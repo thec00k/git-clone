@@ -60,6 +60,7 @@ interface AppContextValue {
   deleteBook: (id: string) => void;
   setBookVisibility: (id: string, v: Visibility) => void;
   setBookCover: (id: string, c: CoverStyle) => void;
+  setBookPlaylist: (id: string, uri: string | undefined) => void;
 
   addArchivePhoto: (src: string, aspect: number) => string;
   toggleFavorite: (id: string) => void;
@@ -91,7 +92,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (async () => {
       const stored = await loadState();
       if (cancelled) return;
-      setState(stored ?? createSeed());
+      // Normalise older saved state that predates newer fields.
+      const initial = stored
+        ? {
+            ...stored,
+            environment: {
+              ...stored.environment,
+              musicProvider: stored.environment?.musicProvider ?? "ambient",
+            },
+          }
+        : createSeed();
+      setState(initial);
       loadedRef.current = true;
     })();
     return () => {
@@ -192,6 +203,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setBookCover = useCallback(
     (id: string, c: CoverStyle) => update((p) => ({ ...p, books: p.books.map((b) => (b.id === id ? { ...b, coverStyle: c } : b)) })),
+    [update],
+  );
+
+  const setBookPlaylist = useCallback(
+    (id: string, uri: string | undefined) =>
+      update((p) => ({ ...p, books: p.books.map((b) => (b.id === id ? { ...b, playlistUri: uri } : b)) })),
     [update],
   );
 
@@ -296,6 +313,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     deleteBook,
     setBookVisibility,
     setBookCover,
+    setBookPlaylist,
     addArchivePhoto,
     toggleFavorite,
     setCategories,

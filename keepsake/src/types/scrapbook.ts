@@ -67,6 +67,8 @@ export interface Scrapbook {
   createdAt: number;
   updatedAt: number;
   pages: Page[];
+  /** optional Spotify playlist link/URI associated with this book (Bible §13) */
+  playlistUri?: string;
 }
 
 export type CoverStyle = "cocoa" | "forest" | "wine" | "midnight" | "ochre";

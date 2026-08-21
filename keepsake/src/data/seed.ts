@@ -129,6 +129,7 @@ export function createSeed(): AppState {
       weather: "clear",
       lampOn: true,
       musicOn: false,
+      musicProvider: "ambient",
       volume: 0.5,
       ambienceVolume: 0.4,
     },

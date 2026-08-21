@@ -23,6 +23,7 @@ import { EnvironmentPanel } from "./EnvironmentPanel";
 import { AchievementsToast } from "./AchievementsToast";
 import { CuratedLetter } from "./CuratedLetter";
 import { Whisper } from "./Whisper";
+import { MusicPanel } from "./MusicPanel";
 
 type Phase = "day" | "dusk" | "night";
 
@@ -50,11 +51,11 @@ const SEASON_TINT: Record<string, string> = {
 };
 
 export function Room() {
-  const { state, environment, setEnvironment, activeBook, unlock, newlyUnlocked, clearNewlyUnlocked } =
-    useApp();
+  const { state, environment, activeBook, unlock, newlyUnlocked, clearNewlyUnlocked } = useApp();
   const { go, viewAs, setViewAs } = useNav();
   const [envOpen, setEnvOpen] = useState(false);
   const [achOpen, setAchOpen] = useState(false);
+  const [musicOpen, setMusicOpen] = useState(false);
   const sceneRef = useRef<HTMLDivElement>(null);
   const [par, setPar] = useState({ x: 0, y: 0 });
 
@@ -294,7 +295,7 @@ export function Room() {
           <button
             className="ks-obj"
             style={{ right: "6%", bottom: "16%", width: "18%", height: "26%" }}
-            onClick={() => setEnvironment({ musicOn: !environment.musicOn })}
+            onClick={() => setMusicOpen(true)}
             aria-label="CRT music"
           >
             <CRT on={environment.musicOn} />
@@ -350,6 +351,7 @@ export function Room() {
       </div>
 
       {envOpen && <EnvironmentPanel onClose={() => setEnvOpen(false)} />}
+      {musicOpen && <MusicPanel onClose={() => setMusicOpen(false)} />}
       {achOpen && <AchievementsPanel onClose={() => setAchOpen(false)} unlocked={state.achievements} />}
       <AchievementsToast ids={newlyUnlocked} onDone={clearNewlyUnlocked} />
     </div>

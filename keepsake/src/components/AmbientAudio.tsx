@@ -6,9 +6,11 @@ import { setMusic, setVolume } from "../lib/audio";
 export function AmbientAudio() {
   const { environment } = useApp();
 
+  const ambientActive = environment.musicOn && environment.musicProvider === "ambient";
+
   useEffect(() => {
-    setMusic(environment.musicOn, environment.volume);
-  }, [environment.musicOn, environment.volume]);
+    setMusic(ambientActive, environment.volume);
+  }, [ambientActive, environment.volume]);
 
   useEffect(() => {
     setVolume(environment.volume);

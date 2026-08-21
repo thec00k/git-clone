@@ -117,8 +117,13 @@
   <li><strong>Craft drawer / stickers</strong> in the editor (&sect;11).</li>
   <li><strong>Hidden achievements</strong> &mdash; discovered as gentle "keepsakes found" with a
     quiet toast; a panel lists found vs undiscovered (&sect;12/&sect;21).</li>
-  <li><strong>CRT music</strong> &mdash; a generative ambient pad via the Web Audio API, toggled by
-    the CRT, volume from room settings; offline-safe and licence-free (&sect;13).</li>
+  <li><strong>CRT music</strong> &mdash; a provider-adapter player (Bible &sect;13): an offline,
+    licence-free generative ambient pad (Web Audio), <em>and</em> a <strong>"Connect Spotify"</strong>
+    account login via browser-safe OAuth&nbsp;PKCE (no client secret). Once connected it lists your
+    playlists and can associate one per book; an embedded Spotify player handles playback (a manual
+    playlist link works without login too). Activation needs a Spotify Developer app Client ID
+    (<code>VITE_SPOTIFY_CLIENT_ID</code>) &mdash; requested via the environment setup panel; full
+    in-app playback control needs Spotify Premium (Web Playback SDK).</li>
   <li><strong>Curated RNG</strong> &mdash; a session-limited "letter on the desk" that waits quietly
     to be opened, never interrupting (&sect;20).</li>
   <li><strong>Export / print</strong> &mdash; a print-ready view of a book; "Save as PDF" in the

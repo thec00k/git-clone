@@ -43,9 +43,14 @@
   same parallax rig. This is the single biggest visual upgrade available and matches the "2.5D" open
   decision (&sect;8).</p>
 
-<h3><span class="pill">proposed</span> Music: synthesized now, licensed later</h3>
-<p>The CRT plays a generative Web-Audio pad to avoid licensing while prototyping (&sect;13). For
-  launch, swap in licensed lo-fi/ambient tracks and/or Spotify linking, per the Bible.</p>
+<h3><span class="pill">acted</span> Music: ambient pad + Spotify account login</h3>
+<p>The CRT is now a provider adapter (&sect;13): an offline generative Web-Audio pad by default, plus a
+  <strong>"Connect Spotify"</strong> login via browser-safe OAuth&nbsp;PKCE (no client secret). Once
+  connected it can browse your playlists and set one per book; an embedded player handles playback.
+  <em>Needs your input to go live:</em> create a Spotify Developer app and provide
+  <code>VITE_SPOTIFY_CLIENT_ID</code> (requested via the setup panel), and register the redirect URI.
+  Full in-app playback control (vs. the embed/previews) requires Spotify Premium (Web Playback SDK) &mdash;
+  a natural next step once credentials exist. Licensed offline lo-fi tracks remain a later option per the Bible.</p>
 
 <h3><span class="pill">proposed</span> Export: browser print now, print pipeline later</h3>
 <p>Export uses the browser's Print / Save-as-PDF. A production path (&sect;25) needs a server PDF

@@ -23,12 +23,15 @@ export type TimeMode = "auto" | "day" | "dusk" | "night";
 export type Season = "spring" | "summer" | "autumn" | "winter";
 export type Weather = "clear" | "rain" | "snow";
 
+export type MusicProvider = "ambient" | "spotify";
+
 export interface Environment {
   timeMode: TimeMode;
   season: Season;
   weather: Weather;
   lampOn: boolean;
   musicOn: boolean;
+  musicProvider: MusicProvider;
   volume: number; // 0..1
   ambienceVolume: number; // 0..1
 }
