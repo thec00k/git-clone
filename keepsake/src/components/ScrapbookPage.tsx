@@ -33,6 +33,13 @@ export function ScrapbookPage({
 
   const sorted = [...page.elements].sort((a, b) => a.z - b.z);
 
+  // Selecting an element also makes its page the active one, so "Add photo",
+  // "Add caption", and "Arrange" all target the page the user is working on.
+  const handleSelect = (id: string) => {
+    onActivate(page.id);
+    onSelect(id);
+  };
+
   return (
     <div
       className="ks-page"
@@ -68,7 +75,7 @@ export function ScrapbookPage({
           key={el.id}
           element={el}
           selected={selectedId === el.id}
-          onSelect={onSelect}
+          onSelect={handleSelect}
           onMove={onMove}
           onEditText={onEditText}
         />

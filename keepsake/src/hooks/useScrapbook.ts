@@ -12,6 +12,7 @@ import { uid } from "../lib/id";
 import { clamp } from "../lib/clamp";
 import { createSeedScrapbook } from "../data/seed";
 import { loadScrapbook, saveScrapbook } from "../lib/storage";
+import { computeLayout, type LayoutPreset } from "../lib/layout";
 
 export interface ElementLocation {
   pageId: string;
@@ -235,6 +236,26 @@ export function useScrapbook() {
     [locate, setFrame],
   );
 
+  const arrangePage = useCallback(
+    (pageId: string, preset: LayoutPreset) => {
+      const page = pages.find((p) => p.id === pageId);
+      if (!page) return;
+      const photoCount = page.elements.filter((e) => e.type === "photo").length;
+      const placements = computeLayout(preset, photoCount);
+      // Keep the updater pure (no shared mutable counter) so it is safe under
+      // React StrictMode's double-invocation.
+      mutatePageElements(pageId, (els) => {
+        let i = 0;
+        return els.map((e) => {
+          if (e.type !== "photo") return e;
+          const p = placements[i++];
+          return p ? { ...e, x: p.x, y: p.y, w: p.w, rotation: p.rot } : e;
+        });
+      });
+    },
+    [pages, mutatePageElements],
+  );
+
   const addSpread = useCallback(() => {
     patchBook((prev) => ({
       ...prev,
@@ -306,6 +327,7 @@ export function useScrapbook() {
     resetTransform,
     cycleFrame,
     setFrame,
+    arrangePage,
     addSpread,
     deleteCurrentSpread,
     goPrev,

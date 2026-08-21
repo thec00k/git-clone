@@ -146,6 +146,7 @@ function CaptionView({
           ref={textareaRef}
           data-no-drag
           value={element.text}
+          maxLength={140}
           onChange={(e) => onEditText(element.id, e.target.value)}
           onBlur={() => setEditing(false)}
           rows={2}

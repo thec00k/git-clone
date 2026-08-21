@@ -17,10 +17,13 @@ photographs → scrapbook → organization first):
   polaroid / taped / flush prints, up to 6 per page.
 - **Arrange like prints**: select, drag, rotate, resize, restack (bring
   forward / send back), change frame, replace, and remove.
-- **Handwritten captions**: add and edit captions inline in a handwriting font,
-  with sharpie ink colours.
-- **Multi-page book**: navigate spreads (buttons or ← / → keys), add and delete
-  spreads.
+- **Handwritten captions**: add and edit captions inline in a handwriting font
+  (short, character-limited), with sharpie ink colours.
+- **Layout presets**: one-tap **Grid / Column / Scatter** arrangements for fast
+  users, alongside full freeform placement for those who enjoy the craft.
+- **Tactile page turns**: a directional 3D page-flip animation across the spine
+  (buttons or ← / → keys), with a reduced-motion fallback that swaps instantly.
+- **Multi-page book**: add and delete spreads.
 - **It remembers**: the whole book (layout, captions, and photos) autosaves to
   **IndexedDB**, so it survives a refresh.
 

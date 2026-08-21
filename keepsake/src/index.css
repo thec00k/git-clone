@@ -316,6 +316,11 @@
     width: min(96%, calc((100dvh - 12rem) * 1.5));
     max-height: 100%;
     filter: drop-shadow(0 30px 44px rgb(10 6 4 / 0.5));
+    perspective: 2200px;
+  }
+
+  .ks-spread--flipping {
+    pointer-events: none;
   }
 
   .ks-spread > .ks-page {
@@ -351,6 +356,93 @@
       rgb(20 14 10 / 0.05) 70%,
       transparent
     );
+  }
+
+  /* Page-turn: a single leaf covering one half that rotates around the spine. */
+  .ks-flip-leaf {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    z-index: 70;
+  }
+
+  .ks-flip-leaf {
+    perspective: 2200px;
+  }
+
+  .ks-flip-leaf.next {
+    left: 50%;
+  }
+
+  .ks-flip-leaf.prev {
+    left: 0;
+  }
+
+  .ks-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+  }
+
+  /* Keyframe-driven so the turn always animates on mount (no fragile
+     state-toggle timing). The pivot must be the spine edge of the leaf. */
+  .ks-flip-inner.next {
+    transform-origin: left center;
+    animation: ks-flip-next 820ms cubic-bezier(0.42, 0.12, 0.2, 1) forwards;
+  }
+
+  .ks-flip-inner.prev {
+    transform-origin: right center;
+    animation: ks-flip-prev 820ms cubic-bezier(0.42, 0.12, 0.2, 1) forwards;
+  }
+
+  @keyframes ks-flip-next {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(-180deg);
+    }
+  }
+
+  @keyframes ks-flip-prev {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(180deg);
+    }
+  }
+
+  .ks-flip-face {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: 0 24px 44px rgb(20 14 10 / 0.4);
+  }
+
+  .ks-flip-face.back {
+    transform: rotateY(180deg);
+  }
+
+  .ks-flip-face > .ks-page {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  /* A moving sheen so the turning leaf catches light. */
+  .ks-flip-face::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg, rgb(0 0 0 / 0.28), transparent 42%);
+    opacity: 0.55;
   }
 }
 
