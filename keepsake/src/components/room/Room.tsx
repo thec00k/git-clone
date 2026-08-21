@@ -22,6 +22,7 @@ import { ACHIEVEMENTS } from "../../types/app";
 import { EnvironmentPanel } from "./EnvironmentPanel";
 import { AchievementsToast } from "./AchievementsToast";
 import { CuratedLetter } from "./CuratedLetter";
+import { Whisper } from "./Whisper";
 
 type Phase = "day" | "dusk" | "night";
 
@@ -315,6 +316,7 @@ export function Room() {
         </div>
 
         <CuratedLetter />
+        <Whisper />
 
         {/* Dust motes */}
         <div className="pointer-events-none absolute inset-0 z-10">

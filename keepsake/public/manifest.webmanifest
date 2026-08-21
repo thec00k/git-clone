@@ -1,0 +1,12 @@
+{
+  "name": "Keepsake",
+  "short_name": "Keepsake",
+  "description": "A calm, tactile digital scrapbook room.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#241c18",
+  "theme_color": "#241c18",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

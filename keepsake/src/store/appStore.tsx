@@ -68,6 +68,9 @@ interface AppContextValue {
   setEnvironment: (patch: Partial<Environment>) => void;
 
   addGuestEntry: (author: string, message: string) => void;
+  addNote: (bookId: string, pageId: string, author: string, message: string) => void;
+  approveNote: (id: string) => void;
+  deleteNote: (id: string) => void;
   addPin: (pin: Omit<MemoryPin, "id" | "createdAt">) => void;
   removePin: (id: string) => void;
 
@@ -222,6 +225,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [update],
   );
 
+  const addNote = useCallback(
+    (bookId: string, pageId: string, author: string, message: string) =>
+      update((p) => ({
+        ...p,
+        notes: [
+          { id: uid("note"), bookId, pageId, author, message, approved: false, createdAt: Date.now() },
+          ...p.notes,
+        ],
+      })),
+    [update],
+  );
+
+  const approveNote = useCallback(
+    (id: string) => update((p) => ({ ...p, notes: p.notes.map((n) => (n.id === id ? { ...n, approved: true } : n)) })),
+    [update],
+  );
+
+  const deleteNote = useCallback(
+    (id: string) => update((p) => ({ ...p, notes: p.notes.filter((n) => n.id !== id) })),
+    [update],
+  );
+
   const addPin = useCallback(
     (pin: Omit<MemoryPin, "id" | "createdAt">) =>
       update((p) => ({ ...p, pins: [...p.pins, { ...pin, id: uid("pin"), createdAt: Date.now() }] })),
@@ -276,6 +301,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCategories,
     setEnvironment,
     addGuestEntry,
+    addNote,
+    approveNote,
+    deleteNote,
     addPin,
     removePin,
     unlock,

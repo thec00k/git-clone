@@ -11,6 +11,7 @@ import {
   Rows3,
   Shuffle,
   Smile,
+  StickyNote,
   Trash2,
   Type,
   Wand2,
@@ -28,6 +29,7 @@ import { PageFlip } from "./PageFlip";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { SaveIndicator } from "./SaveIndicator";
 import { PrintView } from "./PrintView";
+import { NotesPanel } from "./NotesPanel";
 
 export function BookView() {
   const sb = useScrapbook();
@@ -37,6 +39,7 @@ export function BookView() {
   const [showPresets, setShowPresets] = useState(false);
   const [showStickers, setShowStickers] = useState(false);
   const [showPrint, setShowPrint] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
   const addInputRef = useRef<HTMLInputElement>(null);
   const turningRef = useRef(false);
 
@@ -188,6 +191,9 @@ export function BookView() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button className="ks-chip" title="Notes on this spread" onClick={() => setShowNotes(true)}>
+              <StickyNote size={16} />
+            </button>
             <button className="ks-chip" title="Export / print book" onClick={() => setShowPrint(true)}>
               <Printer size={16} />
             </button>
@@ -306,6 +312,13 @@ export function BookView() {
         />
       )}
       {showPrint && sb.book && <PrintView book={sb.book} onClose={() => setShowPrint(false)} />}
+      {showNotes && sb.book && (
+        <NotesPanel
+          bookId={sb.book.id}
+          pageIds={[sb.leftPage?.id, sb.rightPage?.id].filter(Boolean) as string[]}
+          onClose={() => setShowNotes(false)}
+        />
+      )}
     </RoomFrame>
   );
 }

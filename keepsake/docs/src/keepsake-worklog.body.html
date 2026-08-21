@@ -98,11 +98,14 @@
     book editor becomes read-only (&sect;17/&sect;18).</li>
   <li><strong>Guest book</strong> &mdash; flat, non-threaded notes, no counters or reply chains
     (&sect;19).</li>
+  <li><strong>Page notes + approval + whispers</strong> &mdash; a visitor can leave a short note on a
+    spread; it stays hidden until the owner approves it; approved notes then occasionally drift into
+    the room as a quiet, dismissible "whisper" (&sect;19).</li>
 </ul>
 <div class="note">
   <strong>Simulated locally.</strong> There are no real other users; "View as" is a client-side
-  preview. Guest entries are stored locally. Page notes / whispers and real permission inheritance
-  are noted as next steps.
+  preview and notes/visibility are enforced only in the UI. A real permission-inheritance engine and
+  server enforcement are required before any actual sharing (&sect;17).
 </div>
 
 <h2><span class="tag">Phase F</span> Expansion</h2>
@@ -120,6 +123,9 @@
     to be opened, never interrupting (&sect;20).</li>
   <li><strong>Export / print</strong> &mdash; a print-ready view of a book; "Save as PDF" in the
     browser produces a shareable keepsake (&sect;25, software half).</li>
+  <li><strong>Offline read mode</strong> &mdash; a service worker + web manifest cache the app shell
+    and assets (production build), and scrapbook data already lives in IndexedDB, so a loaded room can
+    be revisited offline and installed to the home screen (&sect;22).</li>
 </ul>
 
 <hr />
@@ -156,8 +162,9 @@
 
 <h2>Where this could go next</h2>
 <ul>
-  <li>Phase E depth: page notes / whispers, and a real permission-inheritance engine once a backend exists.</li>
-  <li>Offline read mode (service worker / PWA) for selected books (&sect;22).</li>
+  <li>A real backend (Postgres + auth + object storage) and a proper permission-inheritance engine,
+    turning the local "View as"/visibility previews into real, enforced privacy (&sect;17).</li>
   <li>Undo/redo and richer mobile gestures in the editor.</li>
   <li>Replace CSS/SVG room with commissioned illustrated parallax layers (see suggestions).</li>
+  <li>A fuller curated-RNG opportunity queue and an achievement event-ledger (&sect;12/&sect;20).</li>
 </ul>

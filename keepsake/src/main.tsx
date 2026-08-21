@@ -14,3 +14,13 @@ createRoot(document.getElementById("root")!).render(
     </AppProvider>
   </StrictMode>,
 );
+
+// Offline read mode (production only, so dev HMR is untouched).
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      /* offline mode unavailable */
+    });
+  });
+}
+
