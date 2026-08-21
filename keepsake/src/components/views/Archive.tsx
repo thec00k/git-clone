@@ -85,6 +85,8 @@ export function Archive() {
       <div className="mt-3 flex items-center gap-2 rounded-full bg-black/25 px-3 py-1.5">
         <Search size={15} className="text-paper/50" />
         <input
+          name="search"
+          aria-label="Search photos by category"
           className="w-full bg-transparent text-paper outline-none"
           placeholder="search by category…"
           value={query}

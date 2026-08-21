@@ -13,9 +13,11 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
       <div className="ks-panel w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
         <h2 className="mb-4 font-display text-xl">The room</h2>
 
-        <label className="mb-4 block">
+        <label className="mb-4 block" htmlFor="ks-name">
           <span className="text-sm text-paper/60">Your name</span>
           <input
+            id="ks-name"
+            name="displayName"
             className="mt-1 w-full rounded-lg bg-black/25 px-3 py-2 text-paper outline-none"
             value={state.profile.displayName}
             onChange={(e) => setProfile({ displayName: e.target.value })}
@@ -37,8 +39,25 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="mt-3">
-          <span className="text-sm text-paper/60">Ambience volume</span>
+          <label className="text-sm text-paper/60" htmlFor="ks-music-vol">Music volume</label>
           <input
+            id="ks-music-vol"
+            name="musicVolume"
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={environment.volume}
+            onChange={(e) => setEnvironment({ volume: Number(e.target.value) })}
+            className="mt-1 w-full accent-[var(--color-accent)]"
+          />
+        </div>
+
+        <div className="mt-3">
+          <label className="text-sm text-paper/60" htmlFor="ks-amb-vol">Ambience volume</label>
+          <input
+            id="ks-amb-vol"
+            name="ambienceVolume"
             type="range"
             min={0}
             max={1}

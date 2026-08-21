@@ -102,6 +102,8 @@ export function Room() {
           <label className="flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 text-sm text-paper/80">
             <span className="hidden sm:inline text-paper/50">View as</span>
             <select
+              name="viewAs"
+              aria-label="View the room as"
               className="bg-transparent text-paper outline-none"
               value={viewAs}
               onChange={(e) => {
@@ -260,7 +262,6 @@ export function Room() {
                 backgroundColor: cover.leather,
                 color: cover.ink,
                 boxShadow: "6px 12px 30px rgb(0 0 0 /.5)",
-                animation: "ks-mote-float 0s",
               }}
             >
               <span className="text-[0.6rem] uppercase tracking-[0.2em] opacity-70">a book of</span>

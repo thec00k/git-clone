@@ -37,7 +37,7 @@ export function CuratedLetter() {
     <>
       <button
         className="ks-obj"
-        style={{ left: "58%", bottom: "20%", width: "8%", height: "9%", animation: "ks-mote-float 0s" }}
+        style={{ left: "58%", bottom: "20%", width: "8%", height: "9%" }}
         onClick={() => setOpen(true)}
         aria-label="A letter on the desk"
       >

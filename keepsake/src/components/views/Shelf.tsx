@@ -82,11 +82,15 @@ export function Shelf() {
                   {editing === b.id && (
                     <div className="space-y-2">
                       <input
+                        name="bookTitle"
+                        aria-label="Book title"
                         className="w-full rounded bg-black/25 px-2 py-1 text-sm text-paper outline-none"
                         value={b.title}
                         onChange={(e) => renameBook(b.id, e.target.value, b.subtitle)}
                       />
                       <input
+                        name="bookSubtitle"
+                        aria-label="Book subtitle"
                         className="w-full rounded bg-black/25 px-2 py-1 text-sm text-paper outline-none"
                         value={b.subtitle}
                         onChange={(e) => renameBook(b.id, b.title, e.target.value)}

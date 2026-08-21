@@ -69,11 +69,11 @@ export function Atlas() {
         <div className="ks-panel mt-3 flex flex-wrap items-end gap-2 p-3">
           <label className="flex-1 text-sm text-paper/60">
             Place
-            <input className="mt-1 block w-full rounded bg-black/25 px-2 py-1 text-paper outline-none" placeholder="where…" value={label} onChange={(e) => setLabel(e.target.value)} autoFocus />
+            <input name="place" aria-label="Place name" className="mt-1 block w-full rounded bg-black/25 px-2 py-1 text-paper outline-none" placeholder="where…" value={label} onChange={(e) => setLabel(e.target.value)} autoFocus />
           </label>
           <label className="flex-1 text-sm text-paper/60">
             Note
-            <input className="mt-1 block w-full rounded bg-black/25 px-2 py-1 text-paper outline-none" placeholder="a memory…" value={caption} onChange={(e) => setCaption(e.target.value)} onKeyDown={(e) => e.key === "Enter" && commit()} />
+            <input name="note" aria-label="Memory note" className="mt-1 block w-full rounded bg-black/25 px-2 py-1 text-paper outline-none" placeholder="a memory…" value={caption} onChange={(e) => setCaption(e.target.value)} onKeyDown={(e) => e.key === "Enter" && commit()} />
           </label>
           <button className="ks-tool ks-tool--accent" onClick={commit}>Pin it</button>
           <button className="ks-chip" onClick={() => setDraft(null)}><X size={16} /></button>

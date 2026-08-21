@@ -22,12 +22,16 @@ export function Guestbook() {
       <div className="ks-panel mt-3 p-3">
         <div className="flex flex-wrap gap-2">
           <input
+            name="author"
+            aria-label="Your name"
             className="w-40 rounded bg-black/25 px-3 py-2 text-paper outline-none"
             placeholder="your name"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
           />
           <input
+            name="message"
+            aria-label="Guest book note"
             className="min-w-[12rem] flex-1 rounded bg-black/25 px-3 py-2 text-paper outline-none"
             placeholder="leave a note…"
             value={message}

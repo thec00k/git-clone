@@ -23,7 +23,10 @@ export function NotesPanel({
   const [message, setMessage] = useState("");
 
   const notes = state.notes.filter((n) => n.bookId === bookId && pageIds.includes(n.pageId));
-  const visible = isVisitor ? notes.filter((n) => n.approved) : notes;
+  // Visitors see approved notes, plus their own (so a pending note doesn't seem to vanish).
+  const visible = isVisitor
+    ? notes.filter((n) => n.approved || n.author === VIEW_AS_LABEL[viewAs])
+    : notes;
 
   const leave = () => {
     if (!message.trim() || pageIds.length === 0) return;
@@ -42,6 +45,8 @@ export function NotesPanel({
         {isVisitor && (
           <div className="mb-4 flex gap-2">
             <input
+              name="note"
+              aria-label="Leave a note"
               className="flex-1 rounded bg-black/25 px-3 py-2 text-paper outline-none"
               placeholder="leave a kind note…"
               maxLength={140}

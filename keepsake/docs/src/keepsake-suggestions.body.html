@@ -25,6 +25,13 @@
 <p>Uploaded images are resized to &le;1400px before storage to protect browser memory and IndexedDB
   quota (a risk noted in &sect;6/&sect;22).</p>
 
+<h3><span class="pill">acted</span> Accessibility &amp; small UX polish</h3>
+<p>Added <code>name</code>/<code>aria-label</code> to all form fields (the browser's earlier
+  "form field needs id/name" issues are now clear); added a <strong>Music volume</strong> control
+  (previously the CRT pad had no UI for its level); and a visitor now sees their own <em>pending</em>
+  note in the notes panel so it no longer appears to vanish before approval. Also removed a couple of
+  stray no-op inline style hacks.</p>
+
 <hr />
 
 <h2>Proposed (your call)</h2>
@@ -70,10 +77,10 @@
 
 <h3><span class="pill">proposed</span> Small polish backlog</h3>
 <ul>
-  <li>Add <code>id</code>/<code>name</code> (and visible labels) to form fields &mdash; the console
-    flags a few a11y hints. Quick, worth doing before any real use.</li>
   <li>A one-time, gentle onboarding pointer in the room for first-time visitors (Bible favours
     discovery over instruction, so keep it whisper-light).</li>
   <li>Mid page-turn, the flipping leaf's back shows blank paper rather than the incoming page &mdash;
     a common, acceptable simplification; refine later if desired.</li>
+  <li>Deeper keyboard/screen-reader support and real-device passes for the room objects (foundations
+    are in place; a dedicated audit is a later step per &sect;23).</li>
 </ul>

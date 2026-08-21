@@ -28,7 +28,6 @@ export function Whisper() {
   return (
     <button
       className="absolute left-[10%] top-[58%] z-20 max-w-[16rem] text-left"
-      style={{ animation: "ks-mote-float 0s" }}
       onClick={() => setText(null)}
       aria-label="A whisper"
     >

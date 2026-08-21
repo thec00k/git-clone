@@ -27,6 +27,8 @@ export function Timeline() {
             Year
             <input
               type="number"
+              name="year"
+              aria-label="Year"
               className="mt-1 block w-24 rounded bg-black/25 px-2 py-1 text-paper outline-none"
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
@@ -35,6 +37,8 @@ export function Timeline() {
           <label className="flex-1 text-sm text-paper/60">
             Milestone
             <input
+              name="milestone"
+              aria-label="Milestone"
               className="mt-1 block w-full rounded bg-black/25 px-2 py-1 text-paper outline-none"
               placeholder="what happened…"
               value={title}
