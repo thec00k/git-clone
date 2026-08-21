@@ -21,9 +21,9 @@ import type { ViewAs } from "../../types/app";
 import { ACHIEVEMENTS } from "../../types/app";
 import { EnvironmentPanel } from "./EnvironmentPanel";
 import { AchievementsToast } from "./AchievementsToast";
-import { CuratedLetter } from "./CuratedLetter";
-import { Whisper } from "./Whisper";
+import { RoomCurator } from "./RoomCurator";
 import { MusicPanel } from "./MusicPanel";
+import { useEscapeClose } from "../../hooks/useEscapeClose";
 
 type Phase = "day" | "dusk" | "night";
 
@@ -51,7 +51,8 @@ const SEASON_TINT: Record<string, string> = {
 };
 
 export function Room() {
-  const { state, environment, activeBook, unlock, newlyUnlocked, clearNewlyUnlocked } = useApp();
+  const { state, environment, activeBook, recordProgress, newlyUnlocked, clearNewlyUnlocked, markAchievementsSeen } =
+    useApp();
   const { go, viewAs, setViewAs } = useNav();
   const [envOpen, setEnvOpen] = useState(false);
   const [achOpen, setAchOpen] = useState(false);
@@ -63,8 +64,8 @@ export function Room() {
   const cover = COVER_STYLES[activeBook?.coverStyle ?? "cocoa"];
 
   useEffect(() => {
-    if (phase === "night") unlock("night-owl");
-  }, [phase, unlock]);
+    if (phase === "night") recordProgress({ visitedAtNight: true });
+  }, [phase, recordProgress]);
 
   const onMove = (e: React.PointerEvent) => {
     const r = sceneRef.current?.getBoundingClientRect();
@@ -110,7 +111,7 @@ export function Room() {
               onChange={(e) => {
                 const v = e.target.value as ViewAs;
                 setViewAs(v);
-                if (v !== "owner") unlock("host");
+                if (v !== "owner") recordProgress({ previewedAsVisitor: true });
               }}
             >
               {(["owner", "close", "friend", "public"] as ViewAs[]).map((v) => (
@@ -317,8 +318,7 @@ export function Room() {
           )}
         </div>
 
-        <CuratedLetter />
-        <Whisper />
+        <RoomCurator />
 
         {/* Dust motes */}
         <div className="pointer-events-none absolute inset-0 z-10">
@@ -353,7 +353,13 @@ export function Room() {
       {envOpen && <EnvironmentPanel onClose={() => setEnvOpen(false)} />}
       {musicOpen && <MusicPanel onClose={() => setMusicOpen(false)} />}
       {achOpen && <AchievementsPanel onClose={() => setAchOpen(false)} unlocked={state.achievements} />}
-      <AchievementsToast ids={newlyUnlocked} onDone={clearNewlyUnlocked} />
+      <AchievementsToast
+        ids={newlyUnlocked}
+        onDone={() => {
+          markAchievementsSeen(newlyUnlocked);
+          clearNewlyUnlocked();
+        }}
+      />
     </div>
   );
 }
@@ -449,9 +455,10 @@ function WeatherFx({ kind }: { kind: "rain" | "snow" }) {
 }
 
 function AchievementsPanel({ onClose, unlocked }: { onClose: () => void; unlocked: string[] }) {
+  useEscapeClose(onClose);
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="ks-panel w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
+      <div className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Keepsakes found" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center gap-2">
           <Sparkles size={18} className="text-accent" />
           <h2 className="font-display text-xl">Keepsakes found</h2>

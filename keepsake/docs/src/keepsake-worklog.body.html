@@ -119,8 +119,10 @@
   <li><strong>Memory atlas / map</strong> &mdash; an illustrated map; click to pin a place + note;
     exact coordinates are never used (approximate/manual by default, &sect;16).</li>
   <li><strong>Craft drawer / stickers</strong> in the editor (&sect;11).</li>
-  <li><strong>Hidden achievements</strong> &mdash; discovered as gentle "keepsakes found" with a
-    quiet toast; a panel lists found vs undiscovered (&sect;12/&sect;21).</li>
+  <li><strong>Hidden achievements &mdash; event ledger</strong> (&sect;12): a pure rules engine
+    derives completion from state, so grants are idempotent and reproducible; each is stamped with a
+    completion time and a "seen" flag separates completion from reward presentation. Presented as
+    gentle "keepsakes found"; a panel lists found vs undiscovered.</li>
   <li><strong>CRT music</strong> &mdash; a provider-adapter player (Bible &sect;13): an offline,
     licence-free generative ambient pad (Web Audio), <em>and</em> a <strong>"Connect Spotify"</strong>
     account login via browser-safe OAuth&nbsp;PKCE (no client secret). Once connected it lists your
@@ -128,8 +130,13 @@
     playlist link works without login too). Activation needs a Spotify Developer app Client ID
     (<code>VITE_SPOTIFY_CLIENT_ID</code>) &mdash; requested via the environment setup panel; full
     in-app playback control needs Spotify Premium (Web Playback SDK).</li>
-  <li><strong>Curated RNG</strong> &mdash; a session-limited "letter on the desk" that waits quietly
-    to be opened, never interrupting (&sect;20).</li>
+  <li><strong>Curated-RNG opportunity queue</strong> (&sect;20): candidates (a first-visit welcome,
+    an unseen-achievement reward, an approved-note whisper, a book left ajar, a letter on the desk)
+    each carry eligibility, priority, and a cooldown; a curator picks at most one per session
+    (highest priority, ties broken randomly) and records a persisted receipt so cooldowns hold across
+    sessions. Everything is ambient and non-interrupting.</li>
+  <li><strong>Onboarding</strong> &mdash; a whisper-light first-visit welcome banner delivered
+    through that queue (discovery over instruction), shown once.</li>
   <li><strong>Export / print</strong> &mdash; a print-ready view of a book; "Save as PDF" in the
     browser produces a shareable keepsake (&sect;25, software half).</li>
   <li><strong>Offline read mode</strong> &mdash; a service worker + web manifest cache the app shell

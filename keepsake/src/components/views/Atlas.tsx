@@ -66,17 +66,46 @@ export function Atlas() {
       </div>
 
       {draft && (
-        <div className="ks-panel mt-3 flex flex-wrap items-end gap-2 p-3">
-          <label className="flex-1 text-sm text-paper/60">
-            Place
-            <input name="place" aria-label="Place name" className="mt-1 block w-full rounded bg-black/25 px-2 py-1 text-paper outline-none" placeholder="where…" value={label} onChange={(e) => setLabel(e.target.value)} autoFocus />
-          </label>
-          <label className="flex-1 text-sm text-paper/60">
-            Note
-            <input name="note" aria-label="Memory note" className="mt-1 block w-full rounded bg-black/25 px-2 py-1 text-paper outline-none" placeholder="a memory…" value={caption} onChange={(e) => setCaption(e.target.value)} onKeyDown={(e) => e.key === "Enter" && commit()} />
-          </label>
-          <button className="ks-tool ks-tool--accent" onClick={commit}>Pin it</button>
-          <button className="ks-chip" onClick={() => setDraft(null)}><X size={16} /></button>
+        <div className="ks-panel mt-3 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="font-display text-paper">Pin a memory</p>
+            <button className="ks-chip h-8 w-8" onClick={() => setDraft(null)} aria-label="Cancel">
+              <X size={15} />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="text-sm text-paper/60" htmlFor="ks-pin-place">
+              Place
+              <input
+                id="ks-pin-place"
+                name="place"
+                className="mt-1 block w-full rounded-lg bg-black/25 px-3 py-2 text-paper outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                placeholder="where…"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                autoFocus
+              />
+            </label>
+            <label className="text-sm text-paper/60" htmlFor="ks-pin-note">
+              Note
+              <input
+                id="ks-pin-note"
+                name="note"
+                className="mt-1 block w-full rounded-lg bg-black/25 px-3 py-2 text-paper outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                placeholder="a memory…"
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && commit()}
+              />
+            </label>
+          </div>
+          <button
+            className="ks-tool ks-tool--accent mt-3 w-full justify-center disabled:opacity-40"
+            onClick={commit}
+            disabled={!label.trim()}
+          >
+            Pin it
+          </button>
         </div>
       )}
     </ViewShell>

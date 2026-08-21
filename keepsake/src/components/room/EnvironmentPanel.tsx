@@ -1,4 +1,5 @@
 import { useApp } from "../../store/appStore";
+import { useEscapeClose } from "../../hooks/useEscapeClose";
 import type { Season, TimeMode, Weather } from "../../types/app";
 
 const TIMES: TimeMode[] = ["auto", "day", "dusk", "night"];
@@ -7,10 +8,11 @@ const WEATHERS: Weather[] = ["clear", "rain", "snow"];
 
 export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
   const { state, environment, setEnvironment, setProfile } = useApp();
+  useEscapeClose(onClose);
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="ks-panel w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
+      <div className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Room settings" onClick={(e) => e.stopPropagation()}>
         <h2 className="mb-4 font-display text-xl">The room</h2>
 
         <label className="mb-4 block" htmlFor="ks-name">

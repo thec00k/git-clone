@@ -57,15 +57,18 @@
   renderer with bleed, trim, safe zones, and low-resolution warnings before any print-on-demand
   vendor.</p>
 
-<h3><span class="pill">proposed</span> Achievements as a stand-in</h3>
-<p>Achievements currently derive from state (e.g. "you placed a photo"). The Bible (&sect;12) wants a
-  separated event ledger with idempotent, reproducible grants and varied presentation. Worth building
-  properly alongside the backend.</p>
+<h3><span class="pill">acted</span> Achievements event ledger</h3>
+<p>Reworked to match &sect;12: a pure rules engine derives completion from state (idempotent,
+  reproducible grants), each unlock is stamped with a completion time, and a "seen" flag separates
+  completion from reward presentation. Added a few more achievements (storyteller, decorator,
+  collector). Next step is persisting a fuller immutable action ledger once a backend exists.</p>
 
-<h3><span class="pill">proposed</span> Curated RNG is minimal</h3>
-<p>The "letter on the desk" is a session-limited teaser. The full opportunity queue (&sect;20) with
-  eligibility, cooldowns, quiet-state rules, and receipts is a later system; I'd define the first
-  10&ndash;20 opportunities before writing the engine.</p>
+<h3><span class="pill">acted</span> Curated-RNG opportunity queue</h3>
+<p>Replaced the single teaser with a real queue (&sect;20): candidates (welcome, achievement reward,
+  approved-note whisper, book-left-ajar, desk letter) carry eligibility + priority + cooldown; a
+  curator selects at most one per session and records a persisted receipt so cooldowns hold across
+  sessions. Expanding the catalogue to 10&ndash;20 opportunities and adding quiet-state nuance are the
+  natural follow-ups.</p>
 
 <h3><span class="pill">proposed</span> Stickers &amp; craft assets</h3>
 <p>Stickers are emoji glyphs for now. Replace with licensed SVG/WebP sticker packs and scrapbook
@@ -82,10 +85,15 @@
 
 <h3><span class="pill">proposed</span> Small polish backlog</h3>
 <ul>
-  <li>A one-time, gentle onboarding pointer in the room for first-time visitors (Bible favours
-    discovery over instruction, so keep it whisper-light).</li>
-  <li>Mid page-turn, the flipping leaf's back shows blank paper rather than the incoming page &mdash;
-    a common, acceptable simplification; refine later if desired.</li>
-  <li>Deeper keyboard/screen-reader support and real-device passes for the room objects (foundations
-    are in place; a dedicated audit is a later step per &sect;23).</li>
+  <li><span class="pill">acted</span> A whisper-light first-visit welcome banner (via the opportunity
+    queue), shown once.</li>
+  <li><span class="pill">acted</span> Tidied the map "pin a memory" form (labelled fields, cleaner
+    layout, disabled-until-valid).</li>
+  <li><span class="pill">acted</span> Modals now close on <code>Escape</code> and carry
+    <code>role="dialog"</code>/<code>aria-modal</code>; softened the page-turn sheen so the incoming
+    page reads better mid-turn.</li>
+  <li><span class="pill">proposed</span> A dedicated keyboard/screen-reader audit and real-device
+    passes (foundations are in place; full audit is a later step per &sect;23).</li>
+  <li><span class="pill">proposed</span> Reworking the page-turn so the leaf's back renders the actual
+    incoming page art (currently textured paper) &mdash; a nicer touch, not essential.</li>
 </ul>

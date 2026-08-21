@@ -23,24 +23,8 @@ import type {
 import { uid } from "../lib/id";
 import { createSeed } from "../data/seed";
 import { loadState, saveState } from "../lib/storage";
-
-function computeAutoUnlocks(s: AppState): string[] {
-  const ids = new Set(s.achievements);
-  const anyPhoto = s.books.some((b) => b.pages.some((p) => p.elements.some((e) => e.type === "photo")));
-  if (anyPhoto) ids.add("first-photo");
-  const fullPage = s.books.some((b) =>
-    b.pages.some((p) => p.elements.filter((e) => e.type === "photo").length >= 3),
-  );
-  if (fullPage) ids.add("full-spread");
-  const anyCaption = s.books.some((b) =>
-    b.pages.some((p) => p.elements.some((e) => e.type === "caption")),
-  );
-  if (anyCaption) ids.add("wordsmith");
-  if (s.books.length > 1) ids.add("librarian");
-  if (s.pins.length > 0) ids.add("cartographer");
-  if (s.guestbook.length > 0) ids.add("keeper");
-  return [...ids];
-}
+import { evaluate } from "../lib/achievements";
+import type { Progress } from "../types/app";
 
 interface AppContextValue {
   state: AppState;
@@ -75,7 +59,9 @@ interface AppContextValue {
   addPin: (pin: Omit<MemoryPin, "id" | "createdAt">) => void;
   removePin: (id: string) => void;
 
-  unlock: (id: string) => void;
+  recordProgress: (patch: Partial<Progress>) => void;
+  markAchievementsSeen: (ids: string[]) => void;
+  recordReceipt: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -93,13 +79,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const stored = await loadState();
       if (cancelled) return;
       // Normalise older saved state that predates newer fields.
-      const initial = stored
+      const initial: AppState = stored
         ? {
             ...stored,
             environment: {
               ...stored.environment,
               musicProvider: stored.environment?.musicProvider ?? "ambient",
             },
+            achievementsAt: stored.achievementsAt ?? {},
+            achievementsSeen: stored.achievementsSeen ?? [],
+            progress: stored.progress ?? { visitedAtNight: false, previewedAsVisitor: false },
+            receipts: stored.receipts ?? {},
           }
         : createSeed();
       setState(initial);
@@ -110,14 +100,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Auto-unlock data-derived achievements, then autosave (debounced).
+  // Achievement ledger: grants are derived from state (idempotent), stamped
+  // with a completion time; then autosave (debounced).
   useEffect(() => {
     if (!state || !loadedRef.current) return;
-    const unlocks = computeAutoUnlocks(state);
-    if (unlocks.length !== state.achievements.length) {
-      const added = unlocks.filter((u) => !state.achievements.includes(u));
-      if (added.length) setNewlyUnlocked((n) => [...n, ...added]);
-      setState((prev) => (prev ? { ...prev, achievements: unlocks } : prev));
+    const satisfied = evaluate(state);
+    const merged = [...new Set([...state.achievements, ...satisfied])];
+    if (merged.length !== state.achievements.length) {
+      const added = merged.filter((id) => !state.achievements.includes(id));
+      const now = Date.now();
+      const at = { ...state.achievementsAt };
+      added.forEach((id) => {
+        if (!at[id]) at[id] = now;
+      });
+      setNewlyUnlocked((n) => [...n, ...added]);
+      setState((prev) => (prev ? { ...prev, achievements: merged, achievementsAt: at } : prev));
       return;
     }
     setSaveStatus("saving");
@@ -272,14 +269,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const removePin = useCallback((id: string) => update((p) => ({ ...p, pins: p.pins.filter((x) => x.id !== id) })), [update]);
 
-  const unlock = useCallback(
-    (id: string) =>
+  const recordProgress = useCallback(
+    (patch: Partial<Progress>) =>
       setState((prev) => {
-        if (!prev || prev.achievements.includes(id)) return prev;
-        setNewlyUnlocked((n) => [...n, id]);
-        return { ...prev, achievements: [...prev.achievements, id] };
+        if (!prev) return prev;
+        const next = { ...prev.progress, ...patch };
+        // avoid needless updates (keeps the save/eval loop calm)
+        if (next.visitedAtNight === prev.progress.visitedAtNight && next.previewedAsVisitor === prev.progress.previewedAsVisitor) {
+          return prev;
+        }
+        return { ...prev, progress: next };
       }),
     [],
+  );
+
+  const markAchievementsSeen = useCallback(
+    (ids: string[]) =>
+      update((p) => ({ ...p, achievementsSeen: [...new Set([...p.achievementsSeen, ...ids])] })),
+    [update],
+  );
+
+  const recordReceipt = useCallback(
+    (id: string) => update((p) => ({ ...p, receipts: { ...p.receipts, [id]: Date.now() } })),
+    [update],
   );
 
   const clearNewlyUnlocked = useCallback(() => setNewlyUnlocked([]), []);
@@ -324,7 +336,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     deleteNote,
     addPin,
     removePin,
-    unlock,
+    recordProgress,
+    markAchievementsSeen,
+    recordReceipt,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

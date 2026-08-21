@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Check, Trash2, X } from "lucide-react";
 import { useApp } from "../store/appStore";
 import { useNav } from "../store/nav";
+import { useEscapeClose } from "../hooks/useEscapeClose";
 import { VIEW_AS_LABEL } from "../lib/permissions";
 
 /*
@@ -20,6 +21,7 @@ export function NotesPanel({
 }) {
   const { state, addNote, approveNote, deleteNote } = useApp();
   const { viewAs, isVisitor } = useNav();
+  useEscapeClose(onClose);
   const [message, setMessage] = useState("");
 
   const notes = state.notes.filter((n) => n.bookId === bookId && pageIds.includes(n.pageId));
@@ -36,7 +38,7 @@ export function NotesPanel({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="ks-panel w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
+      <div className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Notes on this spread" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-xl">Notes on this spread</h2>
           <button className="text-paper/50" onClick={onClose}><X size={18} /></button>

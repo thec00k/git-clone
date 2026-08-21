@@ -157,5 +157,9 @@ export function createSeed(): AppState {
       { id: uid("t"), year: new Date().getFullYear(), title: "This year", bookId: book.id },
     ],
     achievements: [],
+    achievementsAt: {},
+    achievementsSeen: [],
+    progress: { visitedAtNight: false, previewedAsVisitor: false },
+    receipts: {},
   };
 }

@@ -518,14 +518,19 @@
     aspect-ratio: auto;
   }
 
-  /* A moving sheen so the turning leaf catches light. */
+  /* A gentle sheen/curl shadow so the turning leaf catches light without
+     hiding the page beneath it. */
   .ks-flip-face::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(105deg, rgb(0 0 0 / 0.28), transparent 42%);
-    opacity: 0.55;
+    background: linear-gradient(105deg, rgb(0 0 0 / 0.18), transparent 55%);
+    opacity: 0.4;
+  }
+
+  .ks-flip-face.back::after {
+    background: linear-gradient(255deg, rgb(0 0 0 / 0.16), transparent 55%);
   }
 }
 

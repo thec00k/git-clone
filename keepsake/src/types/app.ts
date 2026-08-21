@@ -74,6 +74,12 @@ export interface TimelineEntry {
   bookId?: string;
 }
 
+/** Notable one-off events that feed achievement rules (part of the ledger). */
+export interface Progress {
+  visitedAtNight: boolean;
+  previewedAsVisitor: boolean;
+}
+
 export interface AppState {
   version: number;
   profile: Profile;
@@ -85,7 +91,11 @@ export interface AppState {
   notes: PageNote[];
   pins: MemoryPin[];
   timeline: TimelineEntry[];
-  achievements: string[]; // unlocked ids
+  achievements: string[]; // unlocked ids (completed)
+  achievementsAt: Record<string, number>; // id -> unlocked timestamp (ledger)
+  achievementsSeen: string[]; // ids whose reward has been presented
+  progress: Progress; // recorded events used by rules
+  receipts: Record<string, number>; // curated-RNG opportunity id -> last shown at
 }
 
 export interface AchievementDef {
@@ -98,6 +108,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: "first-photo", title: "First Light", hint: "Place your first photograph." },
   { id: "full-spread", title: "A Full Page", hint: "Put several photos on one page." },
   { id: "wordsmith", title: "In Your Own Hand", hint: "Write a caption." },
+  { id: "storyteller", title: "Storyteller", hint: "Write a few captions." },
+  { id: "decorator", title: "A Light Touch", hint: "Add a sticker to a page." },
+  { id: "collector", title: "The Collector", hint: "Keep a good many photographs." },
   { id: "librarian", title: "The Librarian", hint: "Keep more than one book." },
   { id: "cartographer", title: "Cartographer", hint: "Pin a memory to the map." },
   { id: "night-owl", title: "Night Owl", hint: "Visit the room after dark." },

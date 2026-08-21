@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ExternalLink, LogOut, Music, Radio, X } from "lucide-react";
 import { useApp } from "../../store/appStore";
+import { useEscapeClose } from "../../hooks/useEscapeClose";
 import { useSpotify } from "../../hooks/useSpotify";
 import { playlistEmbedId, redirectUri } from "../../lib/spotify";
 import type { MusicProvider } from "../../types/app";
@@ -8,6 +9,7 @@ import type { MusicProvider } from "../../types/app";
 export function MusicPanel({ onClose }: { onClose: () => void }) {
   const { environment, setEnvironment, activeBook, setBookPlaylist } = useApp();
   const sp = useSpotify();
+  useEscapeClose(onClose);
   const [linkDraft, setLinkDraft] = useState(activeBook?.playlistUri ?? "");
 
   const provider = environment.musicProvider;
@@ -18,7 +20,7 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="ks-panel w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
+      <div className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Music" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-xl">The CRT</h2>
           <button className="text-paper/50" onClick={onClose}><X size={18} /></button>
