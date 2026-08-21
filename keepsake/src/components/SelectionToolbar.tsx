@@ -82,7 +82,7 @@ export function SelectionToolbar({
         <ArrowDownToLine size={16} />
       </button>
 
-      {isPhoto ? (
+      {isPhoto && (
         <>
           <button className="ks-chip" title="Change frame" onClick={() => onCycleFrame(id)}>
             <Frame size={16} />
@@ -106,7 +106,8 @@ export function SelectionToolbar({
             }}
           />
         </>
-      ) : (
+      )}
+      {element.type === "caption" && (
         <span className="mx-0.5 flex items-center gap-1">
           {SHARPIE_COLORS.map((c) => (
             <button

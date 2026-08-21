@@ -298,6 +298,89 @@
     color: var(--color-ink);
   }
 
+  /* ---- 2.5D room ---- */
+  .ks-scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* An interactive diorama object: lifts and glows on hover (LBP "pop"). */
+  .ks-obj {
+    position: absolute;
+    cursor: pointer;
+    pointer-events: auto;
+    border: none;
+    background: transparent;
+    padding: 0;
+    transition:
+      transform 240ms var(--ease-out),
+      filter 240ms var(--ease-out);
+    filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.4));
+  }
+
+  .ks-obj:hover,
+  .ks-obj:focus-visible {
+    transform: translate(var(--px, 0), var(--py, 0)) translateY(-8px) scale(1.035);
+    filter: drop-shadow(0 18px 26px rgb(0 0 0 / 0.5)) brightness(1.06);
+    outline: none;
+    z-index: 20;
+  }
+
+  .ks-obj-label {
+    position: absolute;
+    left: 50%;
+    bottom: -1.9rem;
+    transform: translateX(-50%) rotate(-3deg);
+    font-family: var(--font-script);
+    font-size: 1.25rem;
+    color: var(--color-paper);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out);
+    text-shadow: 0 2px 6px rgb(0 0 0 / 0.6);
+    pointer-events: none;
+  }
+
+  .ks-obj:hover .ks-obj-label,
+  .ks-obj:focus-visible .ks-obj-label {
+    opacity: 1;
+  }
+
+  .ks-mote {
+    position: absolute;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgb(255 240 210 / 0.9), transparent 70%);
+    pointer-events: none;
+    animation: ks-mote-float linear infinite;
+  }
+
+  @keyframes ks-mote-float {
+    0% {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.6;
+    }
+    88% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(-120px) translateX(20px);
+      opacity: 0;
+    }
+  }
+
+  .ks-panel {
+    background: linear-gradient(180deg, rgb(58 46 38 / 0.96), rgb(36 28 24 / 0.96));
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 50px rgb(0 0 0 / 0.5);
+    color: var(--color-paper);
+  }
+
   /* Open-book stage: two 3:4 pages forming a 3:2 spread, sized to fit. */
   .ks-stage {
     flex: 1 1 auto;

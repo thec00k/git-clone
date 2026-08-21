@@ -1,35 +1,33 @@
 /*
- * Minimal IndexedDB persistence for a single scrapbook.
- * IndexedDB (rather than localStorage) avoids quota problems now that photo
- * data URLs are persisted so a book survives a refresh.
+ * IndexedDB persistence for the whole local app state (books, archive, room
+ * environment, social, etc.). One record keeps the prototype simple and makes
+ * autosave a single code path.
  */
-import type { Scrapbook } from "../types/scrapbook";
+import type { AppState } from "../types/app";
 
 const DB_NAME = "keepsake";
-const STORE = "books";
-const KEY = "current";
+const STORE = "app";
+const KEY = "state";
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
+    const req = indexedDB.open(DB_NAME, 2);
     req.onupgradeneeded = () => {
       const db = req.result;
-      if (!db.objectStoreNames.contains(STORE)) {
-        db.createObjectStore(STORE);
-      }
+      if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
 }
 
-export async function loadScrapbook(): Promise<Scrapbook | null> {
+export async function loadState(): Promise<AppState | null> {
   try {
     const db = await openDb();
-    return await new Promise<Scrapbook | null>((resolve, reject) => {
+    return await new Promise<AppState | null>((resolve, reject) => {
       const tx = db.transaction(STORE, "readonly");
       const req = tx.objectStore(STORE).get(KEY);
-      req.onsuccess = () => resolve((req.result as Scrapbook) ?? null);
+      req.onsuccess = () => resolve((req.result as AppState) ?? null);
       req.onerror = () => reject(req.error);
     });
   } catch {
@@ -37,11 +35,11 @@ export async function loadScrapbook(): Promise<Scrapbook | null> {
   }
 }
 
-export async function saveScrapbook(book: Scrapbook): Promise<void> {
+export async function saveState(state: AppState): Promise<void> {
   const db = await openDb();
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORE, "readwrite");
-    tx.objectStore(STORE).put(book, KEY);
+    tx.objectStore(STORE).put(state, KEY);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });

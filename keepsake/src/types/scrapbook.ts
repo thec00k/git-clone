@@ -1,14 +1,16 @@
 /*
- * Keepsake data model.
+ * Keepsake book model.
  * Shapes follow the Design Bible v3 "First Production-Ready Data Shapes":
- * Scrapbook -> Page -> PageElement (photo | caption | ...).
- * Positions are stored as percentages of the page so a layout is preserved
- * across screen sizes (a stated Bible requirement).
+ * Scrapbook -> Page -> PageElement (photo | caption | sticker).
+ * Positions are percentages of the page so a layout is preserved across
+ * screen sizes (a stated Bible requirement).
  */
 
 export type PhotoFrame = "polaroid" | "tape" | "flush";
 
-export type ElementType = "photo" | "caption";
+export type ElementType = "photo" | "caption" | "sticker";
+
+export type Visibility = "private" | "friends" | "public";
 
 interface BaseElement {
   id: string;
@@ -26,8 +28,10 @@ interface BaseElement {
 
 export interface PhotoElement extends BaseElement {
   type: "photo";
-  /** image data URL (prototype persists images locally) */
+  /** image data URL or asset path (denormalised for simple rendering) */
   src: string;
+  /** reference to an archive photo (so pages reference, not duplicate) */
+  photoId?: string;
   frame: PhotoFrame;
 }
 
@@ -39,12 +43,18 @@ export interface CaptionElement extends BaseElement {
   color: string;
 }
 
-export type PageElement = PhotoElement | CaptionElement;
+export interface StickerElement extends BaseElement {
+  type: "sticker";
+  /** emoji glyph or SVG sticker id */
+  glyph: string;
+}
+
+export type PageElement = PhotoElement | CaptionElement | StickerElement;
 
 export interface Page {
   id: string;
-  /** optional title page marker text (rendered centered) */
   titlePage?: boolean;
+  backgroundStyle?: string;
   elements: PageElement[];
 }
 
@@ -52,9 +62,22 @@ export interface Scrapbook {
   id: string;
   title: string;
   subtitle: string;
-  pages: Page[];
+  coverStyle: CoverStyle;
+  visibility: Visibility;
+  createdAt: number;
   updatedAt: number;
+  pages: Page[];
 }
+
+export type CoverStyle = "cocoa" | "forest" | "wine" | "midnight" | "ochre";
+
+export const COVER_STYLES: Record<CoverStyle, { label: string; leather: string; ink: string }> = {
+  cocoa: { label: "Cocoa", leather: "#4a3224", ink: "#f3e9d8" },
+  forest: { label: "Forest", leather: "#2f4a3c", ink: "#eef0e6" },
+  wine: { label: "Wine", leather: "#5b2733", ink: "#f4e6df" },
+  midnight: { label: "Midnight", leather: "#20293f", ink: "#e6ebf4" },
+  ochre: { label: "Ochre", leather: "#7a5320", ink: "#fbf1dc" },
+};
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -66,4 +89,9 @@ export const SHARPIE_COLORS = [
   "#1e3a5f", // navy
   "#2f4a3c", // forest
   "#b55245", // terracotta
+] as const;
+
+export const STICKER_GLYPHS = [
+  "★", "✿", "❤", "☀", "☁", "☾", "✈", "☕", "🎞", "📷",
+  "🍂", "🌊", "⛰", "🎈", "🕯", "🔑", "✉", "🎵", "🌻", "🐚",
 ] as const;

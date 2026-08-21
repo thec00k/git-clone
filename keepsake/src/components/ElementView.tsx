@@ -52,6 +52,33 @@ export function ElementView({ element, selected, onSelect, onMove, onEditText }:
     );
   }
 
+  if (element.type === "sticker") {
+    return (
+      <div
+        style={positionStyle}
+        onPointerDown={handleSelect}
+        onPointerMove={drag.onPointerMove}
+        onPointerUp={drag.onPointerUp}
+        onPointerCancel={drag.onPointerCancel}
+        role="button"
+        tabIndex={0}
+        aria-label="Sticker"
+      >
+        <div
+          style={{
+            fontSize: `${element.w}cqw`,
+            lineHeight: 1,
+            textAlign: "center",
+            userSelect: "none",
+            filter: "drop-shadow(0 4px 6px rgb(20 14 10 / 0.35))",
+          }}
+        >
+          {element.glyph}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <CaptionView
       element={element}

@@ -1,50 +1,43 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   CaptionElement,
   PageElement,
   PhotoElement,
   PhotoFrame,
   Scrapbook,
-  SaveStatus,
+  StickerElement,
 } from "../types/scrapbook";
 import { MAX_PHOTOS_PER_PAGE } from "../types/scrapbook";
 import { uid } from "../lib/id";
 import { clamp } from "../lib/clamp";
-import { createSeedScrapbook } from "../data/seed";
-import { loadScrapbook, saveScrapbook } from "../lib/storage";
 import { computeLayout, type LayoutPreset } from "../lib/layout";
+import { useApp } from "../store/appStore";
 
 export interface ElementLocation {
   pageId: string;
   element: PageElement;
 }
 
+/**
+ * Editor hook for the active book. Book data lives in the app store; this hook
+ * owns the transient editor UI state (current spread, selection, active page)
+ * and exposes the mutation API the scrapbook editor uses.
+ */
 export function useScrapbook() {
-  const [book, setBook] = useState<Scrapbook | null>(null);
+  const { activeBook, updateActiveBook, saveStatus } = useApp();
+  const book = activeBook;
+
   const [spread, setSpread] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activePageId, setActivePageId] = useState<string | null>(null);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
-  const loadedRef = useRef(false);
 
-  // Load once on mount (seed if empty).
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const stored = await loadScrapbook();
-      if (cancelled) return;
-      const initial = stored ?? createSeedScrapbook();
-      setBook(initial);
-      setActivePageId(initial.pages[1]?.id ?? initial.pages[0]?.id ?? null);
-      loadedRef.current = true;
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const pages = book?.pages ?? [];
+  const spreadCount = Math.max(1, Math.ceil(pages.length / 2));
+  const currentSpread = clamp(spread, 0, spreadCount - 1);
+  const leftPage = pages[currentSpread * 2] ?? null;
+  const rightPage = pages[currentSpread * 2 + 1] ?? null;
 
-  // Warm the browser cache for every photo so turning to another spread does
-  // not flash empty frames (the Bible asks to "preload adjacent spreads").
+  // Preload photos so page turns don't flash empty frames.
   useEffect(() => {
     if (!book) return;
     for (const page of book.pages) {
@@ -55,29 +48,8 @@ export function useScrapbook() {
         }
       }
     }
-    // Only when the book identity changes, not on every edit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [book?.id]);
-
-  // Debounced autosave whenever the book changes (after the initial load).
-  const saveTimer = useRef<number | undefined>(undefined);
-  useEffect(() => {
-    if (!book || !loadedRef.current) return;
-    setSaveStatus("saving");
-    window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => {
-      saveScrapbook(book)
-        .then(() => setSaveStatus("saved"))
-        .catch(() => setSaveStatus("error"));
-    }, 450);
-    return () => window.clearTimeout(saveTimer.current);
-  }, [book]);
-
-  const pages = book?.pages ?? [];
-  const spreadCount = Math.max(1, Math.ceil(pages.length / 2));
-  const currentSpread = clamp(spread, 0, spreadCount - 1);
-  const leftPage = pages[currentSpread * 2] ?? null;
-  const rightPage = pages[currentSpread * 2 + 1] ?? null;
 
   const locate = useCallback(
     (elementId: string): ElementLocation | null => {
@@ -90,24 +62,17 @@ export function useScrapbook() {
     [pages],
   );
 
-  const patchBook = useCallback((updater: (prev: Scrapbook) => Scrapbook) => {
-    setBook((prev) => (prev ? { ...updater(prev), updatedAt: Date.now() } : prev));
-  }, []);
-
   const mutatePageElements = useCallback(
     (pageId: string, fn: (els: PageElement[]) => PageElement[]) => {
-      patchBook((prev) => ({
-        ...prev,
-        pages: prev.pages.map((p) =>
-          p.id === pageId ? { ...p, elements: fn(p.elements) } : p,
-        ),
+      updateActiveBook((b) => ({
+        ...b,
+        pages: b.pages.map((p) => (p.id === pageId ? { ...p, elements: fn(p.elements) } : p)),
       }));
     },
-    [patchBook],
+    [updateActiveBook],
   );
 
-  const nextZ = (els: PageElement[]) =>
-    els.reduce((max, e) => Math.max(max, e.z), 0) + 1;
+  const nextZ = (els: PageElement[]) => els.reduce((max, e) => Math.max(max, e.z), 0) + 1;
 
   const updateElement = useCallback(
     (elementId: string, patch: Partial<PageElement>) => {
@@ -121,7 +86,7 @@ export function useScrapbook() {
   );
 
   const addPhoto = useCallback(
-    (pageId: string, src: string) => {
+    (pageId: string, src: string, photoId?: string) => {
       const page = pages.find((p) => p.id === pageId);
       if (!page) return;
       const photoCount = page.elements.filter((e) => e.type === "photo").length;
@@ -131,6 +96,7 @@ export function useScrapbook() {
         id: uid("el"),
         type: "photo",
         src,
+        photoId,
         x: clamp(48 + jitter, 20, 80),
         y: clamp(42 + jitter, 20, 70),
         w: 46,
@@ -159,6 +125,26 @@ export function useScrapbook() {
         z: nextZ(page.elements),
         fontSize: 7,
         color: "#2c2418",
+      };
+      mutatePageElements(pageId, (els) => [...els, el]);
+      setSelectedId(el.id);
+    },
+    [pages, mutatePageElements],
+  );
+
+  const addSticker = useCallback(
+    (pageId: string, glyph: string) => {
+      const page = pages.find((p) => p.id === pageId);
+      if (!page) return;
+      const el: StickerElement = {
+        id: uid("el"),
+        type: "sticker",
+        glyph,
+        x: 50,
+        y: 50,
+        w: 16,
+        rotation: (Math.random() * 20 - 10) | 0,
+        z: nextZ(page.elements),
       };
       mutatePageElements(pageId, (els) => [...els, el]);
       setSelectedId(el.id);
@@ -200,8 +186,7 @@ export function useScrapbook() {
   const rotateBy = useCallback(
     (elementId: string, deg: number) => {
       const loc = locate(elementId);
-      if (!loc) return;
-      updateElement(elementId, { rotation: loc.element.rotation + deg });
+      if (loc) updateElement(elementId, { rotation: loc.element.rotation + deg });
     },
     [locate, updateElement],
   );
@@ -209,8 +194,7 @@ export function useScrapbook() {
   const scaleBy = useCallback(
     (elementId: string, factor: number) => {
       const loc = locate(elementId);
-      if (!loc) return;
-      updateElement(elementId, { w: clamp(loc.element.w * factor, 10, 96) });
+      if (loc) updateElement(elementId, { w: clamp(loc.element.w * factor, 6, 96) });
     },
     [locate, updateElement],
   );
@@ -242,8 +226,6 @@ export function useScrapbook() {
       if (!page) return;
       const photoCount = page.elements.filter((e) => e.type === "photo").length;
       const placements = computeLayout(preset, photoCount);
-      // Keep the updater pure (no shared mutable counter) so it is safe under
-      // React StrictMode's double-invocation.
       mutatePageElements(pageId, (els) => {
         let i = 0;
         return els.map((e) => {
@@ -257,28 +239,24 @@ export function useScrapbook() {
   );
 
   const addSpread = useCallback(() => {
-    patchBook((prev) => ({
-      ...prev,
-      pages: [
-        ...prev.pages,
-        { id: uid("page"), elements: [] },
-        { id: uid("page"), elements: [] },
-      ],
+    updateActiveBook((b) => ({
+      ...b,
+      pages: [...b.pages, { id: uid("page"), elements: [] }, { id: uid("page"), elements: [] }],
     }));
-    setSpread(spreadCount); // move to the freshly added spread
+    setSpread(spreadCount);
     setSelectedId(null);
-  }, [patchBook, spreadCount]);
+  }, [updateActiveBook, spreadCount]);
 
   const deleteCurrentSpread = useCallback(() => {
     if (spreadCount <= 1) return;
     const start = currentSpread * 2;
-    patchBook((prev) => ({
-      ...prev,
-      pages: prev.pages.filter((_, i) => i !== start && i !== start + 1),
+    updateActiveBook((b) => ({
+      ...b,
+      pages: b.pages.filter((_, i) => i !== start && i !== start + 1),
     }));
     setSpread((s) => Math.max(0, s - 1));
     setSelectedId(null);
-  }, [patchBook, spreadCount, currentSpread]);
+  }, [updateActiveBook, spreadCount, currentSpread]);
 
   const goPrev = useCallback(() => {
     setSelectedId(null);
@@ -290,7 +268,6 @@ export function useScrapbook() {
     setSpread((s) => Math.min(spreadCount - 1, s + 1));
   }, [spreadCount]);
 
-  // Keep the active page valid for the current spread.
   useEffect(() => {
     const ids = [leftPage?.id, rightPage?.id].filter(Boolean) as string[];
     if (ids.length && (!activePageId || !ids.includes(activePageId))) {
@@ -298,13 +275,19 @@ export function useScrapbook() {
     }
   }, [leftPage?.id, rightPage?.id, activePageId]);
 
+  // Reset editor UI when the active book changes.
+  useEffect(() => {
+    setSpread(0);
+    setSelectedId(null);
+  }, [book?.id]);
+
   const selected = useMemo(
     () => (selectedId ? locate(selectedId) : null),
     [selectedId, locate],
   );
 
   return {
-    book,
+    book: book as Scrapbook | null,
     pages,
     spread: currentSpread,
     spreadCount,
@@ -319,6 +302,7 @@ export function useScrapbook() {
     updateElement,
     addPhoto,
     addCaption,
+    addSticker,
     removeElement,
     bringForward,
     sendBackward,
