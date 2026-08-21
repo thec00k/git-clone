@@ -7,6 +7,7 @@ import {
   LayoutGrid,
   Lock,
   Plus,
+  Printer,
   Rows3,
   Shuffle,
   Smile,
@@ -26,6 +27,7 @@ import { Spread } from "./Spread";
 import { PageFlip } from "./PageFlip";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { SaveIndicator } from "./SaveIndicator";
+import { PrintView } from "./PrintView";
 
 export function BookView() {
   const sb = useScrapbook();
@@ -34,6 +36,7 @@ export function BookView() {
   const [turn, setTurn] = useState<{ dir: "next" | "prev" } | null>(null);
   const [showPresets, setShowPresets] = useState(false);
   const [showStickers, setShowStickers] = useState(false);
+  const [showPrint, setShowPrint] = useState(false);
   const addInputRef = useRef<HTMLInputElement>(null);
   const turningRef = useRef(false);
 
@@ -184,14 +187,19 @@ export function BookView() {
             )}
           </div>
 
-          <div className="hidden items-center gap-3 sm:flex">
-            {isVisitor ? (
-              <span className="rounded-full bg-accent/20 px-3 py-1 text-sm text-accent-fg">
-                Viewing as {VIEW_AS_LABEL[viewAs]}
-              </span>
-            ) : (
-              <SaveIndicator status={sb.saveStatus} />
-            )}
+          <div className="flex items-center gap-2">
+            <button className="ks-chip" title="Export / print book" onClick={() => setShowPrint(true)}>
+              <Printer size={16} />
+            </button>
+            <div className="hidden items-center gap-3 sm:flex">
+              {isVisitor ? (
+                <span className="rounded-full bg-accent/20 px-3 py-1 text-sm text-accent-fg">
+                  Viewing as {VIEW_AS_LABEL[viewAs]}
+                </span>
+              ) : (
+                <SaveIndicator status={sb.saveStatus} />
+              )}
+            </div>
           </div>
         </>
       }
@@ -297,6 +305,7 @@ export function BookView() {
           onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
         />
       )}
+      {showPrint && sb.book && <PrintView book={sb.book} onClose={() => setShowPrint(false)} />}
     </RoomFrame>
   );
 }

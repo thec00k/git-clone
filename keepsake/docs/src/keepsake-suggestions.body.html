@@ -1,11 +1,79 @@
 <h2>How to read this</h2>
 <p>
-  This is a running list of ideas, refinements, and <strong>deviations from Design Bible v3</strong>
-  that came up while building the 2.5D prototype. Nothing here has changed the product's direction on
-  its own &mdash; these are saved for your review and decision. Items marked
-  <span class="pill">acted</span> were small, safe, or privacy/security-related and were applied
-  during the build (also noted in the Work Log); items marked <span class="pill">proposed</span>
-  await your call.
+  A running list of ideas, refinements, and <strong>deviations from Design Bible v3</strong> that came
+  up while building the 2.5D prototype. Items marked <span class="pill">acted</span> were small, safe,
+  or privacy/security-related and were applied during the build (also in the Work Log). Items marked
+  <span class="pill">proposed</span> await your decision &mdash; nothing here has changed the product's
+  direction on its own.
 </p>
 <hr />
-<!-- SUGGESTIONS-APPENDED-BELOW -->
+
+<h2>Acted on (small / safe / privacy)</h2>
+
+<h3><span class="pill">acted</span> Persist photographs locally</h3>
+<p>The Bible (&sect;3) says the current prototype keeps images in memory and lets them disappear on
+  refresh. For a testable prototype that felt wrong, so books (including photos, as downscaled data
+  URLs) now persist in IndexedDB. Trivially reversible if you want the "ephemeral" behaviour back.</p>
+
+<h3><span class="pill">acted</span> <span class="pill">privacy</span> Local visibility gating</h3>
+<p>Private books and the archive are hidden under visitor "View as" modes, and the book becomes
+  read-only for visitors. This is a client-side <em>preview only</em> and is <strong>not</strong>
+  real security &mdash; real enforcement must be server-side (&sect;17). Called out clearly in the UI
+  and Work Log so it is never mistaken for protection.</p>
+
+<h3><span class="pill">acted</span> Downscale uploads</h3>
+<p>Uploaded images are resized to &le;1400px before storage to protect browser memory and IndexedDB
+  quota (a risk noted in &sect;6/&sect;22).</p>
+
+<hr />
+
+<h2>Proposed (your call)</h2>
+
+<h3><span class="pill">proposed</span> Commission illustrated parallax art for the room</h3>
+<p>The 2.5D room is hand-built from CSS/SVG/gradients + the existing paper/wood/leather textures.
+  It reads well, but to truly hit the <em>Little Big Planet / Sly Cooper / Edith Finch</em> feel I'd
+  recommend layered illustrated art (a painted back wall, mid props, foreground desk) driven by the
+  same parallax rig. This is the single biggest visual upgrade available and matches the "2.5D" open
+  decision (&sect;8).</p>
+
+<h3><span class="pill">proposed</span> Music: synthesized now, licensed later</h3>
+<p>The CRT plays a generative Web-Audio pad to avoid licensing while prototyping (&sect;13). For
+  launch, swap in licensed lo-fi/ambient tracks and/or Spotify linking, per the Bible.</p>
+
+<h3><span class="pill">proposed</span> Export: browser print now, print pipeline later</h3>
+<p>Export uses the browser's Print / Save-as-PDF. A production path (&sect;25) needs a server PDF
+  renderer with bleed, trim, safe zones, and low-resolution warnings before any print-on-demand
+  vendor.</p>
+
+<h3><span class="pill">proposed</span> Achievements as a stand-in</h3>
+<p>Achievements currently derive from state (e.g. "you placed a photo"). The Bible (&sect;12) wants a
+  separated event ledger with idempotent, reproducible grants and varied presentation. Worth building
+  properly alongside the backend.</p>
+
+<h3><span class="pill">proposed</span> Curated RNG is minimal</h3>
+<p>The "letter on the desk" is a session-limited teaser. The full opportunity queue (&sect;20) with
+  eligibility, cooldowns, quiet-state rules, and receipts is a later system; I'd define the first
+  10&ndash;20 opportunities before writing the engine.</p>
+
+<h3><span class="pill">proposed</span> Stickers &amp; craft assets</h3>
+<p>Stickers are emoji glyphs for now. Replace with licensed SVG/WebP sticker packs and scrapbook
+  styles (&sect;11), keeping the same transformable-element model already in place.</p>
+
+<h3><span class="pill">proposed</span> Map stays abstract / manual</h3>
+<p>The atlas is an illustrated, non-geocoded map; pins are placed manually. This actually matches the
+  Bible's privacy stance (approximate/manual by default, &sect;16) &mdash; I'd keep it and make exact
+  coordinates strictly opt-in if geocoding is ever added.</p>
+
+<h3><span class="pill">proposed</span> Single IndexedDB record</h3>
+<p>For prototype simplicity all state is one record. Production should split per entity and move to a
+  server (Postgres per &sect;4) &mdash; expected, not a concern yet.</p>
+
+<h3><span class="pill">proposed</span> Small polish backlog</h3>
+<ul>
+  <li>Add <code>id</code>/<code>name</code> (and visible labels) to form fields &mdash; the console
+    flags a few a11y hints. Quick, worth doing before any real use.</li>
+  <li>A one-time, gentle onboarding pointer in the room for first-time visitors (Bible favours
+    discovery over instruction, so keep it whisper-light).</li>
+  <li>Mid page-turn, the flipping leaf's back shows blank paper rather than the incoming page &mdash;
+    a common, acceptable simplification; refine later if desired.</li>
+</ul>

@@ -1,24 +1,163 @@
 <h2>Overview</h2>
 <p>
   This is a breadth-first <strong>2.5D working prototype</strong> of Keepsake, built across the
-  Design Bible v3 phases (A&ndash;F). The goal is a coherent, testable experience that touches
-  as many systems as possible rather than finishing any one to production depth. Everything runs
-  in the browser (React&nbsp;+&nbsp;TypeScript&nbsp;+&nbsp;Vite, persisted to IndexedDB); there is
-  no backend yet, so account, storage, and multi-user systems are simulated <em>locally</em> and
-  labelled as such.
+  Design Bible v3 phases (A&ndash;F). The goal is a coherent, testable experience that touches as
+  many systems as possible rather than finishing any one to production depth. Everything runs in the
+  browser (React&nbsp;19 + TypeScript + Vite, Tailwind v4), persisted to <strong>IndexedDB</strong>;
+  there is no backend yet, so account, storage, and multi-user systems are simulated <em>locally</em>
+  and labelled as such.
 </p>
 <div class="note">
   <strong>Art direction.</strong> The room and chrome draw on <em>Little Big Planet</em> (handcrafted,
-  tactile, "pop-out" objects), <em>Sly Cooper</em> (storybook, bold stylised shapes, warm noir),
-  and <em>What Remains of Edith Finch</em> (a cozy, slightly melancholic diorama house, warm light,
-  drifting dust). It is realised in 2.5D with layered parallax, painterly gradients, grain, and
-  soft vignette &mdash; the "2.5D over full 3D" open decision from Bible &sect;4/&sect;8.
-</p>
+  tactile "pop-out" objects), <em>Sly Cooper</em> (storybook, bold stylised shapes, warm noir), and
+  <em>What Remains of Edith Finch</em> (a cozy, slightly melancholic diorama house, warm light,
+  drifting dust). It is realised in 2.5D with layered parallax, painterly gradients, grain, and soft
+  vignette &mdash; the "2.5D over full 3D" open decision from Bible &sect;4/&sect;8.
+</div>
 <p class="muted">
-  Two conventions from your brief: ideas that <em>deviate</em> from the Bible are collected in the
-  companion "Suggestions &amp; Deviations" PDF; quick, obvious fixes and any clear privacy/security
-  issues are acted on directly and noted here.
+  Ideas that <em>deviate</em> from the Bible are collected in the companion "Suggestions &amp;
+  Deviations" PDF; quick, obvious fixes and any clear privacy/security issues are acted on directly
+  and noted here.
 </p>
 
+<h3>Architecture at a glance</h3>
+<ul>
+  <li><code>store/appStore</code> &mdash; one app state (profile, books, archive, environment,
+    social, pins, timeline, achievements) with debounced IndexedDB autosave.</li>
+  <li><code>store/nav</code> &mdash; a small room-view router plus the local <em>View as</em> mode.</li>
+  <li><code>hooks/useScrapbook</code> &mdash; editor state over the active book.</li>
+  <li>The room is the interface: a diorama hub whose objects open each system (Bible &sect;2/&sect;8).</li>
+</ul>
+
 <hr />
-<!-- PHASES-APPENDED-BELOW -->
+
+<h2><span class="tag">Phase A</span> Core scrapbook</h2>
+<h4>Built</h4>
+<ul>
+  <li>Book &rarr; open two-page spread on a wooden desk; cream paper, spine shadow, drop shadows.</li>
+  <li>Photographs as tactile prints (polaroid / tape / flush frames); select, drag, rotate, resize,
+    restack, replace, remove.</li>
+  <li>Positions stored as page percentages so layout holds across screen sizes (Bible requirement).</li>
+</ul>
+<h4>Notes</h4>
+<ul><li>Data model follows the Bible's <code>Scrapbook &rarr; Page &rarr; PageElement</code> shapes.</li></ul>
+
+<h2><span class="tag">Phase B</span> Scrapbook MVP</h2>
+<h4>Built</h4>
+<ul>
+  <li>Multi-photo pages (up to 6), z-order, sensible initial positions.</li>
+  <li>Editable handwritten captions (character-limited) with sharpie ink colours.</li>
+  <li><strong>Layout presets</strong> &mdash; Grid / Column / Scatter for fast placement (&sect;5).</li>
+  <li><strong>Directional 3D page-turn</strong> animation across the spine, with a reduced-motion
+    instant-swap fallback (&sect;7).</li>
+  <li><strong>Stickers</strong> as page elements sharing the photo/caption transform model (&sect;11).</li>
+</ul>
+<h4>Changes / fixes</h4>
+<ul>
+  <li>Fixed two React&nbsp;StrictMode-exposed impurities discovered by testing (a preset counter and a
+    page-turn commit that ran inside a state updater).</li>
+</ul>
+
+<h2><span class="tag">Phase C</span> Persistent product <span class="pill">local</span></h2>
+<h4>Built</h4>
+<ul>
+  <li><strong>Multiple books + bookshelf</strong>: create, rename, choose leather cover, set
+    visibility, delete; select a book by its cover (&sect;9).</li>
+  <li><strong>Filing cabinet / archive</strong>: every uploaded photo is kept, searchable by
+    category, favouritable; "place in book" adds a <em>reference</em> to the existing photo rather
+    than duplicating it (&sect;10).</li>
+  <li>Per-book <strong>visibility</strong> (private / friends / public).</li>
+</ul>
+<div class="note">
+  <strong>Simulated locally.</strong> Accounts, object storage, and server-side permission
+  enforcement do not exist yet. Visibility is a local <em>preview</em> only (see Phase E and the
+  "real vs simulated" section). Uploaded images are downscaled and stored as data URLs in IndexedDB.
+</div>
+
+<h2><span class="tag">Phase D</span> Room alpha (2.5D)</h2>
+<h4>Built</h4>
+<ul>
+  <li>A diorama <strong>room hub</strong> with three parallax depth layers that respond to the
+    pointer; interactive objects lift and reveal a handwritten label on hover.</li>
+  <li>Authored "camera views" (room &rarr; book / shelf / archive / timeline / map / guest book) via
+    a simple view router &mdash; a CameraDirector stand-in (&sect;8).</li>
+  <li><strong>Window / day&ndash;night / seasons / weather / lamp</strong>: sky and light shift with
+    time (auto by clock, or forced), a seasonal tint, rain/snow, and a warm lamp glow after dark
+    (&sect;14).</li>
+  <li>Ambient <strong>dust motes</strong> and grain for the Edith-Finch mood.</li>
+</ul>
+<h4>Fixes</h4>
+<ul><li>Parallax layer wrappers were intercepting clicks; made them non-interactive so objects
+  beneath remain clickable.</li></ul>
+
+<h2><span class="tag">Phase E</span> Social <span class="pill">local sim</span></h2>
+<h4>Built</h4>
+<ul>
+  <li><strong>Visitor "View as"</strong> (Close friend / Friend / Public) previews the room and
+    library through a visitor's eyes; private books and the archive are hidden accordingly, and the
+    book editor becomes read-only (&sect;17/&sect;18).</li>
+  <li><strong>Guest book</strong> &mdash; flat, non-threaded notes, no counters or reply chains
+    (&sect;19).</li>
+</ul>
+<div class="note">
+  <strong>Simulated locally.</strong> There are no real other users; "View as" is a client-side
+  preview. Guest entries are stored locally. Page notes / whispers and real permission inheritance
+  are noted as next steps.
+</div>
+
+<h2><span class="tag">Phase F</span> Expansion</h2>
+<h4>Built</h4>
+<ul>
+  <li><strong>Timeline wall</strong> &mdash; add year milestones on a vertical line (&sect;15).</li>
+  <li><strong>Memory atlas / map</strong> &mdash; an illustrated map; click to pin a place + note;
+    exact coordinates are never used (approximate/manual by default, &sect;16).</li>
+  <li><strong>Craft drawer / stickers</strong> in the editor (&sect;11).</li>
+  <li><strong>Hidden achievements</strong> &mdash; discovered as gentle "keepsakes found" with a
+    quiet toast; a panel lists found vs undiscovered (&sect;12/&sect;21).</li>
+  <li><strong>CRT music</strong> &mdash; a generative ambient pad via the Web Audio API, toggled by
+    the CRT, volume from room settings; offline-safe and licence-free (&sect;13).</li>
+  <li><strong>Curated RNG</strong> &mdash; a session-limited "letter on the desk" that waits quietly
+    to be opened, never interrupting (&sect;20).</li>
+  <li><strong>Export / print</strong> &mdash; a print-ready view of a book; "Save as PDF" in the
+    browser produces a shareable keepsake (&sect;25, software half).</li>
+</ul>
+
+<hr />
+
+<h2>Deviations acted on during the build</h2>
+<table>
+  <tr><th>Change</th><th>Why</th><th>Bible</th></tr>
+  <tr><td>Persist photos (as data URLs) so books survive a refresh</td><td>Much better to actually test with; small change</td><td>&sect;3 (prototype images were "intentionally temporary")</td></tr>
+  <tr><td>Client-side visibility gating for private books / archive and "View as"</td><td>A clear privacy expectation; implemented as an honest local preview and flagged that real enforcement is server-side</td><td>&sect;17</td></tr>
+  <tr><td>Downscale uploads to &le;1400px</td><td>Protects browser memory / storage quota</td><td>&sect;6/&sect;22 (listed risks)</td></tr>
+</table>
+<p class="muted">Anything larger or subjective was <em>not</em> acted on &mdash; it lives in the
+  Suggestions &amp; Deviations PDF for your review.</p>
+
+<h2>Real vs simulated (please read)</h2>
+<ul>
+  <li><strong>Real &amp; local:</strong> the whole editor, room, environment, library, archive,
+    timeline, map, guest book, achievements, music, export &mdash; all working in the browser and
+    saved to IndexedDB.</li>
+  <li><strong>Simulated (no backend yet):</strong> accounts, cloud photo storage, multi-user
+    visiting, and <em>server-side privacy enforcement</em>. "View as" and visibility are previews,
+    not security. This is the top risk area in the Bible (&sect;17) and needs a real backend before
+    any sharing is enabled.</li>
+</ul>
+
+<h2>Testing</h2>
+<ul>
+  <li><code>npm run build</code> (tsc + vite) passes with no type errors.</li>
+  <li>Browser-verified end to end: room navigation to every object; open/edit book (photos,
+    captions, stickers, presets, page turns, export); day&rarr;night in the window; bookshelf,
+    archive (search/favourite/place-in-book), timeline, map (pin), guest book; "View as" gating.</li>
+  <li>No red console errors. (A few a11y hints about form labels remain &mdash; see suggestions.)</li>
+</ul>
+
+<h2>Where this could go next</h2>
+<ul>
+  <li>Phase E depth: page notes / whispers, and a real permission-inheritance engine once a backend exists.</li>
+  <li>Offline read mode (service worker / PWA) for selected books (&sect;22).</li>
+  <li>Undo/redo and richer mobile gestures in the editor.</li>
+  <li>Replace CSS/SVG room with commissioned illustrated parallax layers (see suggestions).</li>
+</ul>

@@ -534,3 +534,27 @@
     transition: none;
   }
 }
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .ks-print,
+  .ks-print * {
+    visibility: visible !important;
+  }
+  .ks-print {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    overflow: visible;
+  }
+  .ks-no-print {
+    display: none !important;
+  }
+  .ks-print-page {
+    break-after: page;
+    box-shadow: none !important;
+    margin: 0 auto 8mm auto !important;
+  }
+}

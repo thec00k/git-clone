@@ -6,8 +6,9 @@ import { Archive } from "./components/views/Archive";
 import { Timeline } from "./components/views/Timeline";
 import { Atlas } from "./components/views/Atlas";
 import { Guestbook } from "./components/views/Guestbook";
+import { AmbientAudio } from "./components/AmbientAudio";
 
-export default function App() {
+function CurrentView() {
   const { view } = useNav();
   switch (view) {
     case "book":
@@ -25,4 +26,13 @@ export default function App() {
     default:
       return <Room />;
   }
+}
+
+export default function App() {
+  return (
+    <>
+      <AmbientAudio />
+      <CurrentView />
+    </>
+  );
 }

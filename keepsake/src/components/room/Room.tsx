@@ -21,6 +21,7 @@ import type { ViewAs } from "../../types/app";
 import { ACHIEVEMENTS } from "../../types/app";
 import { EnvironmentPanel } from "./EnvironmentPanel";
 import { AchievementsToast } from "./AchievementsToast";
+import { CuratedLetter } from "./CuratedLetter";
 
 type Phase = "day" | "dusk" | "night";
 
@@ -312,6 +313,8 @@ export function Room() {
             />
           )}
         </div>
+
+        <CuratedLetter />
 
         {/* Dust motes */}
         <div className="pointer-events-none absolute inset-0 z-10">
