@@ -1,0 +1,361 @@
+@import "tailwindcss";
+
+/*
+  Keepsake design system.
+  Palette, type, and material tokens follow the cozy, tactile "room" feel
+  (warm dim room, cream paper, leather, terracotta accent) with Fraunces +
+  Caveat type, per the Keepsake Design Bible v3 "handcrafted / nostalgic" tone.
+*/
+@theme {
+  --color-room: #241c18;
+  --color-room-mid: #3a2e26;
+  --color-wood: #6e4a32;
+  --color-wood-dark: #4a3224;
+  --color-paper: #f3e9d8;
+  --color-paper-edge: #e4d4bc;
+  --color-ink: #2c2418;
+  --color-ink-soft: #5c4e3e;
+  --color-muted: #8f7e6c;
+  --color-accent: #b55245;
+  --color-accent-fg: #f6efe4;
+  --color-seal: #9b3b32;
+  --color-sharpie-ink: #1a1510;
+
+  --font-display: "Fraunces", "Iowan Old Style", Palatino, serif;
+  --font-script: "Caveat", "Segoe Script", cursive;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-display);
+    color: var(--color-paper);
+    background: var(--color-room);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-accent) 35%, transparent);
+    color: var(--color-ink);
+  }
+}
+
+@layer components {
+  /* The room — warm, dim, layered gradients with a subtle grain overlay. */
+  .ks-room {
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background:
+      radial-gradient(ellipse 70% 45% at 18% 0%, rgb(232 196 140 / 0.16), transparent 55%),
+      radial-gradient(ellipse 50% 40% at 92% 100%, rgb(0 0 0 / 0.45), transparent 60%),
+      linear-gradient(180deg, #2c241e 0%, var(--color-room) 42%, #1a1510 100%);
+    color: var(--color-paper);
+  }
+
+  .ks-room::after {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    background-image: url("/textures/grain.png");
+    opacity: 0.045;
+    mix-blend-mode: overlay;
+    z-index: 80;
+  }
+
+  .ks-desk {
+    background-image:
+      linear-gradient(180deg, rgb(0 0 0 / 0.18), transparent 40%),
+      url("/textures/wood.jpg");
+    background-size: cover;
+    background-position: center;
+    box-shadow: inset 0 8px 22px rgb(0 0 0 / 0.28);
+  }
+
+  /* A single scrapbook page — cream paper, soft print shadow. */
+  .ks-page {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    background-color: var(--color-paper);
+    background-image: url("/textures/paper.jpg");
+    background-size: cover;
+    color: var(--color-ink);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.55) inset,
+      0 24px 50px rgb(20 14 10 / 0.38),
+      0 2px 0 var(--color-paper-edge);
+    overflow: hidden;
+    touch-action: none;
+    container-type: inline-size;
+    container-name: page;
+  }
+
+  .ks-page[data-active="true"] {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 70%, transparent);
+    outline-offset: -2px;
+  }
+
+  /* Spine shadow between the two pages of an open spread. */
+  .ks-spine {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(20 14 10 / 0.28) 46%,
+      rgb(20 14 10 / 0.42) 50%,
+      rgb(20 14 10 / 0.28) 54%,
+      transparent
+    );
+  }
+
+  /* Photo frames */
+  .ks-polaroid {
+    background: #fffef8;
+    padding: 6% 6% 16% 6%;
+    box-shadow: 0 8px 18px rgb(20 14 10 / 0.28);
+  }
+
+  .ks-flush {
+    background: #fffef8;
+    padding: 2.5%;
+    box-shadow:
+      0 0 0 1px rgb(20 14 10 / 0.06),
+      0 8px 16px rgb(20 14 10 / 0.22);
+  }
+
+  .ks-tape {
+    background: #fffef8;
+    padding: 2.5%;
+    box-shadow: 0 6px 16px rgb(20 14 10 / 0.2);
+  }
+
+  .ks-tape::before,
+  .ks-tape::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    width: 30%;
+    height: 18px;
+    background: color-mix(in oklab, var(--color-accent) 32%, #f3e9d8);
+    opacity: 0.72;
+    transform: rotate(-8deg);
+    box-shadow: 0 2px 5px rgb(20 14 10 / 0.15);
+  }
+
+  .ks-tape::before {
+    left: 6%;
+  }
+
+  .ks-tape::after {
+    right: 6%;
+    transform: rotate(9deg);
+    background: color-mix(in oklab, var(--color-ink) 12%, #f3e9d8);
+  }
+
+  /* Toolbar tool pills */
+  .ks-tool {
+    display: inline-flex;
+    min-height: 44px;
+    min-width: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-paper);
+    background: rgb(44 36 24 / 0.42);
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.06),
+      inset 0 1px 0 rgb(255 255 255 / 0.08);
+    transition:
+      transform 150ms var(--ease-out),
+      background-color 150ms var(--ease-out);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    border: none;
+  }
+
+  .ks-tool:hover {
+    background: rgb(44 36 24 / 0.6);
+  }
+
+  .ks-tool:active {
+    transform: scale(0.96);
+  }
+
+  .ks-tool--accent {
+    background: var(--color-accent);
+    color: var(--color-accent-fg);
+  }
+
+  .ks-tool--accent:hover {
+    background: color-mix(in oklab, var(--color-accent) 88%, black);
+  }
+
+  /* Round icon button (selection chrome) */
+  .ks-chip {
+    display: inline-flex;
+    height: 34px;
+    width: 34px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: none;
+    color: var(--color-paper);
+    background: rgb(28 22 16 / 0.92);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.35);
+    transition: transform 120ms var(--ease-out), background-color 120ms var(--ease-out);
+  }
+
+  .ks-chip:hover {
+    background: var(--color-accent);
+  }
+
+  .ks-chip:active {
+    transform: scale(0.92);
+  }
+
+  /* The closed book on the desk (cover screen). */
+  .ks-book {
+    width: min(20rem, 76vw);
+    aspect-ratio: 2 / 3;
+    position: relative;
+    transform: rotateZ(-6deg);
+    transform-origin: 50% 80%;
+    transition: transform 400ms var(--ease-smooth-out);
+    border: none;
+    background: transparent;
+    padding: 0;
+  }
+
+  .ks-book:hover,
+  .ks-book:focus-visible {
+    transform: rotateZ(-2deg) translateY(-8px);
+    outline: none;
+  }
+
+  .ks-book-cover {
+    position: absolute;
+    inset: 0;
+    border-radius: 4px 12px 12px 4px;
+    background:
+      linear-gradient(90deg, rgb(0 0 0 / 0.35), transparent 14%),
+      linear-gradient(180deg, rgb(243 233 216 / 0.08), transparent 28%),
+      url("/textures/leather.jpg") center / cover;
+    box-shadow:
+      8px 18px 44px rgb(0 0 0 / 0.5),
+      2px 0 0 rgb(255 255 255 / 0.08) inset;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-paper);
+  }
+
+  .ks-book-edge {
+    position: absolute;
+    top: 8px;
+    right: -11px;
+    bottom: 8px;
+    width: 11px;
+    background: repeating-linear-gradient(
+      to bottom,
+      #f3e9d8 0 2px,
+      #e4d4bc 2px 3px
+    );
+    border-radius: 0 2px 2px 0;
+    box-shadow: 2px 0 8px rgb(0 0 0 / 0.3);
+  }
+
+  .ks-caption {
+    font-family: var(--font-script);
+    line-height: 1.12;
+    color: var(--color-ink);
+  }
+
+  /* Open-book stage: two 3:4 pages forming a 3:2 spread, sized to fit. */
+  .ks-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .ks-spread {
+    position: relative;
+    display: flex;
+    aspect-ratio: 3 / 2;
+    width: min(96%, calc((100dvh - 12rem) * 1.5));
+    max-height: 100%;
+    filter: drop-shadow(0 30px 44px rgb(10 6 4 / 0.5));
+  }
+
+  .ks-spread > .ks-page {
+    width: 50%;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .ks-spread > .ks-page:first-child {
+    border-radius: 6px 0 0 6px;
+  }
+
+  .ks-spread > .ks-page:last-child {
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* Spine shadow down the centre of the open book. */
+  .ks-spread::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 46px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 60;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(20 14 10 / 0.05) 30%,
+      rgb(20 14 10 / 0.34) 50%,
+      rgb(20 14 10 / 0.05) 70%,
+      transparent
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ks-book {
+    transition: none;
+  }
+}
