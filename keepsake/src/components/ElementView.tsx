@@ -1,22 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
+import { RotateCw } from "lucide-react";
 import type { CaptionElement, PageElement, PhotoElement } from "../types/scrapbook";
 import { usePointerDrag } from "../hooks/usePointerDrag";
+import { useElementGesture } from "../hooks/useElementGesture";
 
 interface Props {
   element: PageElement;
   selected: boolean;
   onSelect: (id: string) => void;
   onMove: (id: string, x: number, y: number) => void;
+  onTransform: (id: string, patch: Partial<PageElement>) => void;
   onEditText: (id: string, text: string) => void;
 }
 
-export function ElementView({ element, selected, onSelect, onMove, onEditText }: Props) {
-  const drag = usePointerDrag(
-    () => ({ x: element.x, y: element.y }),
-    (x, y) => onMove(element.id, x, y),
-  );
-
+export function ElementView({ element, selected, onSelect, onMove, onTransform, onEditText }: Props) {
   const positionStyle: CSSProperties = {
     position: "absolute",
     left: `${element.x}%`,
@@ -29,41 +27,71 @@ export function ElementView({ element, selected, onSelect, onMove, onEditText }:
     outlineOffset: "6px",
   };
 
-  const handleSelect = (e: React.PointerEvent<HTMLElement>) => {
-    e.stopPropagation();
-    onSelect(element.id);
-    drag.onPointerDown(e);
-  };
-
-  if (element.type === "photo") {
+  // Photos and stickers get full drag + pinch-to-resize + twist-to-rotate,
+  // plus a drag-to-rotate handle when selected.
+  if (element.type === "photo" || element.type === "sticker") {
     return (
-      <div
-        style={positionStyle}
-        onPointerDown={handleSelect}
-        onPointerMove={drag.onPointerMove}
-        onPointerUp={drag.onPointerUp}
-        onPointerCancel={drag.onPointerCancel}
-        role="button"
-        tabIndex={0}
-        aria-label="Photograph"
-      >
-        <PhotoInner element={element} />
-      </div>
+      <TransformableElement
+        element={element}
+        selected={selected}
+        positionStyle={positionStyle}
+        onSelect={onSelect}
+        onTransform={onTransform}
+      />
     );
   }
 
-  if (element.type === "sticker") {
-    return (
-      <div
-        style={positionStyle}
-        onPointerDown={handleSelect}
-        onPointerMove={drag.onPointerMove}
-        onPointerUp={drag.onPointerUp}
-        onPointerCancel={drag.onPointerCancel}
-        role="button"
-        tabIndex={0}
-        aria-label="Sticker"
-      >
+  return (
+    <CaptionView
+      element={element}
+      style={positionStyle}
+      selected={selected}
+      onSelect={onSelect}
+      onMove={onMove}
+      onEditText={onEditText}
+    />
+  );
+}
+
+function TransformableElement({
+  element,
+  selected,
+  positionStyle,
+  onSelect,
+  onTransform,
+}: {
+  element: PhotoElement | Extract<PageElement, { type: "sticker" }>;
+  selected: boolean;
+  positionStyle: CSSProperties;
+  onSelect: (id: string) => void;
+  onTransform: (id: string, patch: Partial<PageElement>) => void;
+}) {
+  const gesture = useElementGesture(
+    () => ({ x: element.x, y: element.y, w: element.w, rotation: element.rotation }),
+    (patch) => onTransform(element.id, patch),
+  );
+
+  const onDown = (e: ReactPointerEvent<HTMLElement>) => {
+    e.stopPropagation();
+    onSelect(element.id);
+    gesture.onPointerDown(e);
+  };
+
+  return (
+    <div
+      className="ks-el"
+      style={positionStyle}
+      onPointerDown={onDown}
+      onPointerMove={gesture.onPointerMove}
+      onPointerUp={gesture.onPointerUp}
+      onPointerCancel={gesture.onPointerCancel}
+      role="button"
+      tabIndex={0}
+      aria-label={element.type === "photo" ? "Photograph" : "Sticker"}
+    >
+      {element.type === "photo" ? (
+        <PhotoInner element={element} />
+      ) : (
         <div
           style={{
             fontSize: `${element.w}cqw`,
@@ -75,19 +103,82 @@ export function ElementView({ element, selected, onSelect, onMove, onEditText }:
         >
           {element.glyph}
         </div>
-      </div>
-    );
-  }
+      )}
+
+      {selected && (
+        <RotateHandle onRotate={(deg) => onTransform(element.id, { rotation: deg })} />
+      )}
+    </div>
+  );
+}
+
+function RotateHandle({ onRotate }: { onRotate: (deg: number) => void }) {
+  const active = useRef(false);
+  const center = useRef({ x: 0, y: 0 });
+
+  const down = (e: ReactPointerEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const el = (e.currentTarget as HTMLElement).closest(".ks-el") as HTMLElement | null;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    center.current = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    active.current = true;
+  };
+
+  const move = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!active.current) return;
+    const dx = e.clientX - center.current.x;
+    const dy = e.clientY - center.current.y;
+    let deg = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
+    if (e.shiftKey) deg = Math.round(deg / 15) * 15;
+    onRotate(deg);
+  };
+
+  const up = (e: ReactPointerEvent<HTMLDivElement>) => {
+    active.current = false;
+    const n = e.currentTarget as HTMLElement;
+    if (n.hasPointerCapture?.(e.pointerId)) n.releasePointerCapture(e.pointerId);
+  };
 
   return (
-    <CaptionView
-      element={element}
-      style={positionStyle}
-      selected={selected}
-      onSelect={handleSelect}
-      drag={drag}
-      onEditText={onEditText}
-    />
+    <div
+      data-no-drag
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={up}
+      title="Drag to rotate (hold Shift to snap to 15°)"
+      style={{
+        position: "absolute",
+        left: "50%",
+        top: 0,
+        transform: "translate(-50%, -100%)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        touchAction: "none",
+        cursor: "grab",
+        zIndex: 5,
+      }}
+    >
+      <span
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: 22,
+          width: 22,
+          borderRadius: 999,
+          background: "var(--color-accent)",
+          color: "var(--color-accent-fg)",
+          boxShadow: "0 2px 6px rgb(0 0 0 / 0.4)",
+        }}
+      >
+        <RotateCw size={13} />
+      </span>
+      <span style={{ width: 2, height: 16, background: "var(--color-accent)" }} />
+    </div>
   );
 }
 
@@ -121,16 +212,20 @@ function CaptionView({
   style,
   selected,
   onSelect,
-  drag,
+  onMove,
   onEditText,
 }: {
   element: CaptionElement;
   style: CSSProperties;
   selected: boolean;
-  onSelect: (e: React.PointerEvent<HTMLElement>) => void;
-  drag: ReturnType<typeof usePointerDrag>;
+  onSelect: (id: string) => void;
+  onMove: (id: string, x: number, y: number) => void;
   onEditText: (id: string, text: string) => void;
 }) {
+  const drag = usePointerDrag(
+    () => ({ x: element.x, y: element.y }),
+    (x, y) => onMove(element.id, x, y),
+  );
   const [editing, setEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -142,7 +237,6 @@ function CaptionView({
     }
   }, [editing]);
 
-  // Enter edit mode automatically when a fresh, placeholder caption is selected.
   useEffect(() => {
     if (!selected) setEditing(false);
   }, [selected]);
@@ -156,10 +250,16 @@ function CaptionView({
     width: "100%",
   };
 
+  const handleSelect = (e: ReactPointerEvent<HTMLElement>) => {
+    e.stopPropagation();
+    onSelect(element.id);
+    drag.onPointerDown(e);
+  };
+
   return (
     <div
       style={style}
-      onPointerDown={editing ? undefined : onSelect}
+      onPointerDown={editing ? undefined : handleSelect}
       onPointerMove={editing ? undefined : drag.onPointerMove}
       onPointerUp={editing ? undefined : drag.onPointerUp}
       onPointerCancel={editing ? undefined : drag.onPointerCancel}

@@ -24,6 +24,7 @@ function StaticPage({
       onSelect={noop}
       onDeselect={noop}
       onMove={noop}
+      onTransform={noop}
       onEditText={noop}
     />
   );

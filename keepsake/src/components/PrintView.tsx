@@ -38,6 +38,7 @@ export function PrintView({ book, onClose }: { book: Scrapbook; onClose: () => v
               onSelect={noop}
               onDeselect={noop}
               onMove={noop}
+              onTransform={noop}
               onEditText={noop}
             />
           </div>

@@ -142,7 +142,7 @@ export function useScrapbook() {
         glyph,
         x: 50,
         y: 50,
-        w: 16,
+        w: 22,
         rotation: (Math.random() * 20 - 10) | 0,
         z: nextZ(page.elements),
       };

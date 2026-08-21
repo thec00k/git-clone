@@ -308,6 +308,7 @@ export function BookView() {
           onSelect={isVisitor ? () => {} : sb.setSelectedId}
           onDeselect={() => sb.setSelectedId(null)}
           onMove={isVisitor ? () => {} : (id, x, y) => sb.updateElement(id, { x, y })}
+          onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
           onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
         />
       )}

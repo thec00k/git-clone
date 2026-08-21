@@ -1,4 +1,4 @@
-import type { Page } from "../types/scrapbook";
+import type { Page, PageElement } from "../types/scrapbook";
 import { ScrapbookPage } from "./ScrapbookPage";
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
   onSelect: (id: string) => void;
   onDeselect: () => void;
   onMove: (id: string, x: number, y: number) => void;
+  onTransform: (id: string, patch: Partial<PageElement>) => void;
   onEditText: (id: string, text: string) => void;
 }
 
@@ -26,6 +27,7 @@ export function Spread({
   onSelect,
   onDeselect,
   onMove,
+  onTransform,
   onEditText,
 }: Props) {
   const shared = {
@@ -36,6 +38,7 @@ export function Spread({
     onSelect,
     onDeselect,
     onMove,
+    onTransform,
     onEditText,
   };
   return (
