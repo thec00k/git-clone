@@ -42,12 +42,12 @@ export const HOTSPOTS: Record<HotspotId, HotspotBox> = {
  * desk, window, archive, and a recentered timeline.
  */
 export const CHAMBER_HOTSPOTS: Record<HotspotId, HotspotBox> = {
-  window: { left: "7%", top: "10%", width: "28%", height: "44%" },
-  timeline: { left: "42%", top: "16%", width: "22%", height: "18%" },
-  archive: { left: "5%", bottom: "14%", width: "16%", height: "40%" },
-  book: { left: "40%", bottom: "9%", width: "20%", height: "32%" },
-  guestbook: { left: "64%", bottom: "12%", width: "13%", height: "16%" },
-  crt: { right: "6%", bottom: "14%", width: "18%", height: "28%" },
+  window: { left: "10%", top: "12%", width: "24%", height: "38%" },
+  timeline: { left: "42%", top: "16%", width: "20%", height: "16%" },
+  archive: { left: "9%", bottom: "12%", width: "14%", height: "36%" },
+  book: { left: "40%", bottom: "10%", width: "18%", height: "30%" },
+  guestbook: { left: "62%", bottom: "12%", width: "12%", height: "15%" },
+  crt: { right: "9%", bottom: "12%", width: "16%", height: "26%" },
   hud: HOTSPOTS.hud,
   map: { left: "6%", top: "7%", width: "88%", height: "86%" },
   shelf: { left: "7%", top: "6%", width: "86%", height: "88%" },

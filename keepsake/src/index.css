@@ -328,28 +328,50 @@
     overflow: hidden;
   }
 
-  /* Three-wall chamber: yaw the room 90° to the map (left) or shelf (right).
-     --wall-w / --room-d are paired so the side walls meet the front at a corner. */
+  /* Full-page chamber. After a yaw the facing wall flattens so clicks land. */
+  .ks-room--chamber {
+    display: block;
+  }
+
+  .ks-room--chamber > header {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 30;
+  }
+
+  .ks-room--chamber > .ks-scene {
+    position: absolute;
+    inset: 0;
+  }
+
   .ks-chamber {
     position: absolute;
     inset: 0;
-    perspective: min(1600px, 180vh);
-    perspective-origin: 50% 46%;
+    perspective: 1400px;
+    perspective-origin: 50% 48%;
     overflow: hidden;
-    --wall-w: min(78vw, 88vh);
-    --room-d: calc(var(--wall-w) / 2);
+    --return-w: 5.25rem;
+    --room-d: 50vw;
   }
 
   .ks-yaw {
     position: absolute;
-    top: 7%;
-    bottom: 8%;
-    left: 50%;
-    width: var(--wall-w);
-    margin-left: calc(var(--wall-w) / -2);
+    inset: 0;
     transform-style: preserve-3d;
-    transform: translateZ(calc(var(--room-d) * -0.95)) rotateX(9deg) rotateY(var(--yaw, 0deg));
+    transform: translateZ(calc(var(--room-d) * -1)) rotateY(var(--yaw, 0deg));
     transition: transform 820ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .ks-yaw.is-flat {
+    transform: none;
+    transform-style: flat;
+    transition: none;
+  }
+
+  .ks-yaw.is-turning {
+    pointer-events: none;
   }
 
   .ks-wall {
@@ -359,12 +381,6 @@
     backface-visibility: hidden;
     pointer-events: none;
     overflow: hidden;
-    border-radius: 2px;
-    box-shadow: 0 18px 40px rgb(0 0 0 / 0.35);
-  }
-
-  .ks-wall * {
-    pointer-events: none;
   }
 
   .ks-wall.is-facing {
@@ -372,9 +388,13 @@
     z-index: 2;
   }
 
-  .ks-wall.is-facing .ks-obj,
-  .ks-wall.is-facing button {
-    pointer-events: auto;
+  .ks-yaw.is-flat .ks-wall:not(.is-facing) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .ks-yaw.is-flat .ks-wall.is-facing {
+    transform: none;
   }
 
   .ks-wall-front {
@@ -394,7 +414,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    height: 10%;
+    height: 12%;
     background:
       linear-gradient(180deg, rgb(0 0 0 / 0.22), transparent 40%),
       url("/textures/wood.jpg") center/cover;
@@ -402,95 +422,120 @@
     pointer-events: none;
   }
 
-  .ks-wall-tabs {
+  /* Side-wall returns sit on the page edge with their label on the wall. */
+  .ks-returns {
     position: absolute;
     inset: 0;
     z-index: 24;
     pointer-events: none;
   }
 
-  .ks-wall-tab {
+  .ks-return {
     pointer-events: auto;
-    position: absolute;
-    top: 42%;
-    max-width: 7.5rem;
-    padding: 0.7rem 0.45rem;
-    border: none;
-    cursor: pointer;
-    font-family: var(--font-script);
-    font-size: 1.2rem;
-    line-height: 1.15;
-    color: var(--color-paper);
-    background: rgb(36 26 20 / 0.72);
-    box-shadow: 0 8px 18px rgb(0 0 0 / 0.4);
-    text-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-  }
-
-  .ks-wall-tab:hover,
-  .ks-wall-tab:focus-visible {
-    background: rgb(52 38 30 / 0.88);
-    color: #fff;
-  }
-
-  .ks-wall-tab:focus-visible {
-    outline: 2px solid color-mix(in oklab, var(--color-accent) 80%, white);
-    outline-offset: 3px;
-  }
-
-  .ks-wall-tab--left {
-    left: 0;
-    border-radius: 0 8px 8px 0;
-    writing-mode: vertical-lr;
-    transform: none;
-  }
-
-  .ks-wall-tab--right {
-    right: 0;
-    border-radius: 8px 0 0 8px;
-  }
-
-  /* 90° returns on the front wall — a sliver of the adjoining rooms. */
-  .ks-corner-peek {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 5.5%;
-    z-index: 4;
+    width: var(--return-w);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
     border: none;
     cursor: pointer;
   }
 
-  .ks-corner-peek--left {
+  .ks-return--left {
     left: 0;
     transform-origin: left center;
-    transform: perspective(420px) rotateY(38deg);
+    transform: perspective(520px) rotateY(32deg);
     background:
-      linear-gradient(90deg, rgb(0 0 0 / 0.35), transparent 70%),
+      linear-gradient(90deg, rgb(0 0 0 / 0.38), transparent 72%),
       linear-gradient(180deg, #c4a06a, #8a6230);
-    box-shadow: 8px 0 18px rgb(0 0 0 / 0.35);
+    box-shadow: 10px 0 22px rgb(0 0 0 / 0.35);
   }
 
-  .ks-corner-peek--right {
+  .ks-return--right {
     right: 0;
     transform-origin: right center;
-    transform: perspective(420px) rotateY(-38deg);
+    transform: perspective(520px) rotateY(-32deg);
     background:
-      linear-gradient(270deg, rgb(0 0 0 / 0.4), transparent 70%),
+      linear-gradient(270deg, rgb(0 0 0 / 0.4), transparent 72%),
       linear-gradient(180deg, #3a2a1e, #5c4030);
-    box-shadow: -8px 0 18px rgb(0 0 0 / 0.35);
+    box-shadow: -10px 0 22px rgb(0 0 0 / 0.35);
   }
 
-  .ks-corner-peek:hover,
-  .ks-corner-peek:focus-visible {
-    filter: brightness(1.08);
+  .ks-return--desk.ks-return--left,
+  .ks-return--desk.ks-return--right {
+    background:
+      linear-gradient(180deg, #3a2c22, #2a2019);
+    box-shadow: 0 0 22px rgb(0 0 0 / 0.4);
   }
 
-  .ks-corner-peek:focus-visible {
+  .ks-return-label {
+    font-family: var(--font-script);
+    font-size: 1.35rem;
+    line-height: 1.1;
+    color: var(--color-paper);
+    text-shadow: 0 2px 6px rgb(0 0 0 / 0.55);
+    writing-mode: vertical-lr;
+  }
+
+  .ks-return--right .ks-return-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .ks-return:hover,
+  .ks-return:focus-visible {
+    filter: brightness(1.1);
+  }
+
+  .ks-return:focus-visible {
     outline: 2px solid color-mix(in oklab, var(--color-accent) 80%, white);
-    outline-offset: 2px;
+    outline-offset: 3px;
+  }
+
+  .ks-wall-stage {
+    position: absolute;
+    top: 4.6rem;
+    bottom: 2.8rem;
+    left: var(--return-w);
+    right: var(--return-w);
+  }
+
+  .ks-chamber[data-room-face="left"] .ks-wall-stage {
+    left: 2.25rem;
+  }
+
+  .ks-chamber[data-room-face="right"] .ks-wall-stage {
+    right: 2.25rem;
+  }
+
+  .ks-wall-piece {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+  }
+
+  .ks-wall-piece.ks-obj:hover,
+  .ks-wall-piece.ks-obj:focus-visible {
+    transform: none;
+    filter: brightness(1.03);
+  }
+
+  .ks-wall-open {
+    position: absolute;
+    left: 50%;
+    bottom: 0.85rem;
+    transform: translateX(-50%);
+    z-index: 6;
+    pointer-events: none;
+    font-family: var(--font-script);
+    font-size: 1.45rem;
+    color: var(--color-paper);
+    text-shadow: 0 2px 8px rgb(0 0 0 / 0.7);
+    white-space: nowrap;
   }
 
   /* An interactive diorama object: lifts and glows on hover (LBP "pop"). */

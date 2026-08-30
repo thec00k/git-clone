@@ -64,7 +64,10 @@ export function Room() {
   const unlockedCount = state.achievements.length;
 
   return (
-    <div className="ks-room flex h-dvh flex-col overflow-hidden" data-room-layout={layout}>
+    <div
+      className={`ks-room flex h-dvh flex-col overflow-hidden${layout === "chamber" ? " ks-room--chamber" : ""}`}
+      data-room-layout={layout}
+    >
       <a className="ks-skip" href="#ks-main">
         Skip to the room
       </a>
