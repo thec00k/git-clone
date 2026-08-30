@@ -352,7 +352,7 @@
     perspective: 1400px;
     perspective-origin: 50% 48%;
     overflow: hidden;
-    --return-w: 5.25rem;
+    --return-w: 4.85rem;
     --room-d: 50vw;
   }
 
@@ -447,21 +447,21 @@
   .ks-return--left {
     left: 0;
     transform-origin: left center;
-    transform: perspective(520px) rotateY(32deg);
+    transform: perspective(720px) rotateY(16deg);
     background:
       linear-gradient(90deg, rgb(0 0 0 / 0.38), transparent 72%),
       linear-gradient(180deg, #c4a06a, #8a6230);
-    box-shadow: 10px 0 22px rgb(0 0 0 / 0.35);
+    box-shadow: 8px 0 18px rgb(0 0 0 / 0.32);
   }
 
   .ks-return--right {
     right: 0;
     transform-origin: right center;
-    transform: perspective(520px) rotateY(-32deg);
+    transform: perspective(720px) rotateY(-16deg);
     background:
       linear-gradient(270deg, rgb(0 0 0 / 0.4), transparent 72%),
       linear-gradient(180deg, #3a2a1e, #5c4030);
-    box-shadow: -10px 0 22px rgb(0 0 0 / 0.35);
+    box-shadow: -8px 0 18px rgb(0 0 0 / 0.32);
   }
 
   .ks-return--desk.ks-return--left,
@@ -497,18 +497,18 @@
 
   .ks-wall-stage {
     position: absolute;
-    top: 4.6rem;
-    bottom: 2.8rem;
-    left: var(--return-w);
-    right: var(--return-w);
+    top: 4.15rem;
+    bottom: 2.15rem;
+    left: calc(var(--return-w) - 6px);
+    right: calc(var(--return-w) - 6px);
   }
 
   .ks-chamber[data-room-face="left"] .ks-wall-stage {
-    left: 2.25rem;
+    left: 1.5rem;
   }
 
   .ks-chamber[data-room-face="right"] .ks-wall-stage {
-    right: 2.25rem;
+    right: 1.5rem;
   }
 
   .ks-wall-piece {
@@ -527,14 +527,16 @@
   .ks-wall-open {
     position: absolute;
     left: 50%;
-    bottom: 0.85rem;
+    bottom: 0.7rem;
     transform: translateX(-50%);
     z-index: 6;
     pointer-events: none;
     font-family: var(--font-script);
-    font-size: 1.45rem;
+    font-size: 1.4rem;
     color: var(--color-paper);
-    text-shadow: 0 2px 8px rgb(0 0 0 / 0.7);
+    background: rgb(20 14 10 / 0.72);
+    padding: 0.15rem 0.9rem 0.25rem;
+    border-radius: 999px;
     white-space: nowrap;
   }
 
