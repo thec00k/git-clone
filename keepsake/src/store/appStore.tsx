@@ -47,6 +47,7 @@ interface AppContextValue {
   setBookVisibility: (id: string, v: Visibility) => void;
   setBookCover: (id: string, c: CoverStyle) => void;
   setBookPlaylist: (id: string, uri: string | undefined) => void;
+  setBookShelf: (id: string, pos: { shelfRow: number; shelfX: number }) => void;
 
   addArchivePhoto: (src: string, aspect: number, categories?: string[]) => string;
   toggleFavorite: (id: string) => void;
@@ -110,6 +111,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
             },
             receipts: stored.receipts ?? {},
             archiveTabs: deriveArchiveTabs(stored.archive ?? [], stored.archiveTabs),
+            books: (stored.books ?? []).map((b, i) => ({
+              ...b,
+              shelfRow: b.shelfRow ?? i % 3,
+              shelfX: b.shelfX ?? Math.min(82, 8 + (i % 6) * 14),
+            })),
           }
         : createSeed();
       setState(initial);
@@ -188,6 +194,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             { id: uid("page"), titlePage: true, elements: [] },
             { id: uid("page"), elements: [] },
           ],
+          shelfRow: p.books.length % 3,
+          shelfX: Math.min(82, 8 + (p.books.length % 6) * 14),
         },
       ],
     }));
@@ -197,6 +205,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const renameBook = useCallback(
     (id: string, title: string, subtitle: string) =>
       update((p) => ({ ...p, books: p.books.map((b) => (b.id === id ? { ...b, title, subtitle } : b)) })),
+    [update],
+  );
+
+  const setBookShelf = useCallback(
+    (id: string, pos: { shelfRow: number; shelfX: number }) =>
+      update((p) => ({
+        ...p,
+        books: p.books.map((b) =>
+          b.id === id ? { ...b, shelfRow: pos.shelfRow, shelfX: pos.shelfX } : b,
+        ),
+      })),
     [update],
   );
 
@@ -387,6 +406,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBookVisibility,
     setBookCover,
     setBookPlaylist,
+    setBookShelf,
     addArchivePhoto,
     toggleFavorite,
     setCategories,

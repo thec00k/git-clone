@@ -29,6 +29,8 @@ interface NavContextValue {
   setTourFocus: (id: HotspotId | null) => void;
   roomFace: RoomFace;
   setRoomFace: (face: RoomFace) => void;
+  backAria: string;
+  backLabel: string;
 }
 
 const NavContext = createContext<NavContextValue | null>(null);
@@ -43,7 +45,6 @@ export function NavProvider({ children }: { children: ReactNode }) {
   const go = useCallback((v: View) => setStack((s) => [...s, v]), []);
   const back = useCallback(() => {
     setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
-    setRoomFace("front");
   }, []);
   const startTour = useCallback(() => {
     setStack(["room"]);
@@ -56,9 +57,12 @@ export function NavProvider({ children }: { children: ReactNode }) {
     setRoomFace("front");
   }, []);
 
+  const view = stack[stack.length - 1];
+  const { aria: backAria, label: backLabel } = returnLabel(view, roomFace);
+
   const value = useMemo<NavContextValue>(
     () => ({
-      view: stack[stack.length - 1],
+      view,
       go,
       back,
       viewAs,
@@ -71,11 +75,24 @@ export function NavProvider({ children }: { children: ReactNode }) {
       setTourFocus,
       roomFace,
       setRoomFace,
+      backAria,
+      backLabel,
     }),
-    [stack, go, back, viewAs, touring, tourFocus, startTour, endTour, roomFace],
+    [view, go, back, viewAs, touring, tourFocus, startTour, endTour, roomFace, backAria, backLabel],
   );
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;
+}
+
+export function returnLabel(view: View, face: RoomFace): { aria: string; label: string } {
+  if (view === "atlas") return { aria: "Back to the map", label: "the map" };
+  if (view === "book" || view === "shelf") {
+    if (face === "right") return { aria: "Back to the bookshelf", label: "the bookshelf" };
+    return { aria: "Back to the desk", label: "the desk" };
+  }
+  if (face === "right") return { aria: "Back to the bookshelf", label: "the bookshelf" };
+  if (face === "left") return { aria: "Back to the map", label: "the map" };
+  return { aria: "Back to the desk", label: "the desk" };
 }
 
 export function useNav(): NavContextValue {

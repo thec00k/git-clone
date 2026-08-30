@@ -41,6 +41,8 @@ export function createSeed(): AppState {
     visibility: "private",
     createdAt: now,
     updatedAt: now,
+    shelfRow: 0,
+    shelfX: 16,
     pages: [
       {
         id: uid("page"),
@@ -122,7 +124,39 @@ export function createSeed(): AppState {
   return {
     version: 1,
     profile: { displayName: "You" },
-    books: [book],
+    books: [
+      book,
+      {
+        id: uid("book"),
+        title: "the coast",
+        subtitle: "salt air",
+        coverStyle: "wine",
+        visibility: "private",
+        createdAt: now - 1000,
+        updatedAt: now - 1000,
+        shelfRow: 0,
+        shelfX: 32,
+        pages: [
+          { id: uid("page"), titlePage: true, elements: [] },
+          { id: uid("page"), elements: [] },
+        ],
+      },
+      {
+        id: uid("book"),
+        title: "kitchen days",
+        subtitle: "slow coffee",
+        coverStyle: "ochre",
+        visibility: "private",
+        createdAt: now - 2000,
+        updatedAt: now - 2000,
+        shelfRow: 1,
+        shelfX: 20,
+        pages: [
+          { id: uid("page"), titlePage: true, elements: [] },
+          { id: uid("page"), elements: [] },
+        ],
+      },
+    ],
     activeBookId: book.id,
     archive,
     archiveTabs,

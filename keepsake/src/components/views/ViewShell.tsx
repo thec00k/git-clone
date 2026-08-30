@@ -3,6 +3,16 @@ import { DoorOpen } from "lucide-react";
 import { RoomFrame } from "../RoomFrame";
 import { useNav } from "../../store/nav";
 
+export function BackChip({ onClick }: { onClick?: () => void } = {}) {
+  const { back, backAria, backLabel } = useNav();
+  return (
+    <button className="ks-chip" aria-label={backAria} title={backAria} onClick={onClick ?? back}>
+      <DoorOpen size={16} />
+      <span className="hidden sm:inline">{backLabel}</span>
+    </button>
+  );
+}
+
 export function ViewShell({
   title,
   subtitle,
@@ -16,15 +26,12 @@ export function ViewShell({
   scroll?: boolean;
   children: ReactNode;
 }) {
-  const { back } = useNav();
   return (
     <RoomFrame
       header={
         <>
           <div className="flex items-center gap-3">
-            <button className="ks-chip" aria-label="Back to the room" title="Back to the room" onClick={back}>
-              <DoorOpen size={16} />
-            </button>
+            <BackChip />
             <div className="leading-tight">
               <p className="font-display font-semibold text-paper">{title}</p>
               {subtitle && (

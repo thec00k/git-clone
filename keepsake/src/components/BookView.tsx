@@ -4,7 +4,6 @@ import {
   BookMarked,
   ChevronLeft,
   ChevronRight,
-  DoorOpen,
   ImagePlus,
   Keyboard,
   LayoutGrid,
@@ -37,11 +36,12 @@ import { SaveIndicator } from "./SaveIndicator";
 import { PrintView } from "./PrintView";
 import { NotesPanel } from "./NotesPanel";
 import { BookIdentityEditor } from "./BookIdentityEditor";
+import { BackChip } from "./views/ViewShell";
 
 export function BookView() {
   const sb = useScrapbook();
   const { addArchivePhoto, renameBook, setBookCover } = useApp();
-  const { back, viewAs, isVisitor } = useNav();
+  const { viewAs, isVisitor } = useNav();
   const [turn, setTurn] = useState<{ dir: "next" | "prev" } | null>(null);
   const [showPresets, setShowPresets] = useState(false);
   const [showStickers, setShowStickers] = useState(false);
@@ -147,7 +147,7 @@ export function BookView() {
 
   if (!sb.book) {
     return (
-      <RoomFrame header={<HomeBtn onClick={back} />}>
+      <RoomFrame header={<BackChip />}>
         <div className="flex flex-1 items-center justify-center text-paper/60">No book open.</div>
       </RoomFrame>
     );
@@ -155,7 +155,7 @@ export function BookView() {
 
   if (!canView) {
     return (
-      <RoomFrame header={<HomeBtn onClick={back} />}>
+      <RoomFrame header={<BackChip />}>
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-paper/70">
           <Lock size={28} />
           <p>This book is private.</p>
@@ -170,7 +170,7 @@ export function BookView() {
       header={
         <>
           <div className="flex items-center gap-3">
-            <HomeBtn onClick={back} />
+            <BackChip />
             <div className="leading-tight">
               <p className="font-display font-semibold text-paper">{sb.book.title}</p>
               <p className="ks-caption text-paper/70" style={{ fontSize: "1.1rem" }}>
@@ -387,14 +387,6 @@ export function BookView() {
         />
       )}
     </RoomFrame>
-  );
-}
-
-function HomeBtn({ onClick }: { onClick: () => void }) {
-  return (
-    <button className="ks-chip" aria-label="Back to the room" title="Back to the room" onClick={onClick}>
-      <DoorOpen size={16} />
-    </button>
   );
 }
 

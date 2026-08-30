@@ -1,4 +1,6 @@
-import { Archive, Clock, Library, MapPin, Music, Moon, CloudSun, Sun } from "lucide-react";
+import { useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
+import { Archive, Clock, Library, MapPin, Music, Moon, CloudSun, Sun, Pencil } from "lucide-react";
 import type { MemoryPin } from "../../types/app";
 import { COVER_STYLES } from "../../types/scrapbook";
 import type { Scrapbook } from "../../types/scrapbook";
@@ -184,83 +186,178 @@ export function CorkboardWall({ pins }: { pins: MemoryPin[] }) {
   );
 }
 
-const FILLER = ["#4a3224", "#2f4a3c", "#5b2733", "#20293f", "#7a5320", "#3a2a1e"];
-
 export function BookshelfWall({
   books,
+  canEdit,
   onOpenBook,
-  onOpenShelf,
+  onRename,
+  onPlace,
+  onNewBook,
 }: {
   books: Scrapbook[];
+  canEdit: boolean;
   onOpenBook: (id: string) => void;
-  onOpenShelf: () => void;
+  onRename: (id: string, title: string) => void;
+  onPlace: (id: string, pos: { shelfRow: number; shelfX: number }) => void;
+  onNewBook?: () => void;
 }) {
   return (
-    <div className="relative h-full w-full">
-      <button
-        type="button"
-        className="absolute inset-0 cursor-pointer border-0 bg-transparent p-0"
-        onClick={onOpenShelf}
-        aria-label="Open the bookshelf"
-      >
-        <div
-          className="flex h-full w-full flex-col justify-between rounded-sm bg-[#2c2018] p-3"
-          style={{ boxShadow: "inset 0 0 40px rgb(0 0 0/.5), inset 0 0 0 8px #4a3224" }}
-        >
-          {[0, 1, 2].map((row) => (
-            <div key={row} className="relative flex-1 border-b-[10px] border-[#6e4a32]">
-              <div className="absolute inset-x-2 bottom-1 top-3 flex items-end gap-1.5">
-                {FILLER.slice(row, row + 5).map((c, i) => (
-                  <div
-                    key={i}
-                    className="w-[9%] rounded-t-sm"
-                    style={{ height: `${48 + ((row * 3 + i) % 5) * 8}%`, background: c, opacity: 0.85 }}
-                    aria-hidden="true"
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </button>
-      <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-3">
-        {books.slice(0, 6).map((b, i) => {
-          const cover = COVER_STYLES[b.coverStyle];
-          const row = i % 3;
-          const col = Math.floor(i / 3);
-          return (
-            <button
-              key={b.id}
-              type="button"
-              className="pointer-events-auto absolute z-10 cursor-pointer border-0 p-0 text-left"
-              style={{
-                left: `${18 + col * 36}%`,
-                top: `${8 + row * 30}%`,
-                width: "22%",
-                height: "26%",
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenBook(b.id);
-              }}
-              aria-label={`Open book: ${b.title}`}
-            >
-              <div
-                className="flex h-full w-full flex-col items-center justify-center rounded-sm p-2 text-center"
-                style={{
-                  background: `linear-gradient(90deg, rgb(0 0 0 /.35), transparent 14%), url('/textures/leather.jpg') center/cover`,
-                  backgroundColor: cover.leather,
-                  color: cover.ink,
-                  boxShadow: "4px 8px 18px rgb(0 0 0 /.45)",
-                }}
-              >
-                <span className="text-[0.45rem] uppercase tracking-[0.16em] opacity-70">a book of</span>
-                <span className="font-display text-sm font-semibold leading-tight">{b.title}</span>
-              </div>
-            </button>
-          );
-        })}
+    <div className="ks-shelf-case">
+      {canEdit && onNewBook && (
+        <button type="button" className="ks-shelf-new" onClick={onNewBook}>
+          New book
+        </button>
+      )}
+      <div className="ks-shelf-inner">
+        {[0, 1, 2].map((row) => (
+          <div key={row} className="ks-shelf-row" data-shelf-row={row}>
+            {books
+              .filter((b) => (b.shelfRow ?? 0) === row)
+              .map((b, i) => (
+                <BookSpine
+                  key={b.id}
+                  book={b}
+                  fallbackX={8 + i * 14}
+                  canEdit={canEdit}
+                  onOpen={() => onOpenBook(b.id)}
+                  onRename={(title) => onRename(b.id, title)}
+                  onPlace={(pos) => onPlace(b.id, pos)}
+                />
+              ))}
+          </div>
+        ))}
       </div>
+    </div>
+  );
+}
+
+function BookSpine({
+  book,
+  fallbackX,
+  canEdit,
+  onOpen,
+  onRename,
+  onPlace,
+}: {
+  book: Scrapbook;
+  fallbackX: number;
+  canEdit: boolean;
+  onOpen: () => void;
+  onRename: (title: string) => void;
+  onPlace: (pos: { shelfRow: number; shelfX: number }) => void;
+}) {
+  const cover = COVER_STYLES[book.coverStyle];
+  const [renaming, setRenaming] = useState(false);
+  const [draft, setDraft] = useState(book.title);
+  const [dragging, setDragging] = useState(false);
+  const drag = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    moved: boolean;
+  } | null>(null);
+
+  const commitTitle = () => {
+    const next = draft.trim();
+    if (next && next !== book.title) onRename(next);
+    setRenaming(false);
+  };
+
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!canEdit) return;
+    if ((e.target as HTMLElement).closest("[data-no-drag]")) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, moved: false };
+  };
+
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const s = drag.current;
+    if (!s || s.pointerId !== e.pointerId) return;
+    if (!s.moved && Math.hypot(e.clientX - s.startX, e.clientY - s.startY) < 6) return;
+    if (!s.moved) {
+      s.moved = true;
+      setDragging(true);
+    }
+    const caseEl = e.currentTarget.closest(".ks-shelf-inner");
+    if (!(caseEl instanceof HTMLElement)) return;
+    const r = caseEl.getBoundingClientRect();
+    const y = ((e.clientY - r.top) / r.height) * 100;
+    const x = ((e.clientX - r.left) / r.width) * 100;
+    onPlace({
+      shelfRow: y < 33 ? 0 : y < 66 ? 1 : 2,
+      shelfX: Math.min(88, Math.max(2, x - 3)),
+    });
+  };
+
+  const endDrag = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const s = drag.current;
+    if (!s || s.pointerId !== e.pointerId) return;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    drag.current = null;
+    setDragging(false);
+    if (!s.moved) onOpen();
+  };
+
+  return (
+    <div
+      className={`ks-spine${dragging ? " is-dragging" : ""}`}
+      style={{
+        left: `${book.shelfX ?? fallbackX}%`,
+        background: `linear-gradient(90deg, rgb(0 0 0 /.28), transparent 22%, rgb(255 255 255 /.08) 48%, transparent 70%), url('/textures/leather.jpg') center/cover`,
+        backgroundColor: cover.leather,
+        color: cover.ink,
+        cursor: canEdit ? "grab" : "pointer",
+      }}
+      data-book-id={book.id}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open book: ${book.title}`}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+    >
+      <span className="ks-spine-title">{book.title}</span>
+      {canEdit && (
+        <button
+          type="button"
+          className="ks-spine-rename"
+          data-no-drag
+          aria-label={`Edit title of ${book.title}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setDraft(book.title);
+            setRenaming(true);
+          }}
+        >
+          <Pencil size={11} />
+        </button>
+      )}
+      {renaming && (
+        <form
+          className="ks-spine-form"
+          data-no-drag
+          onClick={(e) => e.stopPropagation()}
+          onSubmit={(e) => {
+            e.preventDefault();
+            commitTitle();
+          }}
+        >
+          <input
+            aria-label="Book title"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitTitle}
+            autoFocus
+          />
+        </form>
+      )}
     </div>
   );
 }

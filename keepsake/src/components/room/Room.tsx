@@ -18,8 +18,19 @@ import { RoomFlat } from "./RoomFlat";
 import { RoomChamber } from "./RoomChamber";
 
 export function Room() {
-  const { state, environment, activeBook, recordProgress, newlyUnlocked, clearNewlyUnlocked, markAchievementsSeen, setActiveBook } =
-    useApp();
+  const {
+    state,
+    environment,
+    activeBook,
+    recordProgress,
+    newlyUnlocked,
+    clearNewlyUnlocked,
+    markAchievementsSeen,
+    setActiveBook,
+    renameBook,
+    setBookShelf,
+    addBook,
+  } = useApp();
   const { go, viewAs, setViewAs, touring, tourFocus, startTour, roomFace, setRoomFace } = useNav();
   const [envOpen, setEnvOpen] = useState(false);
   const [achOpen, setAchOpen] = useState(false);
@@ -152,6 +163,14 @@ export function Room() {
             onOpenBook={(id) => {
               setActiveBook(id);
               go("book");
+            }}
+            onRenameBook={(id, title) => {
+              const book = state.books.find((b) => b.id === id);
+              if (book) renameBook(id, title, book.subtitle);
+            }}
+            onPlaceBook={setBookShelf}
+            onNewBook={() => {
+              addBook();
             }}
           />
         )}

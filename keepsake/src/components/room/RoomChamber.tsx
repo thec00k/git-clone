@@ -31,6 +31,9 @@ export function RoomChamber({
   onOpenMusic,
   onGo,
   onOpenBook,
+  onRenameBook,
+  onPlaceBook,
+  onNewBook,
 }: {
   roomFace: RoomFace;
   setRoomFace: (face: RoomFace) => void;
@@ -47,6 +50,9 @@ export function RoomChamber({
   onOpenMusic: () => void;
   onGo: (view: "shelf" | "timeline" | "atlas" | "archive" | "book" | "guestbook") => void;
   onOpenBook: (id: string) => void;
+  onRenameBook: (id: string, title: string) => void;
+  onPlaceBook: (id: string, pos: { shelfRow: number; shelfX: number }) => void;
+  onNewBook: () => void;
 }) {
   const cover = COVER_STYLES[activeBook?.coverStyle ?? "cocoa"];
   const tourClass = (id: HotspotId) => (tourFocus === id ? " ks-obj--tour" : "");
@@ -171,9 +177,15 @@ export function RoomChamber({
         >
           <WallPaint phase={phase} season={environment.season} />
           <div className="ks-wall-stage">
-            <div className={`ks-obj ks-wall-piece${tourClass("shelf")}`} data-tour="shelf">
-              <BookshelfWall books={visibleBooks} onOpenBook={onOpenBook} onOpenShelf={() => onGo("shelf")} />
-              <span className="ks-wall-open">Open the bookshelf</span>
+            <div className={`ks-wall-piece${tourClass("shelf")}`} data-tour="shelf">
+              <BookshelfWall
+                books={visibleBooks}
+                canEdit={viewAs === "owner"}
+                onOpenBook={onOpenBook}
+                onRename={onRenameBook}
+                onPlace={onPlaceBook}
+                onNewBook={onNewBook}
+              />
             </div>
           </div>
         </div>

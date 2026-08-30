@@ -69,6 +69,10 @@ export interface Scrapbook {
   pages: Page[];
   /** optional Spotify playlist link/URI associated with this book (Bible §13) */
   playlistUri?: string;
+  /** shelf row 0..2 on the room bookshelf */
+  shelfRow?: number;
+  /** left edge of the spine as a percentage of the shelf width */
+  shelfX?: number;
 }
 
 export type CoverStyle = "cocoa" | "forest" | "wine" | "midnight" | "ochre";
