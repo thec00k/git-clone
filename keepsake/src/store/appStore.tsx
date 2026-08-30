@@ -62,6 +62,7 @@ interface AppContextValue {
   approveNote: (id: string) => void;
   deleteNote: (id: string) => void;
   addPin: (pin: Omit<MemoryPin, "id" | "createdAt">) => void;
+  updatePin: (id: string, patch: Partial<Omit<MemoryPin, "id" | "createdAt">>) => void;
   removePin: (id: string) => void;
 
   recordProgress: (patch: Partial<Progress>) => void;
@@ -98,6 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             environment: {
               ...stored.environment,
               musicProvider: stored.environment?.musicProvider ?? "ambient",
+              pinsLocked: stored.environment?.pinsLocked ?? false,
             },
             achievementsAt: stored.achievementsAt ?? {},
             achievementsSeen: stored.achievementsSeen ?? [],
@@ -313,6 +315,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [update],
   );
 
+  const updatePin = useCallback(
+    (id: string, patch: Partial<Omit<MemoryPin, "id" | "createdAt">>) =>
+      update((p) => ({
+        ...p,
+        pins: p.pins.map((pin) => (pin.id === id ? { ...pin, ...patch } : pin)),
+      })),
+    [update],
+  );
+
   const removePin = useCallback((id: string) => update((p) => ({ ...p, pins: p.pins.filter((x) => x.id !== id) })), [update]);
 
   const recordProgress = useCallback(
@@ -388,6 +399,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     approveNote,
     deleteNote,
     addPin,
+    updatePin,
     removePin,
     recordProgress,
     markAchievementsSeen,

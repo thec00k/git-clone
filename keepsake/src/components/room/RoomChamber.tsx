@@ -10,7 +10,6 @@ import type { Environment, MemoryPin } from "../../types/app";
 import type { ViewAs } from "../../types/app";
 import { BookshelfWall, CorkboardWall, SEASON_TINT, TimelineFrame, type Phase } from "./RoomFurniture";
 import { DeskLayer, WindowPane } from "./RoomFlat";
-import { RoomCurator } from "./RoomCurator";
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -142,7 +141,6 @@ export function RoomChamber({
               crt: CHAMBER_HOTSPOTS.crt,
             }}
           />
-          {roomFace === "front" && !touring && <RoomCurator />}
         </div>
 
         <div

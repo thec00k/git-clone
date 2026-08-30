@@ -14,6 +14,28 @@ export interface TourStep {
 
 export const TOUR_SPEAKER = "THE HOUSE";
 
+/** Session flags so the house does not welcome you again after wander-off. */
+export const TOUR_DONE_KEY = "ks-tour-done";
+export const CURATOR_SESSION_KEY = "ks-curator";
+
+export function markTourFinished(): void {
+  try {
+    sessionStorage.setItem(TOUR_DONE_KEY, "1");
+    sessionStorage.setItem(CURATOR_SESSION_KEY, "1");
+  } catch {
+    /* private mode */
+  }
+}
+
+export function tourAlreadyFinished(completedTour = false): boolean {
+  if (completedTour) return true;
+  try {
+    return sessionStorage.getItem(TOUR_DONE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export const TOUR_STEPS: TourStep[] = [
   {
     id: "hello",

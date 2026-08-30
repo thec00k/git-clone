@@ -6,14 +6,12 @@ import { COVER_STYLES } from "../../types/scrapbook";
 import type { Scrapbook } from "../../types/scrapbook";
 import type { Environment } from "../../types/app";
 import { Cabinet, CRT, MiniShelf, SKY, SEASON_TINT, TimelineFrame, WeatherFx, type Phase } from "./RoomFurniture";
-import { RoomCurator } from "./RoomCurator";
 
 export function RoomFlat({
   phase,
   environment,
   activeBook,
   bookCount,
-  touring,
   tourFocus,
   layer,
   onOpenWindow,
@@ -24,7 +22,6 @@ export function RoomFlat({
   environment: Environment;
   activeBook: Scrapbook | null;
   bookCount: number;
-  touring: boolean;
   tourFocus: HotspotId | null;
   layer: (depth: number) => { transform: string };
   onOpenWindow: () => void;
@@ -105,8 +102,6 @@ export function RoomFlat({
         onOpenMusic={onOpenMusic}
         onGo={onGo}
       />
-
-      {!touring && <RoomCurator />}
     </>
   );
 }

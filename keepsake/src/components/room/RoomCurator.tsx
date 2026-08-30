@@ -4,6 +4,7 @@ import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { isOpportunityKind, pickOpportunity, type OpportunityKind } from "../../lib/opportunities";
+import { CURATOR_SESSION_KEY, tourAlreadyFinished } from "../../lib/tour";
 import { ACHIEVEMENTS } from "../../types/app";
 
 const LETTERS = [
@@ -23,7 +24,7 @@ const SEASON_NOTE: Record<string, string> = {
  * The room's curator: at most one ambient event per session from the
  * opportunity queue (Bible §20/§21). Welcome is the Messenger-style tour.
  */
-export function RoomCurator() {
+export function RoomCurator({ visible = true }: { visible?: boolean }) {
   const { state, newlyUnlocked, recordReceipt, markAchievementsSeen } = useApp();
   const { go, startTour, touring, setRoomFace } = useNav();
   const [kind, setKind] = useState<OpportunityKind | null>(null);
@@ -41,17 +42,24 @@ export function RoomCurator() {
       setKind(forced);
       return;
     }
-    if (sessionStorage.getItem("ks-curator")) return;
+    if (tourAlreadyFinished(stateRef.current.progress.completedTour)) {
+      sessionStorage.setItem(CURATOR_SESSION_KEY, "1");
+    }
+    if (sessionStorage.getItem(CURATOR_SESSION_KEY)) return;
     if (new URLSearchParams(window.location.search).get("tour") === "1") return;
     const delay = stateRef.current.progress.completedTour ? 2600 : 900;
     const t = window.setTimeout(() => {
       const s = stateRef.current;
+      if (tourAlreadyFinished(s.progress.completedTour)) {
+        sessionStorage.setItem(CURATOR_SESSION_KEY, "1");
+        return;
+      }
       const pendingReward =
         s.achievements.find(
           (id) => !s.achievementsSeen.includes(id) && !newlyRef.current.includes(id),
         ) ?? null;
       const choice = pickOpportunity({ state: s, pendingReward }, s.receipts);
-      sessionStorage.setItem("ks-curator", "1");
+      sessionStorage.setItem(CURATOR_SESSION_KEY, "1");
       if (!choice) return;
       if (choice === "welcome") {
         recordReceipt(choice);
@@ -73,7 +81,7 @@ export function RoomCurator() {
     }
   }, [kind]);
 
-  if (touring || !kind || kind === "welcome") return null;
+  if (!visible || touring || !kind || kind === "welcome") return null;
 
   if (kind === "reward" && rewardId) {
     const a = ACHIEVEMENTS.find((x) => x.id === rewardId);

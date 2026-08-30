@@ -40,6 +40,8 @@ export interface Environment {
   musicProvider: MusicProvider;
   volume: number; // 0..1
   ambienceVolume: number; // 0..1
+  /** When true, map pins cannot be dragged (click still opens edit). */
+  pinsLocked: boolean;
 }
 
 export interface GuestEntry {

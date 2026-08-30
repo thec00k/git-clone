@@ -6,9 +6,11 @@ import { VIEW_AS_LABEL } from "../../lib/permissions";
 import type { ViewAs } from "../../types/app";
 import { ACHIEVEMENTS } from "../../types/app";
 import { roomLayoutFromSearch } from "../../lib/roomLayout";
+import { tourAlreadyFinished } from "../../lib/tour";
 import { EnvironmentPanel } from "./EnvironmentPanel";
 import { AchievementsToast } from "./AchievementsToast";
 import { RoomTour } from "./RoomTour";
+import { RoomCurator } from "./RoomCurator";
 import { MusicPanel } from "./MusicPanel";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { PhaseBadge, phaseOf } from "./RoomFurniture";
@@ -28,7 +30,7 @@ export function Room() {
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
-    if (q.get("tour") === "1") startTour();
+    if (q.get("tour") === "1" && !tourAlreadyFinished()) startTour();
   }, [startTour]);
 
   const phase = phaseOf(environment.timeMode);
@@ -125,7 +127,6 @@ export function Room() {
             environment={environment}
             activeBook={activeBook}
             bookCount={state.books.length}
-            touring={touring}
             tourFocus={tourFocus}
             layer={layer}
             onOpenWindow={() => setEnvOpen(true)}
@@ -187,6 +188,7 @@ export function Room() {
         {!touring && <PhaseBadge phase={phase} />}
       </main>
 
+      <RoomCurator visible={(layout === "flat" || roomFace === "front") && !touring} />
       {touring && <RoomTour />}
 
       {envOpen && <EnvironmentPanel onClose={() => setEnvOpen(false)} />}

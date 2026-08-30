@@ -135,6 +135,7 @@ export function createSeed(): AppState {
       musicProvider: "ambient",
       volume: 0.5,
       ambienceVolume: 0.4,
+      pinsLocked: false,
     },
     guestbook: [
       {

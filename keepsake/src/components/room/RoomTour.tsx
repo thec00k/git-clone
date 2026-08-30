@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
-import { TOUR_STEPS } from "../../lib/tour";
+import { markTourFinished, TOUR_STEPS } from "../../lib/tour";
 import { faceForHotspot, roomLayoutFromSearch, YAW_MS } from "../../lib/roomLayout";
 import { DialogueBubble } from "./DialogueBubble";
 
@@ -17,6 +17,7 @@ export function RoomTour() {
   const faceRef = useRef(roomFace);
 
   const finish = useCallback(() => {
+    markTourFinished();
     recordProgress({ completedTour: true });
     setTourFocus(null);
     endTour();
