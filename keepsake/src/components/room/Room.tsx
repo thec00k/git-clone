@@ -24,7 +24,7 @@ import { AchievementsToast } from "./AchievementsToast";
 import { RoomCurator } from "./RoomCurator";
 import { RoomTour } from "./RoomTour";
 import { MusicPanel } from "./MusicPanel";
-import { useEscapeClose } from "../../hooks/useEscapeClose";
+import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { HOTSPOTS } from "../../lib/hotspots";
 import type { HotspotId } from "../../lib/hotspots";
 
@@ -104,6 +104,10 @@ export function Room() {
 
   return (
     <div className="ks-room flex h-dvh flex-col overflow-hidden">
+      <a className="ks-skip" href="#ks-main">
+        Skip to the room
+      </a>
+      <h1 className="sr-only">{state.profile.displayName}&rsquo;s scrapbook room</h1>
       {/* HUD */}
       <header
         data-tour="hud"
@@ -138,7 +142,9 @@ export function Room() {
           </label>
           <button
             className="ks-chip"
-            title="Achievements"
+            title="Keepsakes found"
+            aria-label="Keepsakes found"
+            aria-expanded={achOpen}
             onClick={() => setAchOpen((v) => !v)}
           >
             <Sparkles size={16} />
@@ -150,7 +156,7 @@ export function Room() {
       </header>
 
       {/* Scene */}
-      <div ref={sceneRef} className="ks-scene flex-1" onPointerMove={onMove}>
+      <main id="ks-main" ref={sceneRef} className="ks-scene flex-1" onPointerMove={onMove}>
         {/* Wall + window (back layer) */}
         <div className="pointer-events-none absolute inset-0" style={layer(6)}>
           <div
@@ -366,6 +372,8 @@ export function Room() {
           <button
             className="absolute bottom-3 right-3 z-30 ks-chip"
             title="Room settings"
+            aria-label="Room settings"
+            aria-expanded={envOpen}
             onClick={() => setEnvOpen(true)}
           >
             <Settings2 size={16} />
@@ -373,7 +381,7 @@ export function Room() {
         )}
 
         {!touring && <PhaseBadge phase={phase} />}
-      </div>
+      </main>
 
       {touring && <RoomTour />}
 
@@ -394,8 +402,8 @@ export function Room() {
 function PhaseBadge({ phase }: { phase: Phase }) {
   const Icon = phase === "night" ? Moon : phase === "dusk" ? CloudSun : Sun;
   return (
-    <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1 text-sm text-paper/70">
-      <Icon size={14} /> {phase}
+    <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1 text-sm text-paper/70" aria-label={`Time of day: ${phase}`}>
+      <Icon size={14} aria-hidden="true" /> {phase}
     </div>
   );
 }
@@ -482,10 +490,11 @@ function WeatherFx({ kind }: { kind: "rain" | "snow" }) {
 }
 
 function AchievementsPanel({ onClose, unlocked }: { onClose: () => void; unlocked: string[] }) {
-  useEscapeClose(onClose);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, onClose);
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Keepsakes found" onClick={(e) => e.stopPropagation()}>
+      <div ref={panelRef} className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Keepsakes found" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center gap-2">
           <Sparkles size={18} className="text-accent" />
           <h2 className="font-display text-xl">Keepsakes found</h2>

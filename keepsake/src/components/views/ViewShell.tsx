@@ -22,7 +22,7 @@ export function ViewShell({
       header={
         <>
           <div className="flex items-center gap-3">
-            <button className="ks-chip" title="Back to the room" onClick={back}>
+            <button className="ks-chip" aria-label="Back to the room" title="Back to the room" onClick={back}>
               <DoorOpen size={16} />
             </button>
             <div className="leading-tight">

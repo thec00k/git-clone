@@ -1,7 +1,8 @@
 import { Printer, X } from "lucide-react";
 import type { Scrapbook } from "../types/scrapbook";
 import { ScrapbookPage } from "./ScrapbookPage";
-import { useEscapeClose } from "../hooks/useEscapeClose";
+import { useRef } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 const noop = () => {};
 
@@ -12,16 +13,17 @@ const noop = () => {};
  * resolution checks) is a later, vendor-dependent step — noted in the docs.
  */
 export function PrintView({ book, onClose }: { book: Scrapbook; onClose: () => void }) {
-  useEscapeClose(onClose);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, onClose);
   return (
-    <div className="ks-print fixed inset-0 z-50 overflow-y-auto bg-[#1a1510]/95 p-4" role="dialog" aria-modal="true" aria-label={`Export ${book.title}`}>
+    <div ref={panelRef} className="ks-print fixed inset-0 z-50 overflow-y-auto bg-[#1a1510]/95 p-4" role="dialog" aria-modal="true" aria-label={`Export ${book.title}`}>
       <div className="ks-no-print sticky top-0 z-10 mx-auto mb-4 flex max-w-[520px] items-center justify-between rounded-full bg-[rgb(28_22_16/0.95)] px-3 py-2">
         <span className="px-2 font-display text-paper">Export &ldquo;{book.title}&rdquo;</span>
         <div className="flex gap-2">
           <button className="ks-tool ks-tool--accent" onClick={() => window.print()}>
             <Printer size={16} /> Print / Save as PDF
           </button>
-          <button className="ks-chip" onClick={onClose}>
+          <button className="ks-chip" aria-label="Close export" onClick={onClose}>
             <X size={16} />
           </button>
         </div>

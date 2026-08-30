@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check, Trash2, X } from "lucide-react";
 import { useApp } from "../store/appStore";
 import { useNav } from "../store/nav";
-import { useEscapeClose } from "../hooks/useEscapeClose";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import { VIEW_AS_LABEL } from "../lib/permissions";
 
 /*
@@ -21,7 +21,8 @@ export function NotesPanel({
 }) {
   const { state, addNote, approveNote, deleteNote } = useApp();
   const { viewAs, isVisitor } = useNav();
-  useEscapeClose(onClose);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, onClose);
   const [message, setMessage] = useState("");
 
   const notes = state.notes.filter((n) => n.bookId === bookId && pageIds.includes(n.pageId));
@@ -38,10 +39,10 @@ export function NotesPanel({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Notes on this spread" onClick={(e) => e.stopPropagation()}>
+      <div ref={panelRef} className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Notes on this spread" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-xl">Notes on this spread</h2>
-          <button className="text-paper/50" onClick={onClose}><X size={18} /></button>
+          <button className="text-paper/50" onClick={onClose} aria-label="Close notes"><X size={18} /></button>
         </div>
 
         {isVisitor && (
@@ -73,11 +74,11 @@ export function NotesPanel({
                 {!isVisitor && (
                   <span className="flex gap-1">
                     {!n.approved && (
-                      <button className="ks-chip h-7 w-7" title="Approve" onClick={() => approveNote(n.id)}>
+                      <button className="ks-chip h-7 w-7" title="Approve" aria-label={`Approve note from ${n.author}`} onClick={() => approveNote(n.id)}>
                         <Check size={14} />
                       </button>
                     )}
-                    <button className="ks-chip h-7 w-7 hover:!bg-seal" title="Remove" onClick={() => deleteNote(n.id)}>
+                    <button className="ks-chip h-7 w-7 hover:!bg-seal" title="Remove" aria-label={`Remove note from ${n.author}`} onClick={() => deleteNote(n.id)}>
                       <Trash2 size={14} />
                     </button>
                   </span>

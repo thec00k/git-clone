@@ -53,9 +53,10 @@ export function DialogueBubble({
     >
       <div className="ks-say-name">{speaker}</div>
       <div className="ks-say-box">
-        <p className="ks-say-text">
+        <p className="sr-only">{text}</p>
+        <p className="ks-say-text" aria-hidden="true">
           {shown}
-          {!complete && <span className="ks-say-caret" aria-hidden="true" />}
+          {!complete && <span className="ks-say-caret" />}
         </p>
         <div className="ks-say-meta">
           <span>

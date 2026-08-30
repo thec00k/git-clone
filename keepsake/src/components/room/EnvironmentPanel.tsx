@@ -1,6 +1,7 @@
+import { useRef } from "react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
-import { useEscapeClose } from "../../hooks/useEscapeClose";
+import { useFocusTrap } from "../../hooks/useFocusTrap";
 import type { Season, TimeMode, Weather } from "../../types/app";
 
 const TIMES: TimeMode[] = ["auto", "day", "dusk", "night"];
@@ -10,11 +11,12 @@ const WEATHERS: Weather[] = ["clear", "rain", "snow"];
 export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
   const { state, environment, setEnvironment, setProfile } = useApp();
   const { startTour } = useNav();
-  useEscapeClose(onClose);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, onClose);
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Room settings" onClick={(e) => e.stopPropagation()}>
+      <div ref={panelRef} className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Room settings" onClick={(e) => e.stopPropagation()}>
         <h2 className="mb-4 font-display text-xl">The room</h2>
 
         <label className="mb-4 block" htmlFor="ks-name">
@@ -36,6 +38,7 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
           <span className="text-sm text-paper/60">Lamp</span>
           <button
             className={`ks-tool ${environment.lampOn ? "ks-tool--accent" : ""}`}
+            aria-pressed={environment.lampOn}
             onClick={() => setEnvironment({ lampOn: !environment.lampOn })}
           >
             {environment.lampOn ? "On" : "Off"}
@@ -102,12 +105,13 @@ function Segment({
 }) {
   return (
     <div className="mb-3">
-      <span className="text-sm text-paper/60">{label}</span>
-      <div className="mt-1 flex flex-wrap gap-1.5">
+      <span className="text-sm text-paper/60" id={`ks-seg-${label}`}>{label}</span>
+      <div className="mt-1 flex flex-wrap gap-1.5" role="group" aria-labelledby={`ks-seg-${label}`}>
         {options.map((o) => (
           <button
             key={o}
             className={`ks-tool ${value === o ? "ks-tool--accent" : ""}`}
+            aria-pressed={value === o}
             onClick={() => onChange(o)}
           >
             {o}

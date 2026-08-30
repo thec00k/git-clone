@@ -1,21 +1,26 @@
 import { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import {
   ChevronLeft,
   ChevronRight,
   DoorOpen,
   ImagePlus,
+  Keyboard,
   LayoutGrid,
   Lock,
   Plus,
   Printer,
+  Redo2,
   Rows3,
   Shuffle,
   Smile,
   StickyNote,
   Trash2,
   Type,
+  Undo2,
   Wand2,
 } from "lucide-react";
+import { playPageTurn } from "../lib/audio";
 import { useScrapbook } from "../hooks/useScrapbook";
 import { useApp } from "../store/appStore";
 import { useNav } from "../store/nav";
@@ -40,6 +45,7 @@ export function BookView() {
   const [showStickers, setShowStickers] = useState(false);
   const [showPrint, setShowPrint] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [showKeys, setShowKeys] = useState(false);
   const addInputRef = useRef<HTMLInputElement>(null);
   const turningRef = useRef(false);
 
@@ -88,6 +94,7 @@ export function BookView() {
       return;
     }
     turningRef.current = true;
+    playPageTurn();
     setTurn({ dir });
   };
 
@@ -103,6 +110,23 @@ export function BookView() {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
       if (t && (t.tagName === "TEXTAREA" || t.tagName === "INPUT")) return;
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (e.shiftKey) sb.redo();
+        else sb.undo();
+        return;
+      }
+      if (mod && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        sb.redo();
+        return;
+      }
+      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+        e.preventDefault();
+        setShowKeys((v) => !v);
+        return;
+      }
       if (e.key === "ArrowLeft") requestTurn("prev");
       else if (e.key === "ArrowRight") requestTurn("next");
       else if (!isVisitor && (e.key === "Delete" || e.key === "Backspace") && sb.selectedId) {
@@ -155,18 +179,20 @@ export function BookView() {
           <div className="flex items-center gap-1.5">
             <button
               className="ks-chip"
-              title="Previous"
+              aria-label="Previous spread"
+              title="Previous spread"
               onClick={() => requestTurn("prev")}
               disabled={sb.spread === 0 || !!turn}
             >
               <ChevronLeft size={16} />
             </button>
-            <span className="min-w-14 text-center text-sm text-paper/70">
-              {sb.spread + 1} / {sb.spreadCount}
+            <span className="min-w-14 text-center text-sm text-paper/70" aria-live="polite">
+              Spread {sb.spread + 1} of {sb.spreadCount}
             </span>
             <button
               className="ks-chip"
-              title="Next"
+              aria-label="Next spread"
+              title="Next spread"
               onClick={() => requestTurn("next")}
               disabled={sb.spread === sb.spreadCount - 1 || !!turn}
             >
@@ -175,11 +201,18 @@ export function BookView() {
             {!isVisitor && (
               <>
                 <span className="mx-1 h-6 w-px bg-paper/15" />
-                <button className="ks-chip" title="Add spread" onClick={sb.addSpread}>
+                <button className="ks-chip" aria-label="Undo" title="Undo (⌘Z)" onClick={sb.undo} disabled={!sb.canUndo}>
+                  <Undo2 size={16} />
+                </button>
+                <button className="ks-chip" aria-label="Redo" title="Redo (⌘⇧Z)" onClick={sb.redo} disabled={!sb.canRedo}>
+                  <Redo2 size={16} />
+                </button>
+                <button className="ks-chip" aria-label="Add a spread" title="Add spread" onClick={sb.addSpread}>
                   <Plus size={16} />
                 </button>
                 <button
                   className="ks-chip hover:!bg-seal"
+                  aria-label="Delete this spread"
                   title="Delete this spread"
                   onClick={sb.deleteCurrentSpread}
                   disabled={sb.spreadCount <= 1}
@@ -191,10 +224,13 @@ export function BookView() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="ks-chip" title="Notes on this spread" onClick={() => setShowNotes(true)}>
+            <button className="ks-chip" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" onClick={() => setShowKeys(true)}>
+              <Keyboard size={16} />
+            </button>
+            <button className="ks-chip" aria-label="Notes on this spread" title="Notes on this spread" onClick={() => setShowNotes(true)}>
               <StickyNote size={16} />
             </button>
-            <button className="ks-chip" title="Export / print book" onClick={() => setShowPrint(true)}>
+            <button className="ks-chip" aria-label="Export or print this book" title="Export / print book" onClick={() => setShowPrint(true)}>
               <Printer size={16} />
             </button>
             <div className="hidden items-center gap-3 sm:flex">
@@ -246,6 +282,7 @@ export function BookView() {
                   <button
                     key={g}
                     className="ks-chip text-lg"
+                    aria-label={`Add sticker ${g}`}
                     onClick={() => {
                       if (targetPageId) sb.addSticker(targetPageId, g);
                       setShowStickers(false);
@@ -256,17 +293,17 @@ export function BookView() {
                 ))}
               </div>
             )}
-            <div className="ks-desk flex w-full max-w-xl flex-wrap items-center justify-center gap-2 rounded-2xl px-3 py-2">
+            <div className="ks-desk flex w-full max-w-xl flex-wrap items-center justify-center gap-2 rounded-2xl px-3 py-2" role="toolbar" aria-label="Add to the page">
               <button className="ks-tool ks-tool--accent" onClick={() => addInputRef.current?.click()}>
                 <ImagePlus size={18} /> Add photo
               </button>
               <button className="ks-tool" onClick={() => targetPageId && sb.addCaption(targetPageId)}>
                 <Type size={18} /> Add caption
               </button>
-              <button className="ks-tool" onClick={() => setShowStickers((v) => !v)}>
+              <button className="ks-tool" aria-expanded={showStickers} onClick={() => setShowStickers((v) => !v)}>
                 <Smile size={18} /> Stickers
               </button>
-              <button className="ks-tool" onClick={() => setShowPresets((v) => !v)}>
+              <button className="ks-tool" aria-expanded={showPresets} onClick={() => setShowPresets((v) => !v)}>
                 <Wand2 size={18} /> Arrange
               </button>
               <input
@@ -275,6 +312,7 @@ export function BookView() {
                 accept="image/*"
                 multiple
                 hidden
+                aria-label="Upload photographs"
                 onChange={(e) => {
                   handleFiles(e.target.files);
                   e.target.value = "";
@@ -312,6 +350,7 @@ export function BookView() {
           onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
         />
       )}
+      {showKeys && <ShortcutsHelp onClose={() => setShowKeys(false)} />}
       {showPrint && sb.book && <PrintView book={sb.book} onClose={() => setShowPrint(false)} />}
       {showNotes && sb.book && (
         <NotesPanel
@@ -326,8 +365,47 @@ export function BookView() {
 
 function HomeBtn({ onClick }: { onClick: () => void }) {
   return (
-    <button className="ks-chip" title="Back to the room" onClick={onClick}>
+    <button className="ks-chip" aria-label="Back to the room" title="Back to the room" onClick={onClick}>
       <DoorOpen size={16} />
     </button>
+  );
+}
+
+function ShortcutsHelp({ onClose }: { onClose: () => void }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, onClose);
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div
+        ref={panelRef}
+        className="ks-panel w-full max-w-sm p-5"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Keyboard shortcuts"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="mb-3 font-display text-xl">On the page</h2>
+        <dl className="space-y-1.5 text-sm text-paper/80">
+          <Row k="← →" v="Turn the page" />
+          <Row k="⌘Z / Ctrl Z" v="Undo" />
+          <Row k="⌘⇧Z / Ctrl Y" v="Redo" />
+          <Row k="Delete" v="Remove the selected piece" />
+          <Row k="Esc" v="Clear selection / close" />
+          <Row k="?" v="This list" />
+        </dl>
+        <button className="ks-tool ks-tool--accent mt-4 w-full justify-center" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="flex justify-between gap-4">
+      <dt className="font-display text-paper/50">{k}</dt>
+      <dd className="text-right">{v}</dd>
+    </div>
   );
 }

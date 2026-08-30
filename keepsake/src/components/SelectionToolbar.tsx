@@ -49,14 +49,15 @@ export function SelectionToolbar({
       className="pointer-events-auto flex flex-wrap items-center justify-center gap-1.5 rounded-full bg-[rgb(28_22_16/0.92)] px-2 py-1.5 shadow-lg"
       onPointerDown={(e) => e.stopPropagation()}
     >
-      <button className="ks-chip" title="Rotate left" onClick={() => onRotate(id, -5)}>
+      <button className="ks-chip" aria-label="Rotate left" title="Rotate left" onClick={() => onRotate(id, -5)}>
         <RotateCcw size={16} />
       </button>
-      <button className="ks-chip" title="Rotate right" onClick={() => onRotate(id, 5)}>
+      <button className="ks-chip" aria-label="Rotate right" title="Rotate right" onClick={() => onRotate(id, 5)}>
         <RotateCw size={16} />
       </button>
       <button
         className="ks-chip"
+        aria-label={isPhoto ? "Smaller" : "Smaller text"}
         title={isPhoto ? "Smaller" : "Smaller text"}
         onClick={() => onScale(id, 1 / 1.12)}
       >
@@ -64,31 +65,33 @@ export function SelectionToolbar({
       </button>
       <button
         className="ks-chip"
+        aria-label={isPhoto ? "Bigger" : "Bigger text"}
         title={isPhoto ? "Bigger" : "Bigger text"}
         onClick={() => onScale(id, 1.12)}
       >
         <Plus size={16} />
       </button>
-      <button className="ks-chip" title="Straighten" onClick={() => onReset(id)}>
+      <button className="ks-chip" aria-label="Straighten" title="Straighten" onClick={() => onReset(id)}>
         <RefreshCw size={16} />
       </button>
 
       <span className="mx-0.5 h-6 w-px bg-paper/15" />
 
-      <button className="ks-chip" title="Bring forward" onClick={() => onForward(id)}>
+      <button className="ks-chip" aria-label="Bring forward" title="Bring forward" onClick={() => onForward(id)}>
         <ArrowUpToLine size={16} />
       </button>
-      <button className="ks-chip" title="Send backward" onClick={() => onBackward(id)}>
+      <button className="ks-chip" aria-label="Send backward" title="Send backward" onClick={() => onBackward(id)}>
         <ArrowDownToLine size={16} />
       </button>
 
       {isPhoto && (
         <>
-          <button className="ks-chip" title="Change frame" onClick={() => onCycleFrame(id)}>
+          <button className="ks-chip" aria-label="Change frame" title="Change frame" onClick={() => onCycleFrame(id)}>
             <Frame size={16} />
           </button>
           <button
             className="ks-chip"
+            aria-label="Replace photo"
             title="Replace photo"
             onClick={() => fileRef.current?.click()}
           >
@@ -99,6 +102,7 @@ export function SelectionToolbar({
             type="file"
             accept="image/*"
             hidden
+            aria-label="Replace photograph"
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) onReplace(id, file);
@@ -112,6 +116,7 @@ export function SelectionToolbar({
           {SHARPIE_COLORS.map((c) => (
             <button
               key={c}
+              aria-label={`Ink colour ${c}`}
               title="Ink colour"
               onClick={() => onColor(id, c)}
               className="h-5 w-5 rounded-full border border-paper/25"
@@ -125,6 +130,7 @@ export function SelectionToolbar({
 
       <button
         className="ks-chip hover:!bg-seal"
+        aria-label="Remove from the page"
         title="Remove"
         onClick={() => onDelete(id)}
       >
