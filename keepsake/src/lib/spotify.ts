@@ -3,16 +3,39 @@
  * flow (no client secret). This is the "provider adapter" the Bible §13 calls
  * for; the generative ambient pad remains the offline/default provider.
  *
- * Activation requires a Spotify Developer app you create:
- *   - set VITE_SPOTIFY_CLIENT_ID to its Client ID
- *   - register the redirect URI (defaults to <origin>/, e.g. http://127.0.0.1:5174/)
+ * The Client ID is public-by-design (it is sent to accounts.spotify.com).
+ * The Client Secret must never ship in this frontend — PKCE does not need it.
+ *
+ * Client ID resolution, first match wins:
+ *   1. VITE_SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_ID at build/dev time
+ *   2. a Client ID saved locally in this browser (CRT panel)
+ *
+ * Also register this page's origin as a Redirect URI on the Spotify app
+ * (defaults to <origin>/, e.g. http://127.0.0.1:5174/).
  * Full in-app playback additionally needs a Spotify Premium account.
  */
 
-const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID as string | undefined;
+const CLIENT_ID_KEY = "ks-spotify-client-id";
+
 const REDIRECT_URI =
   (import.meta.env.VITE_SPOTIFY_REDIRECT_URI as string | undefined) ||
   `${window.location.origin}/`;
+
+export function getClientId(): string | undefined {
+  const fromEnv = (import.meta.env.VITE_SPOTIFY_CLIENT_ID as string | undefined)?.trim();
+  if (fromEnv) return fromEnv;
+  try {
+    return localStorage.getItem(CLIENT_ID_KEY)?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function setStoredClientId(id: string): void {
+  const trimmed = id.trim();
+  if (trimmed) localStorage.setItem(CLIENT_ID_KEY, trimmed);
+  else localStorage.removeItem(CLIENT_ID_KEY);
+}
 
 const SCOPES = [
   "user-read-email",
@@ -48,7 +71,7 @@ export interface SpotifyPlaylist {
 }
 
 export function isConfigured(): boolean {
-  return !!CLIENT_ID;
+  return !!getClientId();
 }
 
 export function redirectUri(): string {
@@ -74,13 +97,14 @@ async function challenge(verifier: string): Promise<string> {
 }
 
 export async function login(): Promise<void> {
-  if (!CLIENT_ID) throw new Error("Spotify is not configured");
+  const clientId = getClientId();
+  if (!clientId) throw new Error("Spotify is not configured");
   const verifier = randomString();
   const state = randomString(16);
   sessionStorage.setItem(VERIFIER_KEY, verifier);
   sessionStorage.setItem(STATE_KEY, state);
   const params = new URLSearchParams({
-    client_id: CLIENT_ID,
+    client_id: clientId,
     response_type: "code",
     redirect_uri: REDIRECT_URI,
     scope: SCOPES,
@@ -93,7 +117,8 @@ export async function login(): Promise<void> {
 
 /** If we've just returned from Spotify, exchange the code for tokens. */
 export async function completeLoginIfRedirected(): Promise<boolean> {
-  if (!CLIENT_ID) return false;
+  const clientId = getClientId();
+  if (!clientId) return false;
   const url = new URL(window.location.href);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
@@ -109,7 +134,7 @@ export async function completeLoginIfRedirected(): Promise<boolean> {
   if (!verifier || (expectedState && state !== expectedState)) return false;
 
   const body = new URLSearchParams({
-    client_id: CLIENT_ID,
+    client_id: clientId,
     grant_type: "authorization_code",
     code,
     redirect_uri: REDIRECT_URI,
@@ -157,7 +182,8 @@ async function getAccessToken(): Promise<string | null> {
   const tok = read();
   if (!tok) return null;
   if (Date.now() < tok.expires_at) return tok.access_token;
-  if (!tok.refresh_token || !CLIENT_ID) {
+  const clientId = getClientId();
+  if (!tok.refresh_token || !clientId) {
     logout();
     return null;
   }
@@ -165,7 +191,7 @@ async function getAccessToken(): Promise<string | null> {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      client_id: CLIENT_ID,
+      client_id: clientId,
       grant_type: "refresh_token",
       refresh_token: tok.refresh_token,
     }),

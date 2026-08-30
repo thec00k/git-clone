@@ -47,8 +47,10 @@
 <p>The CRT is now a provider adapter (&sect;13): an offline generative Web-Audio pad by default, plus a
   <strong>"Connect Spotify"</strong> login via browser-safe OAuth&nbsp;PKCE (no client secret). Once
   connected it can browse your playlists and set one per book; an embedded player handles playback.
-  <em>Needs your input to go live:</em> create a Spotify Developer app and provide
-  <code>VITE_SPOTIFY_CLIENT_ID</code> (requested via the setup panel), and register the redirect URI.
+  <em>Needs your input to go live:</em> the Client ID can come from
+  <code>VITE_SPOTIFY_CLIENT_ID</code> / <code>SPOTIFY_CLIENT_ID</code>, or be pasted once in the CRT
+  panel (stored only in this browser). Register the exact Redirect URI shown in the panel.
+  The Client Secret is <strong>not</strong> used and must never be prefixed with <code>VITE_</code>.
   Full in-app playback control (vs. the embed/previews) requires Spotify Premium (Web Playback SDK) &mdash;
   a natural next step once credentials exist. Licensed offline lo-fi tracks remain a later option per the Bible.</p>
 

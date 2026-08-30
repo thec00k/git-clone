@@ -65,15 +65,7 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
           <div className="space-y-3">
             {/* Connection */}
             {!sp.configured ? (
-              <div className="rounded-lg bg-black/20 p-3 text-sm text-paper/70">
-                <p className="mb-1 text-paper">Spotify isn&rsquo;t set up yet.</p>
-                <p className="text-paper/60">
-                  To enable account login, a Spotify Developer app is needed: set
-                  <code>VITE_SPOTIFY_CLIENT_ID</code> and register the redirect URI
-                  <code>{redirectUri()}</code>. You can still paste a public playlist link below to play
-                  it now.
-                </p>
-              </div>
+              <ClientIdSetup onSave={sp.saveClientId} />
             ) : sp.loading ? (
               <p className="text-sm text-paper/60">Checking Spotify…</p>
             ) : sp.connected ? (
@@ -165,6 +157,44 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
             )}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ClientIdSetup({ onSave }: { onSave: (id: string) => void }) {
+  const [draft, setDraft] = useState("");
+  const uri = redirectUri();
+
+  return (
+    <div className="rounded-lg bg-black/20 p-3 text-sm text-paper/70">
+      <p className="mb-1 text-paper">Connect needs your Spotify Client ID.</p>
+      <p className="text-paper/60">
+        In the Spotify Developer app, add this exact Redirect URI:
+      </p>
+      <code className="mt-1 block break-all rounded bg-black/30 px-2 py-1 text-paper/80">{uri}</code>
+      <p className="mt-2 text-paper/50">
+        Paste only the Client ID — never the Client Secret. This login uses PKCE, so the secret stays
+        in your dashboard.
+      </p>
+      <div className="mt-3 flex gap-2">
+        <input
+          id="ks-spotify-client-id"
+          name="spotifyClientId"
+          aria-label="Spotify Client ID"
+          className="flex-1 rounded bg-black/25 px-3 py-2 text-sm text-paper outline-none"
+          placeholder="Spotify Client ID"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          autoComplete="off"
+        />
+        <button
+          className="ks-tool ks-tool--accent disabled:opacity-40"
+          disabled={!draft.trim()}
+          onClick={() => onSave(draft)}
+        >
+          Save
+        </button>
       </div>
     </div>
   );
