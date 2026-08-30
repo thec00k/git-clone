@@ -20,6 +20,8 @@ const SAMPLES: Sample[] = [
 
 export function createSeed(): AppState {
   const now = Date.now();
+  const tabNames = [...new Set(SAMPLES.flatMap((s) => s.categories))];
+  const archiveTabs = tabNames.map((name) => ({ id: name, name }));
   const archive: ArchivePhoto[] = SAMPLES.map((s, i) => ({
     id: uid("ph"),
     src: s.src,
@@ -123,6 +125,7 @@ export function createSeed(): AppState {
     books: [book],
     activeBookId: book.id,
     archive,
+    archiveTabs,
     environment: {
       timeMode: "auto",
       season: "autumn",

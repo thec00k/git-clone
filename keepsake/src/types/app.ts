@@ -10,11 +10,17 @@ export interface Profile {
   displayName: string;
 }
 
+export interface ArchiveTab {
+  id: string;
+  name: string;
+}
+
 export interface ArchivePhoto {
   id: string;
   src: string;
   aspect: number;
   createdAt: number;
+  /** archive tab ids this photo belongs to */
   categories: string[];
   favorite: boolean;
 }
@@ -87,6 +93,7 @@ export interface AppState {
   books: Scrapbook[];
   activeBookId: string | null;
   archive: ArchivePhoto[];
+  archiveTabs: ArchiveTab[];
   environment: Environment;
   guestbook: GuestEntry[];
   notes: PageNote[];

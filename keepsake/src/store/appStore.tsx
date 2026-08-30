@@ -10,6 +10,8 @@ import {
 import type { ReactNode } from "react";
 import type {
   AppState,
+  ArchivePhoto,
+  ArchiveTab,
   Environment,
   MemoryPin,
   Profile,
@@ -46,9 +48,12 @@ interface AppContextValue {
   setBookCover: (id: string, c: CoverStyle) => void;
   setBookPlaylist: (id: string, uri: string | undefined) => void;
 
-  addArchivePhoto: (src: string, aspect: number) => string;
+  addArchivePhoto: (src: string, aspect: number, categories?: string[]) => string;
   toggleFavorite: (id: string) => void;
   setCategories: (id: string, categories: string[]) => void;
+  addArchiveTab: (name: string) => string;
+  renameArchiveTab: (id: string, name: string) => void;
+  removeArchiveTab: (id: string) => void;
 
   setEnvironment: (patch: Partial<Environment>) => void;
 
@@ -62,6 +67,14 @@ interface AppContextValue {
   recordProgress: (patch: Partial<Progress>) => void;
   markAchievementsSeen: (ids: string[]) => void;
   recordReceipt: (id: string) => void;
+}
+
+function deriveArchiveTabs(archive: ArchivePhoto[], tabs?: ArchiveTab[]): ArchiveTab[] {
+  const have = new Map((tabs ?? []).map((t) => [t.id, t]));
+  for (const id of archive.flatMap((a) => a.categories)) {
+    if (!have.has(id)) have.set(id, { id, name: id });
+  }
+  return [...have.values()];
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -94,6 +107,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               completedTour: stored.progress?.completedTour ?? false,
             },
             receipts: stored.receipts ?? {},
+            archiveTabs: deriveArchiveTabs(stored.archive ?? [], stored.archiveTabs),
           }
         : createSeed();
       setState(initial);
@@ -214,11 +228,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const addArchivePhoto = useCallback(
-    (src: string, aspect: number) => {
+    (src: string, aspect: number, categories: string[] = []) => {
       const id = uid("ph");
       update((p) => ({
         ...p,
-        archive: [{ id, src, aspect, createdAt: Date.now(), categories: [], favorite: false }, ...p.archive],
+        archive: [{ id, src, aspect, createdAt: Date.now(), categories, favorite: false }, ...p.archive],
       }));
       return id;
     },
@@ -232,6 +246,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setCategories = useCallback(
     (id: string, categories: string[]) => update((p) => ({ ...p, archive: p.archive.map((a) => (a.id === id ? { ...a, categories } : a)) })),
+    [update],
+  );
+
+  const addArchiveTab = useCallback(
+    (name: string) => {
+      const id = uid("tab");
+      update((p) => ({ ...p, archiveTabs: [...p.archiveTabs, { id, name: name.trim() || "untitled" }] }));
+      return id;
+    },
+    [update],
+  );
+
+  const renameArchiveTab = useCallback(
+    (id: string, name: string) =>
+      update((p) => ({
+        ...p,
+        archiveTabs: p.archiveTabs.map((t) => (t.id === id ? { ...t, name: name.trim() || t.name } : t)),
+      })),
+    [update],
+  );
+
+  const removeArchiveTab = useCallback(
+    (id: string) =>
+      update((p) => ({
+        ...p,
+        archiveTabs: p.archiveTabs.filter((t) => t.id !== id),
+        archive: p.archive.map((a) => ({ ...a, categories: a.categories.filter((c) => c !== id) })),
+      })),
     [update],
   );
 
@@ -337,6 +379,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addArchivePhoto,
     toggleFavorite,
     setCategories,
+    addArchiveTab,
+    renameArchiveTab,
+    removeArchiveTab,
     setEnvironment,
     addGuestEntry,
     addNote,
