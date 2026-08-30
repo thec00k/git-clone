@@ -760,10 +760,10 @@
   .ks-steam {
     position: absolute;
     bottom: 0;
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 18px;
     border-radius: 999px;
-    background: rgb(243 233 216 / 0.35);
+    background: rgb(255 246 230 / 0.75);
     filter: blur(2px);
     animation: ks-steam 3.4s ease-out infinite;
   }
@@ -774,7 +774,7 @@
       opacity: 0;
     }
     20% {
-      opacity: 0.55;
+      opacity: 0.85;
     }
     100% {
       transform: translateY(-46px) scale(1.5);
