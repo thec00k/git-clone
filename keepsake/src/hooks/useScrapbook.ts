@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CaptionElement,
   PageElement,
@@ -30,6 +30,51 @@ export function useScrapbook() {
   const [spread, setSpread] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activePageId, setActivePageId] = useState<string | null>(null);
+  const [historyTick, setHistoryTick] = useState(0);
+
+  const pastRef = useRef<Scrapbook[]>([]);
+  const futureRef = useRef<Scrapbook[]>([]);
+  const restoringRef = useRef(false);
+  const burstRef = useRef(false);
+  const bookRef = useRef(book);
+  bookRef.current = book;
+
+  const remember = useCallback((force = false) => {
+    const current = bookRef.current;
+    if (!current || restoringRef.current) return;
+    if (!force && burstRef.current) return;
+    pastRef.current = [...pastRef.current.slice(-39), structuredClone(current)];
+    futureRef.current = [];
+    burstRef.current = true;
+    window.setTimeout(() => {
+      burstRef.current = false;
+    }, 450);
+    setHistoryTick((n) => n + 1);
+  }, []);
+
+  const undo = useCallback(() => {
+    const current = bookRef.current;
+    const prev = pastRef.current.pop();
+    if (!current || !prev) return;
+    futureRef.current.push(structuredClone(current));
+    restoringRef.current = true;
+    updateActiveBook(() => prev);
+    restoringRef.current = false;
+    setSelectedId(null);
+    setHistoryTick((n) => n + 1);
+  }, [updateActiveBook]);
+
+  const redo = useCallback(() => {
+    const current = bookRef.current;
+    const next = futureRef.current.pop();
+    if (!current || !next) return;
+    pastRef.current.push(structuredClone(current));
+    restoringRef.current = true;
+    updateActiveBook(() => next);
+    restoringRef.current = false;
+    setSelectedId(null);
+    setHistoryTick((n) => n + 1);
+  }, [updateActiveBook]);
 
   const pages = book?.pages ?? [];
   const spreadCount = Math.max(1, Math.ceil(pages.length / 2));
@@ -64,12 +109,13 @@ export function useScrapbook() {
 
   const mutatePageElements = useCallback(
     (pageId: string, fn: (els: PageElement[]) => PageElement[]) => {
+      remember();
       updateActiveBook((b) => ({
         ...b,
         pages: b.pages.map((p) => (p.id === pageId ? { ...p, elements: fn(p.elements) } : p)),
       }));
     },
-    [updateActiveBook],
+    [updateActiveBook, remember],
   );
 
   const nextZ = (els: PageElement[]) => els.reduce((max, e) => Math.max(max, e.z), 0) + 1;
@@ -239,24 +285,26 @@ export function useScrapbook() {
   );
 
   const addSpread = useCallback(() => {
+    remember(true);
     updateActiveBook((b) => ({
       ...b,
       pages: [...b.pages, { id: uid("page"), elements: [] }, { id: uid("page"), elements: [] }],
     }));
     setSpread(spreadCount);
     setSelectedId(null);
-  }, [updateActiveBook, spreadCount]);
+  }, [updateActiveBook, spreadCount, remember]);
 
   const deleteCurrentSpread = useCallback(() => {
     if (spreadCount <= 1) return;
     const start = currentSpread * 2;
+    remember(true);
     updateActiveBook((b) => ({
       ...b,
       pages: b.pages.filter((_, i) => i !== start && i !== start + 1),
     }));
     setSpread((s) => Math.max(0, s - 1));
     setSelectedId(null);
-  }, [updateActiveBook, spreadCount, currentSpread]);
+  }, [updateActiveBook, spreadCount, currentSpread, remember]);
 
   const goPrev = useCallback(() => {
     setSelectedId(null);
@@ -316,5 +364,10 @@ export function useScrapbook() {
     deleteCurrentSpread,
     goPrev,
     goNext,
+    undo,
+    redo,
+    canUndo: pastRef.current.length > 0,
+    canRedo: futureRef.current.length > 0,
+    historyTick,
   };
 }
