@@ -841,7 +841,12 @@
 
   .ks-cork-map {
     border-radius: 4px;
+    background: #3a5c68;
     box-shadow: inset 0 0 40px rgb(0 0 0 / 0.25);
+  }
+
+  .ks-world-map {
+    filter: sepia(0.28) saturate(0.75) contrast(1.05);
   }
 }
 

@@ -42,7 +42,7 @@ export function Atlas() {
   }
 
   return (
-    <ViewShell title="The map" subtitle="a corkboard of the world" scroll={false}>
+    <ViewShell title="The map" subtitle="a corkboard of the world" scroll>
       <p className="mt-2 text-sm text-paper/50">
         {isVisitor
           ? "Places shared on the map."
@@ -54,7 +54,7 @@ export function Atlas() {
           style={{ aspectRatio: "2 / 1", cursor: isVisitor ? "default" : "crosshair" }}
           onClick={onMapClick}
         >
-          <img src="/maps/world.svg" alt="World map" className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+          <img src="/maps/world.svg" alt="World map" className="ks-world-map pointer-events-none absolute inset-0 h-full w-full object-cover" />
           <div
             className="pointer-events-none absolute inset-0"
             style={{ backgroundImage: "url('/textures/grain.png')", opacity: 0.12 }}
