@@ -52,6 +52,28 @@
     cursor: pointer;
   }
 
+  :focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 80%, white);
+    outline-offset: 3px;
+  }
+
+  .ks-skip {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    z-index: 100;
+    transform: translateY(-160%);
+    padding: 0.45rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-size: 0.9rem;
+  }
+
+  .ks-skip:focus {
+    transform: none;
+  }
+
   h1,
   h2,
   h3 {
@@ -324,8 +346,12 @@
   .ks-obj:focus-visible {
     transform: translate(var(--px, 0), var(--py, 0)) translateY(-8px) scale(1.035);
     filter: drop-shadow(0 18px 26px rgb(0 0 0 / 0.5)) brightness(1.06);
-    outline: none;
     z-index: 20;
+  }
+
+  .ks-obj:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 80%, white);
+    outline-offset: 4px;
   }
 
   .ks-obj-label {
@@ -503,19 +529,25 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
+    transform-style: preserve-3d;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     box-shadow: 0 24px 44px rgb(20 14 10 / 0.4);
   }
 
   .ks-flip-face.back {
-    transform: rotateY(180deg);
+    /* 1px lift avoids z-fighting so the incoming page actually paints. */
+    transform: rotateY(180deg) translateZ(1px);
   }
 
   .ks-flip-face > .ks-page {
     width: 100%;
     height: 100%;
     aspect-ratio: auto;
+    /* Children must stay visible on the rotated face. */
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    transform: translateZ(0.5px);
   }
 
   /* A gentle sheen/curl shadow so the turning leaf catches light without
@@ -724,6 +756,65 @@
     transform: translate(2px, 2px);
     box-shadow: 2px 2px 0 #3a322c;
   }
+
+  .ks-steam {
+    position: absolute;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgb(243 233 216 / 0.35);
+    filter: blur(2px);
+    animation: ks-steam 3.4s ease-out infinite;
+  }
+
+  @keyframes ks-steam {
+    0% {
+      transform: translateY(0) scale(0.6);
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.55;
+    }
+    100% {
+      transform: translateY(-46px) scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  .ks-tea-ring {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    border: 3px solid rgb(122 80 40 / 0.28);
+    box-shadow: inset 0 0 0 6px rgb(122 80 40 / 0.08);
+    transform: rotate(-12deg);
+  }
+
+  .ks-moth {
+    left: 22%;
+    top: 18%;
+    width: 10px;
+    height: 6px;
+    background: #d8cfc0;
+    border-radius: 60% 60% 40% 40%;
+    box-shadow: -5px 0 0 #c9c0b0, 5px 0 0 #c9c0b0;
+    animation: ks-moth 7s var(--ease-out) infinite;
+  }
+
+  @keyframes ks-moth {
+    0%,
+    100% {
+      transform: translate(0, 0) rotate(-8deg);
+    }
+    40% {
+      transform: translate(80px, 30px) rotate(12deg);
+    }
+    70% {
+      transform: translate(40px, -10px) rotate(-4deg);
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -733,7 +824,9 @@
 
   .ks-say,
   .ks-tour-cutout,
-  .ks-say-caret {
+  .ks-say-caret,
+  .ks-steam,
+  .ks-moth {
     animation: none !important;
   }
 }
