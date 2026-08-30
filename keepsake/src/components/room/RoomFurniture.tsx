@@ -243,7 +243,7 @@ export function BookshelfWall({
                 e.stopPropagation();
                 onOpenBook(b.id);
               }}
-              aria-label={`Open ${b.title}`}
+              aria-label={`Open book: ${b.title}`}
             >
               <div
                 className="flex h-full w-full flex-col items-center justify-center rounded-sm p-2 text-center"

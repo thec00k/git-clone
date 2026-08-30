@@ -79,6 +79,24 @@ export function RoomChamber({
           aria-hidden={roomFace !== "front"}
         >
           <WallPaint phase={phase} season={environment.season} />
+          <button
+            type="button"
+            className="ks-corner-peek ks-corner-peek--left"
+            onClick={() => setRoomFace("left")}
+            aria-label="Turn to the corkboard map"
+            tabIndex={roomFace === "front" ? 0 : -1}
+          >
+            <span className="sr-only">Corkboard map</span>
+          </button>
+          <button
+            type="button"
+            className="ks-corner-peek ks-corner-peek--right"
+            onClick={() => setRoomFace("right")}
+            aria-label="Turn to the bookshelf"
+            tabIndex={roomFace === "front" ? 0 : -1}
+          >
+            <span className="sr-only">Bookshelf</span>
+          </button>
           <div className="pointer-events-none absolute inset-0" style={par ? layer(6) : undefined}>
             <button
               className={`ks-obj${tourClass("window")}`}
