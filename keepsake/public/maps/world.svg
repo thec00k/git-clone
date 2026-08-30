@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="ocean" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3d6a78"/>
+      <stop offset="100%" stop-color="#2a4a56"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4a06a"/>
+      <stop offset="100%" stop-color="#8d6a3e"/>
+    </linearGradient>
+  </defs>
+  <rect width="2000" height="1000" fill="url(#ocean)"/>
+  <g stroke="#2a2118" stroke-width="0.6" stroke-opacity="0.18" fill="none">
+    <path d="M0 250 H2000 M0 500 H2000 M0 750 H2000"/>
+    <path d="M250 0 V1000 M500 0 V1000 M750 0 V1000 M1000 0 V1000 M1250 0 V1000 M1500 0 V1000 M1750 0 V1000"/>
+  </g>
+  <g fill="url(#land)" stroke="#5c4030" stroke-width="1.2">
+    <!-- North America -->
+    <path d="M210 145 l70-35 55 8 48-22 62 18 40 42-18 38 22 28-8 36-48 22-36 48-22 18-40-8-28 32-52 8-18-28 12-42-32-28-8-48 22-40z"/>
+    <path d="M168 118 l32-28 48 6 18 28-28 22-42 4-28-32z"/>
+    <path d="M255 390 l28 8 18 22-8 18-32-8-18-22z"/>
+    <!-- South America -->
+    <path d="M412 448 l42-8 36 28 12 48-8 62-18 55-28 32-22 8-18-22 8-48-12-42 8-55 12-38z"/>
+    <!-- Greenland -->
+    <path d="M520 72 l38-18 32 12 8 32-22 28-36 8-28-18 8-44z"/>
+    <!-- Europe -->
+    <path d="M930 168 l28-12 32 8 18 22-8 28-22 12-18 22-28-4-12-22 8-28z"/>
+    <path d="M988 155 l22-18 28 4 12 22-18 18-28 4-16-30z"/>
+    <!-- Africa -->
+    <path d="M960 268 l48-8 42 22 18 48-8 55-22 48-32 32-28 8-22-18 8-42-18-38 8-48 14-39z"/>
+    <path d="M1005 255 l22-8 18 12 4 22-22 8-22-12z"/>
+    <!-- Middle East / Arabia -->
+    <path d="M1125 278 l32 4 22 22-8 28-28 8-22-18 4-36z"/>
+    <!-- Asia -->
+    <path d="M1088 148 l55-18 72 8 62-22 70 12 48 28 22 42-12 32 18 28-8 22-42 8-28 22-55 8-48-12-32 18-22-8 8-28-32-18-18 12-28-22 12-42-18-28 18-32z"/>
+    <path d="M1288 318 l42 8 28 28-8 22-36 8-32-18 6-48z"/>
+    <!-- India -->
+    <path d="M1282 338 l28 4 18 32-8 28-22 8-18-22 2-50z"/>
+    <!-- SE Asia / Indonesia -->
+    <path d="M1420 398 l38 4 22 18-8 18-32 4-22-12 2-32z"/>
+    <path d="M1488 428 l48 2 18 12-4 14-42 4-22-8 2-24z"/>
+    <!-- Japan -->
+    <path d="M1628 248 l18-8 12 18-8 22-18 4-8-18z"/>
+    <!-- Australia -->
+    <path d="M1548 548 l62-8 48 18 12 32-18 28-48 12-42-8-22-22 8-32z"/>
+    <path d="M1688 618 l22 2 12 12-8 10-22-2-8-12z"/>
+    <!-- Antarctica -->
+    <path d="M220 918 h1560 c40 8 40 28 0 36 H220 c-40-8-40-28 0-36z"/>
+  </g>
+</svg>
