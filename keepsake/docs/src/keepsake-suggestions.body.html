@@ -206,3 +206,43 @@
     text exposed in full to AT (typewriter is visual-only). A real-device VoiceOver/TalkBack pass
     is still worth doing later (&sect;23).</li>
 </ul>
+
+<h3><span class="pill">proposed</span> Future: Kindle / Amazon library on the bookshelf</h3>
+<p>
+  A later update, not this prototype. Let someone connect their
+  <strong>Amazon library or Kindle</strong> so the room bookshelf can also show books they are
+  reading or have already read &mdash; real titles as spines, sitting beside the scrapbooks they
+  make. When a friend is looking at that shelf, they could start a conversation through the
+  existing <strong>notes</strong> and <strong>guestbook</strong> (a remark on a spine, a signed
+  page in the guest book), instead of inventing a second comment system.
+</p>
+<h4>Why it fits</h4>
+<ul>
+  <li>The shelf is already a place you stand and look. Imported spines would use the same tug /
+    title / arrange language as scrapbooks, marked as <em>from the library</em> so they are not
+    mistaken for a book you authored here.</li>
+  <li>Notes already attach to a book; the guestbook already belongs to the room. A friend
+    visiting a shelf could leave a note on <em>the coast</em> they both read, or sign the book
+    after browsing. Visibility stays the private / friends / public split we already preview
+    (&sect;17).</li>
+  <li>Reading state (reading / read / abandoned) is a natural badge on the spine, not a new wall.</li>
+</ul>
+<h4>Constraints to settle before building</h4>
+<ul>
+  <li><strong>Amazon does not offer a public, Spotify-like Kindle library API.</strong> Any
+    connection would need an official partner path, a user-exported library file, or a
+    different catalogue (e.g. a manual shelf, or another service that <em>does</em> grant
+    read-only library access). Do not scrape Amazon or Kindle Cloud Reader.</li>
+  <li>Imported titles are metadata (title, author, cover if licensed, reading state) &mdash;
+    <em>not</em> the ebook file, and not a reader inside Keepsake. Opening a library spine
+    should open a discussion surface (notes / guestbook), not the book&rsquo;s pages.</li>
+  <li>Opt-in, revocable, and per-title visibility. A connected library must not dump every
+    purchase onto a public shelf. Same privacy stance as the map: approximate and chosen,
+    never a silent leak of what someone bought (&sect;16).</li>
+  <li>Needs a real account and a backend. The current IndexedDB &ldquo;View as&rdquo; preview
+    cannot host a friend standing in your room.</li>
+</ul>
+<p>
+  Worth keeping on the list. Do not start it until scrapbook spines, notes, and visiting a
+  friend&rsquo;s room are real &mdash; this idea sits on top of those, it does not replace them.
+</p>
