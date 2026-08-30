@@ -25,7 +25,7 @@ const SEASON_NOTE: Record<string, string> = {
  */
 export function RoomCurator() {
   const { state, newlyUnlocked, recordReceipt, markAchievementsSeen } = useApp();
-  const { go, startTour, touring } = useNav();
+  const { go, startTour, touring, setRoomFace } = useNav();
   const [kind, setKind] = useState<OpportunityKind | null>(null);
   const [rewardId, setRewardId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -112,7 +112,7 @@ export function RoomCurator() {
 
   if (kind === "ajar-book") {
     return (
-      <Hotspot label="A book left slightly open" style={{ right: "18%", top: "40%", width: "8%", height: "9%" }} onClick={() => go("shelf")}>
+      <Hotspot label="A book left slightly open" style={{ right: "18%", top: "40%", width: "8%", height: "9%" }} onClick={() => { setRoomFace("right"); go("shelf"); }}>
         <div className="flex h-full w-full items-center justify-center rounded-sm bg-[#5b2733] text-paper" style={{ transform: "rotate(-8deg)", boxShadow: "0 6px 14px rgb(0 0 0/.4)" }}>
           <BookOpen size={16} />
         </div>
@@ -161,7 +161,7 @@ export function RoomCurator() {
 
   if (kind === "map-glint") {
     return (
-      <Hotspot label="A pin catching the light" style={{ left: "46%", top: "38%", width: "8%", height: "8%" }} onClick={() => go("atlas")}>
+      <Hotspot label="A pin catching the light" style={{ left: "46%", top: "38%", width: "8%", height: "8%" }} onClick={() => { setRoomFace("left"); go("atlas"); }}>
         <MapIcon size={18} className="text-[#f3e9d8] drop-shadow" />
         <span className="ks-obj-label">a place you marked</span>
       </Hotspot>

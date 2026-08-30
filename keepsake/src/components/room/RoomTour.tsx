@@ -1,16 +1,20 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
 import { TOUR_STEPS } from "../../lib/tour";
+import { faceForHotspot, roomLayoutFromSearch, YAW_MS } from "../../lib/roomLayout";
 import { DialogueBubble } from "./DialogueBubble";
 
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export function RoomTour() {
-  const { touring, endTour, setTourFocus } = useNav();
+  const { touring, endTour, setTourFocus, setRoomFace, roomFace } = useNav();
   const { recordProgress } = useApp();
   const [step, setStep] = useState(0);
-  const [cutout, setCutout] = useState<{ top: number; left: number; width: number; height: number } | null>(
-    null,
-  );
+  const [cutout, setCutout] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const faceRef = useRef(roomFace);
 
   const finish = useCallback(() => {
     recordProgress({ completedTour: true });
@@ -19,23 +23,31 @@ export function RoomTour() {
   }, [endTour, recordProgress, setTourFocus]);
 
   const current = TOUR_STEPS[step];
+  const targetFace = faceForHotspot(current?.focus);
 
   useEffect(() => {
     setTourFocus(current?.focus ?? null);
+    if (roomLayoutFromSearch() === "chamber") setRoomFace(targetFace);
     return () => setTourFocus(null);
-  }, [current, setTourFocus]);
+  }, [current, setTourFocus, setRoomFace, targetFace]);
 
   useLayoutEffect(() => {
     if (!touring || !current?.focus) {
       setCutout(null);
       return;
     }
-    const el = document.querySelector(`[data-tour="${current.focus}"]`);
-    if (!(el instanceof HTMLElement)) {
-      setCutout(null);
-      return;
-    }
+
+    let cancelled = false;
+    let ro: ResizeObserver | null = null;
+    const prevFace = faceRef.current;
+    faceRef.current = targetFace;
+
     const apply = () => {
+      const el = document.querySelector(`[data-tour="${current.focus}"]`);
+      if (!(el instanceof HTMLElement) || cancelled) {
+        if (!el && !cancelled) setCutout(null);
+        return;
+      }
       const r = el.getBoundingClientRect();
       const pad = 8;
       setCutout({
@@ -44,16 +56,43 @@ export function RoomTour() {
         width: r.width + pad * 2,
         height: r.height + pad * 2,
       });
+      if (!ro) {
+        ro = new ResizeObserver(apply);
+        ro.observe(el);
+      }
     };
-    apply();
-    const ro = new ResizeObserver(apply);
-    ro.observe(el);
+
+    const waitThenMeasure = async () => {
+      setCutout(null);
+      const yaw = document.querySelector(".ks-yaw");
+      const needsTurn = yaw instanceof HTMLElement && prevFace !== targetFace && !prefersReducedMotion();
+      if (needsTurn) {
+        await new Promise<void>((resolve) => {
+          let done = false;
+          const finishWait = () => {
+            if (done) return;
+            done = true;
+            yaw.removeEventListener("transitionend", onEnd);
+            resolve();
+          };
+          const onEnd = (e: TransitionEvent) => {
+            if (e.target === yaw && (e.propertyName === "transform" || e.propertyName === "--yaw")) finishWait();
+          };
+          yaw.addEventListener("transitionend", onEnd);
+          window.setTimeout(finishWait, YAW_MS + 80);
+        });
+      }
+      if (!cancelled) apply();
+    };
+
+    void waitThenMeasure();
     window.addEventListener("resize", apply);
     return () => {
-      ro.disconnect();
+      cancelled = true;
+      ro?.disconnect();
       window.removeEventListener("resize", apply);
     };
-  }, [touring, current, step]);
+  }, [touring, current, step, targetFace]);
 
   useEffect(() => {
     if (!touring) return;
@@ -87,10 +126,7 @@ export function RoomTour() {
 
   return (
     <div className="ks-tour" aria-live="polite">
-      <div
-        className="ks-tour-veil"
-        style={{ background: cutout ? "transparent" : "rgb(12 8 6 / 0.42)" }}
-      />
+      <div className="ks-tour-veil" style={{ background: cutout ? "transparent" : "rgb(12 8 6 / 0.42)" }} />
       {cutout && (
         <button
           type="button"

@@ -42,6 +42,11 @@ npm run build    # typecheck (tsc -b) + production build
 npm run preview  # preview the production build
 ```
 
+The room is a three-wall chamber. Side tabs yaw 90° to a dressed corkboard map
+(left) or bookshelf (right). Those walls open the existing editors — they are
+not the editors themselves. Add `?room=flat` to restore the original single-wall
+diorama. The first-visit tour turns to a wall before it spotlights it.
+
 ## Layout
 
 ```
