@@ -566,6 +566,7 @@
   }
 
   .ks-shelf-inner {
+    position: relative;
     display: flex;
     height: 100%;
     flex-direction: column;
@@ -575,15 +576,23 @@
     position: relative;
     flex: 1;
     border-bottom: 10px solid #6e4a32;
+    pointer-events: none;
+  }
+
+  .ks-shelf-books {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
   }
 
   .ks-spine {
+    --shelf-row: 0;
     position: absolute;
-    bottom: 8px;
+    bottom: calc((2 - var(--shelf-row)) * 33.333% + 10px);
     z-index: 2;
     display: flex;
     width: 7.2%;
-    height: 78%;
+    height: 24%;
     align-items: center;
     justify-content: center;
     border-radius: 2px 2px 0 0;
@@ -622,18 +631,18 @@
     position: absolute;
     top: 4px;
     right: 2px;
-    display: none;
     border: none;
     padding: 2px;
     cursor: pointer;
     color: inherit;
     background: rgb(0 0 0 / 0.35);
     border-radius: 4px;
+    opacity: 0.45;
   }
 
   .ks-spine:hover .ks-spine-rename,
   .ks-spine:focus-within .ks-spine-rename {
-    display: block;
+    opacity: 1;
   }
 
   .ks-spine-form {

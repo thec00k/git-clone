@@ -210,22 +210,21 @@ export function BookshelfWall({
       )}
       <div className="ks-shelf-inner">
         {[0, 1, 2].map((row) => (
-          <div key={row} className="ks-shelf-row" data-shelf-row={row}>
-            {books
-              .filter((b) => (b.shelfRow ?? 0) === row)
-              .map((b, i) => (
-                <BookSpine
-                  key={b.id}
-                  book={b}
-                  fallbackX={8 + i * 14}
-                  canEdit={canEdit}
-                  onOpen={() => onOpenBook(b.id)}
-                  onRename={(title) => onRename(b.id, title)}
-                  onPlace={(pos) => onPlace(b.id, pos)}
-                />
-              ))}
-          </div>
+          <div key={row} className="ks-shelf-row" data-shelf-row={row} />
         ))}
+        <div className="ks-shelf-books">
+          {books.map((b, i) => (
+            <BookSpine
+              key={b.id}
+              book={b}
+              fallbackX={8 + (i % 6) * 14}
+              canEdit={canEdit}
+              onOpen={() => onOpenBook(b.id)}
+              onRename={(title) => onRename(b.id, title)}
+              onPlace={(pos) => onPlace(b.id, pos)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -302,6 +301,7 @@ function BookSpine({
     <div
       className={`ks-spine${dragging ? " is-dragging" : ""}`}
       style={{
+        ["--shelf-row" as string]: String(book.shelfRow ?? 0),
         left: `${book.shelfX ?? fallbackX}%`,
         background: `linear-gradient(90deg, rgb(0 0 0 /.28), transparent 22%, rgb(255 255 255 /.08) 48%, transparent 70%), url('/textures/leather.jpg') center/cover`,
         backgroundColor: cover.leather,
@@ -316,7 +316,11 @@ function BookSpine({
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
+      onClick={() => {
+        if (!canEdit && !renaming) onOpen();
+      }}
       onKeyDown={(e) => {
+        if (renaming || (e.target as HTMLElement).closest("[data-no-drag]")) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onOpen();
@@ -344,6 +348,7 @@ function BookSpine({
           className="ks-spine-form"
           data-no-drag
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
           onSubmit={(e) => {
             e.preventDefault();
             commitTitle();
