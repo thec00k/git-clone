@@ -9,6 +9,9 @@ const spotifyClientId =
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  css: {
+    postcss: { plugins: [] },
+  },
   server: {
     host: true,
     port: 5174,
