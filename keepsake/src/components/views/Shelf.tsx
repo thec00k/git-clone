@@ -4,8 +4,9 @@ import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
 import { canSee } from "../../lib/permissions";
 import { COVER_STYLES } from "../../types/scrapbook";
-import type { CoverStyle, Visibility } from "../../types/scrapbook";
+import type { Visibility } from "../../types/scrapbook";
 import { ViewShell } from "./ViewShell";
+import { BookIdentityEditor } from "../BookIdentityEditor";
 
 const VIS: { key: Visibility; icon: typeof Lock; label: string }[] = [
   { key: "private", icon: Lock, label: "Private" },
@@ -81,31 +82,14 @@ export function Shelf() {
                   </button>
                   {editing === b.id && (
                     <div className="space-y-2">
-                      <input
-                        name="bookTitle"
-                        aria-label="Book title"
-                        className="w-full rounded bg-black/25 px-2 py-1 text-sm text-paper outline-none"
-                        value={b.title}
-                        onChange={(e) => renameBook(b.id, e.target.value, b.subtitle)}
+                      <BookIdentityEditor
+                        title={b.title}
+                        subtitle={b.subtitle}
+                        coverStyle={b.coverStyle}
+                        onTitle={(t) => renameBook(b.id, t, b.subtitle)}
+                        onSubtitle={(s) => renameBook(b.id, b.title, s)}
+                        onCover={(c) => setBookCover(b.id, c)}
                       />
-                      <input
-                        name="bookSubtitle"
-                        aria-label="Book subtitle"
-                        className="w-full rounded bg-black/25 px-2 py-1 text-sm text-paper outline-none"
-                        value={b.subtitle}
-                        onChange={(e) => renameBook(b.id, b.title, e.target.value)}
-                      />
-                      <div className="flex flex-wrap gap-1">
-                        {(Object.keys(COVER_STYLES) as CoverStyle[]).map((c) => (
-                          <button
-                            key={c}
-                            title={COVER_STYLES[c].label}
-                            onClick={() => setBookCover(b.id, c)}
-                            className={`h-6 w-6 rounded-full border ${b.coverStyle === c ? "border-accent" : "border-white/20"}`}
-                            style={{ background: COVER_STYLES[c].leather }}
-                          />
-                        ))}
-                      </div>
                       <div className="flex flex-wrap gap-1">
                         {VIS.map((v) => (
                           <button

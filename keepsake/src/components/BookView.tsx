@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import {
+  BookMarked,
   ChevronLeft,
   ChevronRight,
   DoorOpen,
@@ -35,10 +36,11 @@ import { SelectionToolbar } from "./SelectionToolbar";
 import { SaveIndicator } from "./SaveIndicator";
 import { PrintView } from "./PrintView";
 import { NotesPanel } from "./NotesPanel";
+import { BookIdentityEditor } from "./BookIdentityEditor";
 
 export function BookView() {
   const sb = useScrapbook();
-  const { addArchivePhoto } = useApp();
+  const { addArchivePhoto, renameBook, setBookCover } = useApp();
   const { back, viewAs, isVisitor } = useNav();
   const [turn, setTurn] = useState<{ dir: "next" | "prev" } | null>(null);
   const [showPresets, setShowPresets] = useState(false);
@@ -46,6 +48,7 @@ export function BookView() {
   const [showPrint, setShowPrint] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [showKeys, setShowKeys] = useState(false);
+  const [showCover, setShowCover] = useState(false);
   const addInputRef = useRef<HTMLInputElement>(null);
   const turningRef = useRef(false);
 
@@ -224,6 +227,17 @@ export function BookView() {
           </div>
 
           <div className="flex items-center gap-2">
+            {!isVisitor && (
+              <button
+                className="ks-chip"
+                aria-label="Edit cover and title page"
+                title="Cover & title page"
+                aria-expanded={showCover}
+                onClick={() => setShowCover((v) => !v)}
+              >
+                <BookMarked size={16} />
+              </button>
+            )}
             <button className="ks-chip" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" onClick={() => setShowKeys(true)}>
               <Keyboard size={16} />
             </button>
@@ -248,6 +262,19 @@ export function BookView() {
       footer={
         isVisitor ? null : (
           <div className="flex flex-col items-center gap-2 px-4 pb-4">
+            {showCover && sb.book && (
+              <div className="ks-panel w-full max-w-md p-3">
+                <p className="mb-2 font-display text-paper">Cover &amp; title page</p>
+                <BookIdentityEditor
+                  title={sb.book.title}
+                  subtitle={sb.book.subtitle}
+                  coverStyle={sb.book.coverStyle}
+                  onTitle={(t) => renameBook(sb.book!.id, t, sb.book!.subtitle)}
+                  onSubtitle={(s) => renameBook(sb.book!.id, sb.book!.title, s)}
+                  onCover={(c) => setBookCover(sb.book!.id, c)}
+                />
+              </div>
+            )}
             {sb.selected && (
               <SelectionToolbar
                 selected={sb.selected}
