@@ -159,7 +159,7 @@ export function createSeed(): AppState {
     achievements: [],
     achievementsAt: {},
     achievementsSeen: [],
-    progress: { visitedAtNight: false, previewedAsVisitor: false },
+    progress: { visitedAtNight: false, previewedAsVisitor: false, completedTour: false },
     receipts: {},
   };
 }

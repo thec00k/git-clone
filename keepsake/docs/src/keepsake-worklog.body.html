@@ -135,8 +135,14 @@
     each carry eligibility, priority, and a cooldown; a curator picks at most one per session
     (highest priority, ties broken randomly) and records a persisted receipt so cooldowns hold across
     sessions. Everything is ambient and non-interrupting.</li>
-  <li><strong>Onboarding</strong> &mdash; a whisper-light first-visit welcome banner delivered
-    through that queue (discovery over instruction), shown once.</li>
+  <li><strong>Onboarding</strong> &mdash; first visit opens a <em>Messenger</em>-style dialogue
+    tour (name plate + paper bubble + overlapping next) narrated by &ldquo;the house.&rdquo; It
+    walks the room object by object (book, window, shelf, archive, timeline, map, guest book, CRT,
+    and the top bar), with a spotlight cut-out, typewriter line, skip (&ldquo;wander off&rdquo; /
+    Escape), and replay from room settings or <code>?tour=1</code>. Completing or skipping sets
+    <code>progress.completedTour</code> so it does not auto-start again. This is a requested
+    deviation from Bible &sect;21 &ldquo;discovery over instruction&rdquo; &mdash; kept skippable
+    and house-voiced so it still feels like the room speaking, not a checklist.</li>
   <li><strong>Export / print</strong> &mdash; a print-ready view of a book; "Save as PDF" in the
     browser produces a shareable keepsake (&sect;25, software half).</li>
   <li><strong>Offline read mode</strong> &mdash; a service worker + web manifest cache the app shell

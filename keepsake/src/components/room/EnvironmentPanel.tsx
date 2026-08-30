@@ -1,4 +1,5 @@
 import { useApp } from "../../store/appStore";
+import { useNav } from "../../store/nav";
 import { useEscapeClose } from "../../hooks/useEscapeClose";
 import type { Season, TimeMode, Weather } from "../../types/app";
 
@@ -8,6 +9,7 @@ const WEATHERS: Weather[] = ["clear", "rain", "snow"];
 
 export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
   const { state, environment, setEnvironment, setProfile } = useApp();
+  const { startTour } = useNav();
   useEscapeClose(onClose);
 
   return (
@@ -70,7 +72,16 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
           />
         </div>
 
-        <button className="ks-tool ks-tool--accent mt-5 w-full justify-center" onClick={onClose}>
+        <button
+          className="ks-tool mt-5 w-full justify-center"
+          onClick={() => {
+            onClose();
+            startTour();
+          }}
+        >
+          Show me around
+        </button>
+        <button className="ks-tool ks-tool--accent mt-2 w-full justify-center" onClick={onClose}>
           Done
         </button>
       </div>

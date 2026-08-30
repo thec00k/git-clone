@@ -14,13 +14,13 @@ const LETTERS = [
 /*
  * The room's "curator": on a quiet moment it asks the opportunity queue for at
  * most one ambient event and presents it non-intrusively (a letter that waits
- * on the desk, a drifting whisper, a gentle onboarding note, a book left ajar,
+ * on the desk, a drifting whisper, a gentle first-visit tour, a book left ajar,
  * or the delivery of an unseen achievement). One per session; cooldowns persist
- * via receipts. Bible §20/§21.
+ * via receipts. Bible §20/§21. Welcome is a Messenger-style room tour.
  */
 export function RoomCurator() {
   const { state, newlyUnlocked, recordReceipt, markAchievementsSeen } = useApp();
-  const { go } = useNav();
+  const { go, startTour, touring } = useNav();
   const [kind, setKind] = useState<OpportunityKind | null>(null);
   const [rewardId, setRewardId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -33,6 +33,8 @@ export function RoomCurator() {
 
   useEffect(() => {
     if (sessionStorage.getItem("ks-curator")) return;
+    if (new URLSearchParams(window.location.search).get("tour") === "1") return;
+    const delay = stateRef.current.progress.completedTour ? 2600 : 900;
     const t = window.setTimeout(() => {
       const s = stateRef.current;
       const pendingReward =
@@ -42,10 +44,15 @@ export function RoomCurator() {
       const choice = pickOpportunity({ state: s, pendingReward }, s.receipts);
       sessionStorage.setItem("ks-curator", "1");
       if (!choice) return;
+      if (choice === "welcome") {
+        recordReceipt(choice);
+        startTour();
+        return;
+      }
       setKind(choice);
       if (choice === "reward") setRewardId(pendingReward);
       recordReceipt(choice);
-    }, 2600);
+    }, delay);
     return () => window.clearTimeout(t);
     // one-shot on mount; latest state read via refs
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,16 +66,9 @@ export function RoomCurator() {
     }
   }, [kind]);
 
-  if (!kind) return null;
+  if (touring || !kind) return null;
 
-  if (kind === "welcome") {
-    return (
-      <Banner onClose={() => setKind(null)} icon={<Sparkles size={16} className="text-accent" />}>
-        Welcome to your room. Open the <strong>book</strong> to begin, tap the <strong>window</strong> to
-        change the light, or browse the <strong>shelf</strong>. Everything saves itself.
-      </Banner>
-    );
-  }
+  if (kind === "welcome") return null;
 
   if (kind === "reward" && rewardId) {
     const a = ACHIEVEMENTS.find((x) => x.id === rewardId);

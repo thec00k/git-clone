@@ -22,8 +22,11 @@ import { ACHIEVEMENTS } from "../../types/app";
 import { EnvironmentPanel } from "./EnvironmentPanel";
 import { AchievementsToast } from "./AchievementsToast";
 import { RoomCurator } from "./RoomCurator";
+import { RoomTour } from "./RoomTour";
 import { MusicPanel } from "./MusicPanel";
 import { useEscapeClose } from "../../hooks/useEscapeClose";
+import { HOTSPOTS } from "../../lib/hotspots";
+import type { HotspotId } from "../../lib/hotspots";
 
 type Phase = "day" | "dusk" | "night";
 
@@ -53,12 +56,17 @@ const SEASON_TINT: Record<string, string> = {
 export function Room() {
   const { state, environment, activeBook, recordProgress, newlyUnlocked, clearNewlyUnlocked, markAchievementsSeen } =
     useApp();
-  const { go, viewAs, setViewAs } = useNav();
+  const { go, viewAs, setViewAs, touring, tourFocus, startTour } = useNav();
   const [envOpen, setEnvOpen] = useState(false);
   const [achOpen, setAchOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
   const sceneRef = useRef<HTMLDivElement>(null);
   const [par, setPar] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("tour") === "1") startTour();
+  }, [startTour]);
 
   const phase = phaseOf(environment.timeMode);
   const cover = COVER_STYLES[activeBook?.coverStyle ?? "cocoa"];
@@ -68,14 +76,18 @@ export function Room() {
   }, [phase, recordProgress]);
 
   const onMove = (e: React.PointerEvent) => {
+    if (touring) return;
     const r = sceneRef.current?.getBoundingClientRect();
     if (!r) return;
     setPar({ x: (e.clientX - r.left) / r.width - 0.5, y: (e.clientY - r.top) / r.height - 0.5 });
   };
 
-  const layer = (depth: number) => ({
-    transform: `translate(${-par.x * depth}px, ${-par.y * depth}px)`,
-  });
+  const tourClass = (id: HotspotId) => (tourFocus === id ? " ks-obj--tour" : "");
+
+  const layer = (depth: number) => {
+    const p = touring ? { x: 0, y: 0 } : par;
+    return { transform: `translate(${-p.x * depth}px, ${-p.y * depth}px)` };
+  };
 
   const motes = useMemo(
     () =>
@@ -93,7 +105,10 @@ export function Room() {
   return (
     <div className="ks-room flex h-dvh flex-col overflow-hidden">
       {/* HUD */}
-      <header className="z-30 flex shrink-0 items-center justify-between px-4 py-3 sm:px-6">
+      <header
+        data-tour="hud"
+        className={`z-30 flex shrink-0 items-center justify-between px-4 py-3 sm:px-6${tourFocus === "hud" ? " ks-hud--tour" : ""}`}
+      >
         <div className="leading-tight">
           <p className="font-display text-sm uppercase tracking-[0.22em] text-paper/70">Keepsake</p>
           <p className="ks-caption text-paper/80" style={{ fontSize: "1.15rem" }}>
@@ -150,8 +165,9 @@ export function Room() {
           <div className="absolute inset-0" style={{ background: SEASON_TINT[environment.season] }} />
           {/* Window */}
           <button
-            className="ks-obj"
-            style={{ left: "8%", top: "12%", width: "26%", height: "42%" }}
+            className={`ks-obj${tourClass("window")}`}
+            data-tour="window"
+            style={HOTSPOTS.window}
             onClick={() => setEnvOpen(true)}
             aria-label="Window and room settings"
           >
@@ -191,8 +207,9 @@ export function Room() {
         <div className="pointer-events-none absolute inset-0" style={layer(16)}>
           {/* Bookshelf */}
           <button
-            className="ks-obj"
-            style={{ right: "6%", top: "10%", width: "30%", height: "34%" }}
+            className={`ks-obj${tourClass("shelf")}`}
+            data-tour="shelf"
+            style={HOTSPOTS.shelf}
             onClick={() => go("shelf")}
             aria-label="Bookshelf"
           >
@@ -202,8 +219,9 @@ export function Room() {
 
           {/* Timeline frame */}
           <button
-            className="ks-obj"
-            style={{ left: "40%", top: "14%", width: "20%", height: "16%" }}
+            className={`ks-obj${tourClass("timeline")}`}
+            data-tour="timeline"
+            style={HOTSPOTS.timeline}
             onClick={() => go("timeline")}
             aria-label="Timeline"
           >
@@ -218,8 +236,9 @@ export function Room() {
 
           {/* Corkboard / map */}
           <button
-            className="ks-obj"
-            style={{ left: "38.5%", top: "33%", width: "23%", height: "20%" }}
+            className={`ks-obj${tourClass("map")}`}
+            data-tour="map"
+            style={HOTSPOTS.map}
             onClick={() => go("atlas")}
             aria-label="Memory map"
           >
@@ -241,8 +260,9 @@ export function Room() {
 
           {/* Filing cabinet */}
           <button
-            className="ks-obj"
-            style={{ left: "5%", bottom: "16%", width: "16%", height: "40%" }}
+            className={`ks-obj${tourClass("archive")}`}
+            data-tour="archive"
+            style={HOTSPOTS.archive}
             onClick={() => go("archive")}
             aria-label="Filing cabinet"
           >
@@ -252,8 +272,9 @@ export function Room() {
 
           {/* The book on the desk */}
           <button
-            className="ks-obj"
-            style={{ left: "42%", bottom: "10%", width: "18%", height: "30%" }}
+            className={`ks-obj${tourClass("book")}`}
+            data-tour="book"
+            style={HOTSPOTS.book}
             onClick={() => go("book")}
             aria-label={`Open ${activeBook?.title ?? "book"}`}
           >
@@ -280,8 +301,9 @@ export function Room() {
 
           {/* Guest book on the desk */}
           <button
-            className="ks-obj"
-            style={{ left: "64%", bottom: "12%", width: "12%", height: "16%" }}
+            className={`ks-obj${tourClass("guestbook")}`}
+            data-tour="guestbook"
+            style={HOTSPOTS.guestbook}
             onClick={() => go("guestbook")}
             aria-label="Guest book"
           >
@@ -294,8 +316,9 @@ export function Room() {
 
           {/* CRT / music */}
           <button
-            className="ks-obj"
-            style={{ right: "6%", bottom: "16%", width: "18%", height: "26%" }}
+            className={`ks-obj${tourClass("crt")}`}
+            data-tour="crt"
+            style={HOTSPOTS.crt}
             onClick={() => setMusicOpen(true)}
             aria-label="CRT music"
           >
@@ -318,7 +341,7 @@ export function Room() {
           )}
         </div>
 
-        <RoomCurator />
+        {!touring && <RoomCurator />}
 
         {/* Dust motes */}
         <div className="pointer-events-none absolute inset-0 z-10">
@@ -339,16 +362,20 @@ export function Room() {
         </div>
 
         {/* Settings hint */}
-        <button
-          className="absolute bottom-3 right-3 z-30 ks-chip"
-          title="Room settings"
-          onClick={() => setEnvOpen(true)}
-        >
-          <Settings2 size={16} />
-        </button>
+        {!touring && (
+          <button
+            className="absolute bottom-3 right-3 z-30 ks-chip"
+            title="Room settings"
+            onClick={() => setEnvOpen(true)}
+          >
+            <Settings2 size={16} />
+          </button>
+        )}
 
-        <PhaseBadge phase={phase} />
+        {!touring && <PhaseBadge phase={phase} />}
       </div>
+
+      {touring && <RoomTour />}
 
       {envOpen && <EnvironmentPanel onClose={() => setEnvOpen(false)} />}
       {musicOpen && <MusicPanel onClose={() => setMusicOpen(false)} />}

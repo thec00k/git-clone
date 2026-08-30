@@ -78,6 +78,7 @@ export interface TimelineEntry {
 export interface Progress {
   visitedAtNight: boolean;
   previewedAsVisitor: boolean;
+  completedTour: boolean;
 }
 
 export interface AppState {

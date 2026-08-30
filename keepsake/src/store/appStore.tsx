@@ -88,7 +88,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
             },
             achievementsAt: stored.achievementsAt ?? {},
             achievementsSeen: stored.achievementsSeen ?? [],
-            progress: stored.progress ?? { visitedAtNight: false, previewedAsVisitor: false },
+            progress: {
+              visitedAtNight: stored.progress?.visitedAtNight ?? false,
+              previewedAsVisitor: stored.progress?.previewedAsVisitor ?? false,
+              completedTour: stored.progress?.completedTour ?? false,
+            },
             receipts: stored.receipts ?? {},
           }
         : createSeed();
@@ -275,7 +279,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!prev) return prev;
         const next = { ...prev.progress, ...patch };
         // avoid needless updates (keeps the save/eval loop calm)
-        if (next.visitedAtNight === prev.progress.visitedAtNight && next.previewedAsVisitor === prev.progress.previewedAsVisitor) {
+        if (
+          next.visitedAtNight === prev.progress.visitedAtNight &&
+          next.previewedAsVisitor === prev.progress.previewedAsVisitor &&
+          next.completedTour === prev.progress.completedTour
+        ) {
           return prev;
         }
         return { ...prev, progress: next };

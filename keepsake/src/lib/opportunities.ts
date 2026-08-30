@@ -28,8 +28,10 @@ const OPPORTUNITIES: Opportunity[] = [
   {
     id: "welcome",
     priority: 100,
-    cooldownMs: Number.POSITIVE_INFINITY, // once, ever
-    eligible: () => true,
+    cooldownMs: 0,
+    // Once the guided tour is finished or skipped it never auto-starts again.
+    // Replay lives in room settings ("Show me around").
+    eligible: ({ state }) => !state.progress.completedTour,
   },
   {
     id: "reward",

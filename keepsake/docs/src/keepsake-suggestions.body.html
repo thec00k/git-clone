@@ -67,8 +67,19 @@
 <p>Replaced the single teaser with a real queue (&sect;20): candidates (welcome, achievement reward,
   approved-note whisper, book-left-ajar, desk letter) carry eligibility + priority + cooldown; a
   curator selects at most one per session and records a persisted receipt so cooldowns hold across
-  sessions. Expanding the catalogue to 10&ndash;20 opportunities and adding quiet-state nuance are the
-  natural follow-ups.</p>
+  sessions. The <em>welcome</em> candidate now starts the guided room tour until
+  <code>progress.completedTour</code> is set. Expanding the catalogue to 10&ndash;20 opportunities
+  and adding quiet-state nuance are the natural follow-ups.</p>
+
+<h3><span class="pill">acted</span> Messenger-style first-visit dialogue</h3>
+<p>You asked to borrow the bottom-of-scene text-bubble layout from
+  <a href="https://messenger.abeto.co/">messenger.abeto.co</a> for a first-login walkthrough.
+  Implemented as a paper/ink dialogue (name plate overlapping top-left, offset block shadow, square
+  next control overlapping bottom-right) with a spotlight that follows each room object. This
+  <strong>is</strong> a deviation from Bible &sect;21 &ldquo;discovery over instruction&rdquo; &mdash;
+  taken because you asked for it, and kept skippable / house-voiced so it can still be ignored.
+  The cel-shaded 3D look of Messenger itself (toon shading, ink outlines, WebGL scene) is
+  <em>not</em> copied here; that remains the proposed illustrated-parallax upgrade above.</p>
 
 <h3><span class="pill">proposed</span> Stickers &amp; craft assets</h3>
 <p>Stickers are emoji glyphs for now. Replace with licensed SVG/WebP sticker packs and scrapbook
@@ -85,8 +96,9 @@
 
 <h3><span class="pill">proposed</span> Small polish backlog</h3>
 <ul>
-  <li><span class="pill">acted</span> A whisper-light first-visit welcome banner (via the opportunity
-    queue), shown once.</li>
+  <li><span class="pill">acted</span> First-visit onboarding is now a Messenger-style room tour
+    (name plate, paper dialogue box, overlapping next, spotlight on each object) instead of a single
+    banner. Requested; skippable; replayable from settings. See the work log.</li>
   <li><span class="pill">acted</span> Tidied the map "pin a memory" form (labelled fields, cleaner
     layout, disabled-until-valid).</li>
   <li><span class="pill">acted</span> Modals now close on <code>Escape</code> and carry
