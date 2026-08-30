@@ -34,17 +34,23 @@ export function DialogueBubble({
     }
     let i = 0;
     const id = window.setInterval(() => {
-      i += 1;
+      i = Math.min(text.length, i + 3);
       setShown(text.slice(0, i));
       if (i >= text.length) window.clearInterval(id);
-    }, 16);
+    }, 18);
     return () => window.clearInterval(id);
   }, [text]);
 
   const complete = shown.length >= text.length;
 
   return (
-    <div className="ks-say" role="dialog" aria-modal="true" aria-label={`${speaker} says`}>
+    <div
+      className="ks-say"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${speaker} says`}
+      data-complete={complete ? "true" : "false"}
+    >
       <div className="ks-say-name">{speaker}</div>
       <div className="ks-say-box">
         <p className="ks-say-text">

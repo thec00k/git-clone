@@ -642,16 +642,17 @@
     color: var(--color-ink);
     border: 3px solid var(--color-ink);
     box-shadow: 7px 7px 0 #3a322c;
-    padding: 1.15rem 3.4rem 1.7rem 1.2rem;
-    min-height: 6.4rem;
+    padding: 1.15rem 3.4rem 2rem 1.2rem;
+    min-height: 7.6rem;
   }
 
   .ks-say-text {
     font-family: var(--font-script);
-    font-size: clamp(1.35rem, 3.2vw, 1.7rem);
-    line-height: 1.2;
+    font-size: clamp(1.28rem, 2.8vw, 1.58rem);
+    line-height: 1.22;
     color: var(--color-ink);
     margin: 0;
+    overflow-wrap: anywhere;
   }
 
   .ks-say-caret {
