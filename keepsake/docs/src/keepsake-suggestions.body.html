@@ -26,22 +26,111 @@
   quota (a risk noted in &sect;6/&sect;22).</p>
 
 <h3><span class="pill">acted</span> Accessibility &amp; small UX polish</h3>
-<p>Added <code>name</code>/<code>aria-label</code> to all form fields (the browser's earlier
-  "form field needs id/name" issues are now clear); added a <strong>Music volume</strong> control
-  (previously the CRT pad had no UI for its level); and a visitor now sees their own <em>pending</em>
-  note in the notes panel so it no longer appears to vanish before approval. Also removed a couple of
-  stray no-op inline style hacks.</p>
+<p>Added <code>name</code>/<code>aria-label</code> to all form fields; a <strong>Music volume</strong>
+  control; visitors see their own pending note. Follow-up pass: skip links, a
+  <code>&lt;main&gt;</code> landmark, named icon buttons, object focus rings, Tab-trapped dialogs
+  that restore focus, a live spread counter, and tour copy exposed in full to assistive tech
+  (the typewriter is visual-only). A real-device VoiceOver/TalkBack pass is still worth doing
+  later (&sect;23).</p>
 
 <hr />
 
 <h2>Proposed (your call)</h2>
 
-<h3><span class="pill">proposed</span> Commission illustrated parallax art for the room</h3>
-<p>The 2.5D room is hand-built from CSS/SVG/gradients + the existing paper/wood/leather textures.
-  It reads well, but to truly hit the <em>Little Big Planet / Sly Cooper / Edith Finch</em> feel I'd
-  recommend layered illustrated art (a painted back wall, mid props, foreground desk) driven by the
-  same parallax rig. This is the single biggest visual upgrade available and matches the "2.5D" open
-  decision (&sect;8).</p>
+<h3><span class="pill">proposed</span> Room art: painted 2.5D first, toon-3D later (and only if we miss it)</h3>
+<p>
+  The room is still CSS gradients, Lucide icons, and a few textures. It holds as a prototype, but it
+  is not yet the Little Big Planet / Sly Cooper / Edith Finch diorama the Bible asked for. The
+  Messenger tour borrowed <em>layout</em> from
+  <a href="https://messenger.abeto.co/">messenger.abeto.co</a>, not its cel-shaded WebGL look.
+  Here is the art brief I would actually commission.
+</p>
+
+<h4>Recommendation</h4>
+<p>
+  Stay 2.5D. Commission a set of painted, cut-out parallax plates and drop them into the existing
+  depth rig. Do <strong>not</strong> rewrite the room in Three.js to chase Messenger's toon shader.
+  A full 3D scene is a different product: heavier bundle, new camera language, and it fights the
+  scrapbook-on-a-desk metaphor. Bible &sect;8 already picked 2.5D for this reason.
+</p>
+
+<h4>What I want the room to look like</h4>
+<ul>
+  <li><strong>Little Big Planet</strong> &mdash; objects feel sewn, stuffed, or paper-cut. Soft
+    rim light. A slight &ldquo;pop&rdquo; when you hover (we already do this; the art should invite it).</li>
+  <li><strong>Sly Cooper</strong> &mdash; inked silhouettes, limited palette, storybook noir. Edges
+    read from across the room. Night should go indigo + amber, not grey.</li>
+  <li><strong>Edith Finch</strong> &mdash; a lived-in house, slightly melancholy, dust in the beam,
+    nothing sterile. Clutter that looks placed by a person, not a UI kit.</li>
+</ul>
+<p>
+  Palette already in the prototype: cocoa leather <code>#4a3224</code>, cream paper
+  <code>#f3e9d8</code>, seal red <code>#b55245</code>, dusk mauve, night indigo. New art should
+  lock to those, not invent a second brand.
+</p>
+
+<h4>Deliverables (phase 1 &mdash; illustrated plates)</h4>
+<p>Ask an illustrator for layered PNGs/WebPs with transparent cut-outs, authored at ~2&times; the
+  scene size so they survive the existing pointer parallax:</p>
+<ol>
+  <li><strong>Far sky</strong> &mdash; four plates: day, dusk, night, plus a weather overlay
+    (rain streaks / snow) we can tint. The window already frames this.</li>
+  <li><strong>Back wall</strong> &mdash; plaster + picture rail + window casing. Warm, slightly
+    stained. No UI chrome painted in.</li>
+  <li><strong>Mid furniture</strong> &mdash; bookshelf (empty bays; we keep drawing spines in CSS
+    so book count stays live), framed timeline, cork map. These must match today's hotspot boxes
+    in <code>lib/hotspots.ts</code>.</li>
+  <li><strong>Desk + cabinet + CRT</strong> &mdash; wood grain, a lamp, the kettle, a tea ring
+    already in the wood. The open book stays a live HTML cover (leather + title), not painted shut.</li>
+  <li><strong>Foreground clutter</strong> &mdash; a few optional bits (pressed flower, ribbon,
+    letter, loose photo) that the curator can show/hide. Same silhouette language as the mid layer.</li>
+  <li><strong>Season washes</strong> &mdash; four multiply overlays (spring green, summer gold,
+    autumn rust, winter blue) rather than four full rooms.</li>
+</ol>
+<p>
+  Technical constraints for the brief: 16:9 safe area; keep interactive objects inside the current
+  percentage hitboxes; no baked-in text (we set titles in type); no photoreal PBR; export as
+  premultiplied WebP, max ~400&nbsp;KB per plate.
+</p>
+
+<h4>What I do <em>not</em> want (yet)</h4>
+<ul>
+  <li>A free-orbit 3D camera. The room is a tableau. Parallax is a glance, not a fly-through.</li>
+  <li>A full Three.js rewrite of every object. That would freeze the scrapbook, notes, and
+    curator into a 3D engine we do not need.</li>
+  <li>Messenger's cool grey cel-shade as the house style. Keep cream, ink, and wood. If we ever
+    toon-shade something, the outline colour should be cocoa, not black comic-ink.</li>
+  <li>AI texture dumps or stock isometric rooms. The point is one hand. Same illustrator for
+    every plate.</li>
+</ul>
+
+<h4>Optional later: one toon-3D hero, not a 3D house</h4>
+<p>
+  If painted plates still feel flat after we live with them, the honest Messenger-like experiment
+  is a <em>single</em> WebGL accent &mdash; probably the open book, or the window glass &mdash;
+  sitting in the 2.5D scene:
+</p>
+<ul>
+  <li>Toon/cel: a 3&ndash;4 stop ramp (<code>MeshToonMaterial</code> or a tiny custom shader),
+    not a realistic light model.</li>
+  <li>Ink outline via an inverted-hull or fullscreen Sobel; stroke in
+    <code>#2c2418</code>, 1&ndash;2px.</li>
+  <li>Paper/leather/wood as <em>painted</em> textures, not scanned PBR sets.</li>
+  <li>Camera locked; only a few degrees of parallax, matching the CSS layers.</li>
+  <li>Reduced-motion: freeze the mesh and show the still plate.</li>
+</ul>
+<p>
+  That is a spike, not a rewrite. If it does not obviously beat the painted book, throw it away.
+  I would not start there.
+</p>
+
+<h4>Commission shape</h4>
+<p>
+  One illustrator (or a very small studio), two rounds: greyscale layups against a screenshot of
+  the current room, then colour. Style frames: a LBP sack-person living room, a Sly Cooper hideout
+  interior, Edith Finch's kitchen at dusk. Payment for plates + a year of seasonal variants.
+  We keep hotspot code, tour, and curator as-is.
+</p>
 
 <h3><span class="pill">acted</span> Music: ambient pad + Spotify account login</h3>
 <p>The CRT is now a provider adapter (&sect;13): an offline generative Web-Audio pad by default, plus a
@@ -65,13 +154,15 @@
   completion from reward presentation. Added a few more achievements (storyteller, decorator,
   collector). Next step is persisting a fuller immutable action ledger once a backend exists.</p>
 
-<h3><span class="pill">acted</span> Curated-RNG opportunity queue</h3>
-<p>Replaced the single teaser with a real queue (&sect;20): candidates (welcome, achievement reward,
-  approved-note whisper, book-left-ajar, desk letter) carry eligibility + priority + cooldown; a
-  curator selects at most one per session and records a persisted receipt so cooldowns hold across
-  sessions. The <em>welcome</em> candidate now starts the guided room tour until
-  <code>progress.completedTour</code> is set. Expanding the catalogue to 10&ndash;20 opportunities
-  and adding quiet-state nuance are the natural follow-ups.</p>
+<h3><span class="pill">acted</span> Curated-RNG opportunity queue + expanded catalogue</h3>
+<p>Replaced the single teaser with a real queue (&sect;20): candidates carry eligibility + priority
+  + cooldown; a curator selects at most one per session and records a persisted receipt so cooldowns
+  hold across sessions. The <em>welcome</em> candidate starts the guided room tour until
+  <code>progress.completedTour</code> is set. The catalogue is now sixteen kinds: welcome, reward,
+  empty-page, whisper, photo-out, ajar-book, bookmark, guest-wave, map-glint, night-moth,
+  pressed-flower, season-note, letter, window-draft, kettle, tea-ring. Quiet events (priority
+  &lt;&nbsp;25) have a 35% chance of presenting nothing, so the room can stay still. Force one in
+  QA with <code>?event=&lt;kind&gt;</code>.</p>
 
 <h3><span class="pill">acted</span> Messenger-style first-visit dialogue</h3>
 <p>You asked to borrow the bottom-of-scene text-bubble layout from
@@ -103,11 +194,15 @@
     banner. Requested; skippable; replayable from settings. See the work log.</li>
   <li><span class="pill">acted</span> Tidied the map "pin a memory" form (labelled fields, cleaner
     layout, disabled-until-valid).</li>
-  <li><span class="pill">acted</span> Modals now close on <code>Escape</code> and carry
-    <code>role="dialog"</code>/<code>aria-modal</code>; softened the page-turn sheen so the incoming
-    page reads better mid-turn.</li>
-  <li><span class="pill">proposed</span> A dedicated keyboard/screen-reader audit and real-device
-    passes (foundations are in place; full audit is a later step per &sect;23).</li>
-  <li><span class="pill">proposed</span> Reworking the page-turn so the leaf's back renders the actual
-    incoming page art (currently textured paper) &mdash; a nicer touch, not essential.</li>
+  <li><span class="pill">acted</span> Modals close on <code>Escape</code>, trap Tab, restore focus,
+    and carry <code>role="dialog"</code>/<code>aria-modal</code>.</li>
+  <li><span class="pill">acted</span> Page-turn leaf now shows the real incoming spread on the back
+    face (not blank paper), plus a short Web Audio rustle/slap. Reduced-motion still swaps instantly
+    and stays silent.</li>
+  <li><span class="pill">acted</span> Editor undo/redo (chips + ⌘Z / Ctrl+Z, ⌘⇧Z / Ctrl+Y) and a
+    <code>?</code> shortcut list.</li>
+  <li><span class="pill">acted</span> First keyboard/screen-reader pass: skip links, a page
+    <code>&lt;main&gt;</code>, named icon buttons, object focus rings, live spread counter, tour
+    text exposed in full to AT (typewriter is visual-only). A real-device VoiceOver/TalkBack pass
+    is still worth doing later (&sect;23).</li>
 </ul>

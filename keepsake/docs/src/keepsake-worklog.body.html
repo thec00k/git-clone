@@ -48,8 +48,11 @@
   <li>Multi-photo pages (up to 6), z-order, sensible initial positions.</li>
   <li>Editable handwritten captions (character-limited) with sharpie ink colours.</li>
   <li><strong>Layout presets</strong> &mdash; Grid / Column / Scatter for fast placement (&sect;5).</li>
-  <li><strong>Directional 3D page-turn</strong> animation across the spine, with a reduced-motion
-    instant-swap fallback (&sect;7).</li>
+  <li><strong>Directional 3D page-turn</strong> animation across the spine: the turning leaf shows
+    the current page on the front and the <em>real incoming page</em> on the back, with a short
+    Web Audio paper-rustle. Reduced-motion still does an instant swap and stays silent (&sect;7).</li>
+  <li><strong>Undo / redo</strong> in the editor (40-step stack, burst-coalesced so a drag is one
+    step) with chips and ⌘Z / Ctrl+Z, ⌘⇧Z / Ctrl+Y. <code>?</code> opens a shortcut list.</li>
   <li><strong>Stickers</strong> as page elements sharing the photo/caption transform model (&sect;11).</li>
   <li><strong>Free transform for photos &amp; stickers</strong>: a drag-to-rotate handle (hold Shift
     to snap to 15&deg;) for any angle, plus <strong>two-finger pinch to resize and twist to rotate</strong>
@@ -130,11 +133,16 @@
     playlist link works without login too). Activation needs a Spotify Developer app Client ID
     (<code>VITE_SPOTIFY_CLIENT_ID</code>) &mdash; requested via the environment setup panel; full
     in-app playback control needs Spotify Premium (Web Playback SDK).</li>
-  <li><strong>Curated-RNG opportunity queue</strong> (&sect;20): candidates (a first-visit welcome,
-    an unseen-achievement reward, an approved-note whisper, a book left ajar, a letter on the desk)
-    each carry eligibility, priority, and a cooldown; a curator picks at most one per session
-    (highest priority, ties broken randomly) and records a persisted receipt so cooldowns hold across
-    sessions. Everything is ambient and non-interrupting.</li>
+  <li><strong>Curated-RNG opportunity queue</strong> (&sect;20): sixteen candidates (welcome, reward,
+    empty-page, whisper, photo-out, ajar-book, bookmark, guest-wave, map-glint, night-moth,
+    pressed-flower, season-note, letter, window-draft, kettle, tea-ring) each carry eligibility,
+    priority, and a cooldown. A curator picks at most one per session (highest priority; ties
+    broken randomly; quieter events may present nothing) and records a persisted receipt.
+    Force a kind with <code>?event=</code>. Everything is ambient and non-interrupting.</li>
+  <li><strong>Keyboard / screen-reader pass</strong> (&sect;23, first cut): skip links, a
+    <code>&lt;main&gt;</code> landmark, named icon buttons, focus rings on room objects, Tab-trapped
+    dialogs that restore focus, a live spread counter, and tour copy exposed in full to assistive
+    tech.</li>
   <li><strong>Onboarding</strong> &mdash; first visit opens a <em>Messenger</em>-style dialogue
     tour (name plate + paper bubble + overlapping next) narrated by &ldquo;the house.&rdquo; It
     walks the room object by object (book, window, shelf, archive, timeline, map, guest book, CRT,
@@ -179,14 +187,15 @@
   <li>Browser-verified end to end: room navigation to every object; open/edit book (photos,
     captions, stickers, presets, page turns, export); day&rarr;night in the window; bookshelf,
     archive (search/favourite/place-in-book), timeline, map (pin), guest book; "View as" gating.</li>
-  <li>No red console errors. (A few a11y hints about form labels remain &mdash; see suggestions.)</li>
+  <li>No red console errors. Icon-only controls now carry accessible names; dialogs trap focus.</li>
 </ul>
 
 <h2>Where this could go next</h2>
 <ul>
   <li>A real backend (Postgres + auth + object storage) and a proper permission-inheritance engine,
     turning the local "View as"/visibility previews into real, enforced privacy (&sect;17).</li>
-  <li>Undo/redo and richer mobile gestures in the editor.</li>
-  <li>Replace CSS/SVG room with commissioned illustrated parallax layers (see suggestions).</li>
-  <li>A fuller curated-RNG opportunity queue and an achievement event-ledger (&sect;12/&sect;20).</li>
+  <li>Commission illustrated parallax plates for the room &mdash; painted 2.5D first, not a Three.js
+    rewrite. See the 3D art brief in the suggestions PDF.</li>
+  <li>A real-device VoiceOver / TalkBack pass, and licensed sticker/craft packs.</li>
+  <li>Spotify Web Playback SDK once a Client ID is injected on new agents (Premium).</li>
 </ul>
