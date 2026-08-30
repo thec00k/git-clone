@@ -10,16 +10,28 @@
  *   1. VITE_SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_ID at build/dev time
  *   2. a Client ID saved locally in this browser (CRT panel)
  *
- * Also register this page's origin as a Redirect URI on the Spotify app
- * (defaults to <origin>/, e.g. http://127.0.0.1:5174/).
+ * Also register this page's origin as a Redirect URI on the Spotify app.
+ * Spotify forbids the hostname `localhost` — use the loopback literal
+ * `http://127.0.0.1:5174/` (HTTP is allowed only for 127.0.0.1 / [::1]).
  * Full in-app playback additionally needs a Spotify Premium account.
  */
 
 const CLIENT_ID_KEY = "ks-spotify-client-id";
 
-const REDIRECT_URI =
-  (import.meta.env.VITE_SPOTIFY_REDIRECT_URI as string | undefined) ||
-  `${window.location.origin}/`;
+/** Spotify rejects `localhost`; map it to the loopback IP they still allow. */
+function loopbackHost(hostname: string): string {
+  if (hostname === "localhost" || hostname === "[::1]") return "127.0.0.1";
+  return hostname;
+}
+
+function computeRedirectUri(): string {
+  const fromEnv = (import.meta.env.VITE_SPOTIFY_REDIRECT_URI as string | undefined)?.trim();
+  if (fromEnv) return fromEnv;
+  const { protocol, hostname, port } = window.location;
+  const host = loopbackHost(hostname);
+  const portPart = port ? `:${port}` : "";
+  return `${protocol}//${host}${portPart}/`;
+}
 
 export function getClientId(): string | undefined {
   const fromEnv = (import.meta.env.VITE_SPOTIFY_CLIENT_ID as string | undefined)?.trim();
@@ -75,7 +87,7 @@ export function isConfigured(): boolean {
 }
 
 export function redirectUri(): string {
-  return REDIRECT_URI;
+  return computeRedirectUri();
 }
 
 function base64url(bytes: ArrayBuffer): string {
@@ -106,7 +118,7 @@ export async function login(): Promise<void> {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: "code",
-    redirect_uri: REDIRECT_URI,
+    redirect_uri: computeRedirectUri(),
     scope: SCOPES,
     code_challenge_method: "S256",
     code_challenge: await challenge(verifier),
@@ -137,7 +149,7 @@ export async function completeLoginIfRedirected(): Promise<boolean> {
     client_id: clientId,
     grant_type: "authorization_code",
     code,
-    redirect_uri: REDIRECT_URI,
+    redirect_uri: computeRedirectUri(),
     code_verifier: verifier,
   });
   const res = await fetch("https://accounts.spotify.com/api/token", {

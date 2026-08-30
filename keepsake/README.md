@@ -37,7 +37,7 @@ scrapbook experience first" prototype stage.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5174
+npm run dev      # http://127.0.0.1:5174  (Spotify rejects localhost as a redirect URI)
 npm run build    # typecheck (tsc -b) + production build
 npm run preview  # preview the production build
 ```

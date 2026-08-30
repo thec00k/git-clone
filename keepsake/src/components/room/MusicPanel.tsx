@@ -171,12 +171,18 @@ function ClientIdSetup({ onSave }: { onSave: (id: string) => void }) {
     <div className="rounded-lg bg-black/20 p-3 text-sm text-paper/70">
       <p className="mb-1 text-paper">Connect needs your Spotify Client ID.</p>
       <p className="text-paper/60">
-        In the Spotify Developer app, add this exact Redirect URI:
+        In the Spotify Developer Dashboard, add this exact Redirect URI. Spotify will not accept
+        {" "}
+        <code>localhost</code>
+        {" "}
+        &mdash; use <code>127.0.0.1</code> (this one):
       </p>
       <code className="mt-1 block break-all rounded bg-black/30 px-2 py-1 text-paper/80">{uri}</code>
       <p className="mt-2 text-paper/50">
         Paste only the Client ID — never the Client Secret. This login uses PKCE, so the secret stays
-        in your dashboard.
+        in your dashboard. Open Keepsake at this same address (not localhost). Development-mode apps
+        also need your Spotify account on the app&rsquo;s User Management list, and the app owner
+        needs Premium.
       </p>
       <div className="mt-3 flex gap-2">
         <input
