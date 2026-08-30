@@ -7,6 +7,7 @@ import { Timeline } from "./components/views/Timeline";
 import { Atlas } from "./components/views/Atlas";
 import { Guestbook } from "./components/views/Guestbook";
 import { AmbientAudio } from "./components/AmbientAudio";
+import { SpotifyDock } from "./components/SpotifyDock";
 
 function CurrentView() {
   const { view } = useNav();
@@ -32,6 +33,7 @@ export default function App() {
   return (
     <>
       <AmbientAudio />
+      <SpotifyDock />
       <CurrentView />
     </>
   );

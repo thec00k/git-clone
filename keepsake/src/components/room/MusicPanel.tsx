@@ -5,6 +5,7 @@ import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { useSpotify } from "../../hooks/useSpotify";
 import { playlistEmbedId, redirectUri } from "../../lib/spotify";
 import type { MusicProvider } from "../../types/app";
+import { VolumeSlider } from "../VolumeSlider";
 
 export function MusicPanel({ onClose }: { onClose: () => void }) {
   const { environment, setEnvironment, activeBook, setBookPlaylist } = useApp();
@@ -48,17 +49,11 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
                 {environment.musicOn ? "On" : "Off"}
               </button>
             </div>
-            <label className="mt-3 block text-sm text-paper/60" htmlFor="ks-music-vol2">Volume</label>
-            <input
-              id="ks-music-vol2"
-              name="musicVolume"
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
+            <VolumeSlider
+              id="ks-crt-ambient-vol"
+              label="Volume"
               value={environment.volume}
-              onChange={(e) => setEnvironment({ volume: Number(e.target.value) })}
-              className="mt-1 w-full accent-[var(--color-accent)]"
+              onChange={(v) => setEnvironment({ volume: v })}
             />
             <p className="mt-2 text-xs text-paper/40">A soft, generative pad — works offline, no account needed.</p>
           </div>
@@ -101,6 +96,7 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
                       onClick={() => {
                         setBookPlaylist(activeBook.id, pl.uri);
                         setLinkDraft(pl.uri);
+                        setEnvironment({ musicProvider: "spotify", musicOn: true });
                       }}
                     >
                       {pl.image && <img src={pl.image} alt="" className="h-8 w-8 rounded object-cover" />}
@@ -123,28 +119,29 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
                   value={linkDraft}
                   onChange={(e) => setLinkDraft(e.target.value)}
                 />
-                <button className="ks-tool" onClick={() => setBookPlaylist(activeBook.id, linkDraft.trim() || undefined)}>
+                <button
+                  className="ks-tool"
+                  onClick={() => {
+                    setBookPlaylist(activeBook.id, linkDraft.trim() || undefined);
+                    if (linkDraft.trim()) setEnvironment({ musicProvider: "spotify", musicOn: true });
+                  }}
+                >
                   Set
                 </button>
               </div>
             )}
 
-            {/* Player */}
-            {embedId ? (
-              <div className="overflow-hidden rounded-xl">
-                <iframe
-                  title="Spotify player"
-                  src={`https://open.spotify.com/embed/playlist/${embedId}`}
-                  width="100%"
-                  height="152"
-                  frameBorder="0"
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                />
-              </div>
-            ) : (
-              <p className="text-xs text-paper/40">Choose or paste a playlist to play it here.</p>
-            )}
+            <VolumeSlider
+              id="ks-crt-spotify-vol"
+              label="Room volume"
+              value={environment.volume}
+              onChange={(v) => setEnvironment({ volume: v })}
+            />
+            <p className="text-xs text-paper/40">
+              {embedId
+                ? "Playback stays in the dock when you close the CRT. The embed has its own volume too."
+                : "Choose or paste a playlist to play it. It will keep playing after you close this."}
+            </p>
 
             {playlistUri && (
               <a
