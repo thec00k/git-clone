@@ -182,27 +182,9 @@ export function BookView() {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <button
-              className="ks-chip"
-              aria-label="Previous spread"
-              title="Previous spread"
-              onClick={() => requestTurn("prev")}
-              disabled={sb.spread === 0 || !!turn}
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <span className="min-w-14 text-center text-sm text-paper/70" aria-live="polite">
+            <span className="min-w-14 text-center text-sm text-ink/70" aria-live="polite">
               Spread {sb.spread + 1} of {sb.spreadCount}
             </span>
-            <button
-              className="ks-chip"
-              aria-label="Next spread"
-              title="Next spread"
-              onClick={() => requestTurn("next")}
-              disabled={sb.spread === sb.spreadCount - 1 || !!turn}
-            >
-              <ChevronRight size={16} />
-            </button>
             {!isVisitor && (
               <>
                 <span className="mx-1 h-6 w-px bg-paper/15" />
@@ -353,33 +335,55 @@ export function BookView() {
       }
     >
       <RoomNavRails desk />
-      {turn ? (
-        <PageFlip
-          dir={turn.dir}
-          curL={sb.leftPage}
-          curR={sb.rightPage}
-          otherL={otherL}
-          otherR={otherR}
-          bookTitle={sb.book.title}
-          bookSubtitle={sb.book.subtitle}
-          onDone={finishTurn}
-        />
-      ) : (
-        <Spread
-          leftPage={sb.leftPage}
-          rightPage={sb.rightPage}
-          activePageId={isVisitor ? null : sb.activePageId}
-          bookTitle={sb.book.title}
-          bookSubtitle={sb.book.subtitle}
-          selectedId={isVisitor ? null : sb.selectedId}
-          onActivate={isVisitor ? () => {} : sb.setActivePageId}
-          onSelect={isVisitor ? () => {} : sb.setSelectedId}
-          onDeselect={() => sb.setSelectedId(null)}
-          onMove={isVisitor ? () => {} : (id, x, y) => sb.updateElement(id, { x, y })}
-          onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
-          onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
-        />
-      )}
+      <div className="ks-book-stage">
+        <button
+          type="button"
+          className="ks-page-turn ks-page-turn--prev"
+          aria-label="Previous spread"
+          title="Turn the page back"
+          onClick={() => requestTurn("prev")}
+          disabled={sb.spread === 0 || !!turn}
+        >
+          <ChevronLeft size={22} />
+        </button>
+        {turn ? (
+          <PageFlip
+            dir={turn.dir}
+            curL={sb.leftPage}
+            curR={sb.rightPage}
+            otherL={otherL}
+            otherR={otherR}
+            bookTitle={sb.book.title}
+            bookSubtitle={sb.book.subtitle}
+            onDone={finishTurn}
+          />
+        ) : (
+          <Spread
+            leftPage={sb.leftPage}
+            rightPage={sb.rightPage}
+            activePageId={isVisitor ? null : sb.activePageId}
+            bookTitle={sb.book.title}
+            bookSubtitle={sb.book.subtitle}
+            selectedId={isVisitor ? null : sb.selectedId}
+            onActivate={isVisitor ? () => {} : sb.setActivePageId}
+            onSelect={isVisitor ? () => {} : sb.setSelectedId}
+            onDeselect={() => sb.setSelectedId(null)}
+            onMove={isVisitor ? () => {} : (id, x, y) => sb.updateElement(id, { x, y })}
+            onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
+            onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
+          />
+        )}
+        <button
+          type="button"
+          className="ks-page-turn ks-page-turn--next"
+          aria-label="Next spread"
+          title="Turn the page"
+          onClick={() => requestTurn("next")}
+          disabled={sb.spread === sb.spreadCount - 1 || !!turn}
+        >
+          <ChevronRight size={22} />
+        </button>
+      </div>
       {showKeys && <ShortcutsHelp onClose={() => setShowKeys(false)} />}
       {showPrint && sb.book && <PrintView book={sb.book} onClose={() => setShowPrint(false)} />}
       {showNotes && sb.book && (
