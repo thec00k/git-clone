@@ -29,6 +29,7 @@ export function RoomChamber({
   layer,
   onOpenWindow,
   onOpenMusic,
+  onSetEnvironment,
   onGo,
   onOpenBook,
   onRenameBook,
@@ -48,6 +49,7 @@ export function RoomChamber({
   layer: (depth: number) => { transform: string };
   onOpenWindow: () => void;
   onOpenMusic: () => void;
+  onSetEnvironment: (patch: Partial<Environment>) => void;
   onGo: (view: "shelf" | "timeline" | "atlas" | "archive" | "book" | "guestbook") => void;
   onOpenBook: (id: string) => void;
   onRenameBook: (id: string, title: string) => void;
@@ -181,6 +183,8 @@ export function RoomChamber({
               <BookshelfWall
                 books={visibleBooks}
                 canEdit={viewAs === "owner"}
+                lit={environment.shelfLit}
+                onToggleLit={() => onSetEnvironment({ shelfLit: !environment.shelfLit })}
                 onOpenBook={onOpenBook}
                 onRename={onRenameBook}
                 onPlace={onPlaceBook}
@@ -209,7 +213,7 @@ function WallPaint({ phase, season }: { phase: Phase; season: string }) {
       <div className="absolute inset-0" style={{ background: SEASON_TINT[season] }} />
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ background: "linear-gradient(120deg, rgb(255 255 255 / 0.38), transparent 42%)" }}
+        style={{ background: "linear-gradient(120deg, rgb(255 236 210 / 0.16), transparent 46%)" }}
       />
       <div className="ks-wall-skirting" aria-hidden="true" />
     </>

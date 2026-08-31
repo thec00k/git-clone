@@ -61,7 +61,7 @@ export function RoomFlat({
           onClick={() => onGo("shelf")}
           aria-label="Bookshelf"
         >
-          <MiniShelf count={bookCount} />
+          <MiniShelf count={bookCount} lit={environment.shelfLit} />
           <span className="ks-obj-label">the bookshelf</span>
         </button>
         <button
@@ -83,9 +83,9 @@ export function RoomFlat({
         >
           <div
             className="flex h-full w-full items-center justify-center rounded-sm"
-            style={{ background: "#8ec9d8", boxShadow: "inset 0 0 0 5px #5ab4c8, inset 0 0 30px rgb(20 80 100/.18)" }}
+            style={{ background: "#c4a078", boxShadow: "inset 0 0 0 5px #8b5a3c, inset 0 0 30px rgb(40 20 10/.18)" }}
           >
-            <MapIcon size={22} className="text-[#16323c]" />
+            <MapIcon size={22} className="text-[#2c221c]" />
           </div>
           <span className="ks-obj-label">the map</span>
         </button>

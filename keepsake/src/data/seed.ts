@@ -165,6 +165,7 @@ export function createSeed(): AppState {
       season: "autumn",
       weather: "clear",
       lampOn: true,
+      shelfLit: true,
       musicOn: false,
       musicProvider: "ambient",
       volume: 0.5,

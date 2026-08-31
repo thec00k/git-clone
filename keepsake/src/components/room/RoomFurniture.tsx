@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { Archive, Clock, Library, MapPin, Music, Moon, CloudSun, Sun, Pencil } from "lucide-react";
+import { Archive, Clock, Lamp, Library, MapPin, Music, Moon, CloudSun, Sun, Pencil } from "lucide-react";
 import type { MemoryPin } from "../../types/app";
 import { COVER_STYLES } from "../../types/scrapbook";
 import type { Scrapbook } from "../../types/scrapbook";
@@ -18,22 +18,22 @@ export function phaseOf(timeMode: string): Phase {
 }
 
 export const SKY: Record<Phase, string> = {
-  day: "linear-gradient(180deg,#7ec8f0 0%,#c5eef8 48%,#e8f8d8 100%)",
-  dusk: "linear-gradient(180deg,#4a7aaa 0%,#c89ad4 52%,#f3c89a 100%)",
-  night: "linear-gradient(180deg,#0a1c38 0%,#163848 58%,#0c2a40 100%)",
+  day: "linear-gradient(180deg,#87b8d4 0%,#c5dce8 48%,#f3e6c8 100%)",
+  dusk: "linear-gradient(180deg,#3a2848 0%,#c47a4a 52%,#f0b070 100%)",
+  night: "linear-gradient(180deg,#12182a 0%,#1a2238 58%,#0e1424 100%)",
 };
 
 export const SEASON_TINT: Record<string, string> = {
-  spring: "rgb(140 220 160 / 0.16)",
-  summer: "rgb(255 230 140 / 0.14)",
-  autumn: "rgb(255 180 120 / 0.12)",
-  winter: "rgb(200 230 255 / 0.16)",
+  spring: "rgb(180 210 140 / 0.12)",
+  summer: "rgb(255 220 140 / 0.12)",
+  autumn: "rgb(210 120 70 / 0.10)",
+  winter: "rgb(200 220 235 / 0.12)",
 };
 
 export const WALL_PAINT: Record<Phase, string> = {
-  day: "linear-gradient(180deg,#e8f7fb 0%,#c5e6ef 42%,#d8f0e6 100%)",
-  dusk: "linear-gradient(180deg,#7eb4d0 0%,#c9a8d4 52%,#f0c8a8 100%)",
-  night: "linear-gradient(180deg,#0e2a3c 0%,#163e4c 55%,#0c2838 100%)",
+  day: "linear-gradient(180deg,#f6e6d0 0%,#f0d4b8 45%,#e8c8a4 100%)",
+  dusk: "linear-gradient(180deg,#6a4a3e 0%,#8a5a42 50%,#c47a4a 100%)",
+  night: "linear-gradient(180deg,#1e1410 0%,#2a1c18 55%,#3a2418 100%)",
 };
 
 export function PhaseBadge({ phase }: { phase: Phase }) {
@@ -48,16 +48,21 @@ export function PhaseBadge({ phase }: { phase: Phase }) {
   );
 }
 
-export function MiniShelf({ count }: { count: number }) {
+export function MiniShelf({ count, lit = true }: { count: number; lit?: boolean }) {
   const spines = Array.from({ length: Math.max(4, count + 2) });
-  const colors = ["#2eb8d0", "#7ed0a8", "#5aa8d4", "#c5e86c", "#89c4f0"];
+  const colors = ["#6b3a2a", "#8b5a3c", "#3d4a38", "#7a3d3a", "#4a3a2a"];
   return (
     <div
-      className="flex h-full w-full flex-col justify-between rounded-sm bg-[#5ab4c8] p-2"
-      style={{ boxShadow: "inset 0 0 30px rgb(20 80 100/.28)" }}
+      className={`ks-mini-shelf${lit ? " is-lit" : ""}`}
+      style={{
+        boxShadow: lit
+          ? "inset 0 0 30px rgb(20 10 6/.35), 0 0 18px rgb(255 190 100/.22)"
+          : "inset 0 0 30px rgb(20 10 6/.45)",
+        filter: lit ? undefined : "brightness(0.72)",
+      }}
     >
       {[0, 1].map((row) => (
-        <div key={row} className="flex items-end gap-1 border-b-4 border-[#7ed0e4] pb-1">
+        <div key={row} className="ks-mini-shelf-row">
           {spines.slice(row * 4, row * 4 + 5).map((_, i) => (
             <div
               key={i}
@@ -78,12 +83,12 @@ export function MiniShelf({ count }: { count: number }) {
 export function Cabinet() {
   return (
     <div
-      className="flex h-full w-full flex-col gap-1 rounded-sm bg-[#6ab8c8] p-1.5"
-      style={{ boxShadow: "0 8px 20px rgb(20 80 100/.22)" }}
+      className="flex h-full w-full flex-col gap-1 rounded-sm bg-[#6b4330] p-1.5"
+      style={{ boxShadow: "0 8px 20px rgb(20 10 6/.35)" }}
     >
       {[0, 1, 2].map((i) => (
-        <div key={i} className="flex flex-1 items-center justify-center rounded-sm bg-[#8ed0dc]">
-          <div className="h-1.5 w-6 rounded-full bg-[#2a6e80]" />
+        <div key={i} className="flex flex-1 items-center justify-center rounded-sm bg-[#8b5a3c]">
+          <div className="h-1.5 w-6 rounded-full bg-[#3d2418]" />
         </div>
       ))}
       <Archive size={14} className="mx-auto text-paper/40" />
@@ -136,8 +141,8 @@ export function WeatherFx({ kind }: { kind: "rain" | "snow" }) {
 export function TimelineFrame() {
   return (
     <div
-      className="flex h-full w-full items-center justify-center rounded-sm bg-[#7ec9d8] p-1"
-      style={{ boxShadow: "inset 0 0 0 6px #5ab4c8" }}
+      className="flex h-full w-full items-center justify-center rounded-sm bg-[#8b5a3c] p-1"
+      style={{ boxShadow: "inset 0 0 0 6px #6b4330" }}
     >
       <div className="flex h-full w-full items-center justify-center rounded-sm bg-paper/90 text-ink">
         <Clock size={20} />
@@ -150,7 +155,7 @@ export function MiniMap() {
   return (
     <div
       className="flex h-full w-full items-center justify-center rounded-sm"
-      style={{ background: "#8ec9d8", boxShadow: "inset 0 0 0 5px #5ab4c8, inset 0 0 30px rgb(20 80 100/.18)" }}
+      style={{ background: "#c4a078", boxShadow: "inset 0 0 0 5px #8b5a3c, inset 0 0 30px rgb(20 10 6/.18)" }}
     >
       <img src="/maps/world.svg" alt="" className="ks-world-map h-[78%] w-[86%] object-cover opacity-90" />
     </div>
@@ -195,6 +200,8 @@ export function CorkboardWall({ pins }: { pins: MemoryPin[] }) {
 export function BookshelfWall({
   books,
   canEdit,
+  lit,
+  onToggleLit,
   onOpenBook,
   onRename,
   onPlace,
@@ -202,13 +209,25 @@ export function BookshelfWall({
 }: {
   books: Scrapbook[];
   canEdit: boolean;
+  lit: boolean;
+  onToggleLit: () => void;
   onOpenBook: (id: string) => void;
   onRename: (id: string, title: string) => void;
   onPlace: (id: string, pos: { shelfRow: number; shelfX: number }) => void;
   onNewBook?: () => void;
 }) {
   return (
-    <div className="ks-shelf-case">
+    <div className={`ks-shelf-case${lit ? " is-lit" : ""}`} data-shelf-lit={lit ? "on" : "off"}>
+      <button
+        type="button"
+        className="ks-shelf-lamp"
+        aria-pressed={lit}
+        aria-label={lit ? "Turn shelf lights off" : "Turn shelf lights on"}
+        onClick={onToggleLit}
+      >
+        <Lamp size={14} aria-hidden="true" />
+        {lit ? "Lights on" : "Lights off"}
+      </button>
       {canEdit && onNewBook && (
         <button type="button" className="ks-shelf-new" onClick={onNewBook}>
           New book

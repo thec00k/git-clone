@@ -36,6 +36,8 @@ export interface Environment {
   season: Season;
   weather: Weather;
   lampOn: boolean;
+  /** Warm LED strips under each bookshelf row. */
+  shelfLit: boolean;
   musicOn: boolean;
   musicProvider: MusicProvider;
   volume: number; // 0..1

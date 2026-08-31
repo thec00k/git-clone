@@ -45,6 +45,17 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-sm text-paper/60">Shelf lights</span>
+          <button
+            className={`ks-tool ${environment.shelfLit ? "ks-tool--accent" : ""}`}
+            aria-pressed={environment.shelfLit}
+            onClick={() => setEnvironment({ shelfLit: !environment.shelfLit })}
+          >
+            {environment.shelfLit ? "On" : "Off"}
+          </button>
+        </div>
+
         <div className="mt-3">
           <label className="text-sm text-paper/60" htmlFor="ks-music-vol">Music volume</label>
           <input

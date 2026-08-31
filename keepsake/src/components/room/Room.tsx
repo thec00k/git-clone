@@ -31,6 +31,7 @@ export function Room() {
     renameBook,
     setBookShelf,
     addBook,
+    setEnvironment,
   } = useApp();
   const { go, viewAs, setViewAs, touring, tourFocus, startTour, roomFace, setRoomFace } = useNav();
   const [envOpen, setEnvOpen] = useState(false);
@@ -163,6 +164,7 @@ export function Room() {
             layer={layer}
             onOpenWindow={() => setEnvOpen(true)}
             onOpenMusic={() => setMusicOpen(true)}
+            onSetEnvironment={setEnvironment}
             onGo={go}
             onOpenBook={(id) => {
               setActiveBook(id);
