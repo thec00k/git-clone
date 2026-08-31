@@ -36,7 +36,7 @@ import { SaveIndicator } from "./SaveIndicator";
 import { PrintView } from "./PrintView";
 import { NotesPanel } from "./NotesPanel";
 import { BookIdentityEditor } from "./BookIdentityEditor";
-import { BackChip } from "./views/ViewShell";
+import { HomeChip, RoomNavRails } from "./views/ViewShell";
 
 export function BookView() {
   const sb = useScrapbook();
@@ -147,7 +147,8 @@ export function BookView() {
 
   if (!sb.book) {
     return (
-      <RoomFrame header={<BackChip />}>
+      <RoomFrame header={<HomeChip />}>
+        <RoomNavRails />
         <div className="flex flex-1 items-center justify-center text-paper/60">No book open.</div>
       </RoomFrame>
     );
@@ -155,7 +156,8 @@ export function BookView() {
 
   if (!canView) {
     return (
-      <RoomFrame header={<BackChip />}>
+      <RoomFrame header={<HomeChip />}>
+        <RoomNavRails />
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-paper/70">
           <Lock size={28} />
           <p>This book is private.</p>
@@ -170,7 +172,7 @@ export function BookView() {
       header={
         <>
           <div className="flex items-center gap-3">
-            <BackChip />
+            <HomeChip />
             <div className="leading-tight">
               <p className="font-display font-semibold text-paper">{sb.book.title}</p>
               <p className="ks-caption text-paper/70" style={{ fontSize: "1.1rem" }}>
@@ -350,6 +352,7 @@ export function BookView() {
         )
       }
     >
+      <RoomNavRails />
       {turn ? (
         <PageFlip
           dir={turn.dir}

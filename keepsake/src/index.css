@@ -256,6 +256,12 @@
     background: var(--color-accent);
   }
 
+  .ks-chip--home {
+    width: auto;
+    gap: 0.4rem;
+    padding: 0 0.85rem;
+  }
+
   .ks-chip:active {
     transform: scale(0.92);
   }
@@ -329,6 +335,10 @@
   }
 
   /* Full-page chamber. After a yaw the facing wall flattens so clicks land. */
+  .ks-room {
+    --return-w: 4.85rem;
+  }
+
   .ks-room--chamber {
     display: block;
   }
@@ -464,8 +474,19 @@
     box-shadow: -8px 0 18px rgb(0 0 0 / 0.32);
   }
 
+  /* Map and bookshelf sit lower on the side so Home / the desk keep the top corner. */
+  .ks-return--map,
+  .ks-return--shelf {
+    top: auto;
+    bottom: 10%;
+    height: 40%;
+  }
+
   .ks-return--desk.ks-return--left,
   .ks-return--desk.ks-return--right {
+    top: 0;
+    bottom: 0;
+    height: auto;
     background:
       linear-gradient(180deg, #3a2c22, #2a2019);
     box-shadow: 0 0 22px rgb(0 0 0 / 0.4);
@@ -1177,9 +1198,66 @@
   }
 
   .ks-cork-map {
+    position: relative;
     border-radius: 4px;
     background: #3a5c68;
     box-shadow: inset 0 0 40px rgb(0 0 0 / 0.25);
+  }
+
+  .ks-atlas {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 0.85rem;
+    padding: 0.2rem calc(var(--return-w) + 0.7rem) 1rem;
+  }
+
+  .ks-atlas-board {
+    display: flex;
+    flex: 3 1 0;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .ks-atlas-cork {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .ks-atlas-map {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .ks-atlas-editor {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 15rem;
+    max-width: 22rem;
+    flex-direction: column;
+    overflow-y: auto;
+    border-radius: 12px;
+    background: rgb(20 14 10 / 0.55);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+    padding: 1rem 1.05rem 1.1rem;
+  }
+
+  @media (max-width: 860px) {
+    .ks-atlas {
+      flex-direction: column;
+    }
+
+    .ks-atlas-board {
+      flex: 1 1 58%;
+    }
+
+    .ks-atlas-editor {
+      flex: 0 1 auto;
+      max-width: none;
+      min-width: 0;
+    }
   }
 
   .ks-world-map {

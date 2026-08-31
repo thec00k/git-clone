@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, RefObject } from "react";
-import { Lock, MapPin, Pencil, Trash2, Unlock, X } from "lucide-react";
+import { ImagePlus, Lock, MapPin, Pencil, Trash2, Unlock, X } from "lucide-react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
 import { loadImageFile } from "../../lib/image";
@@ -21,6 +21,7 @@ export function Atlas() {
 
   const locked = environment.pinsLocked || isVisitor;
   const editing = editingId ? state.pins.find((p) => p.id === editingId) : null;
+  const formOpen = !!(draft || editing);
 
   const beginNew = (x: number, y: number) => {
     if (isVisitor) return;
@@ -74,6 +75,8 @@ export function Atlas() {
   const closeForm = () => {
     setDraft(null);
     setEditingId(null);
+    setLabel("");
+    setCaption("");
     setPhotoSrc(undefined);
   };
 
@@ -81,7 +84,8 @@ export function Atlas() {
     <ViewShell
       title="The map"
       subtitle="a corkboard of the world"
-      scroll
+      fill
+      scroll={false}
       actions={
         !isVisitor && (
           <button
@@ -97,108 +101,139 @@ export function Atlas() {
         )
       }
     >
-      <p className="mt-2 text-sm text-paper/50">
-        {isVisitor
-          ? "Places shared on the map."
-          : environment.pinsLocked
-            ? "Pins are locked. Click a pin to edit its note. Unlock to drag a pin to a new place."
-            : "Click the map to pin a memory. Drag a pin to move it, or click it to edit. Exact street addresses stay private (Bible §16)."}
-      </p>
-      <div className="ks-cork mt-3">
-        <div
-          ref={mapRef}
-          className="ks-cork-map relative w-full overflow-hidden"
-          style={{ aspectRatio: "2 / 1", cursor: isVisitor || locked ? "default" : "crosshair" }}
-          onClick={onMapClick}
-        >
-          <img src="/maps/world.svg" alt="World map" className="ks-world-map pointer-events-none absolute inset-0 h-full w-full object-cover" />
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{ backgroundImage: "url('/textures/grain.png')", opacity: 0.12 }}
-          />
-          {state.pins.map((p) => (
-            <MapPinMarker
-              key={p.id}
-              pin={p}
-              locked={locked}
-              selected={editingId === p.id}
-              mapRef={mapRef}
-              onSelect={() => openEdit(p)}
-              onMove={(x, y) => updatePin(p.id, { x, y })}
-            />
-          ))}
-          {draft && (
-            <div className="pointer-events-none absolute -translate-x-1/2 -translate-y-full" style={{ left: `${draft.x}%`, top: `${draft.y}%` }}>
-              <MapPin size={26} className="text-paper drop-shadow" />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {(draft || editing) && !isVisitor && (
-        <div className="ks-panel mt-3 p-4" data-pin-editor={editing ? "edit" : "new"}>
-          <div className="mb-3 flex items-center justify-between">
-            <p className="font-display text-paper">{editing ? "Edit this pin" : "Pin a memory"}</p>
-            <button className="ks-chip h-8 w-8" onClick={closeForm} aria-label="Cancel">
-              <X size={15} />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label className="text-sm text-paper/60" htmlFor="ks-pin-place">
-              Place
-              <input
-                id="ks-pin-place"
-                name="place"
-                className="mt-1 block w-full rounded-lg bg-black/25 px-3 py-2 text-paper outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
-                placeholder="where…"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                autoFocus
-              />
-            </label>
-            <label className="text-sm text-paper/60" htmlFor="ks-pin-note">
-              Note
-              <input
-                id="ks-pin-note"
-                name="note"
-                className="mt-1 block w-full rounded-lg bg-black/25 px-3 py-2 text-paper outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
-                placeholder="a memory…"
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && (editing ? commitEdit() : commitNew())}
-              />
-            </label>
-          </div>
-          <div className="mt-3 flex items-center gap-3">
-            <input ref={photoRef} type="file" accept="image/*" hidden aria-label="Photograph for this pin" onChange={(e) => { onPhoto(e.target.files); e.target.value = ""; }} />
-            <button type="button" className="ks-tool" onClick={() => photoRef.current?.click()}>
-              {photoSrc ? "Change photo" : "Add a photo"}
-            </button>
-            {photoSrc && <img src={photoSrc} alt="" className="h-12 w-12 rounded object-cover" />}
-          </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              className="ks-tool ks-tool--accent flex-1 justify-center disabled:opacity-40"
-              onClick={editing ? commitEdit : commitNew}
-              disabled={!label.trim()}
+      <div className="ks-atlas">
+        <div className="ks-atlas-board">
+          <div className="ks-cork ks-atlas-cork">
+            <div
+              ref={mapRef}
+              className="ks-cork-map ks-atlas-map"
+              style={{ cursor: isVisitor || locked ? "default" : "crosshair" }}
+              onClick={onMapClick}
+              data-atlas-map
             >
-              {editing ? "Save" : "Pin it"}
-            </button>
-            {editing && (
-              <button
-                type="button"
-                className="ks-tool"
-                onClick={() => {
-                  removePin(editing.id);
-                  closeForm();
-                }}
-              >
-                <Trash2 size={14} /> Remove
+              <img src="/maps/world.svg" alt="World map" className="ks-world-map pointer-events-none absolute inset-0 h-full w-full object-cover" />
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{ backgroundImage: "url('/textures/grain.png')", opacity: 0.12 }}
+              />
+              {state.pins.map((p) => (
+                <MapPinMarker
+                  key={p.id}
+                  pin={p}
+                  locked={locked}
+                  selected={editingId === p.id}
+                  mapRef={mapRef}
+                  onSelect={() => openEdit(p)}
+                  onMove={(x, y) => updatePin(p.id, { x, y })}
+                />
+              ))}
+              {draft && (
+                <div className="pointer-events-none absolute -translate-x-1/2 -translate-y-full" style={{ left: `${draft.x}%`, top: `${draft.y}%` }}>
+                  <MapPin size={26} className="text-paper drop-shadow" />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <aside className="ks-atlas-editor" data-pin-editor={editing ? "edit" : draft ? "new" : "idle"}>
+          <div className="mb-3 flex items-start justify-between gap-2">
+            <div>
+              <p className="font-display text-lg text-paper">{editing ? "Edit this pin" : draft ? "Pin a memory" : "A place"}</p>
+              <p className="mt-1 text-sm text-paper/55">
+                {isVisitor
+                  ? "Places shared on the map."
+                  : environment.pinsLocked
+                    ? "Pins are locked. Click a pin to edit its note. Unlock to drag."
+                    : formOpen
+                      ? "Name the place, write a caption, add a photo."
+                      : "Click the map to drop a pin. Drag a pin to move it."}
+              </p>
+            </div>
+            {formOpen && !isVisitor && (
+              <button className="ks-chip h-8 w-8 shrink-0" onClick={closeForm} aria-label="Cancel">
+                <X size={15} />
               </button>
             )}
           </div>
-        </div>
-      )}
+
+          {!isVisitor && (
+            <>
+              <label className="block text-sm text-paper/60" htmlFor="ks-pin-place">
+                Place
+                <input
+                  id="ks-pin-place"
+                  name="place"
+                  className="mt-1 block w-full rounded-lg bg-black/25 px-3 py-2 text-paper outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                  placeholder="where…"
+                  value={label}
+                  onChange={(e) => setLabel(e.target.value)}
+                  disabled={!formOpen}
+                  autoFocus={formOpen}
+                />
+              </label>
+              <label className="mt-3 block text-sm text-paper/60" htmlFor="ks-pin-note">
+                Caption
+                <textarea
+                  id="ks-pin-note"
+                  name="note"
+                  rows={4}
+                  className="mt-1 block w-full resize-none rounded-lg bg-black/25 px-3 py-2 text-paper outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                  placeholder="a memory…"
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  disabled={!formOpen}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      editing ? commitEdit() : commitNew();
+                    }
+                  }}
+                />
+              </label>
+              <div className="mt-3">
+                <input
+                  ref={photoRef}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  aria-label="Photograph for this pin"
+                  onChange={(e) => {
+                    onPhoto(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+                <button type="button" className="ks-tool w-full justify-center" onClick={() => photoRef.current?.click()} disabled={!formOpen}>
+                  <ImagePlus size={15} />
+                  {photoSrc ? "Change photo" : "Add a photo"}
+                </button>
+                {photoSrc && <img src={photoSrc} alt="" className="mt-2 h-28 w-full rounded object-cover" />}
+              </div>
+              <div className="mt-auto flex flex-col gap-2 pt-4">
+                <button
+                  className="ks-tool ks-tool--accent w-full justify-center disabled:opacity-40"
+                  onClick={editing ? commitEdit : commitNew}
+                  disabled={!formOpen || !label.trim()}
+                >
+                  {editing ? "Save" : "Pin it"}
+                </button>
+                {editing && (
+                  <button
+                    type="button"
+                    className="ks-tool w-full justify-center"
+                    onClick={() => {
+                      removePin(editing.id);
+                      closeForm();
+                    }}
+                  >
+                    <Trash2 size={14} /> Remove
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </aside>
+      </div>
     </ViewShell>
   );
 }

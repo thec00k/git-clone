@@ -9,7 +9,7 @@ interface Props {
 /** The warm room shell that wraps every screen. */
 export function RoomFrame({ header, footer, children }: Props) {
   return (
-    <div className="ks-room flex h-dvh flex-col overflow-hidden">
+    <div className="ks-room relative flex h-dvh flex-col overflow-hidden">
       <a className="ks-skip" href="#ks-main">
         Skip to the page
       </a>
@@ -18,7 +18,7 @@ export function RoomFrame({ header, footer, children }: Props) {
           {header}
         </header>
       )}
-      <main id="ks-main" className="flex min-h-0 flex-1 flex-col">
+      <main id="ks-main" className="relative flex min-h-0 flex-1 flex-col">
         {children}
       </main>
       {footer && <div className="shrink-0">{footer}</div>}

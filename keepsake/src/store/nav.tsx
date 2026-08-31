@@ -19,6 +19,8 @@ interface NavContextValue {
   view: View;
   go: (v: View) => void;
   back: () => void;
+  goDesk: () => void;
+  goWall: (face: RoomFace) => void;
   viewAs: ViewAs;
   setViewAs: (v: ViewAs) => void;
   isVisitor: boolean;
@@ -46,6 +48,14 @@ export function NavProvider({ children }: { children: ReactNode }) {
   const back = useCallback(() => {
     setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
   }, []);
+  const goDesk = useCallback(() => {
+    setStack(["room"]);
+    setRoomFace("front");
+  }, []);
+  const goWall = useCallback((face: RoomFace) => {
+    setStack(["room"]);
+    setRoomFace(face);
+  }, []);
   const startTour = useCallback(() => {
     setStack(["room"]);
     setRoomFace("front");
@@ -58,13 +68,16 @@ export function NavProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const view = stack[stack.length - 1];
-  const { aria: backAria, label: backLabel } = returnLabel(view, roomFace);
+  const backAria = "Back to the desk";
+  const backLabel = "the desk";
 
   const value = useMemo<NavContextValue>(
     () => ({
       view,
       go,
       back,
+      goDesk,
+      goWall,
       viewAs,
       setViewAs,
       isVisitor: viewAs !== "owner",
@@ -78,20 +91,13 @@ export function NavProvider({ children }: { children: ReactNode }) {
       backAria,
       backLabel,
     }),
-    [view, go, back, viewAs, touring, tourFocus, startTour, endTour, roomFace, backAria, backLabel],
+    [view, go, back, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace],
   );
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;
 }
 
-export function returnLabel(view: View, face: RoomFace): { aria: string; label: string } {
-  if (view === "atlas") return { aria: "Back to the map", label: "the map" };
-  if (view === "book" || view === "shelf") {
-    if (face === "right") return { aria: "Back to the bookshelf", label: "the bookshelf" };
-    return { aria: "Back to the desk", label: "the desk" };
-  }
-  if (face === "right") return { aria: "Back to the bookshelf", label: "the bookshelf" };
-  if (face === "left") return { aria: "Back to the map", label: "the map" };
+export function returnLabel(_view?: View, _face?: RoomFace): { aria: string; label: string } {
   return { aria: "Back to the desk", label: "the desk" };
 }
 
