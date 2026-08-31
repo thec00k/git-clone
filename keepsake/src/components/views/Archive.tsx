@@ -171,10 +171,10 @@ export function Archive() {
               <button className={`ks-tool ${tab === t.id ? "ks-tool--accent" : ""}`} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
                 {t.name}
               </button>
-              <button className="ml-0.5 text-paper/40 hover:text-paper" aria-label={`Rename ${t.name}`} onClick={() => startRename(t.id, t.name)}>
+              <button className="ks-chip ml-0.5 h-7 w-7" aria-label={`Rename ${t.name}`} onClick={() => startRename(t.id, t.name)}>
                 <Pencil size={11} />
               </button>
-              <button className="text-paper/30 hover:text-accent" aria-label={`Remove ${t.name} tab`} onClick={() => { if (tab === t.id) setTab("all"); removeArchiveTab(t.id); }}>
+              <button className="ks-chip h-7 w-7" aria-label={`Remove ${t.name} tab`} onClick={() => { if (tab === t.id) setTab("all"); removeArchiveTab(t.id); }}>
                 <X size={12} />
               </button>
             </span>
@@ -205,7 +205,7 @@ export function Archive() {
         )}
       </div>
 
-      <p className="mt-4 mb-2 text-sm text-paper/50">
+      <p className="mt-4 mb-2 text-sm text-ink/70">
         {filtered.length} photo{filtered.length === 1 ? "" : "s"} · newest first
         {tab !== "all" && tab !== "favorites" ? " · uploads join this tab" : ""}
       </p>
