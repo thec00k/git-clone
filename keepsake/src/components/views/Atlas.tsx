@@ -505,7 +505,8 @@ function FridgePeek({ pin, notes, onClose }: { pin: MemoryPin; notes: PinNote[];
                 })}
               </div>
             </div>
-            <p>{pin.label}</p>
+            <p className="ks-fridge-title">{pin.label}</p>
+            {pin.caption ? <p className="ks-fridge-caption">{pin.caption}</p> : null}
           </div>
         </div>
       </div>
