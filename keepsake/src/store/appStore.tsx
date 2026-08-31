@@ -14,10 +14,10 @@ import type {
   ArchiveTab,
   Environment,
   MemoryPin,
-  PIN_NOTE_MAX,
   PinNote,
   Profile,
 } from "../types/app";
+import { PIN_NOTE_MAX } from "../types/app";
 import type {
   CoverStyle,
   SaveStatus,
@@ -364,12 +364,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const text = message.trim().slice(0, PIN_NOTE_MAX);
       if (!text) return;
       update((p) => {
-        const existing = p.pinNotes.find((n) => n.pinId === pinId && n.author === author);
+        const list = p.pinNotes ?? [];
+        const existing = list.find((n) => n.pinId === pinId && n.author === author);
         if (existing) {
-          return { ...p, pinNotes: p.pinNotes.map((n) => (n.id === existing.id ? { ...n, message: text } : n)) };
+          return { ...p, pinNotes: list.map((n) => (n.id === existing.id ? { ...n, message: text } : n)) };
         }
         const note: PinNote = { id: uid("pnote"), pinId, author, message: text, createdAt: Date.now() };
-        return { ...p, pinNotes: [...p.pinNotes, note] };
+        return { ...p, pinNotes: [...list, note] };
       });
     },
     [update],

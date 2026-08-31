@@ -29,7 +29,7 @@ export function Atlas() {
   const formOpen = !!(draft || editing);
   const canNote = canLeavePinNote(viewAs);
   const author = VIEW_AS_LABEL[viewAs];
-  const peekNotes = peeking ? state.pinNotes.filter((n) => n.pinId === peeking.id) : [];
+  const peekNotes = peeking ? (state.pinNotes ?? []).filter((n) => n.pinId === peeking.id) : [];
 
   const beginNew = (x: number, y: number) => {
     if (isVisitor) return;
@@ -446,7 +446,7 @@ function FridgeNotePanel({
       )}
       <div className="mt-3 flex flex-col gap-2">
         {canNote && (
-          <button className="ks-tool ks-tool--accent w-full justify-center disabled:opacity-40" onClick={commit} disabled={!draft.trim()}>
+          <button type="button" data-stick-note className="ks-tool ks-tool--accent w-full justify-center disabled:opacity-40" onClick={commit} disabled={!draft.trim()}>
             {mine ? "Save sticky" : "Stick it"}
           </button>
         )}
