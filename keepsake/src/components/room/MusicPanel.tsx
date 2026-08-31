@@ -180,6 +180,13 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
+            <VolumeSlider
+              id="ks-crt-spotify-vol"
+              label="Spotify volume"
+              value={environment.volume}
+              onChange={setSpotifyVolume}
+            />
+
             {embedId && (
               <div>
                 <p className="mb-1 text-sm text-paper/60">Now playing</p>
@@ -211,15 +218,9 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
-            <VolumeSlider
-              id="ks-crt-spotify-vol"
-              label="Room volume"
-              value={environment.volume}
-              onChange={setSpotifyVolume}
-            />
             <p className="text-xs text-paper/40">
               {embedId
-                ? "Scroll the player to pick a song. The same player stays in the corner when you close the CRT. Connect Spotify (Premium) so the volume slider follows the music."
+                ? "Scroll the player to pick a song. The same player stays in the corner when you close the CRT. Connect Spotify (Premium) so this slider follows the music."
                 : "Choose or paste a playlist to play it. It will keep playing after you close this."}
             </p>
 
