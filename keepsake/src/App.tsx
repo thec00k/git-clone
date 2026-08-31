@@ -8,6 +8,7 @@ import { Atlas } from "./components/views/Atlas";
 import { Guestbook } from "./components/views/Guestbook";
 import { AmbientAudio } from "./components/AmbientAudio";
 import { SpotifyDock } from "./components/SpotifyDock";
+import { CrtPlayerSlotProvider } from "./store/spotifyUi";
 
 function CurrentView() {
   const { view } = useNav();
@@ -31,10 +32,10 @@ function CurrentView() {
 
 export default function App() {
   return (
-    <>
+    <CrtPlayerSlotProvider>
       <AmbientAudio />
       <SpotifyDock />
       <CurrentView />
-    </>
+    </CrtPlayerSlotProvider>
   );
 }

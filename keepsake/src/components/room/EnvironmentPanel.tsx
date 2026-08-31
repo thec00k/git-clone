@@ -2,6 +2,8 @@ import { useRef } from "react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
+import { setPlaybackVolume } from "../../lib/spotify";
+import { applyPlaybackVolume } from "../../lib/spotifyPlayback";
 import type { Season, TimeMode, Weather } from "../../types/app";
 
 const TIMES: TimeMode[] = ["auto", "day", "dusk", "night"];
@@ -66,7 +68,14 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
             max={1}
             step={0.05}
             value={environment.volume}
-            onChange={(e) => setEnvironment({ volume: Number(e.target.value) })}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setEnvironment({ volume: v });
+              if (environment.musicProvider === "spotify") {
+                void applyPlaybackVolume(v);
+                void setPlaybackVolume(v);
+              }
+            }}
             className="mt-1 w-full accent-[var(--color-accent)]"
           />
         </div>

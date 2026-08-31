@@ -190,7 +190,7 @@ export function logout(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-async function getAccessToken(): Promise<string | null> {
+export async function getAccessToken(): Promise<string | null> {
   const tok = read();
   if (!tok) return null;
   if (Date.now() < tok.expires_at) return tok.access_token;
@@ -213,7 +213,6 @@ async function getAccessToken(): Promise<string | null> {
     return null;
   }
   const data = await res.json();
-  // Spotify may not return a new refresh token; keep the old one.
   store({ ...data, refresh_token: data.refresh_token ?? tok.refresh_token });
   return data.access_token as string;
 }
@@ -226,6 +225,76 @@ async function api<T>(path: string): Promise<T | null> {
   });
   if (!res.ok) return null;
   return (await res.json()) as T;
+}
+
+async function apiSend(path: string, init: RequestInit = {}): Promise<boolean> {
+  const token = await getAccessToken();
+  if (!token) return false;
+  const res = await fetch(`https://api.spotify.com/v1${path}`, {
+    ...init,
+    headers: { Authorization: `Bearer ${token}`, ...(init.headers ?? {}) },
+  });
+  return res.ok || res.status === 204;
+}
+
+/** 0..1 room volume → a Spotify Connect / Web Playback device. */
+export async function setPlaybackVolume(volume: number, deviceId?: string): Promise<boolean> {
+  const pct = Math.round(Math.min(1, Math.max(0, volume)) * 100);
+  const q = deviceId ? `&device_id=${encodeURIComponent(deviceId)}` : "";
+  return apiSend(`/me/player/volume?volume_percent=${pct}${q}`, { method: "PUT" });
+}
+
+export async function transferPlayback(deviceId: string, play = false): Promise<boolean> {
+  return apiSend("/me/player", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ device_ids: [deviceId], play }),
+  });
+}
+
+export interface SpotifyTrack {
+  uri: string;
+  name: string;
+  artists: string;
+}
+
+export async function getPlaylistTracks(id: string): Promise<SpotifyTrack[]> {
+  const data = await api<{
+    items: { track: { uri: string; name: string; artists: { name: string }[] } | null }[];
+  }>(`/playlists/${encodeURIComponent(id)}/tracks?limit=50`);
+  if (!data) return [];
+  return data.items
+    .map((row) => row.track)
+    .filter((t): t is NonNullable<typeof t> => !!t?.uri)
+    .map((t) => ({
+      uri: t.uri,
+      name: t.name,
+      artists: (t.artists ?? []).map((a) => a.name).join(", "),
+    }));
+}
+
+export async function playContext(opts: {
+  contextUri: string;
+  deviceId?: string;
+  offsetUri?: string;
+}): Promise<boolean> {
+  const q = opts.deviceId ? `?device_id=${encodeURIComponent(opts.deviceId)}` : "";
+  const body = opts.offsetUri
+    ? { context_uri: opts.contextUri, offset: { uri: opts.offsetUri } }
+    : { context_uri: opts.contextUri };
+  return apiSend(`/me/player/play${q}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+export async function pausePlayback(): Promise<boolean> {
+  return apiSend("/me/player/pause", { method: "PUT" });
+}
+
+export async function skipPlayback(dir: "next" | "previous"): Promise<boolean> {
+  return apiSend(`/me/player/${dir}`, { method: "POST" });
 }
 
 export async function getProfile(): Promise<SpotifyProfile | null> {

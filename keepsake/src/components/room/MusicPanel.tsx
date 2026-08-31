@@ -1,18 +1,36 @@
-import { useRef, useState } from "react";
-import { ExternalLink, LogOut, Music, Radio, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ExternalLink, LogOut, Music, Radio, SkipBack, SkipForward, X } from "lucide-react";
 import { useApp } from "../../store/appStore";
+import { useCrtPlayerSlot } from "../../store/spotifyUi";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { useSpotify } from "../../hooks/useSpotify";
-import { playlistEmbedId, redirectUri } from "../../lib/spotify";
+import {
+  getPlaylistTracks,
+  playContext,
+  playlistEmbedId,
+  redirectUri,
+  setPlaybackVolume,
+  skipPlayback,
+  type SpotifyTrack,
+} from "../../lib/spotify";
+import { ensurePlaybackDevice } from "../../lib/spotifyPlayback";
 import type { MusicProvider } from "../../types/app";
 import { VolumeSlider } from "../VolumeSlider";
 
 export function MusicPanel({ onClose }: { onClose: () => void }) {
   const { environment, setEnvironment, activeBook, setBookPlaylist } = useApp();
   const sp = useSpotify();
+  const { setSlot } = useCrtPlayerSlot();
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, onClose);
   const [linkDraft, setLinkDraft] = useState(activeBook?.playlistUri ?? "");
+  const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
+  const attachSlot = useCallback(
+    (el: HTMLDivElement | null) => {
+      setSlot(el);
+    },
+    [setSlot],
+  );
 
   const provider = environment.musicProvider;
   const setProvider = (p: MusicProvider) => setEnvironment({ musicProvider: p, musicOn: true });
@@ -20,9 +38,35 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
   const playlistUri = activeBook?.playlistUri;
   const embedId = playlistUri ? playlistEmbedId(playlistUri) : null;
 
+  useEffect(() => {
+    if (!embedId || !sp.connected) {
+      setTracks([]);
+      return;
+    }
+    let live = true;
+    void getPlaylistTracks(embedId).then((list) => {
+      if (live) setTracks(list);
+    });
+    return () => {
+      live = false;
+    };
+  }, [embedId, sp.connected]);
+
+  const setSpotifyVolume = (v: number) => {
+    setEnvironment({ volume: v });
+    void setPlaybackVolume(v);
+  };
+
+  const playTrack = async (offsetUri?: string) => {
+    if (!playlistUri) return;
+    const device = await ensurePlaybackDevice(environment.volume);
+    await playContext({ contextUri: playlistUri, deviceId: device ?? undefined, offsetUri });
+    setEnvironment({ musicProvider: "spotify", musicOn: true });
+  };
+
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div ref={panelRef} className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Music" onClick={(e) => e.stopPropagation()}>
+      <div ref={panelRef} className="ks-panel w-full max-w-lg max-h-[90dvh] overflow-y-auto p-5" role="dialog" aria-modal="true" aria-label="Music" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-xl">The CRT</h2>
           <button className="text-paper/50" onClick={onClose} aria-label="Close music"><X size={18} /></button>
@@ -97,6 +141,11 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
                         setBookPlaylist(activeBook.id, pl.uri);
                         setLinkDraft(pl.uri);
                         setEnvironment({ musicProvider: "spotify", musicOn: true });
+                        void (async () => {
+                          const device = await ensurePlaybackDevice(environment.volume);
+                          await playContext({ contextUri: pl.uri, deviceId: device ?? undefined });
+                          await setPlaybackVolume(environment.volume);
+                        })();
                       }}
                     >
                       {pl.image && <img src={pl.image} alt="" className="h-8 w-8 rounded object-cover" />}
@@ -131,15 +180,46 @@ export function MusicPanel({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
+            {embedId && (
+              <div>
+                <p className="mb-1 text-sm text-paper/60">Now playing</p>
+                <div ref={attachSlot} className="ks-crt-player-slot" data-crt-player />
+                {tracks.length > 0 && (
+                  <div className="ks-crt-tracks" role="list" aria-label="Playlist tracks">
+                    {tracks.map((t) => (
+                      <button
+                        key={t.uri}
+                        type="button"
+                        role="listitem"
+                        className="ks-crt-track"
+                        onClick={() => void playTrack(t.uri)}
+                      >
+                        <span className="truncate text-paper">{t.name}</span>
+                        <span className="truncate text-paper/45">{t.artists}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-2 flex justify-center gap-2">
+                  <button className="ks-chip h-9 w-9" aria-label="Previous track" onClick={() => void skipPlayback("previous")}>
+                    <SkipBack size={14} />
+                  </button>
+                  <button className="ks-chip h-9 w-9" aria-label="Next track" onClick={() => void skipPlayback("next")}>
+                    <SkipForward size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+
             <VolumeSlider
               id="ks-crt-spotify-vol"
               label="Room volume"
               value={environment.volume}
-              onChange={(v) => setEnvironment({ volume: v })}
+              onChange={setSpotifyVolume}
             />
             <p className="text-xs text-paper/40">
               {embedId
-                ? "Playback stays in the dock when you close the CRT. The embed has its own volume too."
+                ? "Scroll the player to pick a song. The same player stays in the corner when you close the CRT. Connect Spotify (Premium) so the volume slider follows the music."
                 : "Choose or paste a playlist to play it. It will keep playing after you close this."}
             </p>
 
