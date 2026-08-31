@@ -77,12 +77,12 @@ export interface Scrapbook {
 
 export type CoverStyle = "cocoa" | "forest" | "wine" | "midnight" | "ochre";
 
-export const COVER_STYLES: Record<CoverStyle, { label: string; leather: string; ink: string; glow: string }> = {
-  cocoa: { label: "Cocoa", leather: "#4a3224", ink: "#f3e9d8", glow: "#ff8a3c" },
-  forest: { label: "Forest", leather: "#2f4a3c", ink: "#eef0e6", glow: "#5dff6a" },
-  wine: { label: "Wine", leather: "#5b2733", ink: "#f4e6df", glow: "#ff3db0" },
-  midnight: { label: "Midnight", leather: "#20293f", ink: "#e6ebf4", glow: "#00e8ff" },
-  ochre: { label: "Ochre", leather: "#7a5320", ink: "#fbf1dc", glow: "#ffe14a" },
+export const COVER_STYLES: Record<CoverStyle, { label: string; leather: string; ink: string }> = {
+  cocoa: { label: "Cocoa", leather: "#4a3224", ink: "#f3e9d8" },
+  forest: { label: "Forest", leather: "#2f4a3c", ink: "#eef0e6" },
+  wine: { label: "Wine", leather: "#5b2733", ink: "#f4e6df" },
+  midnight: { label: "Midnight", leather: "#20293f", ink: "#e6ebf4" },
+  ochre: { label: "Ochre", leather: "#7a5320", ink: "#fbf1dc" },
 };
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";

@@ -18,22 +18,22 @@ export function phaseOf(timeMode: string): Phase {
 }
 
 export const SKY: Record<Phase, string> = {
-  day: "linear-gradient(180deg,#7ec8f0 0%,#d4f0ff 48%,#ffe0f4 100%)",
-  dusk: "linear-gradient(180deg,#2a1048 0%,#c84a9a 52%,#4ec8d8 100%)",
-  night: "linear-gradient(180deg,#070b14 0%,#12182a 58%,#0a1830 100%)",
+  day: "linear-gradient(180deg,#87b8d4 0%,#c5dce8 48%,#f3e6c8 100%)",
+  dusk: "linear-gradient(180deg,#3a2848 0%,#c47a4a 52%,#f0b070 100%)",
+  night: "linear-gradient(180deg,#12182a 0%,#1a2238 58%,#0e1424 100%)",
 };
 
 export const SEASON_TINT: Record<string, string> = {
-  spring: "rgb(80 255 180 / 0.08)",
-  summer: "rgb(255 230 80 / 0.08)",
-  autumn: "rgb(255 80 180 / 0.08)",
-  winter: "rgb(80 220 255 / 0.10)",
+  spring: "rgb(180 210 140 / 0.12)",
+  summer: "rgb(255 220 140 / 0.12)",
+  autumn: "rgb(210 120 70 / 0.10)",
+  winter: "rgb(200 220 235 / 0.12)",
 };
 
 export const WALL_PAINT: Record<Phase, string> = {
-  day: "linear-gradient(180deg,#f4f7fb 0%,#e4eef6 48%,#d2e6f0 100%)",
-  dusk: "linear-gradient(180deg,#3a1458 0%,#8a2a78 48%,#e84a9a 100%)",
-  night: "linear-gradient(180deg,#070b14 0%,#101828 55%,#0c1830 100%)",
+  day: "linear-gradient(180deg,#f6e6d0 0%,#f0d4b8 45%,#e8c8a4 100%)",
+  dusk: "linear-gradient(180deg,#6a4a3e 0%,#8a5a42 50%,#c47a4a 100%)",
+  night: "linear-gradient(180deg,#1e1410 0%,#2a1c18 55%,#3a2418 100%)",
 };
 
 export function PhaseBadge({ phase }: { phase: Phase }) {
@@ -50,15 +50,15 @@ export function PhaseBadge({ phase }: { phase: Phase }) {
 
 export function MiniShelf({ count, lit = true }: { count: number; lit?: boolean }) {
   const spines = Array.from({ length: Math.max(4, count + 2) });
-  const colors = ["#00e8ff", "#ff3db0", "#5dff6a", "#ff8a3c", "#c44bff"];
+  const colors = ["#6b3a2a", "#8b5a3c", "#3d4a38", "#7a3d3a", "#4a3a2a"];
   return (
     <div
       className={`ks-mini-shelf${lit ? " is-lit" : ""}`}
       style={{
         boxShadow: lit
-          ? "inset 0 0 24px rgb(20 40 80/.18), 0 0 18px rgb(0 232 255/.28)"
-          : "inset 0 0 24px rgb(20 40 80/.22)",
-        filter: lit ? undefined : "brightness(0.72) saturate(0.4)",
+          ? "inset 0 0 30px rgb(20 10 6/.35), 0 0 18px rgb(255 190 100/.22)"
+          : "inset 0 0 30px rgb(20 10 6/.45)",
+        filter: lit ? undefined : "brightness(0.72)",
       }}
     >
       {[0, 1].map((row) => (
@@ -70,11 +70,10 @@ export function MiniShelf({ count, lit = true }: { count: number; lit?: boolean 
               style={{
                 height: 30 + ((i * 7) % 16),
                 background: colors[(row * 5 + i) % colors.length],
-                boxShadow: lit ? `0 0 10px ${colors[(row * 5 + i) % colors.length]}` : undefined,
               }}
             />
           ))}
-          <Library size={16} className="mb-1 text-ink/40" />
+          <Library size={16} className="mb-1 text-paper/40" />
         </div>
       ))}
     </div>
@@ -84,15 +83,15 @@ export function MiniShelf({ count, lit = true }: { count: number; lit?: boolean 
 export function Cabinet() {
   return (
     <div
-      className="flex h-full w-full flex-col gap-1 rounded-sm bg-[#f4f7fb] p-1.5"
-      style={{ boxShadow: "0 8px 20px rgb(20 40 80/.18), inset 0 1px 0 #fff" }}
+      className="flex h-full w-full flex-col gap-1 rounded-sm bg-[#6b4330] p-1.5"
+      style={{ boxShadow: "0 8px 20px rgb(20 10 6/.35)" }}
     >
       {[0, 1, 2].map((i) => (
-        <div key={i} className="flex flex-1 items-center justify-center rounded-sm bg-[#ff3db0]/80">
-          <div className="h-1.5 w-6 rounded-full bg-[#2a1040]" />
+        <div key={i} className="flex flex-1 items-center justify-center rounded-sm bg-[#8b5a3c]">
+          <div className="h-1.5 w-6 rounded-full bg-[#3d2418]" />
         </div>
       ))}
-      <Archive size={14} className="mx-auto text-ink/40" />
+      <Archive size={14} className="mx-auto text-paper/40" />
     </div>
   );
 }
@@ -106,11 +105,11 @@ export function CRT({ on }: { on: boolean }) {
       <div
         className="flex h-full w-full items-center justify-center rounded-md"
         style={{
-          background: on ? "radial-gradient(circle, #1a6a78, #081820)" : "radial-gradient(circle, #1a2224, #0c1113)",
-          boxShadow: on ? "inset 0 0 24px #00e8ffaa" : "inset 0 0 18px #000",
+          background: on ? "radial-gradient(circle, #2a5f6a, #10222a)" : "radial-gradient(circle, #1a2224, #0c1113)",
+          boxShadow: on ? "inset 0 0 24px #4fd6e0aa" : "inset 0 0 18px #000",
         }}
       >
-        <Music size={20} className={on ? "text-[#9ff6ff]" : "text-paper/40"} />
+        <Music size={20} className={on ? "text-[#9fe8ee]" : "text-paper/40"} />
       </div>
     </div>
   );
@@ -142,8 +141,8 @@ export function WeatherFx({ kind }: { kind: "rain" | "snow" }) {
 export function TimelineFrame() {
   return (
     <div
-      className="flex h-full w-full items-center justify-center rounded-sm bg-[#d8e4ec] p-1"
-      style={{ boxShadow: "inset 0 0 0 6px #9eb4c4" }}
+      className="flex h-full w-full items-center justify-center rounded-sm bg-[#8b5a3c] p-1"
+      style={{ boxShadow: "inset 0 0 0 6px #6b4330" }}
     >
       <div className="flex h-full w-full items-center justify-center rounded-sm bg-paper/90 text-ink">
         <Clock size={20} />
@@ -156,7 +155,7 @@ export function MiniMap() {
   return (
     <div
       className="flex h-full w-full items-center justify-center rounded-sm"
-      style={{ background: "#b8e8f4", boxShadow: "inset 0 0 0 5px #7ec8e0, inset 0 0 30px rgb(0 180 220/.18)" }}
+      style={{ background: "#c4a078", boxShadow: "inset 0 0 0 5px #8b5a3c, inset 0 0 30px rgb(20 10 6/.18)" }}
     >
       <img src="/maps/world.svg" alt="" className="ks-world-map h-[78%] w-[86%] object-cover opacity-90" />
     </div>
@@ -190,7 +189,7 @@ export function CorkboardWall({ pins }: { pins: MemoryPin[] }) {
                 style={{ transform: "rotate(-4deg)" }}
               />
             ) : null}
-            <MapPin size={22} className="mx-auto text-[#ff3db0] drop-shadow" fill="#ff3db0" />
+            <MapPin size={22} className="mx-auto text-[#b55245] drop-shadow" fill="#b55245" />
           </div>
         ))}
       </div>
@@ -328,9 +327,9 @@ function BookSpine({
       className={`ks-spine${dragging ? " is-dragging" : ""}`}
       style={{
         ["--shelf-row" as string]: String(book.shelfRow ?? 0),
-        ["--leather" as string]: cover.leather,
-        ["--glow" as string]: cover.glow,
         left: `${book.shelfX ?? fallbackX}%`,
+        background: `linear-gradient(90deg, rgb(0 0 0 /.28), transparent 22%, rgb(255 255 255 /.08) 48%, transparent 70%), url('/textures/leather.jpg') center/cover`,
+        backgroundColor: cover.leather,
         color: cover.ink,
         cursor: canEdit ? "grab" : "pointer",
       }}
