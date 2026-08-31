@@ -20,3 +20,8 @@ export const VIEW_AS_LABEL: Record<ViewAs, string> = {
   friend: "Friend",
   public: "Public",
 };
+
+/** Friends and close friends (and the owner) may leave a fridge sticky. */
+export function canLeavePinNote(viewAs: ViewAs): boolean {
+  return viewAs === "owner" || viewAs === "friend" || viewAs === "close";
+}

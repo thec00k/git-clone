@@ -14,6 +14,8 @@ import type {
   ArchiveTab,
   Environment,
   MemoryPin,
+  PIN_NOTE_MAX,
+  PinNote,
   Profile,
 } from "../types/app";
 import type {
@@ -65,6 +67,9 @@ interface AppContextValue {
   addPin: (pin: Omit<MemoryPin, "id" | "createdAt">) => void;
   updatePin: (id: string, patch: Partial<Omit<MemoryPin, "id" | "createdAt">>) => void;
   removePin: (id: string) => void;
+  addPinNote: (pinId: string, author: string, message: string) => void;
+  updatePinNote: (id: string, message: string) => void;
+  deletePinNote: (id: string) => void;
 
   recordProgress: (patch: Partial<Progress>) => void;
   markAchievementsSeen: (ids: string[]) => void;
@@ -110,6 +115,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               completedTour: stored.progress?.completedTour ?? false,
             },
             receipts: stored.receipts ?? {},
+            pinNotes: stored.pinNotes ?? [],
             archiveTabs: deriveArchiveTabs(stored.archive ?? [], stored.archiveTabs),
             books: (stored.books ?? []).map((b, i) => ({
               ...b,
@@ -343,7 +349,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [update],
   );
 
-  const removePin = useCallback((id: string) => update((p) => ({ ...p, pins: p.pins.filter((x) => x.id !== id) })), [update]);
+  const removePin = useCallback(
+    (id: string) =>
+      update((p) => ({
+        ...p,
+        pins: p.pins.filter((x) => x.id !== id),
+        pinNotes: p.pinNotes.filter((n) => n.pinId !== id),
+      })),
+    [update],
+  );
+
+  const addPinNote = useCallback(
+    (pinId: string, author: string, message: string) => {
+      const text = message.trim().slice(0, PIN_NOTE_MAX);
+      if (!text) return;
+      update((p) => {
+        const existing = p.pinNotes.find((n) => n.pinId === pinId && n.author === author);
+        if (existing) {
+          return { ...p, pinNotes: p.pinNotes.map((n) => (n.id === existing.id ? { ...n, message: text } : n)) };
+        }
+        const note: PinNote = { id: uid("pnote"), pinId, author, message: text, createdAt: Date.now() };
+        return { ...p, pinNotes: [...p.pinNotes, note] };
+      });
+    },
+    [update],
+  );
+
+  const updatePinNote = useCallback(
+    (id: string, message: string) => {
+      const text = message.trim().slice(0, PIN_NOTE_MAX);
+      if (!text) return;
+      update((p) => ({ ...p, pinNotes: p.pinNotes.map((n) => (n.id === id ? { ...n, message: text } : n)) }));
+    },
+    [update],
+  );
+
+  const deletePinNote = useCallback(
+    (id: string) => update((p) => ({ ...p, pinNotes: p.pinNotes.filter((n) => n.id !== id) })),
+    [update],
+  );
 
   const recordProgress = useCallback(
     (patch: Partial<Progress>) =>
@@ -421,6 +465,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addPin,
     updatePin,
     removePin,
+    addPinNote,
+    updatePinNote,
+    deletePinNote,
     recordProgress,
     markAchievementsSeen,
     recordReceipt,

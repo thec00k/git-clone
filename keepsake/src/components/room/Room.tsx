@@ -16,6 +16,7 @@ import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { PhaseBadge, phaseOf } from "./RoomFurniture";
 import { RoomFlat } from "./RoomFlat";
 import { RoomChamber } from "./RoomChamber";
+import { HomeChip } from "../views/ViewShell";
 
 export function Room() {
   const {
@@ -89,11 +90,14 @@ export function Room() {
         data-tour="hud"
         className={`z-30 flex shrink-0 items-center justify-between px-4 py-3 sm:px-6${tourFocus === "hud" ? " ks-hud--tour" : ""}`}
       >
-        <div className="leading-tight">
-          <p className="font-display text-sm uppercase tracking-[0.22em] text-paper/70">Keepsake</p>
-          <p className="ks-caption text-paper/80" style={{ fontSize: "1.15rem" }}>
-            {state.profile.displayName}&rsquo;s room
-          </p>
+        <div className="flex items-center gap-3">
+          {roomFace !== "front" && <HomeChip />}
+          <div className="leading-tight">
+            <p className="font-display text-sm uppercase tracking-[0.22em] text-paper/70">Keepsake</p>
+            <p className="ks-caption text-paper/80" style={{ fontSize: "1.15rem" }}>
+              {state.profile.displayName}&rsquo;s room
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 text-sm text-paper/80">

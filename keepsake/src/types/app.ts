@@ -75,6 +75,17 @@ export interface MemoryPin {
   createdAt: number;
 }
 
+/** A short fridge sticky left on a map photo. */
+export const PIN_NOTE_MAX = 20;
+
+export interface PinNote {
+  id: string;
+  pinId: string;
+  author: string;
+  message: string;
+  createdAt: number;
+}
+
 export interface TimelineEntry {
   id: string;
   year: number;
@@ -99,6 +110,7 @@ export interface AppState {
   environment: Environment;
   guestbook: GuestEntry[];
   notes: PageNote[];
+  pinNotes: PinNote[];
   pins: MemoryPin[];
   timeline: TimelineEntry[];
   achievements: string[]; // unlocked ids (completed)

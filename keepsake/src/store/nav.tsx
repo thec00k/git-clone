@@ -68,8 +68,8 @@ export function NavProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const view = stack[stack.length - 1];
-  const backAria = "Back to the desk";
-  const backLabel = "the desk";
+  const backAria = "Return to the desk";
+  const backLabel = "return to desk";
 
   const value = useMemo<NavContextValue>(
     () => ({
@@ -98,7 +98,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
 }
 
 export function returnLabel(_view?: View, _face?: RoomFace): { aria: string; label: string } {
-  return { aria: "Back to the desk", label: "the desk" };
+  return { aria: "Return to the desk", label: "return to desk" };
 }
 
 export function useNav(): NavContextValue {

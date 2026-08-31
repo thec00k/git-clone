@@ -180,6 +180,7 @@ export function createSeed(): AppState {
       },
     ],
     notes: [],
+    pinNotes: [],
     pins: [
       {
         id: uid("pin"),
