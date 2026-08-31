@@ -1,0 +1,1645 @@
+@import "tailwindcss";
+
+/*
+  Keepsake design system.
+  A cozy lamp-lit room: cream plaster, honey oak, terracotta accents,
+  and cream scrapbook paper on the desk. Fraunces + Caveat type.
+*/
+@theme {
+  --color-room: #e8d4c0;
+  --color-room-mid: #c4a078;
+  --color-wood: #8b5a3c;
+  --color-wood-dark: #5c3a24;
+  --color-paper: #f6efe4;
+  --color-paper-edge: #c9b8a4;
+  --color-ink: #2c221c;
+  --color-ink-soft: #5a4a3e;
+  --color-muted: #8a7464;
+  --color-accent: #c45c3e;
+  --color-accent-fg: #fff8f0;
+  --color-seal: #8b3a32;
+  --color-sharpie-ink: #2c221c;
+
+  --font-display: "Fraunces", "Iowan Old Style", Palatino, serif;
+  --font-script: "Caveat", "Segoe Script", cursive;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-display);
+    color: var(--color-paper);
+    background: var(--color-room);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 80%, white);
+    outline-offset: 3px;
+  }
+
+  .ks-skip {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    z-index: 100;
+    transform: translateY(-160%);
+    padding: 0.45rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-size: 0.9rem;
+  }
+
+  .ks-skip:focus {
+    transform: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-accent) 35%, transparent);
+    color: var(--color-ink);
+  }
+}
+
+@layer components {
+  /* The room — warm plaster, lamp glow, a little grain. */
+  .ks-room {
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background:
+      radial-gradient(ellipse 42% 36% at 18% 12%, rgb(255 236 200 / 0.55), transparent 58%),
+      radial-gradient(ellipse 28% 24% at 82% 18%, rgb(255 200 140 / 0.18), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 88% 100%, rgb(196 92 62 / 0.12), transparent 62%),
+      linear-gradient(180deg, #f6e8d4 0%, var(--color-room) 42%, #c4a078 100%);
+    color: var(--color-ink);
+  }
+
+  .ks-room::after {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    background-image: url("/textures/grain.png");
+    opacity: 0.045;
+    mix-blend-mode: overlay;
+    z-index: 80;
+  }
+
+  .ks-desk {
+    background-image:
+      linear-gradient(180deg, rgb(243 220 180 / 0.35), rgb(255 255 255 / 0.08) 40%, rgb(80 40 20 / 0.22)),
+      url("/textures/wood.jpg");
+    background-size: cover;
+    background-position: center;
+    box-shadow: inset 0 8px 22px rgb(40 20 10 / 0.22);
+  }
+
+  /* A single scrapbook page — cream paper, soft print shadow. */
+  .ks-page {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    background-color: var(--color-paper);
+    background-image: url("/textures/paper.jpg");
+    background-size: cover;
+    color: var(--color-ink);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.55) inset,
+      0 24px 50px rgb(20 14 10 / 0.38),
+      0 2px 0 var(--color-paper-edge);
+    overflow: hidden;
+    touch-action: none;
+    container-type: inline-size;
+    container-name: page;
+  }
+
+  .ks-page[data-active="true"] {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 70%, transparent);
+    outline-offset: -2px;
+  }
+
+  /* Spine shadow between the two pages of an open spread. */
+  .ks-spine {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(20 14 10 / 0.28) 46%,
+      rgb(20 14 10 / 0.42) 50%,
+      rgb(20 14 10 / 0.28) 54%,
+      transparent
+    );
+  }
+
+  /* Photo frames */
+  .ks-polaroid {
+    background: #fffef8;
+    padding: 6% 6% 16% 6%;
+    box-shadow: 0 8px 18px rgb(20 14 10 / 0.28);
+  }
+
+  .ks-flush {
+    background: #fffef8;
+    padding: 2.5%;
+    box-shadow:
+      0 0 0 1px rgb(20 14 10 / 0.06),
+      0 8px 16px rgb(20 14 10 / 0.22);
+  }
+
+  .ks-tape {
+    background: #fffef8;
+    padding: 2.5%;
+    box-shadow: 0 6px 16px rgb(20 14 10 / 0.2);
+  }
+
+  .ks-tape::before,
+  .ks-tape::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    width: 30%;
+    height: 18px;
+    background: color-mix(in oklab, var(--color-accent) 32%, #f3e9d8);
+    opacity: 0.72;
+    transform: rotate(-8deg);
+    box-shadow: 0 2px 5px rgb(20 14 10 / 0.15);
+  }
+
+  .ks-tape::before {
+    left: 6%;
+  }
+
+  .ks-tape::after {
+    right: 6%;
+    transform: rotate(9deg);
+    background: color-mix(in oklab, var(--color-ink) 12%, #f3e9d8);
+  }
+
+  /* Toolbar tool pills */
+  .ks-tool {
+    display: inline-flex;
+    min-height: 44px;
+    min-width: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-paper);
+    background: rgb(44 28 20 / 0.55);
+    box-shadow:
+      0 0 0 1px rgb(255 236 210 / 0.06),
+      inset 0 1px 0 rgb(255 236 210 / 0.08);
+    transition:
+      transform 150ms var(--ease-out),
+      background-color 150ms var(--ease-out);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    border: none;
+  }
+
+  .ks-tool:hover {
+    background: rgb(44 28 20 / 0.72);
+  }
+
+  .ks-tool:active {
+    transform: scale(0.96);
+  }
+
+  .ks-tool--accent {
+    background: var(--color-accent);
+    color: var(--color-accent-fg);
+  }
+
+  .ks-tool--accent:hover {
+    background: color-mix(in oklab, var(--color-accent) 88%, black);
+  }
+
+  /* Round icon button (selection chrome) */
+  .ks-chip {
+    display: inline-flex;
+    height: 34px;
+    width: 34px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: none;
+    color: var(--color-paper);
+    background: rgb(44 28 20 / 0.9);
+    box-shadow: 0 2px 8px rgb(20 10 6 / 0.35);
+    transition: transform 120ms var(--ease-out), background-color 120ms var(--ease-out);
+  }
+
+  .ks-chip:hover {
+    background: var(--color-accent);
+  }
+
+  .ks-chip--home {
+    width: auto;
+    gap: 0.4rem;
+    padding: 0 0.85rem;
+  }
+
+  .ks-chip:active {
+    transform: scale(0.92);
+  }
+
+  /* The closed book on the desk (cover screen). */
+  .ks-book {
+    width: min(20rem, 76vw);
+    aspect-ratio: 2 / 3;
+    position: relative;
+    transform: rotateZ(-6deg);
+    transform-origin: 50% 80%;
+    transition: transform 400ms var(--ease-smooth-out);
+    border: none;
+    background: transparent;
+    padding: 0;
+  }
+
+  .ks-book:hover,
+  .ks-book:focus-visible {
+    transform: rotateZ(-2deg) translateY(-8px);
+    outline: none;
+  }
+
+  .ks-book-cover {
+    position: absolute;
+    inset: 0;
+    border-radius: 4px 12px 12px 4px;
+    background:
+      linear-gradient(90deg, rgb(0 0 0 / 0.35), transparent 14%),
+      linear-gradient(180deg, rgb(243 233 216 / 0.08), transparent 28%),
+      url("/textures/leather.jpg") center / cover;
+    box-shadow:
+      8px 18px 44px rgb(0 0 0 / 0.5),
+      2px 0 0 rgb(255 255 255 / 0.08) inset;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-paper);
+  }
+
+  .ks-book-edge {
+    position: absolute;
+    top: 8px;
+    right: -11px;
+    bottom: 8px;
+    width: 11px;
+    background: repeating-linear-gradient(
+      to bottom,
+      #f3e9d8 0 2px,
+      #e4d4bc 2px 3px
+    );
+    border-radius: 0 2px 2px 0;
+    box-shadow: 2px 0 8px rgb(0 0 0 / 0.3);
+  }
+
+  .ks-caption {
+    font-family: var(--font-script);
+    line-height: 1.12;
+    color: var(--color-ink);
+  }
+
+  /* ---- 2.5D room ---- */
+  .ks-scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Full-page chamber. After a yaw the facing wall flattens so clicks land. */
+  .ks-room {
+    --return-w: 4.85rem;
+  }
+
+  .ks-room--chamber {
+    display: block;
+  }
+
+  .ks-room--chamber > header {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 30;
+    background: linear-gradient(180deg, rgb(246 232 212 / 0.9), rgb(246 232 212 / 0.05));
+  }
+
+  .ks-room--chamber > .ks-scene {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ks-chamber {
+    position: absolute;
+    inset: 0;
+    perspective: 1400px;
+    perspective-origin: 50% 48%;
+    overflow: hidden;
+    --return-w: 4.85rem;
+    --room-d: 50vw;
+  }
+
+  .ks-yaw {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: translateZ(calc(var(--room-d) * -1)) rotateY(var(--yaw, 0deg));
+    transition: transform 820ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .ks-yaw.is-flat {
+    transform: none;
+    transform-style: flat;
+    transition: none;
+  }
+
+  .ks-yaw.is-turning {
+    pointer-events: none;
+  }
+
+  .ks-wall {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .ks-wall.is-facing {
+    pointer-events: auto;
+    z-index: 2;
+  }
+
+  .ks-yaw.is-flat .ks-wall:not(.is-facing) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .ks-yaw.is-flat .ks-wall.is-facing {
+    transform: none;
+  }
+
+  .ks-wall-front {
+    transform: translateZ(var(--room-d));
+  }
+
+  .ks-wall-left {
+    transform: rotateY(90deg) translateZ(var(--room-d));
+  }
+
+  .ks-wall-right {
+    transform: rotateY(-90deg) translateZ(var(--room-d));
+  }
+
+  .ks-wall-skirting {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 12%;
+    background:
+      linear-gradient(180deg, rgb(243 220 180 / 0.35), rgb(80 40 20 / 0.12) 40%),
+      url("/textures/wood.jpg") center/cover;
+    box-shadow: inset 0 6px 12px rgb(40 20 10 / 0.18);
+    pointer-events: none;
+  }
+
+  /* Side-wall returns sit on the page edge with their label on the wall. */
+  .ks-returns {
+    position: absolute;
+    inset: 0;
+    z-index: 24;
+    pointer-events: none;
+  }
+
+  .ks-return {
+    pointer-events: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--return-w);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+  }
+
+  .ks-return--left {
+    left: 0;
+    transform-origin: left center;
+    transform: perspective(720px) rotateY(16deg);
+    background:
+      linear-gradient(90deg, rgb(255 236 210 / 0.28), transparent 70%),
+      linear-gradient(180deg, #c4a078, #8b5a3c);
+    box-shadow: 8px 0 18px rgb(40 20 10 / 0.22);
+  }
+
+  .ks-return--right {
+    right: 0;
+    transform-origin: right center;
+    transform: perspective(720px) rotateY(-16deg);
+    background:
+      linear-gradient(270deg, rgb(255 236 210 / 0.22), transparent 70%),
+      linear-gradient(180deg, #8b5a3c, #5c3a24);
+    box-shadow: -8px 0 18px rgb(40 20 10 / 0.22);
+  }
+
+  /* Map and bookshelf sit lower on the side so Home / the desk keep the top corner. */
+  .ks-return--map,
+  .ks-return--shelf {
+    top: auto;
+    bottom: 7%;
+    height: 30%;
+  }
+
+  .ks-return--desk.ks-return--left,
+  .ks-return--desk.ks-return--right {
+    top: 0;
+    bottom: 0;
+    height: auto;
+    background:
+      linear-gradient(180deg, #8b5a3c, #5c3a24);
+    box-shadow: 0 0 22px rgb(40 20 10 / 0.28);
+  }
+
+  .ks-return--bottom {
+    top: auto;
+    bottom: 0.4rem;
+    left: 50%;
+    width: min(15.5rem, 40%);
+    height: 2.55rem;
+    transform: translateX(-50%) perspective(640px) rotateX(14deg);
+    transform-origin: center bottom;
+    background:
+      linear-gradient(180deg, rgb(255 236 210 / 0.32), transparent 68%),
+      linear-gradient(180deg, #8b5a3c, #5c3a24);
+    box-shadow: 0 8px 18px rgb(40 20 10 / 0.22);
+  }
+
+  .ks-return-label {
+    font-family: var(--font-script);
+    font-size: 1.35rem;
+    line-height: 1.1;
+    color: var(--color-paper);
+    text-shadow: 0 2px 6px rgb(0 0 0 / 0.55);
+    writing-mode: vertical-lr;
+  }
+
+  .ks-return--right .ks-return-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .ks-return--bottom .ks-return-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-size: 1.25rem;
+  }
+
+  .ks-return:hover,
+  .ks-return:focus-visible {
+    filter: brightness(1.1);
+  }
+
+  .ks-return:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 80%, white);
+    outline-offset: 3px;
+  }
+
+  .ks-wall-stage {
+    position: absolute;
+    top: 4.15rem;
+    bottom: 2.15rem;
+    left: calc(var(--return-w) - 6px);
+    right: calc(var(--return-w) - 6px);
+  }
+
+  .ks-chamber[data-room-face="left"] .ks-wall-stage {
+    left: 1.5rem;
+  }
+
+  .ks-chamber[data-room-face="right"] .ks-wall-stage {
+    right: 1.5rem;
+  }
+
+  .ks-wall-piece {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+  }
+
+  .ks-wall-piece.ks-obj:hover,
+  .ks-wall-piece.ks-obj:focus-visible {
+    transform: none;
+    filter: brightness(1.03);
+  }
+
+  .ks-wall-open {
+    position: absolute;
+    left: 50%;
+    bottom: 0.7rem;
+    transform: translateX(-50%);
+    z-index: 6;
+    pointer-events: none;
+    font-family: var(--font-script);
+    font-size: 1.4rem;
+    color: var(--color-ink);
+    background: rgb(246 239 228 / 0.86);
+    padding: 0.15rem 0.9rem 0.25rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .ks-shelf-case {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    border-radius: 4px;
+    background:
+      linear-gradient(180deg, rgb(255 236 210 / 0.16), transparent 28%),
+      linear-gradient(180deg, #6b4330, #3d2418);
+    box-shadow: inset 0 0 40px rgb(20 10 6 / 0.38), inset 0 0 0 8px #4a2e20;
+    padding: 2.4rem 0.7rem 0.55rem;
+    transition: filter 280ms var(--ease-out), box-shadow 280ms var(--ease-out);
+  }
+
+  .ks-shelf-case:not(.is-lit) .ks-shelf-inner {
+    filter: brightness(0.68) saturate(0.88);
+  }
+
+  .ks-shelf-case.is-lit {
+    box-shadow:
+      inset 0 0 40px rgb(20 10 6 / 0.28),
+      inset 0 0 0 8px #4a2e20,
+      0 0 36px rgb(255 190 100 / 0.16);
+  }
+
+  .ks-shelf-lamp {
+    position: absolute;
+    top: 0.45rem;
+    left: 0.7rem;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-script);
+    font-size: 1.1rem;
+    color: var(--color-ink);
+    background: rgb(246 239 228 / 0.86);
+    padding: 0.12rem 0.7rem 0.22rem;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgb(20 10 6 / 0.22);
+  }
+
+  .ks-shelf-case.is-lit .ks-shelf-lamp {
+    box-shadow:
+      0 2px 8px rgb(20 10 6 / 0.22),
+      0 0 12px rgb(255 200 120 / 0.45);
+  }
+
+  .ks-shelf-new {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.7rem;
+    z-index: 4;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-script);
+    font-size: 1.15rem;
+    color: var(--color-ink);
+    background: rgb(246 239 228 / 0.86);
+    padding: 0.1rem 0.7rem 0.2rem;
+    border-radius: 999px;
+  }
+
+  .ks-shelf-inner {
+    position: relative;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+  }
+
+  .ks-shelf-row {
+    position: relative;
+    flex: 1;
+    border-bottom: 10px solid #8b5a3c;
+    pointer-events: none;
+  }
+
+  .ks-shelf-row::after {
+    content: "";
+    position: absolute;
+    left: 3%;
+    right: 3%;
+    bottom: 0;
+    height: 3px;
+    border-radius: 2px;
+    background: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 280ms var(--ease-out), box-shadow 280ms var(--ease-out);
+  }
+
+  .ks-shelf-case.is-lit .ks-shelf-row::after {
+    opacity: 1;
+    background: linear-gradient(90deg, transparent, #ffd89a 12%, #ffe8c4 50%, #ffd89a 88%, transparent);
+    box-shadow:
+      0 6px 16px 3px rgb(255 196 110 / 0.55),
+      0 16px 32px rgb(255 170 70 / 0.28);
+  }
+
+  .ks-shelf-books {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  .ks-spine {
+    --shelf-row: 0;
+    position: absolute;
+    bottom: calc((2 - var(--shelf-row)) * 33.333% + 10px);
+    z-index: 2;
+    display: flex;
+    width: 7.2%;
+    height: 24%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px 2px 0 0;
+    box-shadow: 3px 6px 12px rgb(0 0 0 / 0.4);
+    transition: transform 220ms var(--ease-out), filter 220ms var(--ease-out);
+    transform-origin: 50% 100%;
+  }
+
+  .ks-shelf-case.is-lit .ks-spine {
+    box-shadow:
+      3px 6px 12px rgb(0 0 0 / 0.4),
+      0 -8px 16px rgb(255 200 120 / 0.22);
+  }
+
+  .ks-spine:hover,
+  .ks-spine:focus-visible {
+    z-index: 6;
+    transform: translateY(-18%);
+    filter: brightness(1.08);
+  }
+
+  .ks-spine.is-dragging {
+    z-index: 8;
+    transform: translateY(-10%);
+    cursor: grabbing;
+  }
+
+  .ks-spine-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: var(--font-display);
+    font-size: clamp(0.62rem, 1.15vw, 0.88rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+    max-height: 92%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ks-spine-rename {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    color: inherit;
+    background: rgb(0 0 0 / 0.35);
+    border-radius: 4px;
+    opacity: 0.45;
+  }
+
+  .ks-spine:hover .ks-spine-rename,
+  .ks-spine:focus-within .ks-spine-rename {
+    opacity: 1;
+  }
+
+  .ks-spine-form {
+    position: absolute;
+    left: 110%;
+    bottom: 12%;
+    z-index: 9;
+    width: 9rem;
+  }
+
+  .ks-spine-form input {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    background: rgb(20 14 10 / 0.88);
+    color: var(--color-paper);
+    padding: 0.35rem 0.5rem;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    outline: 1px solid color-mix(in oklab, var(--color-accent) 70%, white);
+  }
+
+  /* An interactive diorama object: lifts and glows on hover (LBP "pop"). */
+  .ks-obj {
+    position: absolute;
+    cursor: pointer;
+    pointer-events: auto;
+    border: none;
+    background: transparent;
+    padding: 0;
+    transition:
+      transform 240ms var(--ease-out),
+      filter 240ms var(--ease-out);
+    filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.4));
+  }
+
+  .ks-obj:hover,
+  .ks-obj:focus-visible {
+    transform: translate(var(--px, 0), var(--py, 0)) translateY(-8px) scale(1.035);
+    filter: drop-shadow(0 18px 26px rgb(0 0 0 / 0.5)) brightness(1.06);
+    z-index: 20;
+  }
+
+  .ks-obj:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 80%, white);
+    outline-offset: 4px;
+  }
+
+  .ks-obj-label {
+    position: absolute;
+    left: 50%;
+    bottom: -1.9rem;
+    transform: translateX(-50%) rotate(-3deg);
+    font-family: var(--font-script);
+    font-size: 1.25rem;
+    color: var(--color-ink);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out);
+    text-shadow: 0 1px 0 rgb(255 255 255 / 0.7), 0 2px 8px rgb(255 255 255 / 0.8);
+    pointer-events: none;
+  }
+
+  .ks-obj:hover .ks-obj-label,
+  .ks-obj:focus-visible .ks-obj-label {
+    opacity: 1;
+  }
+
+  .ks-mote {
+    position: absolute;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgb(255 236 200 / 0.95), rgb(255 190 120 / 0.18) 70%);
+    pointer-events: none;
+    animation: ks-mote-float linear infinite;
+  }
+
+  @keyframes ks-mote-float {
+    0% {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.6;
+    }
+    88% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(-120px) translateX(20px);
+      opacity: 0;
+    }
+  }
+
+  .ks-panel {
+    background: linear-gradient(180deg, rgb(62 40 30 / 0.94), rgb(36 22 16 / 0.96));
+    border: 1px solid rgb(255 236 210 / 0.08);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 50px rgb(0 0 0 / 0.5);
+    color: var(--color-paper);
+  }
+
+  /* Open-book stage: two 3:4 pages forming a 3:2 spread, sized to fit. */
+  .ks-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .ks-spread {
+    position: relative;
+    display: flex;
+    aspect-ratio: 3 / 2;
+    width: min(96%, calc((100dvh - 12rem) * 1.5));
+    max-height: 100%;
+    filter: drop-shadow(0 30px 44px rgb(10 6 4 / 0.5));
+    perspective: 2200px;
+  }
+
+  .ks-spread--flipping {
+    pointer-events: none;
+  }
+
+  .ks-spread > .ks-page {
+    width: 50%;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .ks-spread > .ks-page:first-child {
+    border-radius: 6px 0 0 6px;
+  }
+
+  .ks-spread > .ks-page:last-child {
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* Spine shadow down the centre of the open book. */
+  .ks-spread::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 46px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 60;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(20 14 10 / 0.05) 30%,
+      rgb(20 14 10 / 0.34) 50%,
+      rgb(20 14 10 / 0.05) 70%,
+      transparent
+    );
+  }
+
+  /* Page-turn: a single leaf covering one half that rotates around the spine. */
+  .ks-flip-leaf {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    z-index: 70;
+  }
+
+  .ks-flip-leaf {
+    perspective: 2200px;
+  }
+
+  .ks-flip-leaf.next {
+    left: 50%;
+  }
+
+  .ks-flip-leaf.prev {
+    left: 0;
+  }
+
+  .ks-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+  }
+
+  /* Keyframe-driven so the turn always animates on mount (no fragile
+     state-toggle timing). The pivot must be the spine edge of the leaf. */
+  .ks-flip-inner.next {
+    transform-origin: left center;
+    animation: ks-flip-next 820ms cubic-bezier(0.42, 0.12, 0.2, 1) forwards;
+  }
+
+  .ks-flip-inner.prev {
+    transform-origin: right center;
+    animation: ks-flip-prev 820ms cubic-bezier(0.42, 0.12, 0.2, 1) forwards;
+  }
+
+  @keyframes ks-flip-next {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(-180deg);
+    }
+  }
+
+  @keyframes ks-flip-prev {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(180deg);
+    }
+  }
+
+  .ks-flip-face {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: 0 24px 44px rgb(20 14 10 / 0.4);
+  }
+
+  .ks-flip-face.back {
+    /* 1px lift avoids z-fighting so the incoming page actually paints. */
+    transform: rotateY(180deg) translateZ(1px);
+  }
+
+  .ks-flip-face > .ks-page {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    /* Children must stay visible on the rotated face. */
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    transform: translateZ(0.5px);
+  }
+
+  /* A gentle sheen/curl shadow so the turning leaf catches light without
+     hiding the page beneath it. */
+  .ks-flip-face::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg, rgb(0 0 0 / 0.18), transparent 55%);
+    opacity: 0.4;
+  }
+
+  .ks-flip-face.back::after {
+    background: linear-gradient(255deg, rgb(0 0 0 / 0.16), transparent 55%);
+  }
+
+  /* First-visit room tour — Messenger-style dialogue, Keepsake materials. */
+  .ks-obj--tour {
+    z-index: 22;
+    transform: translateY(-6px) scale(1.04);
+    filter: drop-shadow(0 18px 26px rgb(0 0 0 / 0.5)) brightness(1.08);
+  }
+
+  .ks-obj--tour .ks-obj-label {
+    opacity: 1;
+  }
+
+  .ks-hud--tour {
+    position: relative;
+    z-index: 33;
+  }
+
+  .ks-tour {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+  }
+
+  .ks-tour-veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: auto;
+  }
+
+  .ks-tour-cutout {
+    position: absolute;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 12px;
+    box-shadow:
+      0 0 0 9999px rgb(12 8 6 / 0.55),
+      0 0 0 3px var(--color-paper);
+    pointer-events: auto;
+    animation: ks-tour-pulse 2.4s var(--ease-out) infinite;
+  }
+
+  @keyframes ks-tour-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 9999px rgb(12 8 6 / 0.55),
+        0 0 0 3px var(--color-paper);
+    }
+    50% {
+      box-shadow:
+        0 0 0 9999px rgb(12 8 6 / 0.48),
+        0 0 0 5px color-mix(in oklab, var(--color-paper) 80%, var(--color-accent));
+    }
+  }
+
+  .ks-tour-say {
+    position: absolute;
+    left: 50%;
+    bottom: 1.15rem;
+    transform: translateX(-50%);
+    width: min(36rem, calc(100% - 1.4rem));
+    pointer-events: auto;
+    z-index: 2;
+  }
+
+  .ks-say {
+    position: relative;
+    filter: drop-shadow(0 16px 28px rgb(10 6 4 / 0.45));
+    animation: ks-say-in 420ms var(--ease-smooth-out) both;
+  }
+
+  @keyframes ks-say-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .ks-say-name {
+    position: absolute;
+    top: -0.85rem;
+    left: 1rem;
+    z-index: 2;
+    padding: 0.22rem 0.7rem 0.18rem;
+    background: #9eb8c8;
+    color: #1e2a36;
+    border: 3px solid var(--color-ink);
+    box-shadow: 4px 4px 0 #3a4654;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transform: rotate(-1.4deg);
+  }
+
+  .ks-say-box {
+    position: relative;
+    background-color: var(--color-paper);
+    background-image: url("/textures/paper.jpg");
+    background-size: cover;
+    color: var(--color-ink);
+    border: 3px solid var(--color-ink);
+    box-shadow: 7px 7px 0 #3a322c;
+    padding: 1.15rem 3.4rem 2rem 1.2rem;
+    min-height: 7.6rem;
+  }
+
+  .ks-say-text {
+    font-family: var(--font-script);
+    font-size: clamp(1.28rem, 2.8vw, 1.58rem);
+    line-height: 1.22;
+    color: var(--color-ink);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .ks-say-caret {
+    display: inline-block;
+    width: 0.45rem;
+    height: 1em;
+    margin-left: 1px;
+    background: var(--color-ink);
+    vertical-align: text-bottom;
+    animation: ks-say-blink 0.8s steps(1) infinite;
+  }
+
+  @keyframes ks-say-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .ks-say-meta {
+    position: absolute;
+    left: 1.15rem;
+    bottom: 0.45rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    font-family: var(--font-display);
+  }
+
+  .ks-say-skip {
+    border: none;
+    background: none;
+    padding: 0;
+    font-family: var(--font-script);
+    font-size: 1.05rem;
+    letter-spacing: 0;
+    color: var(--color-ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .ks-say-skip:hover {
+    color: var(--color-accent);
+  }
+
+  .ks-say-next {
+    position: absolute;
+    right: -0.55rem;
+    bottom: -0.55rem;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    background: var(--color-paper);
+    color: #6d9ab0;
+    border: 3px solid var(--color-ink);
+    box-shadow: 4px 4px 0 #3a322c;
+    transition: transform 140ms var(--ease-out), background-color 140ms var(--ease-out);
+  }
+
+  .ks-say-next:hover {
+    background: #d7e6ee;
+    transform: translate(-1px, -1px);
+  }
+
+  .ks-say-next:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #3a322c;
+  }
+
+  .ks-steam {
+    position: absolute;
+    bottom: 0;
+    width: 14px;
+    height: 18px;
+    border-radius: 999px;
+    background: rgb(255 246 230 / 0.75);
+    filter: blur(2px);
+    animation: ks-steam 3.4s ease-out infinite;
+  }
+
+  @keyframes ks-steam {
+    0% {
+      transform: translateY(0) scale(0.6);
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.85;
+    }
+    100% {
+      transform: translateY(-46px) scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  .ks-tea-ring {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    border: 3px solid rgb(122 80 40 / 0.28);
+    box-shadow: inset 0 0 0 6px rgb(122 80 40 / 0.08);
+    transform: rotate(-12deg);
+  }
+
+  .ks-moth {
+    left: 22%;
+    top: 18%;
+    width: 10px;
+    height: 6px;
+    background: #d8cfc0;
+    border-radius: 60% 60% 40% 40%;
+    box-shadow: -5px 0 0 #c9c0b0, 5px 0 0 #c9c0b0;
+    animation: ks-moth 7s var(--ease-out) infinite;
+  }
+
+  @keyframes ks-moth {
+    0%,
+    100% {
+      transform: translate(0, 0) rotate(-8deg);
+    }
+    40% {
+      transform: translate(80px, 30px) rotate(12deg);
+    }
+    70% {
+      transform: translate(40px, -10px) rotate(-4deg);
+    }
+  }
+
+  .ks-spotify-dock {
+    position: fixed;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 25;
+    width: min(22rem, calc(100vw - 1.5rem));
+    height: 80px;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgb(0 0 0 / 0.45);
+    background: #121212;
+  }
+
+  .ks-spotify-dock.is-on-crt {
+    z-index: 50;
+    height: 352px;
+    border-radius: 10px;
+  }
+
+  .ks-crt-player-slot {
+    min-height: 352px;
+    border-radius: 10px;
+    background: #121212;
+  }
+
+  .ks-crt-tracks {
+    margin-top: 0.65rem;
+    max-height: 12rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .ks-crt-track {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.05rem;
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: none;
+    border-radius: 8px;
+    background: rgb(0 0 0 / 0.22);
+    text-align: left;
+    font-size: 0.82rem;
+  }
+
+  .ks-crt-track:hover {
+    background: rgb(255 255 255 / 0.08);
+  }
+
+  .ks-book-stage {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .ks-page-turn {
+    position: absolute;
+    top: 50%;
+    z-index: 8;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgb(44 34 24 / 0.16);
+    border-radius: 999px;
+    background: rgb(246 239 228 / 0.94);
+    color: #2c221c;
+    box-shadow: 0 8px 18px rgb(40 20 10 / 0.22);
+    transform: translateY(-50%);
+  }
+
+  .ks-page-turn:hover:not(:disabled) {
+    background: #fff8f0;
+  }
+
+  .ks-page-turn:disabled {
+    opacity: 0.32;
+  }
+
+  .ks-page-turn--prev {
+    left: max(0.4rem, calc(var(--return-w) + 0.15rem));
+  }
+
+  .ks-page-turn--next {
+    right: max(0.4rem, calc(var(--return-w) + 0.15rem));
+  }
+
+  .ks-cork {
+    padding: 10px;
+    border-radius: 10px;
+    background:
+      linear-gradient(180deg, rgb(243 220 180 / 0.35), rgb(160 110 60 / 0.18)),
+      url("/textures/wood.jpg") center/cover;
+    box-shadow:
+      inset 0 0 0 3px #8b5a3c,
+      0 12px 28px rgb(40 20 10 / 0.22);
+  }
+
+  .ks-cork-map {
+    position: relative;
+    border-radius: 4px;
+    background: #c4a078;
+    box-shadow: inset 0 0 40px rgb(40 20 10 / 0.18);
+  }
+
+  .ks-mini-shelf {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 2px;
+    background: #5c3a24;
+    padding: 0.5rem;
+  }
+
+  .ks-mini-shelf-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.25rem;
+    border-bottom: 4px solid #8b5a3c;
+    padding-bottom: 0.25rem;
+    position: relative;
+  }
+
+  .ks-mini-shelf.is-lit .ks-mini-shelf-row::after {
+    content: "";
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    bottom: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffd89a, #ffe8c4, #ffd89a, transparent);
+    box-shadow: 0 4px 10px rgb(255 196 110 / 0.45);
+  }
+
+  .ks-atlas {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 0.85rem;
+    padding: 0.2rem calc(var(--return-w) + 0.7rem) 1rem;
+  }
+
+  .ks-atlas-board {
+    display: flex;
+    flex: 3 1 0;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .ks-atlas-cork {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .ks-atlas-map {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .ks-atlas-editor {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 15rem;
+    max-width: 22rem;
+    flex-direction: column;
+    overflow-y: auto;
+    border-radius: 12px;
+    background: rgb(12 40 52 / 0.45);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+    padding: 1rem 1.05rem 1.1rem;
+  }
+
+  @media (max-width: 860px) {
+    .ks-atlas {
+      flex-direction: column;
+    }
+
+    .ks-atlas-board {
+      flex: 1 1 58%;
+    }
+
+    .ks-atlas-editor {
+      flex: 0 1 auto;
+      max-width: none;
+      min-width: 0;
+    }
+  }
+
+  /* A photograph held up on the map, like a print on the fridge. */
+  .ks-fridge {
+    position: absolute;
+    inset: 0;
+    z-index: 12;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ks-fridge-dim {
+    position: absolute;
+    inset: 0;
+    border: none;
+    cursor: pointer;
+    background: rgb(20 10 6 / 0.32);
+  }
+
+  .ks-fridge-door {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(96%, 44rem);
+    aspect-ratio: 1 / 1;
+    padding: 1.2rem 1.4rem;
+    border-radius: 14px;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.45), transparent 28%),
+      linear-gradient(90deg, #efe4d4, #f6efe4 18%, #e8d8c4 82%, #d8c4a8);
+    box-shadow:
+      inset 0 0 0 10px #c9b8a4,
+      inset 0 0 40px rgb(80 50 20 / 0.08),
+      0 22px 48px rgb(20 10 6 / 0.28);
+  }
+
+  .ks-fridge-well {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 23.25rem);
+  }
+
+  .ks-fridge-print {
+    position: relative;
+  }
+
+  .ks-fridge-polaroid {
+    width: 100%;
+    padding: 0.55rem 0.55rem 1.15rem;
+    background: #fffef8;
+    box-shadow: 0 10px 22px rgb(20 80 100 / 0.22);
+    transform: rotate(-1.6deg);
+  }
+
+  .ks-fridge-stickies {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .ks-fridge-polaroid img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .ks-fridge-title {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-script);
+    font-size: 1.2rem;
+    line-height: 1.15;
+    color: #2c2418;
+    text-align: center;
+  }
+
+  .ks-fridge-caption {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    line-height: 1.25;
+    color: rgb(44 36 24 / 0.72);
+    text-align: center;
+  }
+
+  .ks-sticky {
+    position: absolute;
+    z-index: 2;
+    width: 5.2rem;
+    min-height: 4.5rem;
+    padding: 0.4rem 0.45rem 0.35rem;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.22);
+  }
+
+  /* Beside the print, slightly out so a tilt covers at most a sliver of the photo. */
+  .ks-sticky[data-side="left"] {
+    right: calc(100% + 0.45rem);
+    left: auto;
+  }
+
+  .ks-sticky[data-side="right"] {
+    left: calc(100% + 0.45rem);
+    right: auto;
+  }
+
+  .ks-sticky p {
+    margin: 0;
+    font-family: var(--font-script);
+    font-size: 1.05rem;
+    line-height: 1.1;
+    color: #2c2418;
+    overflow-wrap: anywhere;
+  }
+
+  .ks-sticky cite {
+    display: block;
+    margin-top: 0.35rem;
+    font-family: var(--font-display);
+    font-size: 0.62rem;
+    font-style: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgb(44 36 24 / 0.55);
+  }
+
+  .ks-world-map {
+    filter: sepia(0.28) saturate(0.75) contrast(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ks-yaw {
+    transition: none;
+  }
+
+  .ks-spine {
+    transition: none;
+  }
+
+  .ks-spine:hover,
+  .ks-spine:focus-visible {
+    transform: none;
+  }
+
+  .ks-book {
+    transition: none;
+  }
+
+  .ks-say,
+  .ks-tour-cutout,
+  .ks-say-caret,
+  .ks-steam,
+  .ks-moth {
+    animation: none !important;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .ks-print,
+  .ks-print * {
+    visibility: visible !important;
+  }
+  .ks-print {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    overflow: visible;
+  }
+  .ks-no-print,
+  .ks-spotify-dock {
+    display: none !important;
+  }
+  .ks-print-page {
+    break-after: page;
+    box-shadow: none !important;
+    margin: 0 auto 8mm auto !important;
+  }
+}

@@ -1,0 +1,437 @@
+import { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
+import {
+  BookMarked,
+  ChevronLeft,
+  ChevronRight,
+  ImagePlus,
+  Keyboard,
+  LayoutGrid,
+  Lock,
+  Plus,
+  Printer,
+  Redo2,
+  Rows3,
+  Shuffle,
+  Smile,
+  StickyNote,
+  Trash2,
+  Type,
+  Undo2,
+  Wand2,
+} from "lucide-react";
+import { playPageTurn } from "../lib/audio";
+import { useScrapbook } from "../hooks/useScrapbook";
+import { useApp } from "../store/appStore";
+import { useNav } from "../store/nav";
+import { loadImageFile } from "../lib/image";
+import { canSee, VIEW_AS_LABEL } from "../lib/permissions";
+import type { LayoutPreset } from "../lib/layout";
+import { STICKER_GLYPHS } from "../types/scrapbook";
+import { RoomFrame } from "./RoomFrame";
+import { Spread } from "./Spread";
+import { PageFlip } from "./PageFlip";
+import { SelectionToolbar } from "./SelectionToolbar";
+import { SaveIndicator } from "./SaveIndicator";
+import { PrintView } from "./PrintView";
+import { NotesPanel } from "./NotesPanel";
+import { BookIdentityEditor } from "./BookIdentityEditor";
+import { HomeChip, RoomNavRails } from "./views/ViewShell";
+
+export function BookView() {
+  const sb = useScrapbook();
+  const { addArchivePhoto, renameBook, setBookCover } = useApp();
+  const { viewAs, isVisitor } = useNav();
+  const [turn, setTurn] = useState<{ dir: "next" | "prev" } | null>(null);
+  const [showPresets, setShowPresets] = useState(false);
+  const [showStickers, setShowStickers] = useState(false);
+  const [showPrint, setShowPrint] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
+  const [showKeys, setShowKeys] = useState(false);
+  const [showCover, setShowCover] = useState(false);
+  const addInputRef = useRef<HTMLInputElement>(null);
+  const turningRef = useRef(false);
+
+  const targetPageId = sb.activePageId ?? sb.leftPage?.id ?? sb.rightPage?.id ?? null;
+  const canView = sb.book ? canSee(sb.book.visibility, viewAs) : true;
+
+  async function handleFiles(files: FileList | null) {
+    if (!files || !targetPageId) return;
+    for (const file of Array.from(files)) {
+      try {
+        const { src, aspect } = await loadImageFile(file);
+        const id = addArchivePhoto(src, aspect);
+        sb.addPhoto(targetPageId, src, id);
+      } catch {
+        /* ignore unreadable files */
+      }
+    }
+  }
+
+  async function handleReplace(id: string, file: File) {
+    try {
+      const { src } = await loadImageFile(file);
+      sb.updateElement(id, { src });
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const applyPreset = (preset: LayoutPreset) => {
+    const hasPhotos = (id: string | null | undefined) =>
+      !!id && !!sb.pages.find((p) => p.id === id)?.elements.some((e) => e.type === "photo");
+    let pid = targetPageId;
+    if (!hasPhotos(pid)) pid = [sb.leftPage, sb.rightPage].find((p) => hasPhotos(p?.id))?.id ?? pid;
+    if (pid) sb.arrangePage(pid, preset);
+    setShowPresets(false);
+  };
+
+  const requestTurn = (dir: "next" | "prev") => {
+    if (turningRef.current) return;
+    sb.setSelectedId(null);
+    if (dir === "next" && sb.spread >= sb.spreadCount - 1) return;
+    if (dir === "prev" && sb.spread <= 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (dir === "next") sb.goNext();
+      else sb.goPrev();
+      return;
+    }
+    turningRef.current = true;
+    playPageTurn();
+    setTurn({ dir });
+  };
+
+  const finishTurn = () => {
+    if (!turningRef.current) return;
+    turningRef.current = false;
+    if (turn?.dir === "next") sb.goNext();
+    else if (turn?.dir === "prev") sb.goPrev();
+    setTurn(null);
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (t && (t.tagName === "TEXTAREA" || t.tagName === "INPUT")) return;
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (e.shiftKey) sb.redo();
+        else sb.undo();
+        return;
+      }
+      if (mod && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        sb.redo();
+        return;
+      }
+      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+        e.preventDefault();
+        setShowKeys((v) => !v);
+        return;
+      }
+      if (e.key === "ArrowLeft") requestTurn("prev");
+      else if (e.key === "ArrowRight") requestTurn("next");
+      else if (!isVisitor && (e.key === "Delete" || e.key === "Backspace") && sb.selectedId) {
+        e.preventDefault();
+        sb.removeElement(sb.selectedId);
+      } else if (e.key === "Escape") sb.setSelectedId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  const otherIdx = turn ? (turn.dir === "next" ? sb.spread + 1 : sb.spread - 1) : sb.spread;
+  const otherL = sb.pages[otherIdx * 2] ?? null;
+  const otherR = sb.pages[otherIdx * 2 + 1] ?? null;
+
+  if (!sb.book) {
+    return (
+      <RoomFrame header={<HomeChip />}>
+        <RoomNavRails desk />
+        <div className="flex flex-1 items-center justify-center text-paper/60">No book open.</div>
+      </RoomFrame>
+    );
+  }
+
+  if (!canView) {
+    return (
+      <RoomFrame header={<HomeChip />}>
+        <RoomNavRails desk />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-paper/70">
+          <Lock size={28} />
+          <p>This book is private.</p>
+          <p className="text-sm text-paper/50">Viewing as {VIEW_AS_LABEL[viewAs]}.</p>
+        </div>
+      </RoomFrame>
+    );
+  }
+
+  return (
+    <RoomFrame
+      header={
+        <>
+          <div className="flex items-center gap-3">
+            <HomeChip />
+            <div className="leading-tight">
+              <p className="font-display font-semibold text-ink">{sb.book.title}</p>
+              <p className="ks-caption text-ink/70" style={{ fontSize: "1.1rem" }}>
+                {sb.book.subtitle}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="min-w-14 text-center text-sm text-ink/70" aria-live="polite">
+              Spread {sb.spread + 1} of {sb.spreadCount}
+            </span>
+            {!isVisitor && (
+              <>
+                <span className="mx-1 h-6 w-px bg-paper/15" />
+                <button className="ks-chip" aria-label="Undo" title="Undo (⌘Z)" onClick={sb.undo} disabled={!sb.canUndo}>
+                  <Undo2 size={16} />
+                </button>
+                <button className="ks-chip" aria-label="Redo" title="Redo (⌘⇧Z)" onClick={sb.redo} disabled={!sb.canRedo}>
+                  <Redo2 size={16} />
+                </button>
+                <button className="ks-chip" aria-label="Add a spread" title="Add spread" onClick={sb.addSpread}>
+                  <Plus size={16} />
+                </button>
+                <button
+                  className="ks-chip hover:!bg-seal"
+                  aria-label="Delete this spread"
+                  title="Delete this spread"
+                  onClick={sb.deleteCurrentSpread}
+                  disabled={sb.spreadCount <= 1}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {!isVisitor && (
+              <button
+                className="ks-chip"
+                aria-label="Edit cover and title page"
+                title="Cover & title page"
+                aria-expanded={showCover}
+                onClick={() => setShowCover((v) => !v)}
+              >
+                <BookMarked size={16} />
+              </button>
+            )}
+            <button className="ks-chip" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" onClick={() => setShowKeys(true)}>
+              <Keyboard size={16} />
+            </button>
+            <button className="ks-chip" aria-label="Notes on this spread" title="Notes on this spread" onClick={() => setShowNotes(true)}>
+              <StickyNote size={16} />
+            </button>
+            <button className="ks-chip" aria-label="Export or print this book" title="Export / print book" onClick={() => setShowPrint(true)}>
+              <Printer size={16} />
+            </button>
+            <div className="hidden items-center gap-3 sm:flex">
+              {isVisitor ? (
+                <span className="rounded-full bg-accent/20 px-3 py-1 text-sm text-accent-fg">
+                  Viewing as {VIEW_AS_LABEL[viewAs]}
+                </span>
+              ) : (
+                <SaveIndicator status={sb.saveStatus} />
+              )}
+            </div>
+          </div>
+        </>
+      }
+      footer={
+        isVisitor ? null : (
+          <div className="flex flex-col items-center gap-2 px-4 pb-4">
+            {showCover && sb.book && (
+              <div className="ks-panel w-full max-w-md p-3">
+                <p className="mb-2 font-display text-paper">Cover &amp; title page</p>
+                <BookIdentityEditor
+                  title={sb.book.title}
+                  subtitle={sb.book.subtitle}
+                  coverStyle={sb.book.coverStyle}
+                  onTitle={(t) => renameBook(sb.book!.id, t, sb.book!.subtitle)}
+                  onSubtitle={(s) => renameBook(sb.book!.id, sb.book!.title, s)}
+                  onCover={(c) => setBookCover(sb.book!.id, c)}
+                />
+              </div>
+            )}
+            {sb.selected && (
+              <SelectionToolbar
+                selected={sb.selected}
+                onRotate={sb.rotateBy}
+                onScale={sb.scaleBy}
+                onReset={sb.resetTransform}
+                onForward={sb.bringForward}
+                onBackward={sb.sendBackward}
+                onCycleFrame={sb.cycleFrame}
+                onColor={(id, color) => sb.updateElement(id, { color })}
+                onReplace={handleReplace}
+                onDelete={sb.removeElement}
+              />
+            )}
+            {showPresets && (
+              <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-full bg-[rgb(28_22_16/0.92)] px-2 py-1.5 shadow-lg">
+                <span className="px-1 text-sm text-paper/60">Arrange photos:</span>
+                <button className="ks-tool" onClick={() => applyPreset("grid")}>
+                  <LayoutGrid size={16} /> Grid
+                </button>
+                <button className="ks-tool" onClick={() => applyPreset("column")}>
+                  <Rows3 size={16} /> Column
+                </button>
+                <button className="ks-tool" onClick={() => applyPreset("scatter")}>
+                  <Shuffle size={16} /> Scatter
+                </button>
+              </div>
+            )}
+            {showStickers && (
+              <div className="flex max-w-xl flex-wrap items-center justify-center gap-1 rounded-2xl bg-[rgb(28_22_16/0.92)] px-2 py-2 shadow-lg">
+                {STICKER_GLYPHS.map((g) => (
+                  <button
+                    key={g}
+                    className="ks-chip text-lg"
+                    aria-label={`Add sticker ${g}`}
+                    onClick={() => {
+                      if (targetPageId) sb.addSticker(targetPageId, g);
+                      setShowStickers(false);
+                    }}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="ks-desk flex w-full max-w-xl flex-wrap items-center justify-center gap-2 rounded-2xl px-3 py-2" role="toolbar" aria-label="Add to the page">
+              <button className="ks-tool ks-tool--accent" onClick={() => addInputRef.current?.click()}>
+                <ImagePlus size={18} /> Add photo
+              </button>
+              <button className="ks-tool" onClick={() => targetPageId && sb.addCaption(targetPageId)}>
+                <Type size={18} /> Add caption
+              </button>
+              <button className="ks-tool" aria-expanded={showStickers} onClick={() => setShowStickers((v) => !v)}>
+                <Smile size={18} /> Stickers
+              </button>
+              <button className="ks-tool" aria-expanded={showPresets} onClick={() => setShowPresets((v) => !v)}>
+                <Wand2 size={18} /> Arrange
+              </button>
+              <input
+                ref={addInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                hidden
+                aria-label="Upload photographs"
+                onChange={(e) => {
+                  handleFiles(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+          </div>
+        )
+      }
+    >
+      <RoomNavRails desk />
+      <div className="ks-book-stage">
+        <button
+          type="button"
+          className="ks-page-turn ks-page-turn--prev"
+          aria-label="Previous spread"
+          title="Turn the page back"
+          onClick={() => requestTurn("prev")}
+          disabled={sb.spread === 0 || !!turn}
+        >
+          <ChevronLeft size={22} />
+        </button>
+        {turn ? (
+          <PageFlip
+            dir={turn.dir}
+            curL={sb.leftPage}
+            curR={sb.rightPage}
+            otherL={otherL}
+            otherR={otherR}
+            bookTitle={sb.book.title}
+            bookSubtitle={sb.book.subtitle}
+            onDone={finishTurn}
+          />
+        ) : (
+          <Spread
+            leftPage={sb.leftPage}
+            rightPage={sb.rightPage}
+            activePageId={isVisitor ? null : sb.activePageId}
+            bookTitle={sb.book.title}
+            bookSubtitle={sb.book.subtitle}
+            selectedId={isVisitor ? null : sb.selectedId}
+            onActivate={isVisitor ? () => {} : sb.setActivePageId}
+            onSelect={isVisitor ? () => {} : sb.setSelectedId}
+            onDeselect={() => sb.setSelectedId(null)}
+            onMove={isVisitor ? () => {} : (id, x, y) => sb.updateElement(id, { x, y })}
+            onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
+            onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
+          />
+        )}
+        <button
+          type="button"
+          className="ks-page-turn ks-page-turn--next"
+          aria-label="Next spread"
+          title="Turn the page"
+          onClick={() => requestTurn("next")}
+          disabled={sb.spread === sb.spreadCount - 1 || !!turn}
+        >
+          <ChevronRight size={22} />
+        </button>
+      </div>
+      {showKeys && <ShortcutsHelp onClose={() => setShowKeys(false)} />}
+      {showPrint && sb.book && <PrintView book={sb.book} onClose={() => setShowPrint(false)} />}
+      {showNotes && sb.book && (
+        <NotesPanel
+          bookId={sb.book.id}
+          pageIds={[sb.leftPage?.id, sb.rightPage?.id].filter(Boolean) as string[]}
+          onClose={() => setShowNotes(false)}
+        />
+      )}
+    </RoomFrame>
+  );
+}
+
+function ShortcutsHelp({ onClose }: { onClose: () => void }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, onClose);
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div
+        ref={panelRef}
+        className="ks-panel w-full max-w-sm p-5"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Keyboard shortcuts"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="mb-3 font-display text-xl">On the page</h2>
+        <dl className="space-y-1.5 text-sm text-paper/80">
+          <Row k="← →" v="Turn the page" />
+          <Row k="⌘Z / Ctrl Z" v="Undo" />
+          <Row k="⌘⇧Z / Ctrl Y" v="Redo" />
+          <Row k="Delete" v="Remove the selected piece" />
+          <Row k="Esc" v="Clear selection / close" />
+          <Row k="?" v="This list" />
+        </dl>
+        <button className="ks-tool ks-tool--accent mt-4 w-full justify-center" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="flex justify-between gap-4">
+      <dt className="font-display text-paper/50">{k}</dt>
+      <dd className="text-right">{v}</dd>
+    </div>
+  );
+}

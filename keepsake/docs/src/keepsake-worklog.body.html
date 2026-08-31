@@ -1,0 +1,201 @@
+<h2>Overview</h2>
+<p>
+  This is a breadth-first <strong>2.5D working prototype</strong> of Keepsake, built across the
+  Design Bible v3 phases (A&ndash;F). The goal is a coherent, testable experience that touches as
+  many systems as possible rather than finishing any one to production depth. Everything runs in the
+  browser (React&nbsp;19 + TypeScript + Vite, Tailwind v4), persisted to <strong>IndexedDB</strong>;
+  there is no backend yet, so account, storage, and multi-user systems are simulated <em>locally</em>
+  and labelled as such.
+</p>
+<div class="note">
+  <strong>Art direction.</strong> The room and chrome draw on <em>Little Big Planet</em> (handcrafted,
+  tactile "pop-out" objects), <em>Sly Cooper</em> (storybook, bold stylised shapes, warm noir), and
+  <em>What Remains of Edith Finch</em> (a cozy, slightly melancholic diorama house, warm light,
+  drifting dust). It is realised in 2.5D with layered parallax, painterly gradients, grain, and soft
+  vignette &mdash; the "2.5D over full 3D" open decision from Bible &sect;4/&sect;8.
+</div>
+<p class="muted">
+  Ideas that <em>deviate</em> from the Bible are collected in the companion "Suggestions &amp;
+  Deviations" PDF; quick, obvious fixes and any clear privacy/security issues are acted on directly
+  and noted here.
+</p>
+
+<h3>Architecture at a glance</h3>
+<ul>
+  <li><code>store/appStore</code> &mdash; one app state (profile, books, archive, environment,
+    social, pins, timeline, achievements) with debounced IndexedDB autosave.</li>
+  <li><code>store/nav</code> &mdash; a small room-view router plus the local <em>View as</em> mode.</li>
+  <li><code>hooks/useScrapbook</code> &mdash; editor state over the active book.</li>
+  <li>The room is the interface: a diorama hub whose objects open each system (Bible &sect;2/&sect;8).</li>
+</ul>
+
+<hr />
+
+<h2><span class="tag">Phase A</span> Core scrapbook</h2>
+<h4>Built</h4>
+<ul>
+  <li>Book &rarr; open two-page spread on a wooden desk; cream paper, spine shadow, drop shadows.</li>
+  <li>Photographs as tactile prints (polaroid / tape / flush frames); select, drag, rotate, resize,
+    restack, replace, remove.</li>
+  <li>Positions stored as page percentages so layout holds across screen sizes (Bible requirement).</li>
+</ul>
+<h4>Notes</h4>
+<ul><li>Data model follows the Bible's <code>Scrapbook &rarr; Page &rarr; PageElement</code> shapes.</li></ul>
+
+<h2><span class="tag">Phase B</span> Scrapbook MVP</h2>
+<h4>Built</h4>
+<ul>
+  <li>Multi-photo pages (up to 6), z-order, sensible initial positions.</li>
+  <li>Editable handwritten captions (character-limited) with sharpie ink colours.</li>
+  <li><strong>Layout presets</strong> &mdash; Grid / Column / Scatter for fast placement (&sect;5).</li>
+  <li><strong>Directional 3D page-turn</strong> animation across the spine: the turning leaf shows
+    the current page on the front and the <em>real incoming page</em> on the back, with a short
+    Web Audio paper-rustle. Reduced-motion still does an instant swap and stays silent (&sect;7).</li>
+  <li><strong>Undo / redo</strong> in the editor (40-step stack, burst-coalesced so a drag is one
+    step) with chips and ⌘Z / Ctrl+Z, ⌘⇧Z / Ctrl+Y. <code>?</code> opens a shortcut list.</li>
+  <li><strong>Stickers</strong> as page elements sharing the photo/caption transform model (&sect;11).</li>
+  <li><strong>Free transform for photos &amp; stickers</strong>: a drag-to-rotate handle (hold Shift
+    to snap to 15&deg;) for any angle, plus <strong>two-finger pinch to resize and twist to rotate</strong>
+    on touch devices (Pointer Events, so mouse/pen/multi-touch all work). Toolbar buttons remain for
+    fine steps.</li>
+</ul>
+<h4>Changes / fixes</h4>
+<ul>
+  <li>Fixed two React&nbsp;StrictMode-exposed impurities discovered by testing (a preset counter and a
+    page-turn commit that ran inside a state updater).</li>
+</ul>
+
+<h2><span class="tag">Phase C</span> Persistent product <span class="pill">local</span></h2>
+<h4>Built</h4>
+<ul>
+  <li><strong>Multiple books + bookshelf</strong>: create, rename, choose leather cover, set
+    visibility, delete; select a book by its cover (&sect;9).</li>
+  <li><strong>Filing cabinet / archive</strong>: every uploaded photo is kept, searchable by
+    category, favouritable; "place in book" adds a <em>reference</em> to the existing photo rather
+    than duplicating it (&sect;10).</li>
+  <li>Per-book <strong>visibility</strong> (private / friends / public).</li>
+</ul>
+<div class="note">
+  <strong>Simulated locally.</strong> Accounts, object storage, and server-side permission
+  enforcement do not exist yet. Visibility is a local <em>preview</em> only (see Phase E and the
+  "real vs simulated" section). Uploaded images are downscaled and stored as data URLs in IndexedDB.
+</div>
+
+<h2><span class="tag">Phase D</span> Room alpha (2.5D)</h2>
+<h4>Built</h4>
+<ul>
+  <li>A diorama <strong>room hub</strong> with three parallax depth layers that respond to the
+    pointer; interactive objects lift and reveal a handwritten label on hover.</li>
+  <li>Authored "camera views" (room &rarr; book / shelf / archive / timeline / map / guest book) via
+    a simple view router &mdash; a CameraDirector stand-in (&sect;8).</li>
+  <li><strong>Window / day&ndash;night / seasons / weather / lamp</strong>: sky and light shift with
+    time (auto by clock, or forced), a seasonal tint, rain/snow, and a warm lamp glow after dark
+    (&sect;14).</li>
+  <li>Ambient <strong>dust motes</strong> and grain for the Edith-Finch mood.</li>
+</ul>
+<h4>Fixes</h4>
+<ul><li>Parallax layer wrappers were intercepting clicks; made them non-interactive so objects
+  beneath remain clickable.</li></ul>
+
+<h2><span class="tag">Phase E</span> Social <span class="pill">local sim</span></h2>
+<h4>Built</h4>
+<ul>
+  <li><strong>Visitor "View as"</strong> (Close friend / Friend / Public) previews the room and
+    library through a visitor's eyes; private books and the archive are hidden accordingly, and the
+    book editor becomes read-only (&sect;17/&sect;18).</li>
+  <li><strong>Guest book</strong> &mdash; flat, non-threaded notes, no counters or reply chains
+    (&sect;19).</li>
+  <li><strong>Page notes + approval + whispers</strong> &mdash; a visitor can leave a short note on a
+    spread; it stays hidden until the owner approves it; approved notes then occasionally drift into
+    the room as a quiet, dismissible "whisper" (&sect;19).</li>
+</ul>
+<div class="note">
+  <strong>Simulated locally.</strong> There are no real other users; "View as" is a client-side
+  preview and notes/visibility are enforced only in the UI. A real permission-inheritance engine and
+  server enforcement are required before any actual sharing (&sect;17).
+</div>
+
+<h2><span class="tag">Phase F</span> Expansion</h2>
+<h4>Built</h4>
+<ul>
+  <li><strong>Timeline wall</strong> &mdash; add year milestones on a vertical line (&sect;15).</li>
+  <li><strong>Memory atlas / map</strong> &mdash; an illustrated map; click to pin a place + note;
+    exact coordinates are never used (approximate/manual by default, &sect;16).</li>
+  <li><strong>Craft drawer / stickers</strong> in the editor (&sect;11).</li>
+  <li><strong>Hidden achievements &mdash; event ledger</strong> (&sect;12): a pure rules engine
+    derives completion from state, so grants are idempotent and reproducible; each is stamped with a
+    completion time and a "seen" flag separates completion from reward presentation. Presented as
+    gentle "keepsakes found"; a panel lists found vs undiscovered.</li>
+  <li><strong>CRT music</strong> &mdash; a provider-adapter player (Bible &sect;13): an offline,
+    licence-free generative ambient pad (Web Audio), <em>and</em> a <strong>"Connect Spotify"</strong>
+    account login via browser-safe OAuth&nbsp;PKCE (no client secret). Once connected it lists your
+    playlists and can associate one per book; an embedded Spotify player handles playback (a manual
+    playlist link works without login too). Activation needs a Spotify Developer app Client ID
+    (<code>VITE_SPOTIFY_CLIENT_ID</code>) &mdash; requested via the environment setup panel; full
+    in-app playback control needs Spotify Premium (Web Playback SDK).</li>
+  <li><strong>Curated-RNG opportunity queue</strong> (&sect;20): sixteen candidates (welcome, reward,
+    empty-page, whisper, photo-out, ajar-book, bookmark, guest-wave, map-glint, night-moth,
+    pressed-flower, season-note, letter, window-draft, kettle, tea-ring) each carry eligibility,
+    priority, and a cooldown. A curator picks at most one per session (highest priority; ties
+    broken randomly; quieter events may present nothing) and records a persisted receipt.
+    Force a kind with <code>?event=</code>. Everything is ambient and non-interrupting.</li>
+  <li><strong>Keyboard / screen-reader pass</strong> (&sect;23, first cut): skip links, a
+    <code>&lt;main&gt;</code> landmark, named icon buttons, focus rings on room objects, Tab-trapped
+    dialogs that restore focus, a live spread counter, and tour copy exposed in full to assistive
+    tech.</li>
+  <li><strong>Onboarding</strong> &mdash; first visit opens a <em>Messenger</em>-style dialogue
+    tour (name plate + paper bubble + overlapping next) narrated by &ldquo;the house.&rdquo; It
+    walks the room object by object (book, window, shelf, archive, timeline, map, guest book, CRT,
+    and the top bar), with a spotlight cut-out, typewriter line, skip (&ldquo;wander off&rdquo; /
+    Escape), and replay from room settings or <code>?tour=1</code>. Completing or skipping sets
+    <code>progress.completedTour</code> so it does not auto-start again. This is a requested
+    deviation from Bible &sect;21 &ldquo;discovery over instruction&rdquo; &mdash; kept skippable
+    and house-voiced so it still feels like the room speaking, not a checklist.</li>
+  <li><strong>Export / print</strong> &mdash; a print-ready view of a book; "Save as PDF" in the
+    browser produces a shareable keepsake (&sect;25, software half).</li>
+  <li><strong>Offline read mode</strong> &mdash; a service worker + web manifest cache the app shell
+    and assets (production build), and scrapbook data already lives in IndexedDB, so a loaded room can
+    be revisited offline and installed to the home screen (&sect;22).</li>
+</ul>
+
+<hr />
+
+<h2>Deviations acted on during the build</h2>
+<table>
+  <tr><th>Change</th><th>Why</th><th>Bible</th></tr>
+  <tr><td>Persist photos (as data URLs) so books survive a refresh</td><td>Much better to actually test with; small change</td><td>&sect;3 (prototype images were "intentionally temporary")</td></tr>
+  <tr><td>Client-side visibility gating for private books / archive and "View as"</td><td>A clear privacy expectation; implemented as an honest local preview and flagged that real enforcement is server-side</td><td>&sect;17</td></tr>
+  <tr><td>Downscale uploads to &le;1400px</td><td>Protects browser memory / storage quota</td><td>&sect;6/&sect;22 (listed risks)</td></tr>
+</table>
+<p class="muted">Anything larger or subjective was <em>not</em> acted on &mdash; it lives in the
+  Suggestions &amp; Deviations PDF for your review.</p>
+
+<h2>Real vs simulated (please read)</h2>
+<ul>
+  <li><strong>Real &amp; local:</strong> the whole editor, room, environment, library, archive,
+    timeline, map, guest book, achievements, music, export &mdash; all working in the browser and
+    saved to IndexedDB.</li>
+  <li><strong>Simulated (no backend yet):</strong> accounts, cloud photo storage, multi-user
+    visiting, and <em>server-side privacy enforcement</em>. "View as" and visibility are previews,
+    not security. This is the top risk area in the Bible (&sect;17) and needs a real backend before
+    any sharing is enabled.</li>
+</ul>
+
+<h2>Testing</h2>
+<ul>
+  <li><code>npm run build</code> (tsc + vite) passes with no type errors.</li>
+  <li>Browser-verified end to end: room navigation to every object; open/edit book (photos,
+    captions, stickers, presets, page turns, export); day&rarr;night in the window; bookshelf,
+    archive (search/favourite/place-in-book), timeline, map (pin), guest book; "View as" gating.</li>
+  <li>No red console errors. Icon-only controls now carry accessible names; dialogs trap focus.</li>
+</ul>
+
+<h2>Where this could go next</h2>
+<ul>
+  <li>A real backend (Postgres + auth + object storage) and a proper permission-inheritance engine,
+    turning the local "View as"/visibility previews into real, enforced privacy (&sect;17).</li>
+  <li>Commission illustrated parallax plates for the room &mdash; painted 2.5D first, not a Three.js
+    rewrite. See the 3D art brief in the suggestions PDF.</li>
+  <li>A real-device VoiceOver / TalkBack pass, and licensed sticker/craft packs.</li>
+  <li>Spotify Web Playback SDK once a Client ID is injected on new agents (Premium).</li>
+</ul>

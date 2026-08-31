@@ -1,0 +1,248 @@
+<h2>How to read this</h2>
+<p>
+  A running list of ideas, refinements, and <strong>deviations from Design Bible v3</strong> that came
+  up while building the 2.5D prototype. Items marked <span class="pill">acted</span> were small, safe,
+  or privacy/security-related and were applied during the build (also in the Work Log). Items marked
+  <span class="pill">proposed</span> await your decision &mdash; nothing here has changed the product's
+  direction on its own.
+</p>
+<hr />
+
+<h2>Acted on (small / safe / privacy)</h2>
+
+<h3><span class="pill">acted</span> Persist photographs locally</h3>
+<p>The Bible (&sect;3) says the current prototype keeps images in memory and lets them disappear on
+  refresh. For a testable prototype that felt wrong, so books (including photos, as downscaled data
+  URLs) now persist in IndexedDB. Trivially reversible if you want the "ephemeral" behaviour back.</p>
+
+<h3><span class="pill">acted</span> <span class="pill">privacy</span> Local visibility gating</h3>
+<p>Private books and the archive are hidden under visitor "View as" modes, and the book becomes
+  read-only for visitors. This is a client-side <em>preview only</em> and is <strong>not</strong>
+  real security &mdash; real enforcement must be server-side (&sect;17). Called out clearly in the UI
+  and Work Log so it is never mistaken for protection.</p>
+
+<h3><span class="pill">acted</span> Downscale uploads</h3>
+<p>Uploaded images are resized to &le;1400px before storage to protect browser memory and IndexedDB
+  quota (a risk noted in &sect;6/&sect;22).</p>
+
+<h3><span class="pill">acted</span> Accessibility &amp; small UX polish</h3>
+<p>Added <code>name</code>/<code>aria-label</code> to all form fields; a <strong>Music volume</strong>
+  control; visitors see their own pending note. Follow-up pass: skip links, a
+  <code>&lt;main&gt;</code> landmark, named icon buttons, object focus rings, Tab-trapped dialogs
+  that restore focus, a live spread counter, and tour copy exposed in full to assistive tech
+  (the typewriter is visual-only). A real-device VoiceOver/TalkBack pass is still worth doing
+  later (&sect;23).</p>
+
+<hr />
+
+<h2>Proposed (your call)</h2>
+
+<h3><span class="pill">proposed</span> Room art: painted 2.5D first, toon-3D later (and only if we miss it)</h3>
+<p>
+  The room is still CSS gradients, Lucide icons, and a few textures. It holds as a prototype, but it
+  is not yet the Little Big Planet / Sly Cooper / Edith Finch diorama the Bible asked for. The
+  Messenger tour borrowed <em>layout</em> from
+  <a href="https://messenger.abeto.co/">messenger.abeto.co</a>, not its cel-shaded WebGL look.
+  Here is the art brief I would actually commission.
+</p>
+
+<h4>Recommendation</h4>
+<p>
+  Stay 2.5D. Commission a set of painted, cut-out parallax plates and drop them into the existing
+  depth rig. Do <strong>not</strong> rewrite the room in Three.js to chase Messenger's toon shader.
+  A full 3D scene is a different product: heavier bundle, new camera language, and it fights the
+  scrapbook-on-a-desk metaphor. Bible &sect;8 already picked 2.5D for this reason.
+</p>
+
+<h4>What I want the room to look like</h4>
+<ul>
+  <li><strong>Little Big Planet</strong> &mdash; objects feel sewn, stuffed, or paper-cut. Soft
+    rim light. A slight &ldquo;pop&rdquo; when you hover (we already do this; the art should invite it).</li>
+  <li><strong>Sly Cooper</strong> &mdash; inked silhouettes, limited palette, storybook noir. Edges
+    read from across the room. Night should go indigo + amber, not grey.</li>
+  <li><strong>Edith Finch</strong> &mdash; a lived-in house, slightly melancholy, dust in the beam,
+    nothing sterile. Clutter that looks placed by a person, not a UI kit.</li>
+</ul>
+<p>
+  Palette already in the prototype: cocoa leather <code>#4a3224</code>, cream paper
+  <code>#f3e9d8</code>, seal red <code>#b55245</code>, dusk mauve, night indigo. New art should
+  lock to those, not invent a second brand.
+</p>
+
+<h4>Deliverables (phase 1 &mdash; illustrated plates)</h4>
+<p>Ask an illustrator for layered PNGs/WebPs with transparent cut-outs, authored at ~2&times; the
+  scene size so they survive the existing pointer parallax:</p>
+<ol>
+  <li><strong>Far sky</strong> &mdash; four plates: day, dusk, night, plus a weather overlay
+    (rain streaks / snow) we can tint. The window already frames this.</li>
+  <li><strong>Back wall</strong> &mdash; plaster + picture rail + window casing. Warm, slightly
+    stained. No UI chrome painted in.</li>
+  <li><strong>Mid furniture</strong> &mdash; bookshelf (empty bays; we keep drawing spines in CSS
+    so book count stays live), framed timeline, cork map. These must match today's hotspot boxes
+    in <code>lib/hotspots.ts</code>.</li>
+  <li><strong>Desk + cabinet + CRT</strong> &mdash; wood grain, a lamp, the kettle, a tea ring
+    already in the wood. The open book stays a live HTML cover (leather + title), not painted shut.</li>
+  <li><strong>Foreground clutter</strong> &mdash; a few optional bits (pressed flower, ribbon,
+    letter, loose photo) that the curator can show/hide. Same silhouette language as the mid layer.</li>
+  <li><strong>Season washes</strong> &mdash; four multiply overlays (spring green, summer gold,
+    autumn rust, winter blue) rather than four full rooms.</li>
+</ol>
+<p>
+  Technical constraints for the brief: 16:9 safe area; keep interactive objects inside the current
+  percentage hitboxes; no baked-in text (we set titles in type); no photoreal PBR; export as
+  premultiplied WebP, max ~400&nbsp;KB per plate.
+</p>
+
+<h4>What I do <em>not</em> want (yet)</h4>
+<ul>
+  <li>A free-orbit 3D camera. The room is a tableau. Parallax is a glance, not a fly-through.</li>
+  <li>A full Three.js rewrite of every object. That would freeze the scrapbook, notes, and
+    curator into a 3D engine we do not need.</li>
+  <li>Messenger's cool grey cel-shade as the house style. Keep cream, ink, and wood. If we ever
+    toon-shade something, the outline colour should be cocoa, not black comic-ink.</li>
+  <li>AI texture dumps or stock isometric rooms. The point is one hand. Same illustrator for
+    every plate.</li>
+</ul>
+
+<h4>Optional later: one toon-3D hero, not a 3D house</h4>
+<p>
+  If painted plates still feel flat after we live with them, the honest Messenger-like experiment
+  is a <em>single</em> WebGL accent &mdash; probably the open book, or the window glass &mdash;
+  sitting in the 2.5D scene:
+</p>
+<ul>
+  <li>Toon/cel: a 3&ndash;4 stop ramp (<code>MeshToonMaterial</code> or a tiny custom shader),
+    not a realistic light model.</li>
+  <li>Ink outline via an inverted-hull or fullscreen Sobel; stroke in
+    <code>#2c2418</code>, 1&ndash;2px.</li>
+  <li>Paper/leather/wood as <em>painted</em> textures, not scanned PBR sets.</li>
+  <li>Camera locked; only a few degrees of parallax, matching the CSS layers.</li>
+  <li>Reduced-motion: freeze the mesh and show the still plate.</li>
+</ul>
+<p>
+  That is a spike, not a rewrite. If it does not obviously beat the painted book, throw it away.
+  I would not start there.
+</p>
+
+<h4>Commission shape</h4>
+<p>
+  One illustrator (or a very small studio), two rounds: greyscale layups against a screenshot of
+  the current room, then colour. Style frames: a LBP sack-person living room, a Sly Cooper hideout
+  interior, Edith Finch's kitchen at dusk. Payment for plates + a year of seasonal variants.
+  We keep hotspot code, tour, and curator as-is.
+</p>
+
+<h3><span class="pill">acted</span> Music: ambient pad + Spotify account login</h3>
+<p>The CRT is now a provider adapter (&sect;13): an offline generative Web-Audio pad by default, plus a
+  <strong>"Connect Spotify"</strong> login via browser-safe OAuth&nbsp;PKCE (no client secret). Once
+  connected it can browse your playlists and set one per book; an embedded player handles playback.
+  <em>Needs your input to go live:</em> the Client ID can come from
+  <code>VITE_SPOTIFY_CLIENT_ID</code> / <code>SPOTIFY_CLIENT_ID</code>, or be pasted once in the CRT
+  panel (stored only in this browser). Register the exact Redirect URI shown in the panel.
+  The Client Secret is <strong>not</strong> used and must never be prefixed with <code>VITE_</code>.
+  Full in-app playback control (vs. the embed/previews) requires Spotify Premium (Web Playback SDK) &mdash;
+  a natural next step once credentials exist. Licensed offline lo-fi tracks remain a later option per the Bible.</p>
+
+<h3><span class="pill">proposed</span> Export: browser print now, print pipeline later</h3>
+<p>Export uses the browser's Print / Save-as-PDF. A production path (&sect;25) needs a server PDF
+  renderer with bleed, trim, safe zones, and low-resolution warnings before any print-on-demand
+  vendor.</p>
+
+<h3><span class="pill">acted</span> Achievements event ledger</h3>
+<p>Reworked to match &sect;12: a pure rules engine derives completion from state (idempotent,
+  reproducible grants), each unlock is stamped with a completion time, and a "seen" flag separates
+  completion from reward presentation. Added a few more achievements (storyteller, decorator,
+  collector). Next step is persisting a fuller immutable action ledger once a backend exists.</p>
+
+<h3><span class="pill">acted</span> Curated-RNG opportunity queue + expanded catalogue</h3>
+<p>Replaced the single teaser with a real queue (&sect;20): candidates carry eligibility + priority
+  + cooldown; a curator selects at most one per session and records a persisted receipt so cooldowns
+  hold across sessions. The <em>welcome</em> candidate starts the guided room tour until
+  <code>progress.completedTour</code> is set. The catalogue is now sixteen kinds: welcome, reward,
+  empty-page, whisper, photo-out, ajar-book, bookmark, guest-wave, map-glint, night-moth,
+  pressed-flower, season-note, letter, window-draft, kettle, tea-ring. Quiet events (priority
+  &lt;&nbsp;25) have a 35% chance of presenting nothing, so the room can stay still. Force one in
+  QA with <code>?event=&lt;kind&gt;</code>.</p>
+
+<h3><span class="pill">acted</span> Messenger-style first-visit dialogue</h3>
+<p>You asked to borrow the bottom-of-scene text-bubble layout from
+  <a href="https://messenger.abeto.co/">messenger.abeto.co</a> for a first-login walkthrough.
+  Implemented as a paper/ink dialogue (name plate overlapping top-left, offset block shadow, square
+  next control overlapping bottom-right) with a spotlight that follows each room object. This
+  <strong>is</strong> a deviation from Bible &sect;21 &ldquo;discovery over instruction&rdquo; &mdash;
+  taken because you asked for it, and kept skippable / house-voiced so it can still be ignored.
+  The cel-shaded 3D look of Messenger itself (toon shading, ink outlines, WebGL scene) is
+  <em>not</em> copied here; that remains the proposed illustrated-parallax upgrade above.</p>
+
+<h3><span class="pill">proposed</span> Stickers &amp; craft assets</h3>
+<p>Stickers are emoji glyphs for now. Replace with licensed SVG/WebP sticker packs and scrapbook
+  styles (&sect;11), keeping the same transformable-element model already in place.</p>
+
+<h3><span class="pill">proposed</span> Map stays abstract / manual</h3>
+<p>The atlas is an illustrated, non-geocoded map; pins are placed manually. This actually matches the
+  Bible's privacy stance (approximate/manual by default, &sect;16) &mdash; I'd keep it and make exact
+  coordinates strictly opt-in if geocoding is ever added.</p>
+
+<h3><span class="pill">proposed</span> Single IndexedDB record</h3>
+<p>For prototype simplicity all state is one record. Production should split per entity and move to a
+  server (Postgres per &sect;4) &mdash; expected, not a concern yet.</p>
+
+<h3><span class="pill">proposed</span> Small polish backlog</h3>
+<ul>
+  <li><span class="pill">acted</span> First-visit onboarding is now a Messenger-style room tour
+    (name plate, paper dialogue box, overlapping next, spotlight on each object) instead of a single
+    banner. Requested; skippable; replayable from settings. See the work log.</li>
+  <li><span class="pill">acted</span> Tidied the map "pin a memory" form (labelled fields, cleaner
+    layout, disabled-until-valid).</li>
+  <li><span class="pill">acted</span> Modals close on <code>Escape</code>, trap Tab, restore focus,
+    and carry <code>role="dialog"</code>/<code>aria-modal</code>.</li>
+  <li><span class="pill">acted</span> Page-turn leaf now shows the real incoming spread on the back
+    face (not blank paper), plus a short Web Audio rustle/slap. Reduced-motion still swaps instantly
+    and stays silent.</li>
+  <li><span class="pill">acted</span> Editor undo/redo (chips + ⌘Z / Ctrl+Z, ⌘⇧Z / Ctrl+Y) and a
+    <code>?</code> shortcut list.</li>
+  <li><span class="pill">acted</span> First keyboard/screen-reader pass: skip links, a page
+    <code>&lt;main&gt;</code>, named icon buttons, object focus rings, live spread counter, tour
+    text exposed in full to AT (typewriter is visual-only). A real-device VoiceOver/TalkBack pass
+    is still worth doing later (&sect;23).</li>
+</ul>
+
+<h3><span class="pill">proposed</span> Future: Kindle / Amazon library on the bookshelf</h3>
+<p>
+  A later update, not this prototype. Let someone connect their
+  <strong>Amazon library or Kindle</strong> so the room bookshelf can also show books they are
+  reading or have already read &mdash; real titles as spines, sitting beside the scrapbooks they
+  make. When a friend is looking at that shelf, they could start a conversation through the
+  existing <strong>notes</strong> and <strong>guestbook</strong> (a remark on a spine, a signed
+  page in the guest book), instead of inventing a second comment system.
+</p>
+<h4>Why it fits</h4>
+<ul>
+  <li>The shelf is already a place you stand and look. Imported spines would use the same tug /
+    title / arrange language as scrapbooks, marked as <em>from the library</em> so they are not
+    mistaken for a book you authored here.</li>
+  <li>Notes already attach to a book; the guestbook already belongs to the room. A friend
+    visiting a shelf could leave a note on <em>the coast</em> they both read, or sign the book
+    after browsing. Visibility stays the private / friends / public split we already preview
+    (&sect;17).</li>
+  <li>Reading state (reading / read / abandoned) is a natural badge on the spine, not a new wall.</li>
+</ul>
+<h4>Constraints to settle before building</h4>
+<ul>
+  <li><strong>Amazon does not offer a public, Spotify-like Kindle library API.</strong> Any
+    connection would need an official partner path, a user-exported library file, or a
+    different catalogue (e.g. a manual shelf, or another service that <em>does</em> grant
+    read-only library access). Do not scrape Amazon or Kindle Cloud Reader.</li>
+  <li>Imported titles are metadata (title, author, cover if licensed, reading state) &mdash;
+    <em>not</em> the ebook file, and not a reader inside Keepsake. Opening a library spine
+    should open a discussion surface (notes / guestbook), not the book&rsquo;s pages.</li>
+  <li>Opt-in, revocable, and per-title visibility. A connected library must not dump every
+    purchase onto a public shelf. Same privacy stance as the map: approximate and chosen,
+    never a silent leak of what someone bought (&sect;16).</li>
+  <li>Needs a real account and a backend. The current IndexedDB &ldquo;View as&rdquo; preview
+    cannot host a friend standing in your room.</li>
+</ul>
+<p>
+  Worth keeping on the list. Do not start it until scrapbook spines, notes, and visiting a
+  friend&rsquo;s room are real &mdash; this idea sits on top of those, it does not replace them.
+</p>
