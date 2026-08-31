@@ -1369,14 +1369,14 @@
     box-shadow: 0 4px 10px rgb(0 0 0 / 0.22);
   }
 
-  /* 5% of a 5.2rem sticky may sit on the print (~0.26rem). */
+  /* Flush with the print edge so only a sliver of a tilted sticky can cover the photo. */
   .ks-sticky[data-side="left"] {
-    right: calc(100% - 0.26rem);
+    right: 100%;
     left: auto;
   }
 
   .ks-sticky[data-side="right"] {
-    left: calc(100% - 0.26rem);
+    left: 100%;
     right: auto;
   }
 

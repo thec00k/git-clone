@@ -466,12 +466,12 @@ function FridgeNotePanel({
 }
 
 const STICKY_LOOKS = [
-  { bg: "#f6e27a", rot: -7, side: "right" as const, top: "8%" },
-  { bg: "#f4b4c4", rot: 6, side: "left" as const, top: "22%" },
-  { bg: "#b8e0d2", rot: -5, side: "right" as const, top: "46%" },
-  { bg: "#f3c27a", rot: 8, side: "left" as const, top: "58%" },
-  { bg: "#d7c4f0", rot: -10, side: "right" as const, top: "74%" },
-  { bg: "#c9e4a8", rot: 5, side: "left" as const, top: "78%" },
+  { bg: "#f6e27a", rot: -4, side: "right" as const, top: "8%" },
+  { bg: "#f4b4c4", rot: 3, side: "left" as const, top: "22%" },
+  { bg: "#b8e0d2", rot: -3, side: "right" as const, top: "46%" },
+  { bg: "#f3c27a", rot: 4, side: "left" as const, top: "58%" },
+  { bg: "#d7c4f0", rot: -4, side: "right" as const, top: "74%" },
+  { bg: "#c9e4a8", rot: 3, side: "left" as const, top: "78%" },
 ];
 
 function FridgePeek({ pin, notes, onClose }: { pin: MemoryPin; notes: PinNote[]; onClose: () => void }) {
