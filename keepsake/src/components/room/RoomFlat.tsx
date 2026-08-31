@@ -5,7 +5,7 @@ import type { HotspotId } from "../../lib/hotspots";
 import { COVER_STYLES } from "../../types/scrapbook";
 import type { Scrapbook } from "../../types/scrapbook";
 import type { Environment } from "../../types/app";
-import { Cabinet, CRT, MiniShelf, SKY, SEASON_TINT, TimelineFrame, WeatherFx, type Phase } from "./RoomFurniture";
+import { Cabinet, CRT, MiniShelf, SKY, SEASON_TINT, TimelineFrame, WALL_PAINT, WeatherFx, type Phase } from "./RoomFurniture";
 
 export function RoomFlat({
   phase,
@@ -37,8 +37,7 @@ export function RoomFlat({
         <div
           className="absolute inset-0"
           style={{
-            background:
-              phase === "night" ? "linear-gradient(180deg,#2a2119,#1a1410)" : "linear-gradient(180deg,#3a2c22,#2a2019)",
+            background: WALL_PAINT[phase],
           }}
         />
         <div className="absolute inset-0" style={{ background: SEASON_TINT[environment.season] }} />
@@ -84,9 +83,9 @@ export function RoomFlat({
         >
           <div
             className="flex h-full w-full items-center justify-center rounded-sm"
-            style={{ background: "#b98a4e", boxShadow: "inset 0 0 0 5px #6e4a32, inset 0 0 30px rgb(0 0 0/.25)" }}
+            style={{ background: "#8ec9d8", boxShadow: "inset 0 0 0 5px #5ab4c8, inset 0 0 30px rgb(20 80 100/.18)" }}
           >
-            <MapIcon size={22} className="text-[#3a2a18]" />
+            <MapIcon size={22} className="text-[#16323c]" />
           </div>
           <span className="ks-obj-label">the map</span>
         </button>

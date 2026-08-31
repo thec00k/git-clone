@@ -18,23 +18,29 @@ export function phaseOf(timeMode: string): Phase {
 }
 
 export const SKY: Record<Phase, string> = {
-  day: "linear-gradient(180deg,#8fb8d6 0%,#c8dce6 55%,#e9dcc4 100%)",
-  dusk: "linear-gradient(180deg,#3a4a6b 0%,#a9668a 55%,#e6a15e 100%)",
-  night: "linear-gradient(180deg,#0d1830 0%,#1d2a49 60%,#2a3355 100%)",
+  day: "linear-gradient(180deg,#7ec8f0 0%,#c5eef8 48%,#e8f8d8 100%)",
+  dusk: "linear-gradient(180deg,#4a7aaa 0%,#c89ad4 52%,#f3c89a 100%)",
+  night: "linear-gradient(180deg,#0a1c38 0%,#163848 58%,#0c2a40 100%)",
 };
 
 export const SEASON_TINT: Record<string, string> = {
-  spring: "rgb(120 170 120 / 0.10)",
-  summer: "rgb(240 200 120 / 0.10)",
-  autumn: "rgb(200 120 60 / 0.12)",
-  winter: "rgb(180 210 235 / 0.12)",
+  spring: "rgb(140 220 160 / 0.16)",
+  summer: "rgb(255 230 140 / 0.14)",
+  autumn: "rgb(255 180 120 / 0.12)",
+  winter: "rgb(200 230 255 / 0.16)",
+};
+
+export const WALL_PAINT: Record<Phase, string> = {
+  day: "linear-gradient(180deg,#e8f7fb 0%,#c5e6ef 42%,#d8f0e6 100%)",
+  dusk: "linear-gradient(180deg,#7eb4d0 0%,#c9a8d4 52%,#f0c8a8 100%)",
+  night: "linear-gradient(180deg,#0e2a3c 0%,#163e4c 55%,#0c2838 100%)",
 };
 
 export function PhaseBadge({ phase }: { phase: Phase }) {
   const Icon = phase === "night" ? Moon : phase === "dusk" ? CloudSun : Sun;
   return (
     <div
-      className="absolute bottom-3 left-3 z-30 flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1 text-sm text-paper/70"
+      className="absolute bottom-3 left-3 z-30 flex items-center gap-1.5 rounded-full bg-white/50 px-3 py-1 text-sm text-ink/80"
       aria-label={`Time of day: ${phase}`}
     >
       <Icon size={14} aria-hidden="true" /> {phase}
@@ -44,14 +50,14 @@ export function PhaseBadge({ phase }: { phase: Phase }) {
 
 export function MiniShelf({ count }: { count: number }) {
   const spines = Array.from({ length: Math.max(4, count + 2) });
-  const colors = ["#4a3224", "#2f4a3c", "#5b2733", "#20293f", "#7a5320"];
+  const colors = ["#2eb8d0", "#7ed0a8", "#5aa8d4", "#c5e86c", "#89c4f0"];
   return (
     <div
-      className="flex h-full w-full flex-col justify-between rounded-sm bg-[#3a2a1e] p-2"
-      style={{ boxShadow: "inset 0 0 30px rgb(0 0 0/.4)" }}
+      className="flex h-full w-full flex-col justify-between rounded-sm bg-[#5ab4c8] p-2"
+      style={{ boxShadow: "inset 0 0 30px rgb(20 80 100/.28)" }}
     >
       {[0, 1].map((row) => (
-        <div key={row} className="flex items-end gap-1 border-b-4 border-[#6e4a32] pb-1">
+        <div key={row} className="flex items-end gap-1 border-b-4 border-[#7ed0e4] pb-1">
           {spines.slice(row * 4, row * 4 + 5).map((_, i) => (
             <div
               key={i}
@@ -72,12 +78,12 @@ export function MiniShelf({ count }: { count: number }) {
 export function Cabinet() {
   return (
     <div
-      className="flex h-full w-full flex-col gap-1 rounded-sm bg-[#4a3a2c] p-1.5"
-      style={{ boxShadow: "0 8px 20px rgb(0 0 0/.45)" }}
+      className="flex h-full w-full flex-col gap-1 rounded-sm bg-[#6ab8c8] p-1.5"
+      style={{ boxShadow: "0 8px 20px rgb(20 80 100/.22)" }}
     >
       {[0, 1, 2].map((i) => (
-        <div key={i} className="flex flex-1 items-center justify-center rounded-sm bg-[#5c4836]">
-          <div className="h-1.5 w-6 rounded-full bg-[#2c2418]" />
+        <div key={i} className="flex flex-1 items-center justify-center rounded-sm bg-[#8ed0dc]">
+          <div className="h-1.5 w-6 rounded-full bg-[#2a6e80]" />
         </div>
       ))}
       <Archive size={14} className="mx-auto text-paper/40" />
@@ -130,8 +136,8 @@ export function WeatherFx({ kind }: { kind: "rain" | "snow" }) {
 export function TimelineFrame() {
   return (
     <div
-      className="flex h-full w-full items-center justify-center rounded-sm bg-[#3a2e26] p-1"
-      style={{ boxShadow: "inset 0 0 0 6px #6e4a32" }}
+      className="flex h-full w-full items-center justify-center rounded-sm bg-[#7ec9d8] p-1"
+      style={{ boxShadow: "inset 0 0 0 6px #5ab4c8" }}
     >
       <div className="flex h-full w-full items-center justify-center rounded-sm bg-paper/90 text-ink">
         <Clock size={20} />
@@ -144,7 +150,7 @@ export function MiniMap() {
   return (
     <div
       className="flex h-full w-full items-center justify-center rounded-sm"
-      style={{ background: "#b98a4e", boxShadow: "inset 0 0 0 5px #6e4a32, inset 0 0 30px rgb(0 0 0/.25)" }}
+      style={{ background: "#8ec9d8", boxShadow: "inset 0 0 0 5px #5ab4c8, inset 0 0 30px rgb(20 80 100/.18)" }}
     >
       <img src="/maps/world.svg" alt="" className="ks-world-map h-[78%] w-[86%] object-cover opacity-90" />
     </div>

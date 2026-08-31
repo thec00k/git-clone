@@ -93,19 +93,19 @@ export function Room() {
         <div className="flex items-center gap-3">
           {roomFace !== "front" && <HomeChip />}
           <div className="leading-tight">
-            <p className="font-display text-sm uppercase tracking-[0.22em] text-paper/70">Keepsake</p>
-            <p className="ks-caption text-paper/80" style={{ fontSize: "1.15rem" }}>
+            <p className="font-display text-sm uppercase tracking-[0.22em] text-ink/70">Keepsake</p>
+            <p className="ks-caption text-ink/80" style={{ fontSize: "1.15rem" }}>
               {state.profile.displayName}&rsquo;s room
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 text-sm text-paper/80">
+          <label className="flex items-center gap-1.5 rounded-full bg-white/55 px-2 py-1 text-sm text-ink/80">
             <span className="hidden sm:inline text-paper/50">View as</span>
             <select
               name="viewAs"
               aria-label="View the room as"
-              className="bg-transparent text-paper outline-none"
+              className="bg-transparent text-ink outline-none"
               value={viewAs}
               onChange={(e) => {
                 const v = e.target.value as ViewAs;
@@ -129,7 +129,7 @@ export function Room() {
           >
             <Sparkles size={16} />
           </button>
-          <span className="hidden text-sm text-paper/50 sm:inline">
+          <span className="hidden text-sm text-ink/55 sm:inline">
             {unlockedCount}/{ACHIEVEMENTS.length}
           </span>
         </div>

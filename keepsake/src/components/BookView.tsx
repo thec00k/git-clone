@@ -174,8 +174,8 @@ export function BookView() {
           <div className="flex items-center gap-3">
             <HomeChip />
             <div className="leading-tight">
-              <p className="font-display font-semibold text-paper">{sb.book.title}</p>
-              <p className="ks-caption text-paper/70" style={{ fontSize: "1.1rem" }}>
+              <p className="font-display font-semibold text-ink">{sb.book.title}</p>
+              <p className="ks-caption text-ink/70" style={{ fontSize: "1.1rem" }}>
                 {sb.book.subtitle}
               </p>
             </div>

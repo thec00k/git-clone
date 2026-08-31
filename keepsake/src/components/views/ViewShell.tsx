@@ -80,9 +80,9 @@ export function ViewShell({
           <div className="flex items-center gap-3">
             <HomeChip />
             <div className="leading-tight">
-              <p className="font-display font-semibold text-paper">{title}</p>
+              <p className="font-display font-semibold text-ink">{title}</p>
               {subtitle && (
-                <p className="ks-caption text-paper/70" style={{ fontSize: "1.05rem" }}>
+                <p className="ks-caption text-ink/70" style={{ fontSize: "1.05rem" }}>
                   {subtitle}
                 </p>
               )}

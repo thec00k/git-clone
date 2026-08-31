@@ -120,12 +120,12 @@ export function Atlas() {
       scroll={false}
       actions={
         <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 text-sm text-paper/80">
+          <label className="flex items-center gap-1.5 rounded-full bg-white/55 px-2 py-1 text-sm text-ink/80">
             <span className="hidden sm:inline text-paper/50">View as</span>
             <select
               name="viewAs"
               aria-label="View the room as"
-              className="bg-transparent text-paper outline-none"
+              className="bg-transparent text-ink outline-none"
               value={viewAs}
               onChange={(e) => {
                 const v = e.target.value as ViewAs;
@@ -466,12 +466,12 @@ function FridgeNotePanel({
 }
 
 const STICKY_LOOKS = [
-  { bg: "#f6e27a", rot: -7, side: "right" as const, top: "10%" },
-  { bg: "#f4b4c4", rot: 6, side: "left" as const, top: "12%" },
-  { bg: "#b8e0d2", rot: -5, side: "right" as const, top: "42%" },
-  { bg: "#f3c27a", rot: 8, side: "left" as const, top: "44%" },
-  { bg: "#d7c4f0", rot: -10, side: "right" as const, top: "72%" },
-  { bg: "#c9e4a8", rot: 5, side: "left" as const, top: "74%" },
+  { bg: "#f6e27a", rot: -7, side: "right" as const, top: "8%" },
+  { bg: "#f4b4c4", rot: 6, side: "left" as const, top: "22%" },
+  { bg: "#b8e0d2", rot: -5, side: "right" as const, top: "46%" },
+  { bg: "#f3c27a", rot: 8, side: "left" as const, top: "58%" },
+  { bg: "#d7c4f0", rot: -10, side: "right" as const, top: "74%" },
+  { bg: "#c9e4a8", rot: 5, side: "left" as const, top: "78%" },
 ];
 
 function FridgePeek({ pin, notes, onClose }: { pin: MemoryPin; notes: PinNote[]; onClose: () => void }) {
@@ -481,30 +481,32 @@ function FridgePeek({ pin, notes, onClose }: { pin: MemoryPin; notes: PinNote[];
       <div className="ks-fridge-door">
         <div className="ks-fridge-well">
           <div className="ks-fridge-polaroid">
-            <img src={pin.photoSrc} alt={pin.label} />
+            <div className="ks-fridge-print">
+              <img src={pin.photoSrc} alt={pin.label} />
+              <div className="ks-fridge-stickies">
+                {notes.map((n, i) => {
+                  const look = STICKY_LOOKS[i % STICKY_LOOKS.length];
+                  return (
+                    <div
+                      key={n.id}
+                      className="ks-sticky"
+                      data-sticky-id={n.id}
+                      data-side={look.side}
+                      style={{
+                        top: look.top,
+                        background: look.bg,
+                        transform: `rotate(${look.rot}deg)`,
+                      }}
+                    >
+                      <p>{n.message}</p>
+                      <cite>{n.author}</cite>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
             <p>{pin.label}</p>
           </div>
-        </div>
-        <div className="ks-fridge-stickies">
-          {notes.map((n, i) => {
-            const look = STICKY_LOOKS[i % STICKY_LOOKS.length];
-            return (
-              <div
-                key={n.id}
-                className="ks-sticky"
-                data-sticky-id={n.id}
-                data-side={look.side}
-                style={{
-                  top: look.top,
-                  background: look.bg,
-                  transform: `rotate(${look.rot}deg)`,
-                }}
-              >
-                <p>{n.message}</p>
-                <cite>{n.author}</cite>
-              </div>
-            );
-          })}
         </div>
       </div>
     </div>

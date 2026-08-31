@@ -8,7 +8,7 @@ import { COVER_STYLES } from "../../types/scrapbook";
 import type { Scrapbook } from "../../types/scrapbook";
 import type { Environment, MemoryPin } from "../../types/app";
 import type { ViewAs } from "../../types/app";
-import { BookshelfWall, CorkboardWall, SEASON_TINT, TimelineFrame, type Phase } from "./RoomFurniture";
+import { BookshelfWall, CorkboardWall, SEASON_TINT, TimelineFrame, WALL_PAINT, type Phase } from "./RoomFurniture";
 import { DeskLayer, WindowPane } from "./RoomFlat";
 
 function prefersReducedMotion() {
@@ -203,10 +203,14 @@ function WallPaint({ phase, season }: { phase: Phase; season: string }) {
         className="absolute inset-0"
         style={{
           background:
-            phase === "night" ? "linear-gradient(180deg,#2a2119,#1a1410)" : "linear-gradient(180deg,#3a2c22,#2a2019)",
+            WALL_PAINT[phase],
         }}
       />
       <div className="absolute inset-0" style={{ background: SEASON_TINT[season] }} />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "linear-gradient(120deg, rgb(255 255 255 / 0.38), transparent 42%)" }}
+      />
       <div className="ks-wall-skirting" aria-hidden="true" />
     </>
   );
