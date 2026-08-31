@@ -83,9 +83,9 @@ export function RoomFlat({
         >
           <div
             className="flex h-full w-full items-center justify-center rounded-sm"
-            style={{ background: "#c4a078", boxShadow: "inset 0 0 0 5px #8b5a3c, inset 0 0 30px rgb(40 20 10/.18)" }}
+            style={{ background: "#b8e8f4", boxShadow: "inset 0 0 0 5px #7ec8e0, inset 0 0 30px rgb(0 180 220/.18)" }}
           >
-            <MapIcon size={22} className="text-[#2c221c]" />
+            <MapIcon size={22} className="text-[#1a2430]" />
           </div>
           <span className="ks-obj-label">the map</span>
         </button>
@@ -212,8 +212,8 @@ export function DeskLayer({
         aria-label="Guest book"
       >
         <div
-          className="flex h-full w-full items-center justify-center rounded-sm bg-[#7a3d3a] text-paper"
-          style={{ boxShadow: "0 8px 18px rgb(0 0 0/.4)" }}
+          className="flex h-full w-full items-center justify-center rounded-sm bg-[#ff3db0] text-paper"
+          style={{ boxShadow: "0 8px 18px rgb(200 40 140/.35)" }}
         >
           <PenLine size={18} />
         </div>
@@ -231,7 +231,7 @@ export function DeskLayer({
             bottom: "0%",
             width: "44%",
             height: "70%",
-            background: "radial-gradient(ellipse at 50% 100%, rgb(255 210 130 / 0.22), transparent 62%)",
+            background: "radial-gradient(ellipse at 50% 100%, rgb(0 232 255 / 0.16), rgb(255 61 176 / 0.1) 42%, transparent 62%)",
           }}
         />
       )}
