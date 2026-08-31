@@ -1369,14 +1369,14 @@
     box-shadow: 0 4px 10px rgb(0 0 0 / 0.22);
   }
 
-  /* Flush with the print edge so only a sliver of a tilted sticky can cover the photo. */
+  /* Beside the print, slightly out so a tilt covers at most a sliver of the photo. */
   .ks-sticky[data-side="left"] {
-    right: 100%;
+    right: calc(100% + 0.45rem);
     left: auto;
   }
 
   .ks-sticky[data-side="right"] {
-    left: 100%;
+    left: calc(100% + 0.45rem);
     right: auto;
   }
 
