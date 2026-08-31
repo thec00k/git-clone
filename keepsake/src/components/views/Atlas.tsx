@@ -7,13 +7,13 @@ import { loadImageFile } from "../../lib/image";
 import { clamp } from "../../lib/clamp";
 import { canLeavePinNote, VIEW_AS_LABEL } from "../../lib/permissions";
 import { ViewShell } from "./ViewShell";
-import type { MemoryPin, PinNote } from "../../types/app";
+import type { MemoryPin, PinNote, ViewAs } from "../../types/app";
 import { PIN_NOTE_MAX } from "../../types/app";
 
 export function Atlas() {
-  const { state, environment, setEnvironment, addPin, updatePin, removePin, addPinNote, updatePinNote, deletePinNote } =
+  const { state, environment, setEnvironment, addPin, updatePin, removePin, addPinNote, updatePinNote, deletePinNote, recordProgress } =
     useApp();
-  const { isVisitor, viewAs } = useNav();
+  const { isVisitor, viewAs, setViewAs } = useNav();
   const [draft, setDraft] = useState<{ x: number; y: number } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [peekId, setPeekId] = useState<string | null>(null);
@@ -119,18 +119,40 @@ export function Atlas() {
       fill
       scroll={false}
       actions={
-        !isVisitor && (
-          <button
-            type="button"
-            className="ks-tool"
-            aria-pressed={environment.pinsLocked}
-            aria-label={environment.pinsLocked ? "Unlock pins so they can be moved" : "Lock pins so they cannot be moved"}
-            onClick={() => setEnvironment({ pinsLocked: !environment.pinsLocked })}
-          >
-            {environment.pinsLocked ? <Lock size={15} /> : <Unlock size={15} />}
-            {environment.pinsLocked ? "Pins locked" : "Pins unlocked"}
-          </button>
-        )
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 text-sm text-paper/80">
+            <span className="hidden sm:inline text-paper/50">View as</span>
+            <select
+              name="viewAs"
+              aria-label="View the room as"
+              className="bg-transparent text-paper outline-none"
+              value={viewAs}
+              onChange={(e) => {
+                const v = e.target.value as ViewAs;
+                setViewAs(v);
+                if (v !== "owner") recordProgress({ previewedAsVisitor: true });
+              }}
+            >
+              {(["owner", "close", "friend", "public"] as ViewAs[]).map((v) => (
+                <option key={v} value={v} className="text-ink">
+                  {VIEW_AS_LABEL[v]}
+                </option>
+              ))}
+            </select>
+          </label>
+          {!isVisitor && (
+            <button
+              type="button"
+              className="ks-tool"
+              aria-pressed={environment.pinsLocked}
+              aria-label={environment.pinsLocked ? "Unlock pins so they can be moved" : "Lock pins so they cannot be moved"}
+              onClick={() => setEnvironment({ pinsLocked: !environment.pinsLocked })}
+            >
+              {environment.pinsLocked ? <Lock size={15} /> : <Unlock size={15} />}
+              {environment.pinsLocked ? "Pins locked" : "Pins unlocked"}
+            </button>
+          )}
+        </div>
       }
     >
       <div className="ks-atlas">
