@@ -492,6 +492,20 @@
     box-shadow: 0 0 22px rgb(0 0 0 / 0.4);
   }
 
+  .ks-return--bottom {
+    top: auto;
+    bottom: 0.4rem;
+    left: 50%;
+    width: min(15.5rem, 40%);
+    height: 2.55rem;
+    transform: translateX(-50%) perspective(640px) rotateX(14deg);
+    transform-origin: center bottom;
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.28), transparent 68%),
+      linear-gradient(180deg, #4a3224, #2a2019);
+    box-shadow: 0 8px 18px rgb(0 0 0 / 0.34);
+  }
+
   .ks-return-label {
     font-family: var(--font-script);
     font-size: 1.35rem;
@@ -504,6 +518,12 @@
   .ks-return--right .ks-return-label {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
+  }
+
+  .ks-return--bottom .ks-return-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-size: 1.25rem;
   }
 
   .ks-return:hover,
@@ -1281,8 +1301,12 @@
   .ks-fridge-door {
     position: relative;
     z-index: 1;
-    width: min(78%, 26rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(86%, 32rem);
     aspect-ratio: 4 / 5;
+    padding: 1.1rem 6.5rem;
     border-radius: 10px;
     background:
       linear-gradient(180deg, rgb(255 255 255 / 0.18), transparent 22%),
@@ -1293,15 +1317,25 @@
       0 22px 48px rgb(0 0 0 / 0.45);
   }
 
+  .ks-fridge-well {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 15.5rem;
+  }
+
   .ks-fridge-polaroid {
-    position: absolute;
-    left: 18%;
-    top: 14%;
-    width: 58%;
+    width: 100%;
     padding: 0.55rem 0.55rem 2rem;
     background: #fffef8;
     box-shadow: 0 10px 22px rgb(0 0 0 / 0.28);
     transform: rotate(-2.4deg);
+  }
+
+  .ks-fridge-stickies {
+    position: absolute;
+    inset: 0.7rem 0.4rem;
+    pointer-events: none;
   }
 
   .ks-fridge-polaroid img {
@@ -1322,10 +1356,19 @@
   .ks-sticky {
     position: absolute;
     z-index: 2;
-    width: 5.4rem;
-    min-height: 4.6rem;
+    width: 5.2rem;
+    min-height: 4.5rem;
     padding: 0.4rem 0.45rem 0.35rem;
     box-shadow: 0 4px 10px rgb(0 0 0 / 0.22);
+  }
+
+  .ks-sticky[data-side="left"] {
+    left: 0;
+  }
+
+  .ks-sticky[data-side="right"] {
+    right: 0;
+    left: auto;
   }
 
   .ks-sticky p {

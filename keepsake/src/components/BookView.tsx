@@ -148,7 +148,7 @@ export function BookView() {
   if (!sb.book) {
     return (
       <RoomFrame header={<HomeChip />}>
-        <RoomNavRails />
+        <RoomNavRails desk />
         <div className="flex flex-1 items-center justify-center text-paper/60">No book open.</div>
       </RoomFrame>
     );
@@ -157,7 +157,7 @@ export function BookView() {
   if (!canView) {
     return (
       <RoomFrame header={<HomeChip />}>
-        <RoomNavRails />
+        <RoomNavRails desk />
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-paper/70">
           <Lock size={28} />
           <p>This book is private.</p>
@@ -352,7 +352,7 @@ export function BookView() {
         )
       }
     >
-      <RoomNavRails />
+      <RoomNavRails desk />
       {turn ? (
         <PageFlip
           dir={turn.dir}

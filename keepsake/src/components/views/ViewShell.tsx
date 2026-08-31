@@ -23,8 +23,8 @@ export function HomeChip({ onClick }: { onClick?: () => void } = {}) {
 export const BackChip = HomeChip;
 
 /** Lower side rails to turn to the map or the bookshelf. */
-export function RoomNavRails() {
-  const { goWall } = useNav();
+export function RoomNavRails({ desk = false }: { desk?: boolean } = {}) {
+  const { goWall, goDesk } = useNav();
   return (
     <nav className="ks-returns" aria-label="Turn the room">
       <button
@@ -43,6 +43,17 @@ export function RoomNavRails() {
       >
         <span className="ks-return-label">Bookshelf</span>
       </button>
+      {desk && (
+        <button
+          type="button"
+          className="ks-return ks-return--bottom ks-return--desk"
+          aria-label="Return to the desk"
+          data-desk-tab
+          onClick={goDesk}
+        >
+          <span className="ks-return-label">Desk</span>
+        </button>
+      )}
     </nav>
   );
 }

@@ -466,11 +466,12 @@ function FridgeNotePanel({
 }
 
 const STICKY_LOOKS = [
-  { bg: "#f6e27a", rot: -8, left: "68%", top: "12%" },
-  { bg: "#f4b4c4", rot: 6, left: "6%", top: "18%" },
-  { bg: "#b8e0d2", rot: -4, left: "72%", top: "58%" },
-  { bg: "#f3c27a", rot: 9, left: "8%", top: "62%" },
-  { bg: "#d7c4f0", rot: -11, left: "62%", top: "78%" },
+  { bg: "#f6e27a", rot: -7, side: "right" as const, top: "10%" },
+  { bg: "#f4b4c4", rot: 6, side: "left" as const, top: "12%" },
+  { bg: "#b8e0d2", rot: -5, side: "right" as const, top: "42%" },
+  { bg: "#f3c27a", rot: 8, side: "left" as const, top: "44%" },
+  { bg: "#d7c4f0", rot: -10, side: "right" as const, top: "72%" },
+  { bg: "#c9e4a8", rot: 5, side: "left" as const, top: "74%" },
 ];
 
 function FridgePeek({ pin, notes, onClose }: { pin: MemoryPin; notes: PinNote[]; onClose: () => void }) {
@@ -478,29 +479,33 @@ function FridgePeek({ pin, notes, onClose }: { pin: MemoryPin; notes: PinNote[];
     <div className="ks-fridge" data-fridge role="dialog" aria-modal="true" aria-label={`Photograph: ${pin.label}`}>
       <button type="button" className="ks-fridge-dim" aria-label="Put the photograph back" onClick={onClose} />
       <div className="ks-fridge-door">
-        <div className="ks-fridge-polaroid">
-          <img src={pin.photoSrc} alt={pin.label} />
-          <p>{pin.label}</p>
+        <div className="ks-fridge-well">
+          <div className="ks-fridge-polaroid">
+            <img src={pin.photoSrc} alt={pin.label} />
+            <p>{pin.label}</p>
+          </div>
         </div>
-        {notes.map((n, i) => {
-          const look = STICKY_LOOKS[i % STICKY_LOOKS.length];
-          return (
-            <div
-              key={n.id}
-              className="ks-sticky"
-              data-sticky-id={n.id}
-              style={{
-                left: look.left,
-                top: look.top,
-                background: look.bg,
-                transform: `rotate(${look.rot}deg)`,
-              }}
-            >
-              <p>{n.message}</p>
-              <cite>{n.author}</cite>
-            </div>
-          );
-        })}
+        <div className="ks-fridge-stickies">
+          {notes.map((n, i) => {
+            const look = STICKY_LOOKS[i % STICKY_LOOKS.length];
+            return (
+              <div
+                key={n.id}
+                className="ks-sticky"
+                data-sticky-id={n.id}
+                data-side={look.side}
+                style={{
+                  top: look.top,
+                  background: look.bg,
+                  transform: `rotate(${look.rot}deg)`,
+                }}
+              >
+                <p>{n.message}</p>
+                <cite>{n.author}</cite>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
