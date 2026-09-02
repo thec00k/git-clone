@@ -76,3 +76,41 @@ def test_moonshot_phase_keeps_dust_at_tp():
     sell, dust = pm.exit_plan_at_take_profit(pos, current_price_usd=0.023)
     assert sell == 900
     assert dust == 100
+
+
+def test_bubblemaps_healthy_distribution_lowers_risk():
+    weak = score_token(
+        TokenMetrics(
+            mint="x",
+            holder_count=200,
+            bubblemaps_score=20,
+            top10_adjusted_pct=75,
+            bundle_supply_pct=55,
+            largest_cluster_pct=40,
+        )
+    )
+    healthy = score_token(
+        TokenMetrics(
+            mint="y",
+            holder_count=200,
+            bubblemaps_score=80,
+            top10_adjusted_pct=28,
+            bundle_supply_pct=8,
+            largest_cluster_pct=10,
+            bundled_launch=False,
+        )
+    )
+    assert healthy.score < weak.score
+    assert healthy.buy_usd > weak.buy_usd
+    assert weak.skip is True
+
+
+def test_bubblemaps_is_healthy_distribution_helper():
+    from src.analyzer.bubblemaps import BubblemapsSnapshot, is_healthy_distribution
+
+    assert is_healthy_distribution(
+        BubblemapsSnapshot(bubblemaps_score=70, top10_adjusted_pct=30, bundle_supply_pct=10)
+    )
+    assert not is_healthy_distribution(
+        BubblemapsSnapshot(bubblemaps_score=20, top10_adjusted_pct=70, bundle_supply_pct=50)
+    )

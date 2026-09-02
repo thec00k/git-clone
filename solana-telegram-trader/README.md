@@ -9,7 +9,7 @@ Autonomous Solana bot that watches Telegram group chats for token calls, sizes e
 | Solana only | Parses Solana mints / pump.fun links |
 | Max **$20** per buy until portfolio **$1000** | `MAX_BUY_USD=20`, enforced in risk scorer |
 | Average **~$15** | Risk score maps high risk → $10, low risk → $20 |
-| Risk inputs | Holder count, bundle detection, creator rug history |
+| Risk inputs | Holder count, Bubblemaps score/clusters/bundles, creator rug history |
 | Below **$300** portfolio | **+50% TP = full exit** (compound small wins) |
 | **$300–$1000** | **+50% TP = sell most, keep 10% dust** for moonshots |
 | Stop loss | Default **-35%** (configurable) |
@@ -41,11 +41,27 @@ python -m src.main        # live listener (needs Telegram + optional APIs)
 2. Set `WALLET_PRIVATE_KEY` (base58)
 3. Set `SOLANA_RPC_URL` (Helius recommended)
 4. Optional: `HELIUS_API_KEY`, `BIRDEYE_API_KEY` for holder/liquidity data
+5. Recommended: `BUBBLEMAPS_API_KEY` (Bubblemaps Pro) — same indicators pump.fun shows
+
+## Bubblemaps / pump.fun health signals
+
+Pump.fun embeds **Bubblemaps** in the coin UI. Bots cannot scrape that iframe reliably; we call the **Bubblemaps Data API** instead and feed the same metrics into sizing:
+
+| Signal | Meaning | Bot effect |
+|--------|---------|------------|
+| `bubblemaps_score` (0–100) | Higher = more decentralized / healthier | High → bigger buy; very low → skip |
+| `top_10_adjusted` | Cluster-aware top-10 supply share | High concentration → smaller buy / skip |
+| `bundles` | Supply in launch bundles / top clusters | High → risk up |
+| `fresh_wallets` | Supply held by wallets &lt;10 days old | High → risk up |
+| `nakamoto_coefficient` | Entities needed for 50% supply | ≤3 → risk up |
+| largest cluster share | Biggest related-wallet group | High → risk up |
+
+Set thresholds in `.env` (`BUBBLEMAPS_MIN_SCORE`, `BUBBLEMAPS_MAX_TOP10_PCT`, `BUBBLEMAPS_MAX_BUNDLE_PCT`). Brand-new launches may not have a Bubblemaps map yet (404) — keep `BUBBLEMAPS_REQUIRED=false` unless you only trade coins with maps.
 
 ## Architecture
 
 ```
-Telegram groups → listener → mint parser → metrics APIs
+Telegram groups → listener → mint parser → Bubblemaps + metrics APIs
   → risk scorer ($10–$20) → Jupiter buy → portfolio manager
   → exit loop (TP/SL/dust by phase)
 ```
@@ -53,8 +69,8 @@ Telegram groups → listener → mint parser → metrics APIs
 ## What you still need to configure
 
 - **Which groups** to watch
+- **Bubblemaps Pro API key** (recommended for healthy-coin filtering)
 - **Creator rug database** — plug your indexer into `apply_creator_rug_heuristic()`
-- **Bundle detection** — wire slot-level buy clustering in `detect_bundled_launch()`
 - **Sell-on-chat** — optional: parse "sell"/"out" messages from trusted callers
 
 ## Security

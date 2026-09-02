@@ -11,8 +11,10 @@ from src.models import TokenMetrics
 async def fetch_token_metrics(mint: str) -> TokenMetrics:
     """
     Best-effort enrichment. Returns partial metrics when APIs are unavailable.
-    Plug in Helius DAS / Birdeye / your indexer for production.
+    Bubblemaps provides the same distribution signals shown on pump.fun.
     """
+    from src.analyzer.bubblemaps import fetch_bubblemaps_snapshot
+
     metrics = TokenMetrics(mint=mint)
 
     if settings.birdeye_api_key:
@@ -20,6 +22,19 @@ async def fetch_token_metrics(mint: str) -> TokenMetrics:
 
     if settings.helius_api_key:
         metrics = await _helius_holder_count(metrics)
+
+    snap = await fetch_bubblemaps_snapshot(mint)
+    if snap:
+        metrics.bubblemaps_score = snap.bubblemaps_score
+        metrics.top10_adjusted_pct = snap.top10_adjusted_pct
+        metrics.bundle_supply_pct = snap.bundle_supply_pct
+        metrics.fresh_wallet_pct = snap.fresh_wallet_pct
+        metrics.nakamoto_coefficient = snap.nakamoto_coefficient
+        metrics.largest_cluster_pct = snap.largest_cluster_pct
+        if snap.top10_adjusted_pct is not None:
+            metrics.top10_holder_pct = snap.top10_adjusted_pct
+        if snap.bundle_supply_pct is not None:
+            metrics.bundled_launch = snap.bundle_supply_pct > settings.bubblemaps_max_bundle_pct
 
     return metrics
 

@@ -28,6 +28,13 @@ class TokenMetrics:
     creator_rug_count: int = 0
     creator_token_count: int = 0
     liquidity_usd: float | None = None
+    # Bubblemaps (same family of signals shown on pump.fun)
+    bubblemaps_score: float | None = None  # 0–100, higher = more decentralized / healthier
+    top10_adjusted_pct: float | None = None  # clustered top-10 share, as percent 0–100
+    bundle_supply_pct: float | None = None  # supply held in top clusters/bundles, 0–100
+    fresh_wallet_pct: float | None = None  # supply held by <10-day wallets, 0–100
+    nakamoto_coefficient: int | None = None  # entities needed for 50% supply
+    largest_cluster_pct: float | None = None  # biggest related-wallet cluster share, 0–100
 
 
 @dataclass

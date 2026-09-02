@@ -16,6 +16,13 @@ class Settings(BaseSettings):
 
     helius_api_key: str = ""
     birdeye_api_key: str = ""
+    bubblemaps_api_key: str = ""
+    bubblemaps_fetch_clusters: bool = True
+    # Health gates (aligned with pump.fun Bubblemaps reading)
+    bubblemaps_min_score: float = 45.0  # 0–100, higher = healthier
+    bubblemaps_max_top10_pct: float = 55.0
+    bubblemaps_max_bundle_pct: float = 40.0
+    bubblemaps_required: bool = False  # if True, skip when Bubblemaps has no map yet
 
     portfolio_phase_two_usd: float = 300.0
     portfolio_target_usd: float = 1000.0
