@@ -2,10 +2,16 @@
     import "../app.postcss";
 
     import { page } from "$app/stores";
+
+    $: isScene = $page.url.pathname === "/scene";
 </script>
 
 <nav class="flex justify-center border-b">
-    <div class="max-w-xl w-full py-3">
+    <div
+        class="w-full py-3"
+        class:max-w-6xl={isScene}
+        class:max-w-xl={!isScene}
+        class:px-4={isScene}>
         <div class="flex justify-between">
             <a
                 class="link flex items-center"
@@ -30,6 +36,10 @@
                 </a>
                 <a
                     class="btn mr-3"
+                    class:btn-accent={$page.url.pathname === "/scene"}
+                    href="/scene">Scene</a>
+                <a
+                    class="btn mr-3"
                     class:btn-accent={$page.url.pathname === "/page/one"}
                     href="/page/one">One</a>
                 <a
@@ -42,11 +52,16 @@
 </nav>
 
 <main class="flex justify-center">
-    <div class="max-w-xl w-full py-10">
-        <article class="prose">
+    {#if isScene}
+        <div class="w-full">
             <slot />
-            <i>Written by <a href="https://chat.openai.com/">ChatGPT</a></i>
-        </article>
-    </div>
+        </div>
+    {:else}
+        <div class="max-w-xl w-full py-10">
+            <article class="prose">
+                <slot />
+                <i>Written by <a href="https://chat.openai.com/">ChatGPT</a></i>
+            </article>
+        </div>
+    {/if}
 </main>
-
