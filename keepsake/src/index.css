@@ -1425,11 +1425,19 @@
   .ks-desk-top .ks-book-stage {
     z-index: 3;
     perspective: 1600px;
+    transform-style: preserve-3d;
   }
 
   .ks-desk-top .ks-stage {
-    transform: rotateX(7deg);
+    transform: rotateX(6deg);
     transform-origin: 50% 70%;
+    transform-style: preserve-3d;
+  }
+
+  .ks-desk-top .ks-spread,
+  .ks-desk-top .ks-flip-leaf,
+  .ks-desk-top .ks-flip-inner {
+    transform-style: preserve-3d;
   }
 
   .ks-desk-top .ks-spread {

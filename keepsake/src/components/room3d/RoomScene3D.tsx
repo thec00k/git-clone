@@ -314,7 +314,7 @@ function RoomLights({ phase, environment }: { phase: Phase; environment: Environ
 function DeskProps() {
   return (
     <group>
-      <group position={[-0.86, 0.758, -1.08]} rotation={[0, 0.45, 0]}>
+      <group position={[-0.72, 0.762, -1.1]} rotation={[0, 0.45, 0]}>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
           { z: 0.016, color: "#2c221c", yaw: 0.04 },
@@ -326,7 +326,7 @@ function DeskProps() {
           </mesh>
         ))}
       </group>
-      <group position={[-0.1, 0.77, -1.05]} rotation={[0, 0.28, 0]}>
+      <group position={[-0.22, 0.772, -1.08]} rotation={[0, 0.28, 0]}>
         <mesh>
           <boxGeometry args={[0.14, 0.04, 0.1]} />
           <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
@@ -344,7 +344,7 @@ function DeskProps() {
           <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
         </mesh>
       </group>
-      <group position={[-0.82, 0.766, -1.34]} rotation={[0, 0.55, 0]}>
+      <group position={[-0.68, 0.768, -1.32]} rotation={[0, 0.55, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#f2d04a" roughness={0.48} />
