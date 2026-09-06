@@ -232,7 +232,7 @@ function RoomModel({
           object={object}
           active={tourFocus === id}
           onActivate={() => onActivate(id)}
-          prompt={seated && id === "book" ? "Open the scrapbook" : undefined}
+          prompt={seated && !drawerOpen && id === "book" ? "Open the scrapbook" : undefined}
         />
       ))}
     </group>
