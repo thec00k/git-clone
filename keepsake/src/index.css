@@ -1487,6 +1487,63 @@
     box-shadow: 0 4px 10px rgb(20 10 6 / 0.4);
   }
 
+  .ks-clock-face {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 168px;
+    height: 56px;
+    padding: 0 10px;
+    border-radius: 4px;
+    background: #12140e;
+    color: #ffb56a;
+    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", monospace;
+    font-size: 28px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 8px rgb(255 181 106 / 0.55), 0 0 18px rgb(196 92 62 / 0.25);
+    pointer-events: none;
+  }
+
+  .ks-clock-wheel {
+    display: inline-block;
+    height: 1em;
+    overflow: hidden;
+    line-height: 1;
+  }
+
+  .ks-clock-reel {
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.62s cubic-bezier(0.22, 0.8, 0.28, 1);
+  }
+
+  .ks-clock-num {
+    display: block;
+    height: 1em;
+    line-height: 1;
+  }
+
+  .ks-clock-colon {
+    display: inline-block;
+    width: 0.45em;
+    text-align: center;
+    transform: translateY(-0.04em);
+  }
+
+  .ks-clock-colon.is-live {
+    animation: ks-clock-blink 1s steps(1) infinite;
+  }
+
+  @keyframes ks-clock-blink {
+    50% { opacity: 0.28; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ks-clock-reel { transition: none; }
+    .ks-clock-colon.is-live { animation: none; }
+  }
+
   .ks-sticker-shop {
     position: absolute;
     inset: 0;

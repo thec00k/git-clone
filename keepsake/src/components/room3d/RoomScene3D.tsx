@@ -12,6 +12,8 @@ import {
   DESK_OBJECT,
   DOOR_OBJECT,
   CEILING_SWITCH,
+  CLOCK_DIGITS,
+  CLOCK_OBJECT,
   HOTSPOT_LABEL,
   LAMP_BULB,
   LAMP_OBJECT,
@@ -20,9 +22,10 @@ import {
   hotspotFromObjectName,
 } from "../../lib/roomHotspots";
 import type { RoomFace } from "../../lib/roomLayout";
-import type { Environment } from "../../types/app";
+import type { Environment, TimeMode } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
 import { StickerStore } from "../StickerStore";
+import { RollingClock } from "./RollingClock";
 import { useApp } from "../../store/appStore";
 import { useListen } from "../../store/listen";
 
@@ -275,6 +278,7 @@ function RoomModel({
       <DeskStandIn scene={cloned} />
       <DeskProps scene={cloned} />
       <LampFixture scene={cloned} on={environment.lampOn} onToggle={onToggleLamp} />
+      <DeskClock scene={cloned} timeMode={environment.timeMode} />
       <CeilingSwitch scene={cloned} on={environment.ceilingOn !== false} onToggle={onToggleCeiling} />
       <ChairSit scene={cloned} seated={seated} onSit={onSit} />
       <RoomDoor scene={cloned} onOpen={onOpenDoor} />
@@ -766,6 +770,61 @@ function LampFixture({
           </button>
         </FacedHtml>
       </group>
+    </group>
+  );
+}
+
+const CLOCK_FACE_PX = 168;
+
+function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeMode }) {
+  const clock = useMemo(() => scene.getObjectByName(CLOCK_OBJECT), [scene]);
+  const digits = useMemo(() => scene.getObjectByName(CLOCK_DIGITS), [scene]);
+  const pose = useMemo(() => {
+    const face = digits && hasGeometry(digits) ? digits : clock && hasGeometry(clock) ? clock : null;
+    if (face) {
+      const box = new THREE.Box3().setFromObject(face);
+      const pos = new THREE.Vector3();
+      box.getCenter(pos);
+      if (!digits || !hasGeometry(digits)) pos.z = box.max.z + 0.004;
+      const size = box.getSize(new THREE.Vector3());
+      const width = Math.max(size.x, size.z, 0.1);
+      const quat = new THREE.Quaternion();
+      face.getWorldQuaternion(quat);
+      return { pos, quat, scale: width / CLOCK_FACE_PX, standIn: false };
+    }
+    const desk = measureDesk(scene);
+    const lamp = deskLampCorner(desk);
+    return {
+      pos: new THREE.Vector3(lamp.x + 0.24, desk.y + 0.035, lamp.z + 0.04),
+      quat: new THREE.Quaternion(),
+      scale: 0.14 / CLOCK_FACE_PX,
+      standIn: true,
+    };
+  }, [scene, clock, digits]);
+
+  return (
+    <group position={pose.pos.toArray()} quaternion={pose.quat}>
+      {pose.standIn && (
+        <>
+          <mesh position={[0, 0.008, 0]}>
+            <boxGeometry args={[0.16, 0.05, 0.07]} />
+            <meshStandardMaterial color="#3a2a20" roughness={0.58} />
+          </mesh>
+          <mesh position={[0, 0.03, 0.028]}>
+            <boxGeometry args={[0.13, 0.032, 0.01]} />
+            <meshStandardMaterial color="#12140e" roughness={0.4} />
+          </mesh>
+        </>
+      )}
+      <Html
+        transform
+        occlude={false}
+        position={pose.standIn ? [0, 0.03, 0.036] : [0, 0, 0]}
+        scale={pose.scale}
+        style={{ pointerEvents: "none" }}
+      >
+        <RollingClock timeMode={timeMode} />
+      </Html>
     </group>
   );
 }

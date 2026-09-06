@@ -18,7 +18,8 @@ export type ListenId =
   | "stand"
   | "door"
   | "lamp"
-  | "switch";
+  | "switch"
+  | "clock";
 
 export interface ListenThing {
   id: ListenId;
@@ -98,6 +99,11 @@ const THINGS: Record<ListenId, Omit<ListenThing, "id">> = {
     hint: "A small switch to the left of the window. It turns the ceiling light on or off.",
     face: "front",
   },
+  clock: {
+    name: "The desk clock",
+    hint: "A small clock beside the lamp. It keeps the hour the window is keeping.",
+    face: "front",
+  },
 };
 
 const BASE_ORDER: ListenId[] = ["book", "window", "shelf", "archive", "map", "guestbook", "crt"];
@@ -115,6 +121,7 @@ export function listenThings(opts: {
     } else {
       ids.push("chair");
       ids.push("lamp");
+      ids.push("clock");
       ids.push("switch");
       ids.push("door");
     }
