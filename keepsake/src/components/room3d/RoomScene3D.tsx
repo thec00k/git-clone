@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -285,9 +285,11 @@ function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boolean }) {
   return null;
 }
 
+const DRAWER_PROMPT_AT = new THREE.Vector3(-0.15, 0.48, -1.5);
+
 function DrawerPrompt({ onOpen }: { onOpen: () => void }) {
   return (
-    <group position={[-0.15, 0.48, -1.5]}>
+    <group position={DRAWER_PROMPT_AT.toArray()}>
       <mesh
         onClick={(e) => {
           e.stopPropagation();
@@ -303,11 +305,11 @@ function DrawerPrompt({ onOpen }: { onOpen: () => void }) {
         <boxGeometry args={[0.42, 0.16, 0.12]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <Html center occlude={false} style={{ pointerEvents: "auto" }}>
+      <FacedHtml point={DRAWER_PROMPT_AT}>
         <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-open-drawer aria-hidden="true" tabIndex={-1} onClick={onOpen}>
           Open the drawer
         </button>
-      </Html>
+      </FacedHtml>
     </group>
   );
 }
@@ -367,7 +369,7 @@ function HotspotAnchor({
         <sphereGeometry args={[0.18, 10, 10]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <Html center occlude={false} style={{ pointerEvents: "auto" }}>
+      <FacedHtml point={box}>
         <button
           type="button"
           className={`ks-hot3d${active ? " is-tour" : ""}${prompt ? " ks-hot3d--label" : ""}`}
@@ -382,7 +384,7 @@ function HotspotAnchor({
         >
           {prompt}
         </button>
-      </Html>
+      </FacedHtml>
     </group>
   );
 }
@@ -414,6 +416,41 @@ function objectAnchor(object: THREE.Object3D, emptyLift: number) {
   }
   box.getCenter(c);
   return c;
+}
+
+const _faceDir = new THREE.Vector3();
+const _faceLook = new THREE.Vector3();
+
+/** Drei Html behind the camera paints over the window. Keep prompts only when faced. */
+function useFaced(point: THREE.Vector3, minDot = 0.18) {
+  const { camera } = useThree();
+  const [on, setOn] = useState(false);
+  useFrame(() => {
+    _faceDir.copy(point).sub(camera.position);
+    const dist = _faceDir.length();
+    camera.getWorldDirection(_faceLook);
+    const faced = dist > 0.08 && _faceDir.normalize().dot(_faceLook) > minDot;
+    setOn((prev) => (prev === faced ? prev : faced));
+  });
+  return on;
+}
+
+function FacedHtml({
+  point,
+  children,
+  position,
+}: {
+  point: THREE.Vector3;
+  children: ReactNode;
+  position?: [number, number, number];
+}) {
+  const faced = useFaced(point);
+  if (!faced) return null;
+  return (
+    <Html position={position} center occlude={false} style={{ pointerEvents: "auto" }}>
+      {children}
+    </Html>
+  );
 }
 
 /** Window carries day / dusk / night. The ceiling fan is a plain on/off, like the lamp. */
@@ -576,11 +613,11 @@ function RoomDoor({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void
         <boxGeometry args={[0.95, 2.2, 0.28]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <Html position={fromGlb ? [0, 0.2, 0] : [0, 0.42, -0.08]} center occlude={false} style={{ pointerEvents: "auto" }}>
+      <FacedHtml point={center} position={fromGlb ? [0, 0.2, 0] : [0, 0.42, -0.08]}>
         <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-room-door aria-hidden="true" tabIndex={-1} onClick={onOpen}>
           The door
         </button>
-      </Html>
+      </FacedHtml>
     </group>
   );
 }
@@ -610,11 +647,11 @@ function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seated: boo
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       {!seated && (
-        <Html position={[0, 0.28, 0]} center occlude={false} style={{ pointerEvents: "auto" }}>
+        <FacedHtml point={center} position={[0, 0.28, 0]}>
           <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-sit-down aria-hidden="true" tabIndex={-1} onClick={onSit}>
             Sit down
           </button>
-        </Html>
+        </FacedHtml>
       )}
     </group>
   );
