@@ -467,7 +467,7 @@ function measureDesk(scene: THREE.Object3D): DeskMeasure {
 
 /** Left-back corner of the desktop — where the lamp belongs. */
 function deskLampCorner(desk: DeskMeasure) {
-  return new THREE.Vector3(desk.minX + 0.16, desk.y + 0.36, desk.minZ + 0.16);
+  return new THREE.Vector3(desk.minX + 0.14, desk.y + 0.28, desk.minZ + 0.12);
 }
 
 function lampShadePos(scene: THREE.Object3D) {
@@ -593,9 +593,9 @@ function RoomLights({
         <pointLight
           ref={lampRef}
           position={(scene ? lampShadePos(scene) : deskLampCorner(STAND_IN_DESK)).toArray()}
-          intensity={night ? 4.6 : dusk ? 3.4 : 1.9}
+          intensity={night ? 3.8 : dusk ? 2.8 : 1.6}
           color="#ffb56a"
-          distance={2.6}
+          distance={1.85}
         />
       )}
       {environment.shelfLit && <pointLight position={shelfLit.toArray()} intensity={2.4} color="#ffd89a" distance={3} />}
@@ -632,12 +632,12 @@ function DeskStandIn({ scene }: { scene: THREE.Object3D }) {
 
 function DeskProps({ scene }: { scene: THREE.Object3D }) {
   const desk = useMemo(() => measureDesk(scene), [scene]);
-  const y = desk.y + 0.01;
+  const y = desk.y + 0.004;
   const along = (t: number) => desk.minX + (desk.maxX - desk.minX) * t;
   const depth = (t: number) => desk.minZ + (desk.maxZ - desk.minZ) * t;
   return (
     <group>
-      <group position={[along(0.62), y, depth(0.78)]} rotation={[0, 0.45, 0]}>
+      <group position={[along(0.68), y, depth(0.56)]} rotation={[0, 0.45, 0]}>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
           { z: 0.016, color: "#2c221c", yaw: 0.04 },
@@ -649,7 +649,7 @@ function DeskProps({ scene }: { scene: THREE.Object3D }) {
           </mesh>
         ))}
       </group>
-      <group position={[along(0.38), y + 0.004, depth(0.72)]} rotation={[0, 0.22, 0]}>
+      <group position={[along(0.42), y + 0.002, depth(0.52)]} rotation={[0, 0.22, 0]}>
         <mesh>
           <boxGeometry args={[0.14, 0.04, 0.1]} />
           <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
@@ -667,7 +667,7 @@ function DeskProps({ scene }: { scene: THREE.Object3D }) {
           <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
         </mesh>
       </group>
-      <group position={[along(0.24), y + 0.002, depth(0.7)]} rotation={[0, 0.4, 0]}>
+      <group position={[along(0.28), y + 0.002, depth(0.5)]} rotation={[0, 0.4, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#f2d04a" roughness={0.48} />
@@ -744,8 +744,8 @@ function LampFixture({
             <cylinderGeometry args={[0.01, 0.012, 0.28, 8]} />
             <meshStandardMaterial color="#c4a078" roughness={0.45} metalness={0.15} />
           </mesh>
-          <mesh position={[0, 0.32, 0]}>
-            <cylinderGeometry args={[0.07, 0.095, 0.08, 12]} />
+          <mesh position={[0, 0.34, 0]}>
+            <cylinderGeometry args={[0.055, 0.1, 0.09, 12]} />
             <meshStandardMaterial color="#3a2a20" roughness={0.62} />
           </mesh>
         </group>
