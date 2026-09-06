@@ -750,14 +750,13 @@ function LampFixture({
           </mesh>
         </group>
       )}
-      <mesh position={shade.toArray()}>
-        <sphereGeometry args={[0.022, 12, 10]} />
-        <meshStandardMaterial
-          color={on ? "#fff4d2" : "#d8c4a0"}
-          emissive={on ? "#ffe6b0" : "#2a241c"}
-          emissiveIntensity={on ? 2.8 : 0.06}
-          roughness={0.35}
-        />
+      <mesh position={[shade.x, shade.y - 0.01, shade.z + 0.02]}>
+        <sphereGeometry args={[0.028, 12, 10]} />
+        {on ? (
+          <meshBasicMaterial color="#fff1c2" />
+        ) : (
+          <meshStandardMaterial color="#c4b089" roughness={0.4} />
+        )}
       </mesh>
       <group position={shade.toArray()}>
         <ClickHit size={[0.22, 0.42, 0.22]} onClick={onToggle} />
