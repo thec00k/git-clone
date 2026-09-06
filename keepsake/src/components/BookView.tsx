@@ -37,6 +37,7 @@ import { PrintView } from "./PrintView";
 import { NotesPanel } from "./NotesPanel";
 import { BookIdentityEditor } from "./BookIdentityEditor";
 import { HomeChip, RoomNavRails } from "./views/ViewShell";
+import { DeskClutter } from "./DeskClutter";
 
 export function BookView() {
   const sb = useScrapbook();
@@ -169,6 +170,7 @@ export function BookView() {
 
   return (
     <RoomFrame
+      className="ks-room--desk-top"
       header={
         <>
           <div className="flex items-center gap-3">
@@ -317,72 +319,80 @@ export function BookView() {
               <button className="ks-tool" aria-expanded={showPresets} onClick={() => setShowPresets((v) => !v)}>
                 <Wand2 size={18} /> Arrange
               </button>
-              <input
-                ref={addInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                hidden
-                aria-label="Upload photographs"
-                onChange={(e) => {
-                  handleFiles(e.target.files);
-                  e.target.value = "";
-                }}
-              />
             </div>
           </div>
         )
       }
     >
       <RoomNavRails desk />
-      <div className="ks-book-stage">
-        <button
-          type="button"
-          className="ks-page-turn ks-page-turn--prev"
-          aria-label="Previous spread"
-          title="Turn the page back"
-          onClick={() => requestTurn("prev")}
-          disabled={sb.spread === 0 || !!turn}
-        >
-          <ChevronLeft size={22} />
-        </button>
-        {turn ? (
-          <PageFlip
-            dir={turn.dir}
-            curL={sb.leftPage}
-            curR={sb.rightPage}
-            otherL={otherL}
-            otherR={otherR}
-            bookTitle={sb.book.title}
-            bookSubtitle={sb.book.subtitle}
-            onDone={finishTurn}
-          />
-        ) : (
-          <Spread
-            leftPage={sb.leftPage}
-            rightPage={sb.rightPage}
-            activePageId={isVisitor ? null : sb.activePageId}
-            bookTitle={sb.book.title}
-            bookSubtitle={sb.book.subtitle}
-            selectedId={isVisitor ? null : sb.selectedId}
-            onActivate={isVisitor ? () => {} : sb.setActivePageId}
-            onSelect={isVisitor ? () => {} : sb.setSelectedId}
-            onDeselect={() => sb.setSelectedId(null)}
-            onMove={isVisitor ? () => {} : (id, x, y) => sb.updateElement(id, { x, y })}
-            onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
-            onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
-          />
-        )}
-        <button
-          type="button"
-          className="ks-page-turn ks-page-turn--next"
-          aria-label="Next spread"
-          title="Turn the page"
-          onClick={() => requestTurn("next")}
-          disabled={sb.spread === sb.spreadCount - 1 || !!turn}
-        >
-          <ChevronRight size={22} />
-        </button>
+      <div className="ks-desk-top" data-desk-top>
+        <DeskClutter
+          onPrint={() => setShowPrint(true)}
+          onSnap={() => {
+            if (!isVisitor) addInputRef.current?.click();
+          }}
+        />
+        <input
+          ref={addInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          aria-label="Upload photographs"
+          onChange={(e) => {
+            handleFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+        <div className="ks-book-stage">
+          <button
+            type="button"
+            className="ks-page-turn ks-page-turn--prev"
+            aria-label="Previous spread"
+            title="Turn the page back"
+            onClick={() => requestTurn("prev")}
+            disabled={sb.spread === 0 || !!turn}
+          >
+            <ChevronLeft size={22} />
+          </button>
+          {turn ? (
+            <PageFlip
+              dir={turn.dir}
+              curL={sb.leftPage}
+              curR={sb.rightPage}
+              otherL={otherL}
+              otherR={otherR}
+              bookTitle={sb.book.title}
+              bookSubtitle={sb.book.subtitle}
+              onDone={finishTurn}
+            />
+          ) : (
+            <Spread
+              leftPage={sb.leftPage}
+              rightPage={sb.rightPage}
+              activePageId={isVisitor ? null : sb.activePageId}
+              bookTitle={sb.book.title}
+              bookSubtitle={sb.book.subtitle}
+              selectedId={isVisitor ? null : sb.selectedId}
+              onActivate={isVisitor ? () => {} : sb.setActivePageId}
+              onSelect={isVisitor ? () => {} : sb.setSelectedId}
+              onDeselect={() => sb.setSelectedId(null)}
+              onMove={isVisitor ? () => {} : (id, x, y) => sb.updateElement(id, { x, y })}
+              onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
+              onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
+            />
+          )}
+          <button
+            type="button"
+            className="ks-page-turn ks-page-turn--next"
+            aria-label="Next spread"
+            title="Turn the page"
+            onClick={() => requestTurn("next")}
+            disabled={sb.spread === sb.spreadCount - 1 || !!turn}
+          >
+            <ChevronRight size={22} />
+          </button>
+        </div>
       </div>
       {showKeys && <ShortcutsHelp onClose={() => setShowKeys(false)} />}
       {showPrint && sb.book && <PrintView book={sb.book} onClose={() => setShowPrint(false)} />}

@@ -4,12 +4,13 @@ interface Props {
   header?: ReactNode;
   footer?: ReactNode;
   children: ReactNode;
+  className?: string;
 }
 
 /** The warm room shell that wraps every screen. */
-export function RoomFrame({ header, footer, children }: Props) {
+export function RoomFrame({ header, footer, children, className }: Props) {
   return (
-    <div className="ks-room relative flex h-dvh flex-col overflow-hidden">
+    <div className={`ks-room relative flex h-dvh flex-col overflow-hidden${className ? ` ${className}` : ""}`}>
       <a className="ks-skip" href="#ks-main">
         Skip to the page
       </a>

@@ -123,6 +123,7 @@ export function RoomScene3D({
             onActivate={activate}
           />
           <DeskChair seated={seated} onSit={() => { setRoomFace("front"); setSeated(true); }} />
+          <DeskProps />
           <RoomLights phase={phase} environment={environment} />
         </Suspense>
         <FaceCamera face={roomFace} seated={seated} touring={touring} />
@@ -307,6 +308,53 @@ function RoomLights({ phase, environment }: { phase: Phase; environment: Environ
       )}
       {environment.shelfLit && <pointLight position={[1.85, 1.35, -0.12]} intensity={2.4} color="#ffd89a" distance={3} />}
     </>
+  );
+}
+
+function DeskProps() {
+  return (
+    <group>
+      <group position={[-0.84, 0.762, -1.1]} rotation={[Math.PI / 2, 0, -0.55]}>
+        {[
+          { x: 0, color: "#c45c3e" },
+          { x: 0.018, color: "#2c221c" },
+          { x: 0.036, color: "#4a7c59" },
+        ].map((m) => (
+          <mesh key={m.color} position={[m.x, 0, 0]}>
+            <cylinderGeometry args={[0.007, 0.007, 0.11, 8]} />
+            <meshStandardMaterial color={m.color} roughness={0.45} />
+          </mesh>
+        ))}
+      </group>
+      <group position={[-0.12, 0.772, -1.06]} rotation={[0, 0.35, 0]}>
+        <mesh>
+          <boxGeometry args={[0.13, 0.045, 0.09]} />
+          <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
+        </mesh>
+        <mesh position={[0.01, 0.028, -0.01]}>
+          <boxGeometry args={[0.05, 0.004, 0.06]} />
+          <meshStandardMaterial color="#fffef8" roughness={0.7} />
+        </mesh>
+        <mesh position={[0.042, 0.008, 0.028]}>
+          <cylinderGeometry args={[0.01, 0.01, 0.008, 10]} />
+          <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
+        </mesh>
+      </group>
+      <group position={[-0.8, 0.768, -1.36]} rotation={[0, 0.7, 0]}>
+        <mesh>
+          <boxGeometry args={[0.11, 0.048, 0.06]} />
+          <meshStandardMaterial color="#f2d04a" roughness={0.5} />
+        </mesh>
+        <mesh position={[0, -0.006, 0.001]} scale={[0.98, 0.55, 1.02]}>
+          <boxGeometry args={[0.11, 0.048, 0.06]} />
+          <meshStandardMaterial color="#2c221c" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 0.002, 0.032]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.014, 0.014, 0.01, 12]} />
+          <meshStandardMaterial color="#1a2430" roughness={0.3} />
+        </mesh>
+      </group>
+    </group>
   );
 }
 
