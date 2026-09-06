@@ -26,8 +26,8 @@ const FACE_VIEW: Record<RoomFace, { position: THREE.Vector3; target: THREE.Vecto
 };
 
 const SEATED_VIEW = {
-  position: new THREE.Vector3(-0.28, 1.08, -0.38),
-  target: new THREE.Vector3(-0.48, 0.78, -1.22),
+  position: new THREE.Vector3(-0.36, 1.52, -0.46),
+  target: new THREE.Vector3(-0.5, 0.76, -1.18),
 };
 
 const CHAIR_POS: [number, number, number] = [-0.22, 0, -0.52];
@@ -103,17 +103,17 @@ export function RoomScene3D({
   return (
     <div className="ks-room3d" data-room-face={roomFace} data-seated={seated ? "1" : "0"} aria-label="The scrapbook room">
       <Canvas
-        camera={{ fov: seated ? 36 : 42, near: 0.08, far: 40, position: FACE_VIEW.front.position.toArray() }}
+        camera={{ fov: seated ? 38 : 42, near: 0.08, far: 40, position: FACE_VIEW.front.position.toArray() }}
         dpr={[1, 1.75]}
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 0.78,
+          toneMappingExposure: 0.62,
           failIfMajorPerformanceCaveat: false,
           powerPreference: "default",
         }}
       >
-        <color attach="background" args={[phase === "night" ? "#1a1410" : phase === "dusk" ? "#3a2418" : "#c4a078"]} />
+        <color attach="background" args={[phase === "night" ? "#12161c" : phase === "dusk" ? "#2a1c14" : "#5a6570"]} />
         <Suspense fallback={null}>
           <RoomModel
             phase={phase}
@@ -162,6 +162,28 @@ function RoomModel({
       mesh.receiveShadow = false;
       const mat = mesh.material;
       if (!mat || Array.isArray(mat)) return;
+      if (mesh.name === "Outside_View") {
+        const sky =
+          phase === "night" ? "#1a2230" : phase === "dusk" ? "#5a4034" : "#4a5860";
+        mesh.material = new THREE.MeshBasicMaterial({ color: sky });
+        return;
+      }
+      if (mesh.name === "Win_Glass") {
+        mesh.material = new THREE.MeshPhysicalMaterial({
+          color: phase === "night" ? "#243040" : "#6a7880",
+          transparent: true,
+          opacity: phase === "night" ? 0.7 : 0.48,
+          roughness: 0.58,
+          metalness: 0,
+          transmission: 0,
+          thickness: 0,
+          ior: 1.2,
+          envMapIntensity: 0.04,
+          emissive: new THREE.Color(phase === "night" ? "#0c1218" : "#1e262c"),
+          emissiveIntensity: 0.03,
+        });
+        return;
+      }
       const std = mat as THREE.MeshStandardMaterial;
       if (!mesh.userData.ksTuned) {
         mesh.material = std.clone();
@@ -171,20 +193,6 @@ function RoomModel({
       if (mesh.name === "CRT_Screen") {
         local.emissive = new THREE.Color(environment.musicOn ? "#3ec8c8" : "#102428");
         local.emissiveIntensity = environment.musicOn ? 1.4 : 0.15;
-      }
-      if (mesh.name === "Outside_View") {
-        local.color.set(phase === "night" ? "#243044" : phase === "dusk" ? "#c4895a" : "#b8c4c8");
-        local.emissive.set(phase === "night" ? "#0c1420" : phase === "dusk" ? "#6a3a20" : "#6e7a82");
-        local.emissiveIntensity = phase === "night" ? 0.12 : 0.22;
-      }
-      if (mesh.name === "Win_Glass") {
-        local.color.set("#d8e0e4");
-        local.emissive.set("#2a3034");
-        local.emissiveIntensity = 0.04;
-        const glass = local as THREE.MeshStandardMaterial & { transmission?: number };
-        if (typeof glass.transmission === "number") glass.transmission = Math.min(glass.transmission, 0.45);
-        local.transparent = true;
-        local.opacity = 0.55;
       }
     });
   }, [cloned, environment.musicOn, phase]);
@@ -279,13 +287,13 @@ function RoomLights({ phase, environment }: { phase: Phase; environment: Environ
   const night = phase === "night";
   const dusk = phase === "dusk";
   const amb = night ? 0.22 : dusk ? 0.36 : 0.48;
-  const windowGlow = night ? 0.35 : dusk ? 0.9 : 1.35;
+  const windowGlow = night ? 0.12 : dusk ? 0.22 : 0.18;
   return (
     <>
       <ambientLight intensity={amb} color={night ? "#8a9bb8" : "#fff4e6"} />
-      <pointLight position={[-0.12, 1.52, -1.62]} intensity={windowGlow} color="#f0e2c4" distance={3.4} decay={2} />
-      <pointLight position={[0, 2.45, -0.15]} intensity={night ? 1.6 : 4.2} color="#fff6ea" distance={7} />
-      <pointLight position={[-0.6, 1.75, 0.8]} intensity={night ? 0.9 : 2.4} color="#ffe8c8" distance={5} />
+      <pointLight position={[-0.12, 1.42, -1.52]} intensity={windowGlow} color="#d4c4a8" distance={2.2} decay={2.4} />
+      <pointLight position={[0, 2.45, -0.15]} intensity={night ? 1.6 : 3.4} color="#fff6ea" distance={7} />
+      <pointLight position={[-0.6, 1.75, 0.8]} intensity={night ? 0.9 : 2.0} color="#ffe8c8" distance={5} />
       {environment.lampOn && (night || dusk) && (
         <pointLight position={[-0.35, 0.95, -1.05]} intensity={4.5} color="#ffb56a" distance={3.2} />
       )}
@@ -357,8 +365,8 @@ function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean
     const ctrl = controls.current;
     if (ctrl) {
       ctrl.target.lerp(view.target, t);
-      ctrl.minDistance = seated ? 0.45 : 1.1;
-      ctrl.maxDistance = seated ? 1.35 : 3.4;
+      ctrl.minDistance = seated ? 0.55 : 1.1;
+      ctrl.maxDistance = seated ? 1.8 : 3.4;
       ctrl.update();
     } else {
       camera.lookAt(view.target);
@@ -371,10 +379,10 @@ function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean
       enablePan={false}
       enableZoom={!touring}
       enableRotate={!touring}
-      minDistance={seated ? 0.45 : 1.1}
-      maxDistance={seated ? 1.35 : 3.4}
-      maxPolarAngle={seated ? Math.PI * 0.62 : Math.PI * 0.58}
-      minPolarAngle={seated ? Math.PI * 0.32 : Math.PI * 0.28}
+      minDistance={seated ? 0.55 : 1.1}
+      maxDistance={seated ? 1.8 : 3.4}
+      maxPolarAngle={seated ? Math.PI * 0.78 : Math.PI * 0.58}
+      minPolarAngle={seated ? Math.PI * 0.12 : Math.PI * 0.28}
       target={(seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face]).target.toArray()}
     />
   );
