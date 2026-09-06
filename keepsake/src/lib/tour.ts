@@ -67,12 +67,6 @@ export const TOUR_STEPS: TourStep[] = [
     focus: "archive",
   },
   {
-    id: "timeline",
-    speaker: TOUR_SPEAKER,
-    text: "The little frame on the wall is the timeline — years, and the days that marked them.",
-    focus: "timeline",
-  },
-  {
     id: "map",
     speaker: TOUR_SPEAKER,
     text: "The corkboard is a memory map. Pin a place the way you'd pin a postcard. No exact coordinates, just a mark.",

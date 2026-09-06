@@ -35,7 +35,7 @@ const CHAIR_POS: [number, number, number] = [-0.1, 0, -0.52];
 /** Desk-facing chair, yawed 45° left of the table (toward the guestbook). */
 const CHAIR_YAW = THREE.MathUtils.degToRad(45);
 
-type HotspotAction = Exclude<HotspotId, "hud" | "timeline">;
+type HotspotAction = Exclude<HotspotId, "hud">;
 
 export function RoomScene3D({
   roomFace,
@@ -56,7 +56,7 @@ export function RoomScene3D({
   touring: boolean;
   onOpenWindow: () => void;
   onOpenMusic: () => void;
-  onGo: (view: "shelf" | "timeline" | "atlas" | "archive" | "book" | "guestbook") => void;
+  onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
   const [seated, setSeated] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);

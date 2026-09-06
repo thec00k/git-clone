@@ -2,7 +2,7 @@ import type { HotspotId } from "./hotspots";
 
 export const ROOM_GLB = "/room/keepsake.glb";
 
-export const HOTSPOT_OBJECT: Record<Exclude<HotspotId, "hud" | "timeline">, string> = {
+export const HOTSPOT_OBJECT: Record<Exclude<HotspotId, "hud">, string> = {
   window: "ks_window",
   book: "ks_book",
   crt: "ks_crt",
@@ -23,7 +23,7 @@ export const HOTSPOT_LABEL: Record<string, string> = {
 };
 
 /** Parent object name → hotspot id. Child meshes inherit the nearest ks_* ancestor. */
-export function hotspotFromObjectName(name: string): Exclude<HotspotId, "hud" | "timeline"> | null {
+export function hotspotFromObjectName(name: string): Exclude<HotspotId, "hud"> | null {
   if (name === "ks_window") return "window";
   if (name === "ks_book") return "book";
   if (name === "ks_crt") return "crt";

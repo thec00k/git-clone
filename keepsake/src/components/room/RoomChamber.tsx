@@ -8,7 +8,7 @@ import { COVER_STYLES } from "../../types/scrapbook";
 import type { Scrapbook } from "../../types/scrapbook";
 import type { Environment, MemoryPin } from "../../types/app";
 import type { ViewAs } from "../../types/app";
-import { BookshelfWall, CorkboardWall, SEASON_TINT, TimelineFrame, WALL_PAINT, type Phase } from "./RoomFurniture";
+import { BookshelfWall, CorkboardWall, SEASON_TINT, WALL_PAINT, type Phase } from "./RoomFurniture";
 import { DeskLayer, WindowPane } from "./RoomFlat";
 
 function prefersReducedMotion() {
@@ -50,7 +50,7 @@ export function RoomChamber({
   onOpenWindow: () => void;
   onOpenMusic: () => void;
   onSetEnvironment: (patch: Partial<Environment>) => void;
-  onGo: (view: "shelf" | "timeline" | "atlas" | "archive" | "book" | "guestbook") => void;
+  onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
   onOpenBook: (id: string) => void;
   onRenameBook: (id: string, title: string) => void;
   onPlaceBook: (id: string, pos: { shelfRow: number; shelfX: number }) => void;
@@ -118,19 +118,6 @@ export function RoomChamber({
             >
               <WindowPane phase={phase} weather={environment.weather} />
               <span className="ks-obj-label">the window</span>
-            </button>
-          </div>
-          <div className="pointer-events-none absolute inset-0" style={par ? layer(16) : undefined}>
-            <button
-              className={`ks-obj${tourClass("timeline")}`}
-              data-tour="timeline"
-              style={CHAMBER_HOTSPOTS.timeline}
-              onClick={() => onGo("timeline")}
-              aria-label="Timeline"
-              tabIndex={roomFace === "front" ? 0 : -1}
-            >
-              <TimelineFrame />
-              <span className="ks-obj-label">the timeline</span>
             </button>
           </div>
           <DeskLayer

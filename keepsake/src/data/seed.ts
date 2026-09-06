@@ -193,9 +193,6 @@ export function createSeed(): AppState {
         createdAt: now - 200000000,
       },
     ],
-    timeline: [
-      { id: uid("t"), year: new Date().getFullYear(), title: "This year", bookId: book.id },
-    ],
     achievements: [],
     achievementsAt: {},
     achievementsSeen: [],

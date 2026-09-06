@@ -3,7 +3,6 @@ import { Room } from "./components/room/Room";
 import { BookView } from "./components/BookView";
 import { Shelf } from "./components/views/Shelf";
 import { Archive } from "./components/views/Archive";
-import { Timeline } from "./components/views/Timeline";
 import { Atlas } from "./components/views/Atlas";
 import { Guestbook } from "./components/views/Guestbook";
 import { AmbientAudio } from "./components/AmbientAudio";
@@ -19,8 +18,6 @@ function CurrentView() {
       return <Shelf />;
     case "archive":
       return <Archive />;
-    case "timeline":
-      return <Timeline />;
     case "atlas":
       return <Atlas />;
     case "guestbook":

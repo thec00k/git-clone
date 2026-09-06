@@ -6,7 +6,6 @@
 export type HotspotId =
   | "window"
   | "shelf"
-  | "timeline"
   | "map"
   | "archive"
   | "book"
@@ -27,7 +26,6 @@ export type HotspotBox = {
 export const HOTSPOTS: Record<HotspotId, HotspotBox> = {
   window: { left: "8%", top: "12%", width: "26%", height: "42%" },
   shelf: { right: "6%", top: "10%", width: "30%", height: "34%" },
-  timeline: { left: "40%", top: "14%", width: "20%", height: "16%" },
   map: { left: "38.5%", top: "33%", width: "23%", height: "20%" },
   archive: { left: "5%", bottom: "16%", width: "16%", height: "40%" },
   book: { left: "42%", bottom: "10%", width: "18%", height: "30%" },
@@ -39,11 +37,10 @@ export const HOTSPOTS: Record<HotspotId, HotspotBox> = {
 /**
  * Positions on the chamber's facing wall. Shelf and map live on the
  * right / left walls as large dressed pieces; the front wall keeps the
- * desk, window, archive, and a recentered timeline.
+ * desk, window, and archive.
  */
 export const CHAMBER_HOTSPOTS: Record<HotspotId, HotspotBox> = {
   window: { left: "10%", top: "12%", width: "24%", height: "38%" },
-  timeline: { left: "42%", top: "16%", width: "20%", height: "16%" },
   archive: { left: "9%", bottom: "12%", width: "14%", height: "36%" },
   book: { left: "40%", bottom: "10%", width: "18%", height: "30%" },
   guestbook: { left: "62%", bottom: "12%", width: "12%", height: "15%" },

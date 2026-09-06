@@ -5,7 +5,7 @@ import type { HotspotId } from "../../lib/hotspots";
 import { COVER_STYLES } from "../../types/scrapbook";
 import type { Scrapbook } from "../../types/scrapbook";
 import type { Environment } from "../../types/app";
-import { Cabinet, CRT, MiniShelf, SKY, SEASON_TINT, TimelineFrame, WALL_PAINT, WeatherFx, type Phase } from "./RoomFurniture";
+import { Cabinet, CRT, MiniShelf, SKY, SEASON_TINT, WALL_PAINT, WeatherFx, type Phase } from "./RoomFurniture";
 
 export function RoomFlat({
   phase,
@@ -26,7 +26,7 @@ export function RoomFlat({
   layer: (depth: number) => { transform: string };
   onOpenWindow: () => void;
   onOpenMusic: () => void;
-  onGo: (view: "shelf" | "timeline" | "atlas" | "archive" | "book" | "guestbook") => void;
+  onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
   const cover = COVER_STYLES[activeBook?.coverStyle ?? "cocoa"];
   const tourClass = (id: HotspotId) => (tourFocus === id ? " ks-obj--tour" : "");
@@ -63,16 +63,6 @@ export function RoomFlat({
         >
           <MiniShelf count={bookCount} lit={environment.shelfLit} />
           <span className="ks-obj-label">the bookshelf</span>
-        </button>
-        <button
-          className={`ks-obj${tourClass("timeline")}`}
-          data-tour="timeline"
-          style={HOTSPOTS.timeline}
-          onClick={() => onGo("timeline")}
-          aria-label="Timeline"
-        >
-          <TimelineFrame />
-          <span className="ks-obj-label">the timeline</span>
         </button>
         <button
           className={`ks-obj${tourClass("map")}`}

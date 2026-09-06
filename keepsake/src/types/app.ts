@@ -88,13 +88,6 @@ export interface PinNote {
   createdAt: number;
 }
 
-export interface TimelineEntry {
-  id: string;
-  year: number;
-  title: string;
-  bookId?: string;
-}
-
 /** Notable one-off events that feed achievement rules (part of the ledger). */
 export interface Progress {
   visitedAtNight: boolean;
@@ -114,7 +107,6 @@ export interface AppState {
   notes: PageNote[];
   pinNotes: PinNote[];
   pins: MemoryPin[];
-  timeline: TimelineEntry[];
   achievements: string[]; // unlocked ids (completed)
   achievementsAt: Record<string, number>; // id -> unlocked timestamp (ledger)
   achievementsSeen: string[]; // ids whose reward has been presented

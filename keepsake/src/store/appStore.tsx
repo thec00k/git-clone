@@ -100,6 +100,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (async () => {
       const stored = await loadState();
       if (cancelled) return;
+      // Drop the retired timeline field from older saves so it is not rewritten.
+      if (stored && "timeline" in stored) {
+        delete (stored as { timeline?: unknown }).timeline;
+      }
       // Normalise older saved state that predates newer fields.
       const initial: AppState = stored
         ? {

@@ -11,7 +11,6 @@ export type View =
   | "book"
   | "shelf"
   | "archive"
-  | "timeline"
   | "atlas"
   | "guestbook";
 

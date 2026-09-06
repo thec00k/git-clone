@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { Archive, Clock, Lamp, Library, MapPin, Music, Moon, CloudSun, Sun, Pencil } from "lucide-react";
+import { Archive, Lamp, Library, MapPin, Music, Moon, CloudSun, Sun, Pencil } from "lucide-react";
 import type { MemoryPin } from "../../types/app";
 import { COVER_STYLES } from "../../types/scrapbook";
 import type { Scrapbook } from "../../types/scrapbook";
@@ -134,19 +134,6 @@ export function WeatherFx({ kind }: { kind: "rain" | "snow" }) {
           }}
         />
       ))}
-    </div>
-  );
-}
-
-export function TimelineFrame() {
-  return (
-    <div
-      className="flex h-full w-full items-center justify-center rounded-sm bg-[#8b5a3c] p-1"
-      style={{ boxShadow: "inset 0 0 0 6px #6b4330" }}
-    >
-      <div className="flex h-full w-full items-center justify-center rounded-sm bg-paper/90 text-ink">
-        <Clock size={20} />
-      </div>
     </div>
   );
 }
