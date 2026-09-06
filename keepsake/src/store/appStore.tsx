@@ -17,7 +17,7 @@ import type {
   PinNote,
   Profile,
 } from "../types/app";
-import { PIN_NOTE_MAX } from "../types/app";
+import { PIN_NOTE_MAX, TIDY_ROOM } from "../types/app";
 import type {
   CoverStyle,
   SaveStatus,
@@ -60,6 +60,8 @@ interface AppContextValue {
   removeArchiveTab: (id: string) => void;
 
   setEnvironment: (patch: Partial<Environment>) => void;
+  tidyRoom: () => void;
+  flushSave: () => Promise<void>;
 
   addGuestEntry: (author: string, message: string) => void;
   addNote: (bookId: string, pageId: string, author: string, message: string) => void;
@@ -94,6 +96,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
   const loadedRef = useRef(false);
   const saveTimer = useRef<number | undefined>(undefined);
+  const stateRef = useRef<AppState | null>(null);
+  stateRef.current = state;
 
   useEffect(() => {
     let cancelled = false;
@@ -316,6 +320,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setEnvironment = useCallback((patch: Partial<Environment>) => update((p) => ({ ...p, environment: { ...p.environment, ...patch } })), [update]);
 
+  const tidyRoom = useCallback(
+    () => update((p) => ({ ...p, environment: { ...p.environment, ...TIDY_ROOM } })),
+    [update],
+  );
+
+  const flushSave = useCallback(async () => {
+    const snap = stateRef.current;
+    if (!snap) return;
+    window.clearTimeout(saveTimer.current);
+    setSaveStatus("saving");
+    try {
+      await saveState(snap);
+      setSaveStatus("saved");
+    } catch {
+      setSaveStatus("error");
+    }
+  }, []);
+
   const addGuestEntry = useCallback(
     (author: string, message: string) =>
       update((p) => ({ ...p, guestbook: [{ id: uid("g"), author, message, createdAt: Date.now() }, ...p.guestbook] })),
@@ -492,6 +514,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     renameArchiveTab,
     removeArchiveTab,
     setEnvironment,
+    tidyRoom,
+    flushSave,
     addGuestEntry,
     addNote,
     approveNote,

@@ -48,6 +48,20 @@ export interface Environment {
   pinsLocked: boolean;
 }
 
+/** Lights, weather, and hour the door's "tidy up" restores. Books and photos stay. */
+export const TIDY_ROOM: Pick<
+  Environment,
+  "timeMode" | "season" | "weather" | "lampOn" | "ceilingOn" | "shelfLit" | "pinsLocked"
+> = {
+  timeMode: "auto",
+  season: "autumn",
+  weather: "clear",
+  lampOn: true,
+  ceilingOn: true,
+  shelfLit: true,
+  pinsLocked: false,
+};
+
 export interface GuestEntry {
   id: string;
   author: string;

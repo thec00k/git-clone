@@ -11,6 +11,8 @@ export const CEILING_FAN_BLADES = "ks_ceiling_fan_blades";
 export const CEILING_FAN_LIGHT = "ks_ceiling_fan_light";
 /** Empty outside the glass. Day / dusk / night aim through the window. */
 export const WINDOW_SUN_OBJECT = "ks_window_sun";
+/** Exit on the wall opposite the window. */
+export const DOOR_OBJECT = "ks_door";
 
 export const HOTSPOT_OBJECT: Record<Exclude<HotspotId, "hud">, string> = {
   window: "ks_window",

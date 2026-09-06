@@ -1,4 +1,5 @@
 import type { AppState, ArchivePhoto } from "../types/app";
+import { TIDY_ROOM } from "../types/app";
 import type { Scrapbook } from "../types/scrapbook";
 import { uid } from "../lib/id";
 
@@ -161,17 +162,11 @@ export function createSeed(): AppState {
     archive,
     archiveTabs,
     environment: {
-      timeMode: "auto",
-      season: "autumn",
-      weather: "clear",
-      lampOn: true,
-      ceilingOn: true,
-      shelfLit: true,
+      ...TIDY_ROOM,
       musicOn: false,
       musicProvider: "ambient",
       volume: 0.5,
       ambienceVolume: 0.4,
-      pinsLocked: false,
     },
     guestbook: [
       {

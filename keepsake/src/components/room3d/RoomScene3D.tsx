@@ -7,6 +7,7 @@ import {
   CEILING_FAN_BLADES,
   CEILING_FAN_LIGHT,
   CHAIR_OBJECT,
+  DOOR_OBJECT,
   HOTSPOT_LABEL,
   ROOM_GLB,
   WINDOW_SUN_OBJECT,
@@ -51,6 +52,7 @@ export function RoomScene3D({
   touring,
   onOpenWindow,
   onOpenMusic,
+  onOpenDoor,
   onGo,
 }: {
   roomFace: RoomFace;
@@ -61,6 +63,7 @@ export function RoomScene3D({
   touring: boolean;
   onOpenWindow: () => void;
   onOpenMusic: () => void;
+  onOpenDoor: () => void;
   onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
   const [seated, setSeated] = useState(false);
@@ -82,11 +85,12 @@ export function RoomScene3D({
       sit,
       stand,
       openDrawer: () => setShopOpen(true),
+      openDoor: onOpenDoor,
       seated,
       shopOpen,
     });
     return () => bindScene(null);
-  }, [bindScene, seated, shopOpen, setRoomFace]);
+  }, [bindScene, seated, shopOpen, setRoomFace, onOpenDoor]);
 
   const activate = (id: HotspotAction) => {
     if (id === "window") onOpenWindow();
@@ -153,6 +157,7 @@ export function RoomScene3D({
             onActivate={activate}
             onOpenDrawer={() => setShopOpen(true)}
             onSit={sit}
+            onOpenDoor={onOpenDoor}
           />
           <DeskProps />
         </Suspense>
@@ -178,6 +183,7 @@ function RoomModel({
   onActivate,
   onOpenDrawer,
   onSit,
+  onOpenDoor,
 }: {
   phase: Phase;
   environment: Environment;
@@ -187,6 +193,7 @@ function RoomModel({
   onActivate: (id: HotspotAction) => void;
   onOpenDrawer: () => void;
   onSit: () => void;
+  onOpenDoor: () => void;
 }) {
   const { scene } = useGLTF(ROOM_GLB);
   const cloned = useMemo(() => scene.clone(true), [scene]);
@@ -241,6 +248,7 @@ function RoomModel({
       <primitive object={cloned} />
       <DeskDrawer scene={cloned} open={drawerOpen} />
       <ChairSit scene={cloned} seated={seated} onSit={onSit} />
+      <RoomDoor scene={cloned} onOpen={onOpenDoor} />
       <RoomLights phase={phase} environment={environment} scene={cloned} />
       {seated && !drawerOpen && <DrawerPrompt onOpen={onOpenDrawer} />}
       {roots.map(({ id, object }) => (
@@ -489,6 +497,60 @@ function DeskProps() {
   );
 }
 
+/** Door on the wall opposite the window. Uses `ks_door` when the GLB has one. */
+function RoomDoor({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void }) {
+  const fromGlb = useMemo(() => scene.getObjectByName(DOOR_OBJECT), [scene]);
+  const center = useMemo(() => {
+    if (!fromGlb) return new THREE.Vector3(0.06, 1.08, 1.98);
+    const box = new THREE.Box3().setFromObject(fromGlb);
+    const c = new THREE.Vector3();
+    box.getCenter(c);
+    return c;
+  }, [fromGlb]);
+
+  return (
+    <group position={fromGlb ? center : [0.06, 0, 1.98]}>
+      {!fromGlb && (
+        <>
+          <mesh position={[0, 1.08, 0]}>
+            <boxGeometry args={[0.92, 2.16, 0.08]} />
+            <meshStandardMaterial color="#5c3a24" roughness={0.78} />
+          </mesh>
+          <mesh position={[0, 1.08, -0.03]}>
+            <boxGeometry args={[0.78, 2.02, 0.05]} />
+            <meshStandardMaterial color="#8b5a3c" roughness={0.7} />
+          </mesh>
+          <mesh position={[0.28, 1.02, -0.07]}>
+            <sphereGeometry args={[0.035, 10, 10]} />
+            <meshStandardMaterial color="#c4a078" roughness={0.35} metalness={0.25} />
+          </mesh>
+        </>
+      )}
+      <mesh
+        position={fromGlb ? [0, 0, 0] : [0, 1.08, 0]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpen();
+        }}
+        onPointerOver={() => {
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          document.body.style.cursor = "";
+        }}
+      >
+        <boxGeometry args={[0.95, 2.2, 0.28]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+      <Html position={fromGlb ? [0, 0.2, 0] : [0, 0.42, -0.08]} center occlude={false} style={{ pointerEvents: "auto" }}>
+        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-room-door aria-hidden="true" tabIndex={-1} onClick={onOpen}>
+          The door
+        </button>
+      </Html>
+    </group>
+  );
+}
+
 /** Sit prompt on the Blender chair. Hidden until `ks_chair` is in the GLB. */
 function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seated: boolean; onSit: () => void }) {
   const chair = useMemo(() => scene.getObjectByName(CHAIR_OBJECT), [scene]);
@@ -531,7 +593,7 @@ function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seated: boo
 }
 
 /** Stay inside the plaster — no walking through walls, floor, or the desk. */
-const ROOM_WALK = { minX: -1.48, maxX: 1.52, minZ: -0.68, maxZ: 1.9 };
+const ROOM_WALK = { minX: -1.48, maxX: 1.52, minZ: -0.68, maxZ: 2.02 };
 const WALK_SPEED = 1.55;
 const LOOK_YAW = 0.0034;
 const LOOK_PITCH = 0.0028;

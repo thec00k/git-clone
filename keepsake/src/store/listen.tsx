@@ -6,6 +6,7 @@ export interface SceneHandle {
   sit: () => void;
   stand: () => void;
   openDrawer: () => void;
+  openDoor: () => void;
   seated: boolean;
   shopOpen: boolean;
 }

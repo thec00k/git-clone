@@ -8,6 +8,7 @@ import { ACHIEVEMENTS } from "../../types/app";
 import { roomLayoutFromSearch } from "../../lib/roomLayout";
 import { tourAlreadyFinished } from "../../lib/tour";
 import { EnvironmentPanel } from "./EnvironmentPanel";
+import { LeavePanel } from "./LeavePanel";
 import { AchievementsToast } from "./AchievementsToast";
 import { RoomTour } from "./RoomTour";
 import { RoomCurator } from "./RoomCurator";
@@ -43,6 +44,7 @@ export function Room() {
   const [envOpen, setEnvOpen] = useState(false);
   const [achOpen, setAchOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
+  const [doorOpen, setDoorOpen] = useState(false);
   const sceneRef = useRef<HTMLDivElement>(null);
   const [par, setPar] = useState({ x: 0, y: 0 });
   const layout = useMemo(() => roomLayoutFromSearch(), []);
@@ -191,6 +193,7 @@ export function Room() {
               touring={touring}
               onOpenWindow={() => setEnvOpen(true)}
               onOpenMusic={() => setMusicOpen(true)}
+              onOpenDoor={() => setDoorOpen(true)}
               onGo={go}
             />
           </WebGLGuard>
@@ -278,6 +281,10 @@ export function Room() {
             }
             if (id === "stand") {
               scene?.stand();
+              return;
+            }
+            if (id === "door") {
+              scene?.openDoor();
             }
           }}
         />
@@ -318,6 +325,7 @@ export function Room() {
       {touring && <RoomTour />}
 
       {envOpen && <EnvironmentPanel onClose={() => setEnvOpen(false)} />}
+      {doorOpen && <LeavePanel onClose={() => setDoorOpen(false)} />}
       {musicOpen && <MusicPanel onClose={() => setMusicOpen(false)} />}
       {achOpen && <AchievementsPanel onClose={() => setAchOpen(false)} unlocked={state.achievements} />}
       <AchievementsToast

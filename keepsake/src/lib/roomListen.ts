@@ -15,7 +15,8 @@ export type ListenId =
   | "crt"
   | "chair"
   | "drawer"
-  | "stand";
+  | "stand"
+  | "door";
 
 export interface ListenThing {
   id: ListenId;
@@ -80,6 +81,11 @@ const THINGS: Record<ListenId, Omit<ListenThing, "id">> = {
     hint: "Leave the chair and look around the room again.",
     face: "front",
   },
+  door: {
+    name: "The door",
+    hint: "The door opposite the window. Step out to visit friends, leave the room as it is, tidy up, or close the door.",
+    face: "front",
+  },
 };
 
 const BASE_ORDER: ListenId[] = ["book", "window", "shelf", "archive", "map", "guestbook", "crt"];
@@ -96,6 +102,7 @@ export function listenThings(opts: {
       if (!opts.shopOpen) ids.push("drawer");
     } else {
       ids.push("chair");
+      ids.push("door");
     }
   }
   return ids.map((id) => ({ id, ...THINGS[id] }));

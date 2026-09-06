@@ -91,6 +91,11 @@ export const TOUR_STEPS: TourStep[] = [
     focus: "hud",
   },
   {
+    id: "door",
+    speaker: TOUR_SPEAKER,
+    text: "The door is on the wall opposite the window. You can leave the room as it is, tidy the lights, or step out when friends have rooms of their own.",
+  },
+  {
     id: "close",
     speaker: TOUR_SPEAKER,
     text: "Everything saves itself. There's no rush. The room will be here when you come back.",
