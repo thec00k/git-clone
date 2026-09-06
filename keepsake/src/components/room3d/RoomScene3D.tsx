@@ -164,23 +164,16 @@ function RoomModel({
       if (!mat || Array.isArray(mat)) return;
       if (mesh.name === "Outside_View") {
         const sky =
-          phase === "night" ? "#1a2230" : phase === "dusk" ? "#5a4034" : "#4a5860";
+          phase === "night" ? "#1a2230" : phase === "dusk" ? "#5a4034" : "#5c666e";
         mesh.material = new THREE.MeshBasicMaterial({ color: sky });
         return;
       }
       if (mesh.name === "Win_Glass") {
-        mesh.material = new THREE.MeshPhysicalMaterial({
-          color: phase === "night" ? "#243040" : "#6a7880",
+        mesh.material = new THREE.MeshBasicMaterial({
+          color: phase === "night" ? "#243040" : "#6e7a82",
           transparent: true,
-          opacity: phase === "night" ? 0.7 : 0.48,
-          roughness: 0.58,
-          metalness: 0,
-          transmission: 0,
-          thickness: 0,
-          ior: 1.2,
-          envMapIntensity: 0.04,
-          emissive: new THREE.Color(phase === "night" ? "#0c1218" : "#1e262c"),
-          emissiveIntensity: 0.03,
+          opacity: phase === "night" ? 0.55 : 0.32,
+          depthWrite: false,
         });
         return;
       }
@@ -193,6 +186,14 @@ function RoomModel({
       if (mesh.name === "CRT_Screen") {
         local.emissive = new THREE.Color(environment.musicOn ? "#3ec8c8" : "#102428");
         local.emissiveIntensity = environment.musicOn ? 1.4 : 0.15;
+      }
+      if (windowAncestor(mesh)) {
+        local.roughness = Math.max(local.roughness ?? 0, 0.88);
+        local.metalness = 0;
+        local.envMapIntensity = 0.08;
+        const physical = local as THREE.MeshPhysicalMaterial;
+        if ("clearcoat" in physical) physical.clearcoat = 0;
+        if ("transmission" in physical) physical.transmission = 0;
       }
     });
   }, [cloned, environment.musicOn, phase]);
@@ -212,6 +213,15 @@ function RoomModel({
       ))}
     </group>
   );
+}
+
+function windowAncestor(obj: THREE.Object3D): boolean {
+  let cur: THREE.Object3D | null = obj;
+  while (cur) {
+    if (cur.name === "ks_window" || cur.name.startsWith("Win_")) return true;
+    cur = cur.parent;
+  }
+  return false;
 }
 
 function collectHotspotRoots(root: THREE.Object3D): { id: HotspotAction; object: THREE.Object3D }[] {
@@ -287,11 +297,9 @@ function RoomLights({ phase, environment }: { phase: Phase; environment: Environ
   const night = phase === "night";
   const dusk = phase === "dusk";
   const amb = night ? 0.22 : dusk ? 0.36 : 0.48;
-  const windowGlow = night ? 0.12 : dusk ? 0.22 : 0.18;
   return (
     <>
       <ambientLight intensity={amb} color={night ? "#8a9bb8" : "#fff4e6"} />
-      <pointLight position={[-0.12, 1.42, -1.52]} intensity={windowGlow} color="#d4c4a8" distance={2.2} decay={2.4} />
       <pointLight position={[0, 2.45, -0.15]} intensity={night ? 1.6 : 3.4} color="#fff6ea" distance={7} />
       <pointLight position={[-0.6, 1.75, 0.8]} intensity={night ? 0.9 : 2.0} color="#ffe8c8" distance={5} />
       {environment.lampOn && (night || dusk) && (
