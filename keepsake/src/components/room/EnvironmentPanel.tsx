@@ -50,6 +50,18 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="mt-3 flex items-center justify-between">
+          <span className="text-sm text-paper/60">Ceiling fan</span>
+          <button
+            className={`ks-tool ${environment.ceilingOn !== false ? "ks-tool--accent" : ""}`}
+            aria-pressed={environment.ceilingOn !== false}
+            data-ceiling-toggle
+            onClick={() => setEnvironment({ ceilingOn: environment.ceilingOn === false })}
+          >
+            {environment.ceilingOn !== false ? "On" : "Off"}
+          </button>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between">
           <span className="text-sm text-paper/60">Shelf lights</span>
           <button
             className={`ks-tool ${environment.shelfLit ? "ks-tool--accent" : ""}`}

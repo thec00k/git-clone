@@ -3,7 +3,15 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { HotspotId } from "../../lib/hotspots";
-import { CHAIR_OBJECT, HOTSPOT_LABEL, ROOM_GLB, hotspotFromObjectName } from "../../lib/roomHotspots";
+import {
+  CEILING_FAN_BLADES,
+  CEILING_FAN_LIGHT,
+  CHAIR_OBJECT,
+  HOTSPOT_LABEL,
+  ROOM_GLB,
+  WINDOW_SUN_OBJECT,
+  hotspotFromObjectName,
+} from "../../lib/roomHotspots";
 import type { RoomFace } from "../../lib/roomLayout";
 import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
@@ -115,7 +123,13 @@ export function RoomScene3D({
   }, [touring, seated, shopOpen]);
 
   return (
-    <div className="ks-room3d" data-room-face={roomFace} data-seated={seated ? "1" : "0"} aria-label="The scrapbook room">
+    <div
+      className="ks-room3d"
+      data-room-face={roomFace}
+      data-seated={seated ? "1" : "0"}
+      data-ceiling={environment.ceilingOn !== false ? "1" : "0"}
+      aria-label="The scrapbook room"
+    >
       <div className="ks-room3d-picture" aria-hidden="true">
       <Canvas
         camera={{ fov: seated ? 38 : 42, near: 0.08, far: 40, position: FACE_VIEW.front.position.toArray() }}
@@ -141,7 +155,6 @@ export function RoomScene3D({
             onSit={sit}
           />
           <DeskProps />
-          <RoomLights phase={phase} environment={environment} />
         </Suspense>
         <EyeCamera face={roomFace} seated={seated} touring={touring} />
       </Canvas>
@@ -228,6 +241,7 @@ function RoomModel({
       <primitive object={cloned} />
       <DeskDrawer scene={cloned} open={drawerOpen} />
       <ChairSit scene={cloned} seated={seated} onSit={onSit} />
+      <RoomLights phase={phase} environment={environment} scene={cloned} />
       {seated && !drawerOpen && <DrawerPrompt onOpen={onOpenDrawer} />}
       {roots.map(({ id, object }) => (
         <HotspotAnchor
@@ -365,15 +379,53 @@ function HotspotAnchor({
   );
 }
 
-function RoomLights({ phase, environment }: { phase: Phase; environment: Environment }) {
+const CEILING_FALLBACK = new THREE.Vector3(0, 2.45, -0.15);
+const WINDOW_SUN_FALLBACK = new THREE.Vector3(0.05, 1.85, -2.2);
+
+function worldPos(scene: THREE.Object3D, name: string, fallback: THREE.Vector3) {
+  const obj = scene.getObjectByName(name);
+  if (!obj) return fallback;
+  const p = new THREE.Vector3();
+  obj.getWorldPosition(p);
+  return p;
+}
+
+/** Window carries day / dusk / night. The ceiling fan is a plain on/off, like the lamp. */
+function RoomLights({
+  phase,
+  environment,
+  scene,
+}: {
+  phase: Phase;
+  environment: Environment;
+  scene?: THREE.Object3D;
+}) {
   const night = phase === "night";
   const dusk = phase === "dusk";
-  const amb = night ? 0.22 : dusk ? 0.36 : 0.48;
+  const ceiling = useMemo(
+    () => (scene ? worldPos(scene, CEILING_FAN_LIGHT, CEILING_FALLBACK) : CEILING_FALLBACK),
+    [scene],
+  );
+  const windowSun = useMemo(
+    () => (scene ? worldPos(scene, WINDOW_SUN_OBJECT, WINDOW_SUN_FALLBACK) : WINDOW_SUN_FALLBACK),
+    [scene],
+  );
+
+  useFrame((_, dt) => {
+    const blades = scene?.getObjectByName(CEILING_FAN_BLADES);
+    if (blades && environment.ceilingOn !== false) blades.rotation.y += dt * 1.35;
+  });
+
+  const windowColor = night ? "#c8d4f0" : dusk ? "#ffb070" : "#ffe6b8";
+  const windowGain = night ? 0.55 : dusk ? 1.35 : 2.1;
+
   return (
     <>
-      <ambientLight intensity={amb} color={night ? "#8a9bb8" : "#fff4e6"} />
-      <pointLight position={[0, 2.45, -0.15]} intensity={night ? 1.6 : 3.4} color="#fff6ea" distance={7} />
-      <pointLight position={[-0.6, 1.75, 0.8]} intensity={night ? 0.9 : 2.0} color="#ffe8c8" distance={5} />
+      <ambientLight intensity={night ? 0.12 : dusk ? 0.16 : 0.18} color={night ? "#8a9bb8" : "#fff4e6"} />
+      <directionalLight position={windowSun.toArray()} intensity={windowGain} color={windowColor} />
+      {environment.ceilingOn !== false && (
+        <pointLight position={ceiling.toArray()} intensity={2.8} color="#fff6ea" distance={7} />
+      )}
       {environment.lampOn && (night || dusk) && (
         <pointLight position={[-0.35, 0.95, -1.05]} intensity={4.5} color="#ffb56a" distance={3.2} />
       )}

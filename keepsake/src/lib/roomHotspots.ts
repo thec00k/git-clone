@@ -5,6 +5,13 @@ export const ROOM_GLB = "/room/keepsake.glb";
 /** Sit target in the GLB. The coded placeholder chair is gone. */
 export const CHAIR_OBJECT = "ks_chair";
 
+/** Optional ceiling fixture. Light toggle attaches to the empty. */
+export const CEILING_FAN_OBJECT = "ks_ceiling_fan";
+export const CEILING_FAN_BLADES = "ks_ceiling_fan_blades";
+export const CEILING_FAN_LIGHT = "ks_ceiling_fan_light";
+/** Empty outside the glass. Day / dusk / night aim through the window. */
+export const WINDOW_SUN_OBJECT = "ks_window_sun";
+
 export const HOTSPOT_OBJECT: Record<Exclude<HotspotId, "hud">, string> = {
   window: "ks_window",
   book: "ks_book",

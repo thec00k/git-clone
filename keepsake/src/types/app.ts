@@ -36,6 +36,8 @@ export interface Environment {
   season: Season;
   weather: Weather;
   lampOn: boolean;
+  /** Ceiling fan light. On/off only — day, dusk, and night stay on the window. */
+  ceilingOn: boolean;
   /** Warm LED strips under each bookshelf row. */
   shelfLit: boolean;
   musicOn: boolean;

@@ -113,6 +113,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               musicProvider: stored.environment?.musicProvider ?? "ambient",
               pinsLocked: stored.environment?.pinsLocked ?? false,
               shelfLit: stored.environment?.shelfLit ?? true,
+              ceilingOn: stored.environment?.ceilingOn ?? true,
             },
             achievementsAt: stored.achievementsAt ?? {},
             achievementsSeen: stored.achievementsSeen ?? [],
