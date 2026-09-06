@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { RotateCw } from "lucide-react";
 import type { CaptionElement, PageElement, PhotoElement } from "../types/scrapbook";
+import { clamp } from "../lib/clamp";
 import { usePointerDrag } from "../hooks/usePointerDrag";
 import { useElementGesture } from "../hooks/useElementGesture";
 
@@ -27,8 +28,10 @@ export function ElementView({ element, selected, onSelect, onMove, onTransform, 
     outlineOffset: "6px",
   };
 
+  if (element.type === "stroke") return null;
+
   // Photos and stickers get full drag + pinch-to-resize + twist-to-rotate,
-  // plus a drag-to-rotate handle when selected.
+  // plus rotate and corner-resize handles when selected.
   if (element.type === "photo" || element.type === "sticker") {
     return (
       <TransformableElement
@@ -106,7 +109,17 @@ function TransformableElement({
       )}
 
       {selected && (
-        <RotateHandle onRotate={(deg) => onTransform(element.id, { rotation: deg })} />
+        <>
+          <RotateHandle onRotate={(deg) => onTransform(element.id, { rotation: deg })} />
+          {(["nw", "ne", "sw", "se"] as const).map((corner) => (
+            <ResizeHandle
+              key={corner}
+              corner={corner}
+              size={element.w}
+              onResize={(w) => onTransform(element.id, { w })}
+            />
+          ))}
+        </>
       )}
     </div>
   );
@@ -179,6 +192,62 @@ function RotateHandle({ onRotate }: { onRotate: (deg: number) => void }) {
       </span>
       <span style={{ width: 2, height: 16, background: "var(--color-accent)" }} />
     </div>
+  );
+}
+
+function ResizeHandle({
+  corner,
+  size,
+  onResize,
+}: {
+  corner: "nw" | "ne" | "sw" | "se";
+  size: number;
+  onResize: (w: number) => void;
+}) {
+  const active = useRef(false);
+  const start = useRef({ x: 0, y: 0, dist: 1, w: size });
+
+  const down = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    const el = (e.currentTarget as HTMLElement).closest(".ks-el") as HTMLElement | null;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    start.current = {
+      x: cx,
+      y: cy,
+      dist: Math.max(8, Math.hypot(e.clientX - cx, e.clientY - cy)),
+      w: size,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    active.current = true;
+  };
+
+  const move = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!active.current) return;
+    const dist = Math.hypot(e.clientX - start.current.x, e.clientY - start.current.y);
+    onResize(clamp((start.current.w * dist) / start.current.dist, 8, 92));
+  };
+
+  const up = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    active.current = false;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+  };
+
+  return (
+    <button
+      type="button"
+      data-no-drag
+      data-resize={corner}
+      className={`ks-el-resize ks-el-resize--${corner}`}
+      aria-label={`Resize from the ${corner} corner`}
+      title="Drag to resize"
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={up}
+    />
   );
 }
 
