@@ -39,29 +39,6 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
         <Segment label="Weather" value={environment.weather} options={WEATHERS} onChange={(v) => setEnvironment({ weather: v as Weather })} />
 
         <div className="mt-4 flex items-center justify-between">
-          <span className="text-sm text-paper/60">Lamp</span>
-          <button
-            className={`ks-tool ${environment.lampOn ? "ks-tool--accent" : ""}`}
-            aria-pressed={environment.lampOn}
-            onClick={() => setEnvironment({ lampOn: !environment.lampOn })}
-          >
-            {environment.lampOn ? "On" : "Off"}
-          </button>
-        </div>
-
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-sm text-paper/60">Ceiling fan</span>
-          <button
-            className={`ks-tool ${environment.ceilingOn !== false ? "ks-tool--accent" : ""}`}
-            aria-pressed={environment.ceilingOn !== false}
-            data-ceiling-toggle
-            onClick={() => setEnvironment({ ceilingOn: environment.ceilingOn === false })}
-          >
-            {environment.ceilingOn !== false ? "On" : "Off"}
-          </button>
-        </div>
-
-        <div className="mt-3 flex items-center justify-between">
           <span className="text-sm text-paper/60">Shelf lights</span>
           <button
             className={`ks-tool ${environment.shelfLit ? "ks-tool--accent" : ""}`}

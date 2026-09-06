@@ -9,8 +9,11 @@ export const CHAIR_OBJECT = "ks_chair";
 export const CEILING_FAN_OBJECT = "ks_ceiling_fan";
 export const CEILING_FAN_BLADES = "ks_ceiling_fan_blades";
 export const CEILING_FAN_LIGHT = "ks_ceiling_fan_light";
-/** Desk lamp. The point light sits above this empty when the mesh is missing. */
+/** Desk lamp. Click it to turn the bulb on. Optional child `ks_lamp_bulb`. */
 export const LAMP_OBJECT = "ks_lamp";
+export const LAMP_BULB = "ks_lamp_bulb";
+/** Plate to the left of the window. Toggles the ceiling light. */
+export const CEILING_SWITCH = "ks_ceiling_switch";
 /** Empty outside the glass. Day / dusk / night aim through the window. */
 export const WINDOW_SUN_OBJECT = "ks_window_sun";
 /** Exit on the wall opposite the window. */

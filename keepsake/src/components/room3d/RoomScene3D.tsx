@@ -11,7 +11,9 @@ import {
   DESK_DRAWER,
   DESK_OBJECT,
   DOOR_OBJECT,
+  CEILING_SWITCH,
   HOTSPOT_LABEL,
+  LAMP_BULB,
   LAMP_OBJECT,
   ROOM_GLB,
   WINDOW_SUN_OBJECT,
@@ -21,6 +23,7 @@ import type { RoomFace } from "../../lib/roomLayout";
 import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
 import { StickerStore } from "../StickerStore";
+import { useApp } from "../../store/appStore";
 import { useListen } from "../../store/listen";
 
 const EYE_Y = 1.32;
@@ -75,6 +78,7 @@ export function RoomScene3D({
   const [seated, setSeated] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const { bindScene } = useListen();
+  const { setEnvironment } = useApp();
 
   const stand = () => {
     setShopOpen(false);
@@ -86,17 +90,22 @@ export function RoomScene3D({
     setSeated(true);
   };
 
+  const toggleLamp = () => setEnvironment({ lampOn: !environment.lampOn });
+  const toggleCeiling = () => setEnvironment({ ceilingOn: environment.ceilingOn === false });
+
   useEffect(() => {
     bindScene({
       sit,
       stand,
       openDrawer: () => setShopOpen(true),
       openDoor: onOpenDoor,
+      toggleLamp,
+      toggleCeiling,
       seated,
       shopOpen,
     });
     return () => bindScene(null);
-  }, [bindScene, seated, shopOpen, setRoomFace, onOpenDoor]);
+  }, [bindScene, seated, shopOpen, setRoomFace, onOpenDoor, environment.lampOn, environment.ceilingOn, setEnvironment]);
 
   const activate = (id: HotspotAction) => {
     if (id === "window") onOpenWindow();
@@ -138,6 +147,7 @@ export function RoomScene3D({
       data-room-face={roomFace}
       data-seated={seated ? "1" : "0"}
       data-ceiling={environment.ceilingOn !== false ? "1" : "0"}
+      data-lamp={environment.lampOn ? "1" : "0"}
       aria-label="The scrapbook room"
     >
       <div className="ks-room3d-picture" aria-hidden="true">
@@ -164,8 +174,9 @@ export function RoomScene3D({
             onOpenDrawer={() => setShopOpen(true)}
             onSit={sit}
             onOpenDoor={onOpenDoor}
+            onToggleLamp={toggleLamp}
+            onToggleCeiling={toggleCeiling}
           />
-          <DeskProps />
         </Suspense>
         <EyeCamera face={roomFace} seated={seated} touring={touring} />
       </Canvas>
@@ -190,6 +201,8 @@ function RoomModel({
   onOpenDrawer,
   onSit,
   onOpenDoor,
+  onToggleLamp,
+  onToggleCeiling,
 }: {
   phase: Phase;
   environment: Environment;
@@ -200,6 +213,8 @@ function RoomModel({
   onOpenDrawer: () => void;
   onSit: () => void;
   onOpenDoor: () => void;
+  onToggleLamp: () => void;
+  onToggleCeiling: () => void;
 }) {
   const { scene } = useGLTF(ROOM_GLB);
   const cloned = useMemo(() => scene.clone(true), [scene]);
@@ -238,6 +253,10 @@ function RoomModel({
         local.emissive = new THREE.Color(environment.musicOn ? "#3ec8c8" : "#102428");
         local.emissiveIntensity = environment.musicOn ? 1.4 : 0.15;
       }
+      if (mesh.name === LAMP_BULB || /lamp.*bulb/i.test(mesh.name)) {
+        local.emissive = new THREE.Color(environment.lampOn ? "#ffe6b0" : "#3a3228");
+        local.emissiveIntensity = environment.lampOn ? 2.4 : 0.08;
+      }
       if (windowAncestor(mesh)) {
         local.roughness = Math.max(local.roughness ?? 0, 0.88);
         local.metalness = 0;
@@ -247,17 +266,20 @@ function RoomModel({
         if ("transmission" in physical) physical.transmission = 0;
       }
     });
-  }, [cloned, environment.musicOn, phase]);
+  }, [cloned, environment.musicOn, environment.lampOn, phase]);
 
   return (
     <group>
       <primitive object={cloned} />
       <DeskDrawer scene={cloned} open={drawerOpen} />
       <DeskStandIn scene={cloned} />
+      <DeskProps scene={cloned} />
+      <LampFixture scene={cloned} on={environment.lampOn} onToggle={onToggleLamp} />
+      <CeilingSwitch scene={cloned} on={environment.ceilingOn !== false} onToggle={onToggleCeiling} />
       <ChairSit scene={cloned} seated={seated} onSit={onSit} />
       <RoomDoor scene={cloned} onOpen={onOpenDoor} />
       <RoomLights phase={phase} environment={environment} scene={cloned} />
-      {seated && !drawerOpen && <DrawerPrompt onOpen={onOpenDrawer} />}
+      {seated && !drawerOpen && <DrawerPrompt scene={cloned} onOpen={onOpenDrawer} />}
       {roots.map(({ id, object }) => (
         <HotspotAnchor
           key={id}
@@ -287,11 +309,13 @@ function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boolean }) {
   return null;
 }
 
-const DRAWER_PROMPT_AT = new THREE.Vector3(-0.15, 0.48, -1.5);
-
-function DrawerPrompt({ onOpen }: { onOpen: () => void }) {
+function DrawerPrompt({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void }) {
+  const at = useMemo(() => {
+    const desk = measureDesk(scene);
+    return new THREE.Vector3((desk.minX + desk.maxX) / 2, desk.y - 0.28, desk.maxZ + 0.04);
+  }, [scene]);
   return (
-    <group position={DRAWER_PROMPT_AT.toArray()}>
+    <group position={at.toArray()}>
       <mesh
         onClick={(e) => {
           e.stopPropagation();
@@ -307,7 +331,7 @@ function DrawerPrompt({ onOpen }: { onOpen: () => void }) {
         <boxGeometry args={[0.42, 0.16, 0.12]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <FacedHtml point={DRAWER_PROMPT_AT}>
+      <FacedHtml point={at}>
         <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-open-drawer aria-hidden="true" tabIndex={-1} onClick={onOpen}>
           Open the drawer
         </button>
@@ -393,7 +417,6 @@ function HotspotAnchor({
 
 const CEILING_FALLBACK = new THREE.Vector3(0, 3.02, 0);
 const WINDOW_SUN_FALLBACK = new THREE.Vector3(-0.15, 2.28, -2.63);
-const LAMP_FALLBACK = new THREE.Vector3(0.9, 1.08, -1.7);
 const SHELF_LIGHT_FALLBACK = new THREE.Vector3(2.15, 1.45, -0.12);
 
 function worldPos(scene: THREE.Object3D, names: string | string[], fallback: THREE.Vector3) {
@@ -415,6 +438,53 @@ function hasGeometry(object: THREE.Object3D | undefined) {
     if (mesh.isMesh && mesh.geometry) found = true;
   });
   return found;
+}
+
+type DeskMeasure = {
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
+  y: number;
+};
+
+const STAND_IN_DESK: DeskMeasure = {
+  minX: -1.04,
+  maxX: 0.74,
+  minZ: -2.115,
+  maxZ: -1.415,
+  y: 0.765,
+};
+
+function measureDesk(scene: THREE.Object3D): DeskMeasure {
+  const desk = scene.getObjectByName(DESK_OBJECT);
+  if (desk && hasGeometry(desk)) {
+    const box = new THREE.Box3().setFromObject(desk);
+    return { minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z, y: box.max.y };
+  }
+  return STAND_IN_DESK;
+}
+
+/** Left-back corner of the desktop — where the lamp belongs. */
+function deskLampCorner(desk: DeskMeasure) {
+  return new THREE.Vector3(desk.minX + 0.16, desk.y + 0.36, desk.minZ + 0.16);
+}
+
+function lampShadePos(scene: THREE.Object3D) {
+  const lamp = scene.getObjectByName(LAMP_OBJECT);
+  if (lamp && hasGeometry(lamp)) {
+    const box = new THREE.Box3().setFromObject(lamp);
+    const p = new THREE.Vector3();
+    box.getCenter(p);
+    p.y = box.max.y - 0.03;
+    return p;
+  }
+  const empty = worldPos(scene, LAMP_OBJECT, new THREE.Vector3(Number.NaN, 0, 0));
+  if (Number.isFinite(empty.x) && empty.x < 0) {
+    if (empty.y < 0.5) empty.y = 1.1;
+    return empty;
+  }
+  return deskLampCorner(measureDesk(scene));
 }
 
 /** Locators with no mesh have an empty box — use the empty's world point, lifted off the floor. */
@@ -487,12 +557,7 @@ function RoomLights({
     () => (scene ? worldPos(scene, WINDOW_SUN_OBJECT, WINDOW_SUN_FALLBACK) : WINDOW_SUN_FALLBACK.clone()),
     [scene],
   );
-  const lamp = useMemo(() => {
-    if (!scene) return LAMP_FALLBACK.clone();
-    const p = worldPos(scene, LAMP_OBJECT, LAMP_FALLBACK);
-    if (p.y < 0.5) p.y = 1.08;
-    return p;
-  }, [scene]);
+  const lampRef = useRef<THREE.PointLight>(null);
   const shelfLit = useMemo(() => {
     if (!scene) return SHELF_LIGHT_FALLBACK.clone();
     const p = worldPos(scene, "ks_shelf", SHELF_LIGHT_FALLBACK);
@@ -508,6 +573,10 @@ function RoomLights({
       scene?.getObjectByName(CEILING_FAN_BLADES) ??
       scene?.getObjectByName(CEILING_FAN_OBJECT)?.children.find((child) => /blade/i.test(child.name));
     if (blades && environment.ceilingOn !== false) blades.rotation.y += dt * 1.35;
+    if (scene && lampRef.current) {
+      const p = lampShadePos(scene);
+      lampRef.current.position.copy(p);
+    }
   });
 
   const windowColor = night ? "#c8d4f0" : dusk ? "#ffb070" : "#ffe6b8";
@@ -520,8 +589,14 @@ function RoomLights({
       {environment.ceilingOn !== false && (
         <pointLight position={ceiling.toArray()} intensity={3.2} color="#fff6ea" distance={9} />
       )}
-      {environment.lampOn && (night || dusk) && (
-        <pointLight position={lamp.toArray()} intensity={4.5} color="#ffb56a" distance={3.4} />
+      {environment.lampOn && (
+        <pointLight
+          ref={lampRef}
+          position={(scene ? lampShadePos(scene) : deskLampCorner(STAND_IN_DESK)).toArray()}
+          intensity={night ? 4.6 : dusk ? 3.4 : 1.9}
+          color="#ffb56a"
+          distance={2.6}
+        />
       )}
       {environment.shelfLit && <pointLight position={shelfLit.toArray()} intensity={2.4} color="#ffd89a" distance={3} />}
     </>
@@ -555,10 +630,14 @@ function DeskStandIn({ scene }: { scene: THREE.Object3D }) {
   );
 }
 
-function DeskProps() {
+function DeskProps({ scene }: { scene: THREE.Object3D }) {
+  const desk = useMemo(() => measureDesk(scene), [scene]);
+  const y = desk.y + 0.01;
+  const along = (t: number) => desk.minX + (desk.maxX - desk.minX) * t;
+  const depth = (t: number) => desk.minZ + (desk.maxZ - desk.minZ) * t;
   return (
     <group>
-      <group position={[-0.58, 0.768, -1.7]} rotation={[0, 0.45, 0]}>
+      <group position={[along(0.62), y, depth(0.78)]} rotation={[0, 0.45, 0]}>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
           { z: 0.016, color: "#2c221c", yaw: 0.04 },
@@ -570,7 +649,7 @@ function DeskProps() {
           </mesh>
         ))}
       </group>
-      <group position={[-0.42, 0.772, -1.62]} rotation={[0, 0.28, 0]}>
+      <group position={[along(0.38), y + 0.004, depth(0.72)]} rotation={[0, 0.22, 0]}>
         <mesh>
           <boxGeometry args={[0.14, 0.04, 0.1]} />
           <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
@@ -588,7 +667,7 @@ function DeskProps() {
           <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
         </mesh>
       </group>
-      <group position={[-0.78, 0.768, -1.76]} rotation={[0, 0.55, 0]}>
+      <group position={[along(0.24), y + 0.002, depth(0.7)]} rotation={[0, 0.4, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#f2d04a" roughness={0.48} />
@@ -606,6 +685,134 @@ function DeskProps() {
           <meshStandardMaterial color="#f6efe4" roughness={0.4} />
         </mesh>
       </group>
+    </group>
+  );
+}
+
+function ClickHit({
+  size,
+  onClick,
+}: {
+  size: [number, number, number];
+  onClick: () => void;
+}) {
+  return (
+    <mesh
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      onPointerOver={() => {
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = "";
+      }}
+    >
+      <boxGeometry args={size} />
+      <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+    </mesh>
+  );
+}
+
+function LampFixture({
+  scene,
+  on,
+  onToggle,
+}: {
+  scene: THREE.Object3D;
+  on: boolean;
+  onToggle: () => void;
+}) {
+  const lamp = useMemo(() => scene.getObjectByName(LAMP_OBJECT), [scene]);
+  const solid = hasGeometry(lamp);
+  const shade = useMemo(() => lampShadePos(scene), [scene]);
+  const base = useMemo(() => {
+    const desk = measureDesk(scene);
+    return new THREE.Vector3(shade.x, desk.y, shade.z);
+  }, [scene, shade]);
+
+  return (
+    <group>
+      {!solid && (
+        <group position={base.toArray()}>
+          <mesh position={[0, 0.02, 0]}>
+            <cylinderGeometry args={[0.045, 0.055, 0.02, 12]} />
+            <meshStandardMaterial color="#5c3a24" roughness={0.7} />
+          </mesh>
+          <mesh position={[0, 0.16, 0]}>
+            <cylinderGeometry args={[0.01, 0.012, 0.28, 8]} />
+            <meshStandardMaterial color="#c4a078" roughness={0.45} metalness={0.15} />
+          </mesh>
+          <mesh position={[0, 0.32, 0]}>
+            <cylinderGeometry args={[0.07, 0.095, 0.08, 12]} />
+            <meshStandardMaterial color="#3a2a20" roughness={0.62} />
+          </mesh>
+        </group>
+      )}
+      <mesh position={shade.toArray()}>
+        <sphereGeometry args={[0.022, 12, 10]} />
+        <meshStandardMaterial
+          color={on ? "#fff4d2" : "#d8c4a0"}
+          emissive={on ? "#ffe6b0" : "#2a241c"}
+          emissiveIntensity={on ? 2.8 : 0.06}
+          roughness={0.35}
+        />
+      </mesh>
+      <group position={shade.toArray()}>
+        <ClickHit size={[0.22, 0.42, 0.22]} onClick={onToggle} />
+        <FacedHtml point={shade} position={[0, 0.16, 0]}>
+          <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-lamp-toggle aria-hidden="true" tabIndex={-1} onClick={onToggle}>
+            {on ? "Lamp on" : "Lamp off"}
+          </button>
+        </FacedHtml>
+      </group>
+    </group>
+  );
+}
+
+const SWITCH_FALLBACK = new THREE.Vector3(-1.22, 1.28, -2.1);
+
+function CeilingSwitch({
+  scene,
+  on,
+  onToggle,
+}: {
+  scene: THREE.Object3D;
+  on: boolean;
+  onToggle: () => void;
+}) {
+  const fromGlb = useMemo(() => {
+    const obj = scene.getObjectByName(CEILING_SWITCH);
+    return hasGeometry(obj) ? obj : undefined;
+  }, [scene]);
+  const center = useMemo(() => {
+    if (fromGlb) return objectAnchor(fromGlb, 1.28);
+    const named = scene.getObjectByName(CEILING_SWITCH);
+    if (named) return objectAnchor(named, 1.28);
+    return SWITCH_FALLBACK.clone();
+  }, [fromGlb, scene]);
+
+  return (
+    <group position={center.toArray()}>
+      {!fromGlb && (
+        <>
+          <mesh>
+            <boxGeometry args={[0.08, 0.12, 0.02]} />
+            <meshStandardMaterial color="#f3ebe0" roughness={0.62} />
+          </mesh>
+          <mesh position={[0, on ? 0.018 : -0.018, 0.016]}>
+            <boxGeometry args={[0.028, 0.04, 0.016]} />
+            <meshStandardMaterial color="#c45c3e" roughness={0.5} />
+          </mesh>
+        </>
+      )}
+      <ClickHit size={[0.16, 0.2, 0.1]} onClick={onToggle} />
+      <FacedHtml point={center} position={[0, 0.12, 0.02]}>
+        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-ceiling-switch aria-hidden="true" tabIndex={-1} onClick={onToggle}>
+          {on ? "Ceiling on" : "Ceiling off"}
+        </button>
+      </FacedHtml>
     </group>
   );
 }

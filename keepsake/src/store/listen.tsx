@@ -7,6 +7,8 @@ export interface SceneHandle {
   stand: () => void;
   openDrawer: () => void;
   openDoor: () => void;
+  toggleLamp: () => void;
+  toggleCeiling: () => void;
   seated: boolean;
   shopOpen: boolean;
 }

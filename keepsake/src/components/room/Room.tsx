@@ -285,6 +285,14 @@ export function Room() {
             }
             if (id === "door") {
               scene?.openDoor();
+              return;
+            }
+            if (id === "lamp") {
+              scene?.toggleLamp();
+              return;
+            }
+            if (id === "switch") {
+              scene?.toggleCeiling();
             }
           }}
         />
