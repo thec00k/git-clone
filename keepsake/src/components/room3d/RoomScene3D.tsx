@@ -6,9 +6,12 @@ import type { HotspotId } from "../../lib/hotspots";
 import {
   CEILING_FAN_BLADES,
   CEILING_FAN_LIGHT,
+  CEILING_FAN_OBJECT,
   CHAIR_OBJECT,
+  DESK_DRAWER,
   DOOR_OBJECT,
   HOTSPOT_LABEL,
+  LAMP_OBJECT,
   ROOM_GLB,
   WINDOW_SUN_OBJECT,
   hotspotFromObjectName,
@@ -21,24 +24,26 @@ import { useListen } from "../../store/listen";
 
 const EYE_Y = 1.32;
 
+/** Start in the larger plaster box (walls x±2.56, z±2.19, ceiling y=3.18). */
 const FACE_VIEW: Record<RoomFace, { position: THREE.Vector3; target: THREE.Vector3 }> = {
   front: {
-    position: new THREE.Vector3(0.05, EYE_Y, 1.72),
-    target: new THREE.Vector3(-0.05, 0.88, -1.05),
+    position: new THREE.Vector3(0.05, EYE_Y, 1.42),
+    target: new THREE.Vector3(-0.15, 0.92, -1.58),
   },
   left: {
-    position: new THREE.Vector3(-0.15, EYE_Y, 0.55),
-    target: new THREE.Vector3(-1.85, 1.42, -0.08),
+    position: new THREE.Vector3(0.18, EYE_Y, 0.22),
+    target: new THREE.Vector3(-2.22, 1.42, 0.05),
   },
   right: {
-    position: new THREE.Vector3(0.2, EYE_Y, 0.5),
-    target: new THREE.Vector3(1.88, 1.15, -0.1),
+    position: new THREE.Vector3(-0.18, EYE_Y, 0.22),
+    target: new THREE.Vector3(2.22, 1.2, -0.12),
   },
 };
 
+/** Sit at `ks_chair` (−0.34, 0, −0.90) looking at the book on the desk. */
 const SEATED_VIEW = {
-  position: new THREE.Vector3(-0.36, 1.52, -0.46),
-  target: new THREE.Vector3(-0.5, 0.76, -1.18),
+  position: new THREE.Vector3(-0.34, 1.26, -0.58),
+  target: new THREE.Vector3(-0.15, 0.82, -1.68),
 };
 
 type HotspotAction = Exclude<HotspotId, "hud">;
@@ -268,7 +273,7 @@ function RoomModel({
 const DRAWER_OPEN_Z = 0.26;
 
 function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boolean }) {
-  const drawer = useMemo(() => scene.getObjectByName("Desk_Drawer"), [scene]);
+  const drawer = useMemo(() => scene.getObjectByName(DESK_DRAWER), [scene]);
   const restZ = useRef<number | null>(null);
   if (drawer && restZ.current == null) restZ.current = drawer.position.z;
 
@@ -282,7 +287,7 @@ function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boolean }) {
 
 function DrawerPrompt({ onOpen }: { onOpen: () => void }) {
   return (
-    <group position={[-0.12, 0.58, -1.08]}>
+    <group position={[-0.15, 0.48, -1.5]}>
       <mesh
         onClick={(e) => {
           e.stopPropagation();
@@ -343,12 +348,7 @@ function HotspotAnchor({
   prompt?: string;
   onActivate: () => void;
 }) {
-  const box = useMemo(() => {
-    const b = new THREE.Box3().setFromObject(object);
-    const c = new THREE.Vector3();
-    b.getCenter(c);
-    return c;
-  }, [object]);
+  const box = useMemo(() => objectAnchor(object, 0.88), [object]);
 
   return (
     <group position={box}>
@@ -387,15 +387,33 @@ function HotspotAnchor({
   );
 }
 
-const CEILING_FALLBACK = new THREE.Vector3(0, 2.45, -0.15);
-const WINDOW_SUN_FALLBACK = new THREE.Vector3(0.05, 1.85, -2.2);
+const CEILING_FALLBACK = new THREE.Vector3(0, 3.02, 0);
+const WINDOW_SUN_FALLBACK = new THREE.Vector3(-0.15, 2.28, -2.63);
+const LAMP_FALLBACK = new THREE.Vector3(0.9, 1.08, -1.7);
+const SHELF_LIGHT_FALLBACK = new THREE.Vector3(2.15, 1.45, -0.12);
 
-function worldPos(scene: THREE.Object3D, name: string, fallback: THREE.Vector3) {
-  const obj = scene.getObjectByName(name);
-  if (!obj) return fallback;
-  const p = new THREE.Vector3();
-  obj.getWorldPosition(p);
-  return p;
+function worldPos(scene: THREE.Object3D, names: string | string[], fallback: THREE.Vector3) {
+  for (const name of Array.isArray(names) ? names : [names]) {
+    const obj = scene.getObjectByName(name);
+    if (!obj) continue;
+    const p = new THREE.Vector3();
+    obj.getWorldPosition(p);
+    return p;
+  }
+  return fallback.clone();
+}
+
+/** Locators with no mesh have an empty box — use the empty's world point, lifted off the floor. */
+function objectAnchor(object: THREE.Object3D, emptyLift: number) {
+  const box = new THREE.Box3().setFromObject(object);
+  const c = new THREE.Vector3();
+  if (box.isEmpty()) {
+    object.getWorldPosition(c);
+    if (c.y < 0.4) c.y += emptyLift;
+    return c;
+  }
+  box.getCenter(c);
+  return c;
 }
 
 /** Window carries day / dusk / night. The ceiling fan is a plain on/off, like the lamp. */
@@ -410,17 +428,36 @@ function RoomLights({
 }) {
   const night = phase === "night";
   const dusk = phase === "dusk";
-  const ceiling = useMemo(
-    () => (scene ? worldPos(scene, CEILING_FAN_LIGHT, CEILING_FALLBACK) : CEILING_FALLBACK),
-    [scene],
-  );
+  const ceiling = useMemo(() => {
+    if (!scene) return CEILING_FALLBACK.clone();
+    const p = worldPos(scene, [CEILING_FAN_LIGHT, CEILING_FAN_OBJECT], CEILING_FALLBACK);
+    if (p.y > 2.6) p.y -= 0.12;
+    return p;
+  }, [scene]);
   const windowSun = useMemo(
-    () => (scene ? worldPos(scene, WINDOW_SUN_OBJECT, WINDOW_SUN_FALLBACK) : WINDOW_SUN_FALLBACK),
+    () => (scene ? worldPos(scene, WINDOW_SUN_OBJECT, WINDOW_SUN_FALLBACK) : WINDOW_SUN_FALLBACK.clone()),
     [scene],
   );
+  const lamp = useMemo(() => {
+    if (!scene) return LAMP_FALLBACK.clone();
+    const p = worldPos(scene, LAMP_OBJECT, LAMP_FALLBACK);
+    if (p.y < 0.5) p.y = 1.08;
+    return p;
+  }, [scene]);
+  const shelfLit = useMemo(() => {
+    if (!scene) return SHELF_LIGHT_FALLBACK.clone();
+    const p = worldPos(scene, "ks_shelf", SHELF_LIGHT_FALLBACK);
+    if (p.y < 0.5) {
+      p.x -= 0.35;
+      p.y = 1.45;
+    }
+    return p;
+  }, [scene]);
 
   useFrame((_, dt) => {
-    const blades = scene?.getObjectByName(CEILING_FAN_BLADES);
+    const blades =
+      scene?.getObjectByName(CEILING_FAN_BLADES) ??
+      scene?.getObjectByName(CEILING_FAN_OBJECT)?.children.find((child) => /blade/i.test(child.name));
     if (blades && environment.ceilingOn !== false) blades.rotation.y += dt * 1.35;
   });
 
@@ -432,12 +469,12 @@ function RoomLights({
       <ambientLight intensity={night ? 0.12 : dusk ? 0.16 : 0.18} color={night ? "#8a9bb8" : "#fff4e6"} />
       <directionalLight position={windowSun.toArray()} intensity={windowGain} color={windowColor} />
       {environment.ceilingOn !== false && (
-        <pointLight position={ceiling.toArray()} intensity={2.8} color="#fff6ea" distance={7} />
+        <pointLight position={ceiling.toArray()} intensity={3.2} color="#fff6ea" distance={9} />
       )}
       {environment.lampOn && (night || dusk) && (
-        <pointLight position={[-0.35, 0.95, -1.05]} intensity={4.5} color="#ffb56a" distance={3.2} />
+        <pointLight position={lamp.toArray()} intensity={4.5} color="#ffb56a" distance={3.4} />
       )}
-      {environment.shelfLit && <pointLight position={[1.85, 1.35, -0.12]} intensity={2.4} color="#ffd89a" distance={3} />}
+      {environment.shelfLit && <pointLight position={shelfLit.toArray()} intensity={2.4} color="#ffd89a" distance={3} />}
     </>
   );
 }
@@ -445,7 +482,7 @@ function RoomLights({
 function DeskProps() {
   return (
     <group>
-      <group position={[-0.72, 0.762, -1.1]} rotation={[0, 0.45, 0]}>
+      <group position={[-0.58, 0.768, -1.7]} rotation={[0, 0.45, 0]}>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
           { z: 0.016, color: "#2c221c", yaw: 0.04 },
@@ -457,7 +494,7 @@ function DeskProps() {
           </mesh>
         ))}
       </group>
-      <group position={[-0.22, 0.772, -1.08]} rotation={[0, 0.28, 0]}>
+      <group position={[-0.42, 0.772, -1.62]} rotation={[0, 0.28, 0]}>
         <mesh>
           <boxGeometry args={[0.14, 0.04, 0.1]} />
           <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
@@ -475,7 +512,7 @@ function DeskProps() {
           <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
         </mesh>
       </group>
-      <group position={[-0.68, 0.768, -1.32]} rotation={[0, 0.55, 0]}>
+      <group position={[-0.78, 0.768, -1.76]} rotation={[0, 0.55, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#f2d04a" roughness={0.48} />
@@ -501,15 +538,12 @@ function DeskProps() {
 function RoomDoor({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void }) {
   const fromGlb = useMemo(() => scene.getObjectByName(DOOR_OBJECT), [scene]);
   const center = useMemo(() => {
-    if (!fromGlb) return new THREE.Vector3(0.06, 1.08, 1.98);
-    const box = new THREE.Box3().setFromObject(fromGlb);
-    const c = new THREE.Vector3();
-    box.getCenter(c);
-    return c;
+    if (!fromGlb) return new THREE.Vector3(0.15, 1.1, 2.12);
+    return objectAnchor(fromGlb, 1.1);
   }, [fromGlb]);
 
   return (
-    <group position={fromGlb ? center : [0.06, 0, 1.98]}>
+    <group position={fromGlb ? center : [0.15, 0, 2.12]}>
       {!fromGlb && (
         <>
           <mesh position={[0, 1.08, 0]}>
@@ -554,13 +588,7 @@ function RoomDoor({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void
 /** Sit prompt on the Blender chair. Hidden until `ks_chair` is in the GLB. */
 function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seated: boolean; onSit: () => void }) {
   const chair = useMemo(() => scene.getObjectByName(CHAIR_OBJECT), [scene]);
-  const center = useMemo(() => {
-    if (!chair) return null;
-    const box = new THREE.Box3().setFromObject(chair);
-    const c = new THREE.Vector3();
-    box.getCenter(c);
-    return c;
-  }, [chair]);
+  const center = useMemo(() => (chair ? objectAnchor(chair, 0.48) : null), [chair]);
 
   if (!chair || !center) return null;
 
@@ -593,7 +621,7 @@ function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seated: boo
 }
 
 /** Stay inside the plaster — no walking through walls, floor, or the desk. */
-const ROOM_WALK = { minX: -1.48, maxX: 1.52, minZ: -0.68, maxZ: 2.02 };
+const ROOM_WALK = { minX: -2.08, maxX: 2.08, minZ: -1.12, maxZ: 1.82 };
 const WALK_SPEED = 1.55;
 const LOOK_YAW = 0.0034;
 const LOOK_PITCH = 0.0028;

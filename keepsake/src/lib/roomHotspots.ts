@@ -9,10 +9,15 @@ export const CHAIR_OBJECT = "ks_chair";
 export const CEILING_FAN_OBJECT = "ks_ceiling_fan";
 export const CEILING_FAN_BLADES = "ks_ceiling_fan_blades";
 export const CEILING_FAN_LIGHT = "ks_ceiling_fan_light";
+/** Desk lamp. The point light sits above this empty when the mesh is missing. */
+export const LAMP_OBJECT = "ks_lamp";
 /** Empty outside the glass. Day / dusk / night aim through the window. */
 export const WINDOW_SUN_OBJECT = "ks_window_sun";
 /** Exit on the wall opposite the window. */
 export const DOOR_OBJECT = "ks_door";
+/** Desk body. The drawer slides when `Desk_Drawer` is a child. */
+export const DESK_OBJECT = "Desk";
+export const DESK_DRAWER = "Desk_Drawer";
 
 export const HOTSPOT_OBJECT: Record<Exclude<HotspotId, "hud">, string> = {
   window: "ks_window",
