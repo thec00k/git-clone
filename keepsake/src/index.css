@@ -1315,6 +1315,13 @@
     white-space: nowrap;
   }
 
+  .ks-sit-prompt--seat {
+    min-height: 30px;
+    padding: 0.28rem 0.7rem;
+    font-size: 0.8rem;
+    box-shadow: 0 4px 10px rgb(20 10 6 / 0.4);
+  }
+
   .ks-stand-up {
     position: absolute;
     left: 50%;

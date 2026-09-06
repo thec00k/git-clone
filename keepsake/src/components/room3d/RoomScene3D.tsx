@@ -30,9 +30,9 @@ const SEATED_VIEW = {
   target: new THREE.Vector3(-0.5, 0.76, -1.18),
 };
 
-const CHAIR_POS: [number, number, number] = [-0.28, 0, -0.5];
-/** Desk-facing chair, yawed 30° toward the CRT (right from the standing view). */
-const CHAIR_YAW = THREE.MathUtils.degToRad(-30);
+const CHAIR_POS: [number, number, number] = [-0.1, 0, -0.52];
+/** Desk-facing chair, yawed 45° left of the table (toward the guestbook). */
+const CHAIR_YAW = THREE.MathUtils.degToRad(45);
 
 type HotspotAction = Exclude<HotspotId, "hud" | "timeline">;
 
@@ -409,8 +409,8 @@ function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       {!seated && (
-        <Html position={[0, 0.9, 0]} center occlude={false} style={{ pointerEvents: "auto" }}>
-          <button type="button" className="ks-sit-prompt" data-sit-down onClick={onSit}>
+        <Html position={[0, 0.32, -0.02]} center occlude={false} style={{ pointerEvents: "auto" }}>
+          <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-sit-down onClick={onSit}>
             Sit down
           </button>
         </Html>
