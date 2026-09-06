@@ -14,6 +14,8 @@ interface Props {
   onMove: (id: string, x: number, y: number) => void;
   onTransform: (id: string, patch: Partial<PageElement>) => void;
   onEditText: (id: string, text: string) => void;
+  drawColor?: string | null;
+  onDrawStroke?: (pageId: string, color: string, points: { x: number; y: number }[]) => void;
 }
 
 export function Spread({
@@ -29,6 +31,8 @@ export function Spread({
   onMove,
   onTransform,
   onEditText,
+  drawColor = null,
+  onDrawStroke,
 }: Props) {
   const shared = {
     bookTitle,
@@ -40,6 +44,8 @@ export function Spread({
     onMove,
     onTransform,
     onEditText,
+    drawColor,
+    onDrawStroke,
   };
   return (
     <div className="ks-stage">

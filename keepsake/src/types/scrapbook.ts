@@ -1,14 +1,14 @@
 /*
  * Keepsake book model.
  * Shapes follow the Design Bible v3 "First Production-Ready Data Shapes":
- * Scrapbook -> Page -> PageElement (photo | caption | sticker).
+ * Scrapbook -> Page -> PageElement (photo | caption | sticker | stroke).
  * Positions are percentages of the page so a layout is preserved across
  * screen sizes (a stated Bible requirement).
  */
 
 export type PhotoFrame = "polaroid" | "tape" | "flush";
 
-export type ElementType = "photo" | "caption" | "sticker";
+export type ElementType = "photo" | "caption" | "sticker" | "stroke";
 
 export type Visibility = "private" | "friends" | "public";
 
@@ -49,7 +49,22 @@ export interface StickerElement extends BaseElement {
   glyph: string;
 }
 
-export type PageElement = PhotoElement | CaptionElement | StickerElement;
+/** Marker ink on the page. Points are percentages of the page. */
+export interface StrokeElement extends BaseElement {
+  type: "stroke";
+  color: string;
+  /** stroke width in page-percent units */
+  width: number;
+  points: { x: number; y: number }[];
+}
+
+export type PageElement = PhotoElement | CaptionElement | StickerElement | StrokeElement;
+
+export const MARKER_INKS = {
+  terracotta: "#c45c3e",
+  ink: "#2c221c",
+  moss: "#4a7c59",
+} as const;
 
 export interface Page {
   id: string;

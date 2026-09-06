@@ -51,6 +51,7 @@ export function BookView() {
   const [showNotes, setShowNotes] = useState(false);
   const [showKeys, setShowKeys] = useState(false);
   const [showCover, setShowCover] = useState(false);
+  const [drawInk, setDrawInk] = useState<string | null>(null);
   const addInputRef = useRef<HTMLInputElement>(null);
   const turningRef = useRef(false);
 
@@ -137,7 +138,10 @@ export function BookView() {
       else if (!isVisitor && (e.key === "Delete" || e.key === "Backspace") && sb.selectedId) {
         e.preventDefault();
         sb.removeElement(sb.selectedId);
-      } else if (e.key === "Escape") sb.setSelectedId(null);
+      } else if (e.key === "Escape") {
+        sb.setSelectedId(null);
+        setDrawInk(null);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -326,8 +330,10 @@ export function BookView() {
         )
       }
     >
-      <div className="ks-desk-top" data-desk-top>
+      <div className="ks-desk-top" data-desk-top data-draw-ink={drawInk ?? ""}>
         <DeskClutter
+          ink={isVisitor ? null : drawInk}
+          onPickInk={isVisitor ? undefined : setDrawInk}
           onPrint={() => setShowPrint(true)}
           onSnap={() => {
             if (!isVisitor) addInputRef.current?.click();
@@ -381,6 +387,8 @@ export function BookView() {
               onMove={isVisitor ? () => {} : (id, x, y) => sb.updateElement(id, { x, y })}
               onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
               onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
+              drawColor={isVisitor ? null : drawInk}
+              onDrawStroke={isVisitor ? undefined : sb.addStroke}
             />
           )}
           <button

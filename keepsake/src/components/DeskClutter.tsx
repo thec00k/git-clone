@@ -1,17 +1,35 @@
-/** Decorative desk props around the open scrapbook. Printer and camera are usable. */
+import { MARKER_INKS } from "../types/scrapbook";
+
+/** Desk props around the open scrapbook. Printer, camera, and markers are usable. */
 export function DeskClutter({
   onPrint,
   onSnap,
+  ink,
+  onPickInk,
 }: {
   onPrint: () => void;
   onSnap: () => void;
+  ink?: string | null;
+  onPickInk?: (color: string | null) => void;
 }) {
   return (
     <div className="ks-clutter" aria-hidden={false}>
-      <div className="ks-clutter-markers" aria-hidden="true">
-        <span className="ks-marker" data-ink="terracotta" />
-        <span className="ks-marker" data-ink="ink" />
-        <span className="ks-marker" data-ink="moss" />
+      <div className="ks-clutter-markers" role="group" aria-label="Markers">
+        {(Object.entries(MARKER_INKS) as [keyof typeof MARKER_INKS, string][]).map(([name, color]) => {
+          const selected = ink === color;
+          return (
+            <button
+              key={name}
+              type="button"
+              className={`ks-marker${selected ? " is-selected" : ""}`}
+              data-ink={name}
+              data-desk-marker
+              aria-label={`${selected ? "Put down" : "Draw with"} the ${name} marker`}
+              aria-pressed={selected}
+              onClick={() => onPickInk?.(selected ? null : color)}
+            />
+          );
+        })}
       </div>
 
       <button

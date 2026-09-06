@@ -148,6 +148,61 @@
     outline-offset: -2px;
   }
 
+  .ks-page-ink {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .ks-draw-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .ks-el-resize {
+    position: absolute;
+    width: 0.85rem;
+    height: 0.85rem;
+    margin: 0;
+    padding: 0;
+    border: 2px solid #f4efe6;
+    border-radius: 2px;
+    background: var(--color-accent);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.28);
+    z-index: 6;
+    touch-action: none;
+  }
+
+  .ks-el-resize--nw {
+    left: -0.38rem;
+    top: -0.38rem;
+    cursor: nwse-resize;
+  }
+
+  .ks-el-resize--ne {
+    right: -0.38rem;
+    top: -0.38rem;
+    cursor: nesw-resize;
+  }
+
+  .ks-el-resize--sw {
+    left: -0.38rem;
+    bottom: -0.38rem;
+    cursor: nesw-resize;
+  }
+
+  .ks-el-resize--se {
+    right: -0.38rem;
+    bottom: -0.38rem;
+    cursor: nwse-resize;
+  }
+
   /* Spine shadow between the two pages of an open spread. */
   .ks-spine {
     background: linear-gradient(
@@ -1612,41 +1667,70 @@
 
   .ks-clutter-markers {
     position: absolute;
-    top: 11%;
-    left: max(0.6rem, calc(var(--return-w) + 0.2rem));
+    right: max(0.55rem, calc(var(--return-w) + 0.1rem));
+    bottom: 5%;
     display: flex;
-    gap: 0.35rem;
-    transform: rotate(-28deg);
+    align-items: flex-end;
+    gap: 0.4rem;
+    pointer-events: auto;
+    z-index: 5;
   }
 
   .ks-marker {
     display: block;
     width: 0.72rem;
     height: 4.4rem;
+    padding: 0;
+    border: 0;
     border-radius: 4px 4px 3px 3px;
     background:
       linear-gradient(180deg, var(--marker-cap) 0 18%, #f3e6d2 18% 22%, var(--marker-body) 22% 88%, #2c221c 88%);
     box-shadow:
       1px 2px 0 rgb(20 10 6 / 0.18),
       0 8px 14px rgb(20 10 6 / 0.22);
+    cursor: pointer;
+  }
+
+  .ks-marker:focus-visible {
+    outline: 2px solid #f4efe6;
+    outline-offset: 3px;
+  }
+
+  .ks-marker.is-selected {
+    box-shadow:
+      0 0 0 2px #f4efe6,
+      0 0 0 4px var(--marker-cap),
+      2px 4px 12px rgb(20 10 6 / 0.32);
   }
 
   .ks-marker[data-ink="terracotta"] {
     --marker-cap: #c45c3e;
     --marker-body: #e8a090;
-    transform: rotate(-6deg);
+    transform: rotate(-8deg);
   }
 
   .ks-marker[data-ink="ink"] {
     --marker-cap: #2c221c;
     --marker-body: #5a4a3e;
-    transform: rotate(4deg) translateY(0.35rem);
+    transform: rotate(3deg);
   }
 
   .ks-marker[data-ink="moss"] {
     --marker-cap: #4a7c59;
     --marker-body: #8fb89a;
-    transform: rotate(10deg) translateY(-0.2rem);
+    transform: rotate(11deg);
+  }
+
+  .ks-marker.is-selected[data-ink="terracotta"] {
+    transform: rotate(-8deg) translateY(-6px);
+  }
+
+  .ks-marker.is-selected[data-ink="ink"] {
+    transform: rotate(3deg) translateY(-6px);
+  }
+
+  .ks-marker.is-selected[data-ink="moss"] {
+    transform: rotate(11deg) translateY(-6px);
   }
 
   .ks-mini-printer,
@@ -1776,19 +1860,20 @@
   }
 
   .ks-clutter-label {
+    padding: 0.16rem 0.5rem;
+    border-radius: 999px;
+    background: rgb(28 18 12 / 0.78);
     font-family: var(--font-script);
     font-size: 0.95rem;
-    color: #2c221c;
-    text-shadow: 0 1px 0 rgb(246 239 228 / 0.45);
-    opacity: 0.82;
+    color: #f4efe6;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+    pointer-events: none;
   }
 
   @media (max-width: 720px) {
-    .ks-clutter-markers,
-    .ks-mini-printer,
-    .ks-disposable {
-      transform: scale(0.78);
-      transform-origin: center;
+    .ks-clutter-markers {
+      transform: scale(0.82);
+      transform-origin: bottom right;
     }
 
     .ks-mini-printer {

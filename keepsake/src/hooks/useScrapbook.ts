@@ -6,6 +6,7 @@ import type {
   PhotoFrame,
   Scrapbook,
   StickerElement,
+  StrokeElement,
 } from "../types/scrapbook";
 import { MAX_PHOTOS_PER_PAGE } from "../types/scrapbook";
 import { uid } from "../lib/id";
@@ -198,6 +199,30 @@ export function useScrapbook() {
     [pages, mutatePageElements],
   );
 
+  const addStroke = useCallback(
+    (pageId: string, color: string, points: { x: number; y: number }[]) => {
+      if (points.length < 2) return;
+      const page = pages.find((p) => p.id === pageId);
+      if (!page) return;
+      const xs = points.map((p) => p.x);
+      const ys = points.map((p) => p.y);
+      const el: StrokeElement = {
+        id: uid("el"),
+        type: "stroke",
+        color,
+        width: 1.7,
+        points,
+        x: (Math.min(...xs) + Math.max(...xs)) / 2,
+        y: (Math.min(...ys) + Math.max(...ys)) / 2,
+        w: Math.max(4, Math.max(...xs) - Math.min(...xs)),
+        rotation: 0,
+        z: nextZ(page.elements),
+      };
+      mutatePageElements(pageId, (els) => [...els, el]);
+    },
+    [pages, mutatePageElements],
+  );
+
   const removeElement = useCallback(
     (elementId: string) => {
       const loc = locate(elementId);
@@ -351,6 +376,7 @@ export function useScrapbook() {
     addPhoto,
     addCaption,
     addSticker,
+    addStroke,
     removeElement,
     bringForward,
     sendBackward,
