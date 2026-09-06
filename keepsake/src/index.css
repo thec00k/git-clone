@@ -1387,14 +1387,14 @@
   /* Top-down desk the scrapbook sits on when opened from the chair. */
   .ks-room--desk-top {
     background:
-      radial-gradient(ellipse 58% 48% at 50% 38%, rgb(255 228 186 / 0.28), transparent 62%),
+      radial-gradient(ellipse 58% 48% at 50% 38%, rgb(255 228 186 / 0.34), transparent 62%),
       repeating-linear-gradient(
-        94deg,
-        #7a4e32 0 10px,
-        #8b5a3c 10px 18px,
-        #6e4328 18px 22px,
-        #9a6848 22px 30px,
-        #5c3a24 30px 33px
+        8deg,
+        #a07050 0 7px,
+        #8b5a3c 7px 13px,
+        #b0845c 13px 16px,
+        #7a4e32 16px 22px,
+        #9a6848 22px 28px
       );
   }
 

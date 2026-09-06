@@ -314,44 +314,52 @@ function RoomLights({ phase, environment }: { phase: Phase; environment: Environ
 function DeskProps() {
   return (
     <group>
-      <group position={[-0.84, 0.762, -1.1]} rotation={[Math.PI / 2, 0, -0.55]}>
+      <group position={[-0.86, 0.758, -1.08]} rotation={[0, 0.45, 0]}>
         {[
-          { x: 0, color: "#c45c3e" },
-          { x: 0.018, color: "#2c221c" },
-          { x: 0.036, color: "#4a7c59" },
+          { z: 0, color: "#c45c3e", yaw: -0.08 },
+          { z: 0.016, color: "#2c221c", yaw: 0.04 },
+          { z: 0.032, color: "#4a7c59", yaw: 0.12 },
         ].map((m) => (
-          <mesh key={m.color} position={[m.x, 0, 0]}>
-            <cylinderGeometry args={[0.007, 0.007, 0.11, 8]} />
-            <meshStandardMaterial color={m.color} roughness={0.45} />
+          <mesh key={m.color} position={[0, 0.006, m.z]} rotation={[0, 0, Math.PI / 2 + m.yaw]}>
+            <cylinderGeometry args={[0.006, 0.006, 0.13, 8]} />
+            <meshStandardMaterial color={m.color} roughness={0.42} />
           </mesh>
         ))}
       </group>
-      <group position={[-0.12, 0.772, -1.06]} rotation={[0, 0.35, 0]}>
+      <group position={[-0.1, 0.77, -1.05]} rotation={[0, 0.28, 0]}>
         <mesh>
-          <boxGeometry args={[0.13, 0.045, 0.09]} />
+          <boxGeometry args={[0.14, 0.04, 0.1]} />
           <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
         </mesh>
-        <mesh position={[0.01, 0.028, -0.01]}>
-          <boxGeometry args={[0.05, 0.004, 0.06]} />
-          <meshStandardMaterial color="#fffef8" roughness={0.7} />
+        <mesh position={[-0.01, 0.036, 0]}>
+          <boxGeometry args={[0.055, 0.006, 0.07]} />
+          <meshStandardMaterial color="#fffef8" roughness={0.68} />
         </mesh>
-        <mesh position={[0.042, 0.008, 0.028]}>
+        <mesh position={[-0.01, 0.05, 0]}>
+          <boxGeometry args={[0.04, 0.022, 0.05]} />
+          <meshStandardMaterial color="#c4a078" roughness={0.7} />
+        </mesh>
+        <mesh position={[0.048, 0.006, 0.038]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.01, 0.01, 0.008, 10]} />
           <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
         </mesh>
       </group>
-      <group position={[-0.8, 0.768, -1.36]} rotation={[0, 0.7, 0]}>
+      <group position={[-0.82, 0.766, -1.34]} rotation={[0, 0.55, 0]}>
         <mesh>
-          <boxGeometry args={[0.11, 0.048, 0.06]} />
-          <meshStandardMaterial color="#f2d04a" roughness={0.5} />
+          <boxGeometry args={[0.12, 0.05, 0.064]} />
+          <meshStandardMaterial color="#f2d04a" roughness={0.48} />
         </mesh>
-        <mesh position={[0, -0.006, 0.001]} scale={[0.98, 0.55, 1.02]}>
-          <boxGeometry args={[0.11, 0.048, 0.06]} />
+        <mesh position={[0, -0.008, 0]}>
+          <boxGeometry args={[0.122, 0.028, 0.066]} />
           <meshStandardMaterial color="#2c221c" roughness={0.7} />
         </mesh>
-        <mesh position={[0, 0.002, 0.032]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.014, 0.014, 0.01, 12]} />
-          <meshStandardMaterial color="#1a2430" roughness={0.3} />
+        <mesh position={[0, 0.002, 0.034]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.016, 0.016, 0.012, 12]} />
+          <meshStandardMaterial color="#1a2430" roughness={0.28} />
+        </mesh>
+        <mesh position={[-0.04, 0.018, 0.02]}>
+          <boxGeometry args={[0.018, 0.01, 0.014]} />
+          <meshStandardMaterial color="#f6efe4" roughness={0.4} />
         </mesh>
       </group>
     </group>
