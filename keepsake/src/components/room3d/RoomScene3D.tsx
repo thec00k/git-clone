@@ -9,6 +9,7 @@ import {
   CEILING_FAN_OBJECT,
   CHAIR_OBJECT,
   DESK_DRAWER,
+  DESK_OBJECT,
   DOOR_OBJECT,
   HOTSPOT_LABEL,
   LAMP_OBJECT,
@@ -27,8 +28,8 @@ const EYE_Y = 1.32;
 /** Start in the larger plaster box (walls x±2.56, z±2.19, ceiling y=3.18). */
 const FACE_VIEW: Record<RoomFace, { position: THREE.Vector3; target: THREE.Vector3 }> = {
   front: {
-    position: new THREE.Vector3(0.05, EYE_Y, 1.42),
-    target: new THREE.Vector3(-0.15, 0.92, -1.58),
+    position: new THREE.Vector3(0.05, EYE_Y, 0.62),
+    target: new THREE.Vector3(-0.15, 0.88, -1.62),
   },
   left: {
     position: new THREE.Vector3(0.18, EYE_Y, 0.22),
@@ -252,6 +253,7 @@ function RoomModel({
     <group>
       <primitive object={cloned} />
       <DeskDrawer scene={cloned} open={drawerOpen} />
+      <DeskStandIn scene={cloned} />
       <ChairSit scene={cloned} seated={seated} onSit={onSit} />
       <RoomDoor scene={cloned} onOpen={onOpenDoor} />
       <RoomLights phase={phase} environment={environment} scene={cloned} />
@@ -523,6 +525,33 @@ function RoomLights({
       )}
       {environment.shelfLit && <pointLight position={shelfLit.toArray()} intensity={2.4} color="#ffd89a" distance={3} />}
     </>
+  );
+}
+
+/** Temporary oak top while `Desk` is still an empty locator. */
+function DeskStandIn({ scene }: { scene: THREE.Object3D }) {
+  const desk = useMemo(() => scene.getObjectByName(DESK_OBJECT), [scene]);
+  if (hasGeometry(desk)) return null;
+  return (
+    <group position={[-0.15, 0, -1.765]}>
+      <mesh position={[0, 0.742, 0]}>
+        <boxGeometry args={[1.78, 0.045, 0.7]} />
+        <meshStandardMaterial color="#8d5a36" roughness={0.66} />
+      </mesh>
+      {(
+        [
+          [-0.78, -0.28],
+          [0.78, -0.28],
+          [-0.78, 0.28],
+          [0.78, 0.28],
+        ] as const
+      ).map(([x, z]) => (
+        <mesh key={`${x}:${z}`} position={[x, 0.36, z]}>
+          <boxGeometry args={[0.07, 0.72, 0.07]} />
+          <meshStandardMaterial color="#7a4c2e" roughness={0.74} />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
