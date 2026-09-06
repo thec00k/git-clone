@@ -497,6 +497,18 @@ function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
 const ROOM_WALK = { minX: -1.7, maxX: 1.75, minZ: -1.12, maxZ: 2.28 };
 const WALK_SPEED = 1.65;
 
+function clampCameraInRoom(camera: THREE.Camera, target: THREE.Vector3) {
+  const x = THREE.MathUtils.clamp(camera.position.x, ROOM_WALK.minX, ROOM_WALK.maxX);
+  const z = THREE.MathUtils.clamp(camera.position.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
+  const dx = x - camera.position.x;
+  const dz = z - camera.position.z;
+  if (!dx && !dz) return;
+  camera.position.x = x;
+  camera.position.z = z;
+  target.x += dx;
+  target.z += dz;
+}
+
 function walkIntent(e: KeyboardEvent): { axis: "f" | "r"; dir: -1 | 1 } | null {
   const code = e.code;
   if (code === "KeyW" || e.key === "ArrowUp") return { axis: "f", dir: 1 };
@@ -519,6 +531,13 @@ function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean
   useEffect(() => {
     userMoved.current = false;
   }, [face, seated, touring]);
+
+  useEffect(() => {
+    const el = gl.domElement;
+    const blockMenu = (e: Event) => e.preventDefault();
+    el.addEventListener("contextmenu", blockMenu);
+    return () => el.removeEventListener("contextmenu", blockMenu);
+  }, [gl]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -572,18 +591,16 @@ function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean
       const step = new THREE.Vector3()
         .addScaledVector(forward, keys.current.f * WALK_SPEED * dt)
         .addScaledVector(right, keys.current.r * WALK_SPEED * dt);
-      const next = camera.position.clone().add(step);
-      next.x = THREE.MathUtils.clamp(next.x, ROOM_WALK.minX, ROOM_WALK.maxX);
-      next.z = THREE.MathUtils.clamp(next.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
-      const applied = next.sub(camera.position);
-      camera.position.add(applied);
-      ctrl.target.add(applied);
+      camera.position.add(step);
+      ctrl.target.add(step);
+      clampCameraInRoom(camera, ctrl.target);
     }
 
     if (ctrl) {
       ctrl.minDistance = seated ? 0.45 : 0.4;
       ctrl.maxDistance = seated ? 2.2 : 4.8;
       ctrl.update();
+      if (userMoved.current && !touring) clampCameraInRoom(camera, ctrl.target);
     } else if (followPreset) {
       camera.lookAt(view.target);
     }
@@ -600,14 +617,25 @@ function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean
   return (
     <OrbitControls
       ref={controls}
-      enablePan={false}
+      enablePan={!touring}
       enableZoom={!touring}
       enableRotate={!touring}
+      screenSpacePanning
+      panSpeed={1.15}
       zoomSpeed={0.85}
       minDistance={seated ? 0.45 : 0.4}
       maxDistance={seated ? 2.2 : 4.8}
       maxPolarAngle={seated ? Math.PI * 0.78 : Math.PI * 0.72}
       minPolarAngle={seated ? Math.PI * 0.12 : Math.PI * 0.18}
+      mouseButtons={{
+        LEFT: THREE.MOUSE.PAN,
+        MIDDLE: THREE.MOUSE.PAN,
+        RIGHT: THREE.MOUSE.ROTATE,
+      }}
+      touches={{
+        ONE: THREE.TOUCH.PAN,
+        TWO: THREE.TOUCH.DOLLY_ROTATE,
+      }}
       target={view.target.toArray()}
       onStart={() => {
         if (!touringRef.current) userMoved.current = true;
