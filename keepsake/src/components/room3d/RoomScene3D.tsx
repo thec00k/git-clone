@@ -31,6 +31,8 @@ const SEATED_VIEW = {
 };
 
 const CHAIR_POS: [number, number, number] = [-0.22, 0, -0.52];
+/** Face the desk, then yaw 30° toward the CRT (right from the standing view). */
+const CHAIR_YAW = Math.PI - Math.PI / 6;
 
 type HotspotAction = Exclude<HotspotId, "hud" | "timeline">;
 
@@ -370,7 +372,7 @@ function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
   const oak = "#8b5a3c";
   const dark = "#5c3a24";
   return (
-    <group position={CHAIR_POS} rotation={[0, 0, 0]}>
+    <group position={CHAIR_POS} rotation={[0, CHAIR_YAW, 0]}>
       <mesh position={[0, 0.24, 0]} castShadow>
         <boxGeometry args={[0.42, 0.05, 0.4]} />
         <meshStandardMaterial color={oak} roughness={0.72} />
@@ -407,7 +409,7 @@ function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       {!seated && (
-        <Html position={[0, 0.86, 0.12]} center occlude={false} style={{ pointerEvents: "auto" }}>
+        <Html position={[0, 0.9, 0]} center occlude={false} style={{ pointerEvents: "auto" }}>
           <button type="button" className="ks-sit-prompt" data-sit-down onClick={onSit}>
             Sit down
           </button>
