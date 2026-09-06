@@ -405,6 +405,16 @@ function worldPos(scene: THREE.Object3D, names: string | string[], fallback: THR
   return fallback.clone();
 }
 
+function hasGeometry(object: THREE.Object3D | undefined) {
+  if (!object) return false;
+  let found = false;
+  object.traverse((child) => {
+    const mesh = child as THREE.Mesh;
+    if (mesh.isMesh && mesh.geometry) found = true;
+  });
+  return found;
+}
+
 /** Locators with no mesh have an empty box — use the empty's world point, lifted off the floor. */
 function objectAnchor(object: THREE.Object3D, emptyLift: number) {
   const box = new THREE.Box3().setFromObject(object);
@@ -503,7 +513,7 @@ function RoomLights({
 
   return (
     <>
-      <ambientLight intensity={night ? 0.12 : dusk ? 0.16 : 0.18} color={night ? "#8a9bb8" : "#fff4e6"} />
+      <ambientLight intensity={night ? 0.16 : dusk ? 0.24 : 0.34} color={night ? "#8a9bb8" : "#fff4e6"} />
       <directionalLight position={windowSun.toArray()} intensity={windowGain} color={windowColor} />
       {environment.ceilingOn !== false && (
         <pointLight position={ceiling.toArray()} intensity={3.2} color="#fff6ea" distance={9} />
@@ -573,7 +583,10 @@ function DeskProps() {
 
 /** Door on the wall opposite the window. Uses `ks_door` when the GLB has one. */
 function RoomDoor({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void }) {
-  const fromGlb = useMemo(() => scene.getObjectByName(DOOR_OBJECT), [scene]);
+  const fromGlb = useMemo(() => {
+    const obj = scene.getObjectByName(DOOR_OBJECT);
+    return hasGeometry(obj) ? obj : undefined;
+  }, [scene]);
   const center = useMemo(() => {
     if (!fromGlb) return new THREE.Vector3(0.15, 1.1, 2.12);
     return objectAnchor(fromGlb, 1.1);
