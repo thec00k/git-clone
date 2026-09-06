@@ -28,7 +28,7 @@ export function RoomTour() {
 
   useEffect(() => {
     setTourFocus(current?.focus ?? null);
-    if (roomLayoutFromSearch() === "chamber") setRoomFace(targetFace);
+    if (roomLayoutFromSearch() !== "flat") setRoomFace(targetFace);
     return () => setTourFocus(null);
   }, [current, setTourFocus, setRoomFace, targetFace]);
 
@@ -67,6 +67,9 @@ export function RoomTour() {
       setCutout(null);
       const yaw = document.querySelector(".ks-yaw");
       const needsTurn = yaw instanceof HTMLElement && prevFace !== targetFace && !prefersReducedMotion();
+      if (!needsTurn && prevFace !== targetFace && !prefersReducedMotion()) {
+        await new Promise((r) => window.setTimeout(r, 480));
+      }
       if (needsTurn) {
         await new Promise<void>((resolve) => {
           let done = false;

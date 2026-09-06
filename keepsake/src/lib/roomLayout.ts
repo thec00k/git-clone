@@ -2,13 +2,16 @@ import type { HotspotId } from "./hotspots";
 
 export type RoomFace = "front" | "left" | "right";
 
-export type RoomLayout = "chamber" | "flat";
+export type RoomLayout = "glb" | "chamber" | "flat";
 
 /** How long the chamber yaw transition runs (keep in sync with `.ks-yaw`). */
 export const YAW_MS = 820;
 
 export function roomLayoutFromSearch(search: string = typeof window === "undefined" ? "" : window.location.search): RoomLayout {
-  return new URLSearchParams(search).get("room") === "flat" ? "flat" : "chamber";
+  const room = new URLSearchParams(search).get("room");
+  if (room === "flat") return "flat";
+  if (room === "chamber") return "chamber";
+  return "glb";
 }
 
 /** Which wall the tour (and arrow keys) should face for a given object. */

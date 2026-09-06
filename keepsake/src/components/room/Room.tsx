@@ -16,6 +16,7 @@ import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { PhaseBadge, phaseOf } from "./RoomFurniture";
 import { RoomFlat } from "./RoomFlat";
 import { RoomChamber } from "./RoomChamber";
+import { RoomScene3D } from "../room3d/RoomScene3D";
 import { HomeChip } from "../views/ViewShell";
 
 export function Room() {
@@ -80,7 +81,7 @@ export function Room() {
 
   return (
     <div
-      className={`ks-room flex h-dvh flex-col overflow-hidden${layout === "chamber" ? " ks-room--chamber" : ""}`}
+      className={`ks-room flex h-dvh flex-col overflow-hidden${layout !== "flat" ? " ks-room--chamber" : ""}`}
       data-room-layout={layout}
     >
       <a className="ks-skip" href="#ks-main">
@@ -137,7 +138,19 @@ export function Room() {
       </header>
 
       <main id="ks-main" ref={sceneRef} className="ks-scene flex-1" onPointerMove={onMove}>
-        {layout === "flat" ? (
+        {layout === "glb" ? (
+          <RoomScene3D
+            roomFace={roomFace}
+            setRoomFace={setRoomFace}
+            phase={phase}
+            environment={environment}
+            tourFocus={tourFocus}
+            touring={touring}
+            onOpenWindow={() => setEnvOpen(true)}
+            onOpenMusic={() => setMusicOpen(true)}
+            onGo={go}
+          />
+        ) : layout === "flat" ? (
           <RoomFlat
             phase={phase}
             environment={environment}
@@ -213,7 +226,7 @@ export function Room() {
         {!touring && <PhaseBadge phase={phase} />}
       </main>
 
-      <RoomCurator visible={(layout === "flat" || roomFace === "front") && !touring} />
+      <RoomCurator visible={layout !== "glb" && (layout === "flat" || roomFace === "front") && !touring} />
       {touring && <RoomTour />}
 
       {envOpen && <EnvironmentPanel onClose={() => setEnvOpen(false)} />}

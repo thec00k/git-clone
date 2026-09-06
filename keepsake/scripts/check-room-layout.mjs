@@ -23,7 +23,10 @@ function nextFace(face, dir) {
 }
 
 function roomLayoutFromSearch(search) {
-  return new URLSearchParams(search).get("room") === "flat" ? "flat" : "chamber";
+  const room = new URLSearchParams(search).get("room");
+  if (room === "flat") return "flat";
+  if (room === "chamber") return "chamber";
+  return "glb";
 }
 
 assert.equal(faceForHotspot("shelf"), "right");
@@ -39,8 +42,9 @@ assert.equal(nextFace("left", "right"), "front");
 assert.equal(nextFace("right", "left"), "front");
 assert.equal(nextFace("left", "left"), "left");
 assert.equal(nextFace("right", "right"), "right");
-assert.equal(roomLayoutFromSearch(""), "chamber");
-assert.equal(roomLayoutFromSearch("?tour=1"), "chamber");
+assert.equal(roomLayoutFromSearch(""), "glb");
+assert.equal(roomLayoutFromSearch("?tour=1"), "glb");
+assert.equal(roomLayoutFromSearch("?room=chamber"), "chamber");
 assert.equal(roomLayoutFromSearch("?room=flat"), "flat");
 assert.equal(roomLayoutFromSearch("?room=flat&tour=1"), "flat");
 
