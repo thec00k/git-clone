@@ -1,7 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html, OrbitControls, useGLTF } from "@react-three/drei";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { Html, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { HotspotId } from "../../lib/hotspots";
 import { HOTSPOT_LABEL, ROOM_GLB, hotspotFromObjectName } from "../../lib/roomHotspots";
@@ -11,17 +10,19 @@ import type { Phase } from "../room/RoomFurniture";
 import { StickerStore } from "../StickerStore";
 import { useListen } from "../../store/listen";
 
+const EYE_Y = 1.32;
+
 const FACE_VIEW: Record<RoomFace, { position: THREE.Vector3; target: THREE.Vector3 }> = {
   front: {
-    position: new THREE.Vector3(0.05, 1.32, 1.72),
+    position: new THREE.Vector3(0.05, EYE_Y, 1.72),
     target: new THREE.Vector3(-0.05, 0.88, -1.05),
   },
   left: {
-    position: new THREE.Vector3(-0.15, 1.42, 0.55),
+    position: new THREE.Vector3(-0.15, EYE_Y, 0.55),
     target: new THREE.Vector3(-1.85, 1.42, -0.08),
   },
   right: {
-    position: new THREE.Vector3(0.2, 1.38, 0.5),
+    position: new THREE.Vector3(0.2, EYE_Y, 0.5),
     target: new THREE.Vector3(1.88, 1.15, -0.1),
   },
 };
@@ -146,7 +147,7 @@ export function RoomScene3D({
           <DeskProps />
           <RoomLights phase={phase} environment={environment} />
         </Suspense>
-        <FaceCamera face={roomFace} seated={seated} touring={touring} />
+        <EyeCamera face={roomFace} seated={seated} touring={touring} />
       </Canvas>
       </div>
       {seated && (
@@ -488,20 +489,13 @@ function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
   );
 }
 
-const ROOM_WALK = { minX: -1.7, maxX: 1.75, minZ: -1.12, maxZ: 2.28 };
-const WALK_SPEED = 1.65;
-
-function clampCameraInRoom(camera: THREE.Camera, target: THREE.Vector3) {
-  const x = THREE.MathUtils.clamp(camera.position.x, ROOM_WALK.minX, ROOM_WALK.maxX);
-  const z = THREE.MathUtils.clamp(camera.position.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
-  const dx = x - camera.position.x;
-  const dz = z - camera.position.z;
-  if (!dx && !dz) return;
-  camera.position.x = x;
-  camera.position.z = z;
-  target.x += dx;
-  target.z += dz;
-}
+/** Stay inside the plaster — no walking through walls, floor, or the desk. */
+const ROOM_WALK = { minX: -1.48, maxX: 1.52, minZ: -0.68, maxZ: 1.9 };
+const WALK_SPEED = 1.55;
+const LOOK_YAW = 0.0034;
+const LOOK_PITCH = 0.0028;
+const PITCH_MIN = -0.72;
+const PITCH_MAX = 0.55;
 
 function walkIntent(e: KeyboardEvent): { axis: "f" | "r"; dir: -1 | 1 } | null {
   const code = e.code;
@@ -512,26 +506,89 @@ function walkIntent(e: KeyboardEvent): { axis: "f" | "r"; dir: -1 | 1 } | null {
   return null;
 }
 
-function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean; touring: boolean }) {
+function lookFromView(pos: THREE.Vector3, target: THREE.Vector3) {
+  const dx = target.x - pos.x;
+  const dy = target.y - pos.y;
+  const dz = target.z - pos.z;
+  return {
+    yaw: Math.atan2(dx, -dz),
+    pitch: Math.atan2(dy, Math.hypot(dx, dz)),
+  };
+}
+
+function lookDir(yaw: number, pitch: number) {
+  const cp = Math.cos(pitch);
+  return new THREE.Vector3(Math.sin(yaw) * cp, Math.sin(pitch), -Math.cos(yaw) * cp);
+}
+
+function clampInRoom(pos: THREE.Vector3) {
+  pos.x = THREE.MathUtils.clamp(pos.x, ROOM_WALK.minX, ROOM_WALK.maxX);
+  pos.z = THREE.MathUtils.clamp(pos.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
+}
+
+/** Eye-height look: yaw/pitch only. The camera never leaves standing height. */
+function EyeCamera({ face, seated, touring }: { face: RoomFace; seated: boolean; touring: boolean }) {
   const { camera, gl } = useThree();
-  const controls = useRef<OrbitControlsImpl>(null);
   const keys = useRef({ f: 0, r: 0 });
+  const yaw = useRef(0);
+  const pitch = useRef(0);
+  const dragging = useRef(false);
   const userMoved = useRef(false);
   const touringRef = useRef(touring);
   touringRef.current = touring;
+  const seatedRef = useRef(seated);
+  seatedRef.current = seated;
   const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const view = seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face];
 
   useEffect(() => {
     userMoved.current = false;
-  }, [face, seated, touring]);
+    const look = lookFromView(view.position, view.target);
+    yaw.current = look.yaw;
+    pitch.current = look.pitch;
+  }, [face, seated, touring, view]);
 
   useEffect(() => {
     const el = gl.domElement;
     const blockMenu = (e: Event) => e.preventDefault();
+    const down = (e: PointerEvent) => {
+      if (touringRef.current) return;
+      if ((e.target as HTMLElement | null)?.closest?.("button, a, input, textarea, [role='dialog']")) return;
+      dragging.current = true;
+      userMoved.current = true;
+      el.setPointerCapture(e.pointerId);
+    };
+    const move = (e: PointerEvent) => {
+      if (!dragging.current || touringRef.current) return;
+      yaw.current -= e.movementX * LOOK_YAW;
+      pitch.current = THREE.MathUtils.clamp(pitch.current - e.movementY * LOOK_PITCH, PITCH_MIN, PITCH_MAX);
+    };
+    const up = (e: PointerEvent) => {
+      dragging.current = false;
+      if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+    };
+    const wheel = (e: WheelEvent) => {
+      if (touringRef.current || seatedRef.current) return;
+      e.preventDefault();
+      userMoved.current = true;
+      const dir = lookDir(yaw.current, 0);
+      camera.position.addScaledVector(dir, -e.deltaY * 0.0022);
+      clampInRoom(camera.position);
+      camera.position.y = EYE_Y;
+    };
     el.addEventListener("contextmenu", blockMenu);
-    return () => el.removeEventListener("contextmenu", blockMenu);
-  }, [gl]);
+    el.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    el.addEventListener("wheel", wheel, { passive: false });
+    return () => {
+      el.removeEventListener("contextmenu", blockMenu);
+      el.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      el.removeEventListener("wheel", wheel);
+    };
+  }, [camera, gl]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -566,75 +623,39 @@ function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean
   }, [seated]);
 
   useFrame((_, dt) => {
-    const ctrl = controls.current;
-    const followPreset = touring || !userMoved.current;
-
-    if (followPreset && !userMoved.current) {
+    if (touring || !userMoved.current) {
       const t = reduced || touring ? 1 : 1 - Math.pow(0.0008, dt);
       camera.position.lerp(view.position, t);
-      if (ctrl) ctrl.target.lerp(view.target, t);
-    }
-
-    if (!touring && !seated && (keys.current.f || keys.current.r) && ctrl) {
-      const forward = new THREE.Vector3();
-      camera.getWorldDirection(forward);
-      forward.y = 0;
-      if (forward.lengthSq() > 1e-6) forward.normalize();
-      const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0));
-      if (right.lengthSq() > 1e-6) right.normalize();
-      const step = new THREE.Vector3()
-        .addScaledVector(forward, keys.current.f * WALK_SPEED * dt)
-        .addScaledVector(right, keys.current.r * WALK_SPEED * dt);
-      camera.position.add(step);
-      ctrl.target.add(step);
-      clampCameraInRoom(camera, ctrl.target);
-    }
-
-    if (ctrl) {
-      ctrl.minDistance = seated ? 0.45 : 0.4;
-      ctrl.maxDistance = seated ? 2.2 : 4.8;
-      ctrl.update();
-      if (userMoved.current && !touring) clampCameraInRoom(camera, ctrl.target);
-    } else if (followPreset) {
+      if (!seated) {
+        camera.position.y = EYE_Y;
+        clampInRoom(camera.position);
+      }
       camera.lookAt(view.target);
+    } else {
+      if (!seated && (keys.current.f || keys.current.r)) {
+        const forward = lookDir(yaw.current, 0);
+        const right = new THREE.Vector3(-forward.z, 0, forward.x);
+        camera.position.addScaledVector(forward, keys.current.f * WALK_SPEED * dt);
+        camera.position.addScaledVector(right, keys.current.r * WALK_SPEED * dt);
+      }
+      if (seated) {
+        camera.position.copy(SEATED_VIEW.position);
+      } else {
+        camera.position.y = EYE_Y;
+        clampInRoom(camera.position);
+      }
+      camera.lookAt(camera.position.clone().add(lookDir(yaw.current, pitch.current)));
     }
 
     const host = gl.domElement.closest(".ks-room3d");
     if (host instanceof HTMLElement) {
-      const dist = ctrl ? camera.position.distanceTo(ctrl.target) : 0;
       host.dataset.cam = `${camera.position.x.toFixed(3)},${camera.position.y.toFixed(3)},${camera.position.z.toFixed(3)}`;
-      host.dataset.zoom = dist.toFixed(3);
+      host.dataset.eye = camera.position.y.toFixed(3);
       host.dataset.walk = keys.current.f || keys.current.r ? "1" : "0";
     }
   });
 
-  return (
-    <OrbitControls
-      ref={controls}
-      enablePan={false}
-      enableZoom={!touring}
-      enableRotate={!touring}
-      rotateSpeed={0.85}
-      zoomSpeed={0.85}
-      minDistance={seated ? 0.45 : 0.4}
-      maxDistance={seated ? 2.2 : 4.8}
-      maxPolarAngle={seated ? Math.PI * 0.82 : Math.PI * 0.88}
-      minPolarAngle={seated ? Math.PI * 0.1 : Math.PI * 0.08}
-      mouseButtons={{
-        LEFT: THREE.MOUSE.ROTATE,
-        MIDDLE: THREE.MOUSE.DOLLY,
-        RIGHT: THREE.MOUSE.ROTATE,
-      }}
-      touches={{
-        ONE: THREE.TOUCH.ROTATE,
-        TWO: THREE.TOUCH.DOLLY_ROTATE,
-      }}
-      target={view.target.toArray()}
-      onStart={() => {
-        if (!touringRef.current) userMoved.current = true;
-      }}
-    />
-  );
+  return null;
 }
 
 useGLTF.preload(ROOM_GLB);
