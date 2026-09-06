@@ -93,11 +93,6 @@ export function RoomScene3D({
     else if (id === "shelf") onGo("shelf");
   };
 
-  const turn = (face: RoomFace) => {
-    stand();
-    setRoomFace(face);
-  };
-
   useEffect(() => {
     if (touring) stand();
   }, [touring]);
@@ -154,7 +149,6 @@ export function RoomScene3D({
         <FaceCamera face={roomFace} seated={seated} touring={touring} />
       </Canvas>
       </div>
-      <WallReturns face={roomFace} onTurn={turn} />
       {seated && (
         <button type="button" className="ks-stand-up" aria-hidden="true" tabIndex={-1} onClick={stand}>
           Stand up
@@ -617,23 +611,22 @@ function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean
   return (
     <OrbitControls
       ref={controls}
-      enablePan={!touring}
+      enablePan={false}
       enableZoom={!touring}
       enableRotate={!touring}
-      screenSpacePanning
-      panSpeed={1.15}
+      rotateSpeed={0.85}
       zoomSpeed={0.85}
       minDistance={seated ? 0.45 : 0.4}
       maxDistance={seated ? 2.2 : 4.8}
-      maxPolarAngle={seated ? Math.PI * 0.78 : Math.PI * 0.72}
-      minPolarAngle={seated ? Math.PI * 0.12 : Math.PI * 0.18}
+      maxPolarAngle={seated ? Math.PI * 0.82 : Math.PI * 0.88}
+      minPolarAngle={seated ? Math.PI * 0.1 : Math.PI * 0.08}
       mouseButtons={{
-        LEFT: THREE.MOUSE.PAN,
-        MIDDLE: THREE.MOUSE.PAN,
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.DOLLY,
         RIGHT: THREE.MOUSE.ROTATE,
       }}
       touches={{
-        ONE: THREE.TOUCH.PAN,
+        ONE: THREE.TOUCH.ROTATE,
         TWO: THREE.TOUCH.DOLLY_ROTATE,
       }}
       target={view.target.toArray()}
@@ -641,33 +634,6 @@ function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean
         if (!touringRef.current) userMoved.current = true;
       }}
     />
-  );
-}
-
-function WallReturns({ face, onTurn }: { face: RoomFace; onTurn: (f: RoomFace) => void }) {
-  return (
-    <nav className="ks-returns" aria-label="Turn the room">
-      {face === "front" && (
-        <>
-          <button type="button" className="ks-return ks-return--left ks-return--map" onClick={() => onTurn("left")}>
-            <span className="ks-return-label">Corkboard map</span>
-          </button>
-          <button type="button" className="ks-return ks-return--right ks-return--shelf" onClick={() => onTurn("right")}>
-            <span className="ks-return-label">Bookshelf</span>
-          </button>
-        </>
-      )}
-      {face === "left" && (
-        <button type="button" className="ks-return ks-return--right ks-return--desk" onClick={() => onTurn("front")}>
-          <span className="ks-return-label">Desk</span>
-        </button>
-      )}
-      {face === "right" && (
-        <button type="button" className="ks-return ks-return--left ks-return--desk" onClick={() => onTurn("front")}>
-          <span className="ks-return-label">Desk</span>
-        </button>
-      )}
-    </nav>
   );
 }
 

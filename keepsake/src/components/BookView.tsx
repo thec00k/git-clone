@@ -36,7 +36,7 @@ import { SaveIndicator } from "./SaveIndicator";
 import { PrintView } from "./PrintView";
 import { NotesPanel } from "./NotesPanel";
 import { BookIdentityEditor } from "./BookIdentityEditor";
-import { HomeChip, RoomNavRails } from "./views/ViewShell";
+import { HomeChip } from "./views/ViewShell";
 import { DeskClutter } from "./DeskClutter";
 
 export function BookView() {
@@ -150,7 +150,6 @@ export function BookView() {
   if (!sb.book) {
     return (
       <RoomFrame header={<HomeChip />}>
-        <RoomNavRails desk />
         <div className="flex flex-1 items-center justify-center text-paper/60">No book open.</div>
       </RoomFrame>
     );
@@ -159,7 +158,6 @@ export function BookView() {
   if (!canView) {
     return (
       <RoomFrame header={<HomeChip />}>
-        <RoomNavRails desk />
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-paper/70">
           <Lock size={28} />
           <p>This book is private.</p>
@@ -328,7 +326,6 @@ export function BookView() {
         )
       }
     >
-      <RoomNavRails desk />
       <div className="ks-desk-top" data-desk-top>
         <DeskClutter
           onPrint={() => setShowPrint(true)}

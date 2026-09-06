@@ -22,42 +22,6 @@ export function HomeChip({ onClick }: { onClick?: () => void } = {}) {
 /** @deprecated Use HomeChip — the header always goes home to the desk. */
 export const BackChip = HomeChip;
 
-/** Lower side rails to turn to the map or the bookshelf. */
-export function RoomNavRails({ desk = false }: { desk?: boolean } = {}) {
-  const { goWall, goDesk } = useNav();
-  return (
-    <nav className="ks-returns" aria-label="Turn the room">
-      <button
-        type="button"
-        className="ks-return ks-return--left ks-return--map"
-        aria-label="View the corkboard map"
-        onClick={() => goWall("left")}
-      >
-        <span className="ks-return-label">Corkboard map</span>
-      </button>
-      <button
-        type="button"
-        className="ks-return ks-return--right ks-return--shelf"
-        aria-label="View the bookshelf"
-        onClick={() => goWall("right")}
-      >
-        <span className="ks-return-label">Bookshelf</span>
-      </button>
-      {desk && (
-        <button
-          type="button"
-          className="ks-return ks-return--bottom ks-return--desk"
-          aria-label="Return to the desk"
-          data-desk-tab
-          onClick={goDesk}
-        >
-          <span className="ks-return-label">Desk</span>
-        </button>
-      )}
-    </nav>
-  );
-}
-
 export function ViewShell({
   title,
   subtitle,
@@ -92,14 +56,12 @@ export function ViewShell({
         </>
       }
     >
-      <RoomNavRails />
       <div
         className={
           fill
             ? "flex min-h-0 flex-1 flex-col"
             : `mx-auto w-full max-w-4xl px-4 pb-8 ${scroll ? "overflow-y-auto" : ""}`
         }
-        style={fill ? undefined : { paddingLeft: "calc(var(--return-w) + 0.75rem)", paddingRight: "calc(var(--return-w) + 0.75rem)" }}
       >
         {children}
       </div>
