@@ -2,6 +2,9 @@ import type { HotspotId } from "./hotspots";
 
 export const ROOM_GLB = "/room/keepsake.glb";
 
+/** Sit target in the GLB. The coded placeholder chair is gone. */
+export const CHAIR_OBJECT = "ks_chair";
+
 export const HOTSPOT_OBJECT: Record<Exclude<HotspotId, "hud">, string> = {
   window: "ks_window",
   book: "ks_book",

@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { HotspotId } from "../../lib/hotspots";
-import { HOTSPOT_LABEL, ROOM_GLB, hotspotFromObjectName } from "../../lib/roomHotspots";
+import { CHAIR_OBJECT, HOTSPOT_LABEL, ROOM_GLB, hotspotFromObjectName } from "../../lib/roomHotspots";
 import type { RoomFace } from "../../lib/roomLayout";
 import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
@@ -31,10 +31,6 @@ const SEATED_VIEW = {
   position: new THREE.Vector3(-0.36, 1.52, -0.46),
   target: new THREE.Vector3(-0.5, 0.76, -1.18),
 };
-
-const CHAIR_POS: [number, number, number] = [-0.1, 0, -0.52];
-/** Desk-facing chair, yawed 45° left of the table (toward the guestbook). */
-const CHAIR_YAW = THREE.MathUtils.degToRad(45);
 
 type HotspotAction = Exclude<HotspotId, "hud">;
 
@@ -142,8 +138,8 @@ export function RoomScene3D({
             drawerOpen={shopOpen}
             onActivate={activate}
             onOpenDrawer={() => setShopOpen(true)}
+            onSit={sit}
           />
-          <DeskChair seated={seated} onSit={sit} />
           <DeskProps />
           <RoomLights phase={phase} environment={environment} />
         </Suspense>
@@ -168,6 +164,7 @@ function RoomModel({
   drawerOpen,
   onActivate,
   onOpenDrawer,
+  onSit,
 }: {
   phase: Phase;
   environment: Environment;
@@ -176,6 +173,7 @@ function RoomModel({
   drawerOpen: boolean;
   onActivate: (id: HotspotAction) => void;
   onOpenDrawer: () => void;
+  onSit: () => void;
 }) {
   const { scene } = useGLTF(ROOM_GLB);
   const cloned = useMemo(() => scene.clone(true), [scene]);
@@ -229,6 +227,7 @@ function RoomModel({
     <group>
       <primitive object={cloned} />
       <DeskDrawer scene={cloned} open={drawerOpen} />
+      <ChairSit scene={cloned} seated={seated} onSit={onSit} />
       {seated && !drawerOpen && <DrawerPrompt onOpen={onOpenDrawer} />}
       {roots.map(({ id, object }) => (
         <HotspotAnchor
@@ -438,32 +437,22 @@ function DeskProps() {
   );
 }
 
-function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
-  const oak = "#8b5a3c";
-  const dark = "#5c3a24";
+/** Sit prompt on the Blender chair. Hidden until `ks_chair` is in the GLB. */
+function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seated: boolean; onSit: () => void }) {
+  const chair = useMemo(() => scene.getObjectByName(CHAIR_OBJECT), [scene]);
+  const center = useMemo(() => {
+    if (!chair) return null;
+    const box = new THREE.Box3().setFromObject(chair);
+    const c = new THREE.Vector3();
+    box.getCenter(c);
+    return c;
+  }, [chair]);
+
+  if (!chair || !center) return null;
+
   return (
-    <group position={CHAIR_POS} rotation={[0, CHAIR_YAW, 0]}>
-      <mesh position={[0, 0.24, 0]} castShadow>
-        <boxGeometry args={[0.42, 0.05, 0.4]} />
-        <meshStandardMaterial color={oak} roughness={0.72} />
-      </mesh>
-      <mesh position={[0, 0.52, 0.17]}>
-        <boxGeometry args={[0.42, 0.5, 0.05]} />
-        <meshStandardMaterial color={oak} roughness={0.72} />
-      </mesh>
-      {[
-        [-0.17, 0.12, -0.16],
-        [0.17, 0.12, -0.16],
-        [-0.17, 0.12, 0.16],
-        [0.17, 0.12, 0.16],
-      ].map((p, i) => (
-        <mesh key={i} position={p as [number, number, number]}>
-          <boxGeometry args={[0.05, 0.24, 0.05]} />
-          <meshStandardMaterial color={dark} roughness={0.78} />
-        </mesh>
-      ))}
+    <group position={center}>
       <mesh
-        position={[0, 0.46, 0.02]}
         onClick={(e) => {
           e.stopPropagation();
           onSit();
@@ -475,11 +464,11 @@ function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
           document.body.style.cursor = "";
         }}
       >
-        <boxGeometry args={[0.46, 0.7, 0.46]} />
+        <boxGeometry args={[0.5, 0.72, 0.5]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       {!seated && (
-        <Html position={[0, 0.32, -0.02]} center occlude={false} style={{ pointerEvents: "auto" }}>
+        <Html position={[0, 0.28, 0]} center occlude={false} style={{ pointerEvents: "auto" }}>
           <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-sit-down aria-hidden="true" tabIndex={-1} onClick={onSit}>
             Sit down
           </button>
