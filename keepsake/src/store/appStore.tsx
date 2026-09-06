@@ -29,6 +29,7 @@ import { createSeed } from "../data/seed";
 import { loadState, saveState } from "../lib/storage";
 import { evaluate } from "../lib/achievements";
 import type { Progress } from "../types/app";
+import { EVERYDAY_PACK_ID, STARTING_STAMPS, packById } from "../lib/stickerPacks";
 
 interface AppContextValue {
   state: AppState;
@@ -74,6 +75,7 @@ interface AppContextValue {
   recordProgress: (patch: Partial<Progress>) => void;
   markAchievementsSeen: (ids: string[]) => void;
   recordReceipt: (id: string) => void;
+  buyStickerPack: (id: string) => "ok" | "owned" | "short";
 }
 
 function deriveArchiveTabs(archive: ArchivePhoto[], tabs?: ArchiveTab[]): ArchiveTab[] {
@@ -116,6 +118,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
               completedTour: stored.progress?.completedTour ?? false,
             },
             receipts: stored.receipts ?? {},
+            stamps: stored.stamps ?? STARTING_STAMPS,
+            ownedStickerPacks: [...new Set([EVERYDAY_PACK_ID, ...(stored.ownedStickerPacks ?? [])])],
             pinNotes: stored.pinNotes ?? [],
             archiveTabs: deriveArchiveTabs(stored.archive ?? [], stored.archiveTabs),
             books: (stored.books ?? []).map((b, i) => ({
@@ -420,6 +424,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [update],
   );
 
+  const buyStickerPack = useCallback((id: string): "ok" | "owned" | "short" => {
+    const pack = packById(id);
+    if (!pack || pack.price <= 0) return "owned";
+    let result: "ok" | "owned" | "short" = "short";
+    update((p) => {
+      if (p.ownedStickerPacks.includes(id)) {
+        result = "owned";
+        return p;
+      }
+      if (p.stamps < pack.price) {
+        result = "short";
+        return p;
+      }
+      result = "ok";
+      return {
+        ...p,
+        stamps: p.stamps - pack.price,
+        ownedStickerPacks: [...p.ownedStickerPacks, id],
+      };
+    });
+    return result;
+  }, [update]);
+
   const clearNewlyUnlocked = useCallback(() => setNewlyUnlocked([]), []);
 
   const activeBook = useMemo(
@@ -473,6 +500,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     recordProgress,
     markAchievementsSeen,
     recordReceipt,
+    buyStickerPack,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

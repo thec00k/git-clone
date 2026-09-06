@@ -9,6 +9,7 @@ import type { RoomFace } from "../../lib/roomLayout";
 import { nextFace } from "../../lib/roomLayout";
 import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
+import { StickerStore } from "../StickerStore";
 
 const FACE_VIEW: Record<RoomFace, { position: THREE.Vector3; target: THREE.Vector3 }> = {
   front: {
@@ -58,6 +59,12 @@ export function RoomScene3D({
   onGo: (view: "shelf" | "timeline" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
   const [seated, setSeated] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
+
+  const stand = () => {
+    setShopOpen(false);
+    setSeated(false);
+  };
 
   const activate = (id: HotspotAction) => {
     if (id === "window") onOpenWindow();
@@ -70,12 +77,12 @@ export function RoomScene3D({
   };
 
   const turn = (face: RoomFace) => {
-    setSeated(false);
+    stand();
     setRoomFace(face);
   };
 
   useEffect(() => {
-    if (touring) setSeated(false);
+    if (touring) stand();
   }, [touring]);
 
   useEffect(() => {
@@ -84,9 +91,14 @@ export function RoomScene3D({
       if (e.target instanceof HTMLElement && e.target.closest("input, textarea, select, [contenteditable='true']")) {
         return;
       }
+      if (e.key === "Escape" && shopOpen) {
+        e.preventDefault();
+        setShopOpen(false);
+        return;
+      }
       if (e.key === "Escape" && seated) {
         e.preventDefault();
-        setSeated(false);
+        stand();
         return;
       }
       if (e.key === "ArrowLeft") {
@@ -100,7 +112,7 @@ export function RoomScene3D({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [touring, roomFace, seated, setRoomFace]);
+  }, [touring, roomFace, seated, shopOpen, setRoomFace]);
 
   return (
     <div className="ks-room3d" data-room-face={roomFace} data-seated={seated ? "1" : "0"} aria-label="The scrapbook room">
@@ -122,7 +134,9 @@ export function RoomScene3D({
             environment={environment}
             tourFocus={tourFocus}
             seated={seated}
+            drawerOpen={shopOpen}
             onActivate={activate}
+            onOpenDrawer={() => setShopOpen(true)}
           />
           <DeskChair seated={seated} onSit={() => { setRoomFace("front"); setSeated(true); }} />
           <DeskProps />
@@ -132,10 +146,11 @@ export function RoomScene3D({
       </Canvas>
       <WallReturns face={roomFace} onTurn={turn} />
       {seated && (
-        <button type="button" className="ks-stand-up" onClick={() => setSeated(false)}>
+        <button type="button" className="ks-stand-up" onClick={stand}>
           Stand up
         </button>
       )}
+      {shopOpen && <StickerStore onClose={() => setShopOpen(false)} />}
     </div>
   );
 }
@@ -145,13 +160,17 @@ function RoomModel({
   environment,
   tourFocus,
   seated,
+  drawerOpen,
   onActivate,
+  onOpenDrawer,
 }: {
   phase: Phase;
   environment: Environment;
   tourFocus: HotspotId | null;
   seated: boolean;
+  drawerOpen: boolean;
   onActivate: (id: HotspotAction) => void;
+  onOpenDrawer: () => void;
 }) {
   const { scene } = useGLTF(ROOM_GLB);
   const cloned = useMemo(() => scene.clone(true), [scene]);
@@ -204,6 +223,8 @@ function RoomModel({
   return (
     <group>
       <primitive object={cloned} />
+      <DeskDrawer scene={cloned} open={drawerOpen} />
+      {seated && !drawerOpen && <DrawerPrompt onOpen={onOpenDrawer} />}
       {roots.map(({ id, object }) => (
         <HotspotAnchor
           key={id}
@@ -214,6 +235,48 @@ function RoomModel({
           prompt={seated && id === "book" ? "Open the scrapbook" : undefined}
         />
       ))}
+    </group>
+  );
+}
+
+const DRAWER_OPEN_Z = 0.26;
+
+function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boolean }) {
+  const drawer = useMemo(() => scene.getObjectByName("Desk_Drawer"), [scene]);
+  const restZ = useRef<number | null>(null);
+  if (drawer && restZ.current == null) restZ.current = drawer.position.z;
+
+  useFrame((_, dt) => {
+    if (!drawer || restZ.current == null) return;
+    const target = restZ.current + (open ? DRAWER_OPEN_Z : 0);
+    drawer.position.z = THREE.MathUtils.damp(drawer.position.z, target, 8, dt);
+  });
+  return null;
+}
+
+function DrawerPrompt({ onOpen }: { onOpen: () => void }) {
+  return (
+    <group position={[-0.12, 0.58, -1.08]}>
+      <mesh
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpen();
+        }}
+        onPointerOver={() => {
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          document.body.style.cursor = "";
+        }}
+      >
+        <boxGeometry args={[0.42, 0.16, 0.12]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+      <Html center occlude={false} style={{ pointerEvents: "auto" }}>
+        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-open-drawer onClick={onOpen}>
+          Open the drawer
+        </button>
+      </Html>
     </group>
   );
 }

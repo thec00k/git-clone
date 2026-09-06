@@ -27,7 +27,7 @@ import { useNav } from "../store/nav";
 import { loadImageFile } from "../lib/image";
 import { canSee, VIEW_AS_LABEL } from "../lib/permissions";
 import type { LayoutPreset } from "../lib/layout";
-import { STICKER_GLYPHS } from "../types/scrapbook";
+import { ownedStickerGlyphs } from "../lib/stickerPacks";
 import { RoomFrame } from "./RoomFrame";
 import { Spread } from "./Spread";
 import { PageFlip } from "./PageFlip";
@@ -41,7 +41,8 @@ import { DeskClutter } from "./DeskClutter";
 
 export function BookView() {
   const sb = useScrapbook();
-  const { addArchivePhoto, renameBook, setBookCover } = useApp();
+  const { addArchivePhoto, renameBook, setBookCover, state } = useApp();
+  const stickerGlyphs = ownedStickerGlyphs(state.ownedStickerPacks);
   const { viewAs, isVisitor } = useNav();
   const [turn, setTurn] = useState<{ dir: "next" | "prev" } | null>(null);
   const [showPresets, setShowPresets] = useState(false);
@@ -290,20 +291,23 @@ export function BookView() {
               </div>
             )}
             {showStickers && (
-              <div className="flex max-w-xl flex-wrap items-center justify-center gap-1 rounded-2xl bg-[rgb(28_22_16/0.92)] px-2 py-2 shadow-lg">
-                {STICKER_GLYPHS.map((g) => (
-                  <button
-                    key={g}
-                    className="ks-chip text-lg"
-                    aria-label={`Add sticker ${g}`}
-                    onClick={() => {
-                      if (targetPageId) sb.addSticker(targetPageId, g);
-                      setShowStickers(false);
-                    }}
-                  >
-                    {g}
-                  </button>
-                ))}
+              <div className="flex max-w-xl flex-col items-center gap-1.5 rounded-2xl bg-[rgb(28_22_16/0.92)] px-3 py-2 shadow-lg">
+                <div className="flex flex-wrap items-center justify-center gap-1">
+                  {stickerGlyphs.map((g) => (
+                    <button
+                      key={g}
+                      className="ks-chip text-lg"
+                      aria-label={`Add sticker ${g}`}
+                      onClick={() => {
+                        if (targetPageId) sb.addSticker(targetPageId, g);
+                        setShowStickers(false);
+                      }}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-center text-sm text-paper/50">More packs live in the desk drawer.</p>
               </div>
             )}
             <div className="ks-desk flex w-full max-w-xl flex-wrap items-center justify-center gap-2 rounded-2xl px-3 py-2" role="toolbar" aria-label="Add to the page">

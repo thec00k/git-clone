@@ -201,5 +201,7 @@ export function createSeed(): AppState {
     achievementsSeen: [],
     progress: { visitedAtNight: false, previewedAsVisitor: false, completedTour: false },
     receipts: {},
+    stamps: 12,
+    ownedStickerPacks: ["everyday"],
   };
 }

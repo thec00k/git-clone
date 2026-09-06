@@ -120,6 +120,10 @@ export interface AppState {
   achievementsSeen: string[]; // ids whose reward has been presented
   progress: Progress; // recorded events used by rules
   receipts: Record<string, number>; // curated-RNG opportunity id -> last shown at
+  /** Local drawer-shop currency. No real money. */
+  stamps: number;
+  /** Sticker pack ids the drawer has already sold you. Always includes everyday. */
+  ownedStickerPacks: string[];
 }
 
 export interface AchievementDef {

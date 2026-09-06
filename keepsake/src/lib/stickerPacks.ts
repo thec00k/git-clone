@@ -1,0 +1,79 @@
+import { STICKER_GLYPHS } from "../types/scrapbook";
+
+/** Sticker packs sold from the desk drawer. Everyday is always owned. */
+
+export interface StickerPack {
+  id: string;
+  title: string;
+  blurb: string;
+  price: number;
+  glyphs: readonly string[];
+}
+
+export const EVERYDAY_PACK_ID = "everyday";
+
+export const STICKER_PACKS: StickerPack[] = [
+  {
+    id: EVERYDAY_PACK_ID,
+    title: "Everyday",
+    blurb: "The tin that already lives in the drawer.",
+    price: 0,
+    glyphs: STICKER_GLYPHS,
+  },
+  {
+    id: "garden",
+    title: "Garden cuttings",
+    blurb: "Pressed petals and a little dirt under the nails.",
+    price: 4,
+    glyphs: ["🌸", "🌿", "🍃", "🌷", "🌼", "🦋", "🍄", "🪴"],
+  },
+  {
+    id: "post",
+    title: "Post office",
+    blurb: "Wax, twine, and things that still arrive by hand.",
+    price: 4,
+    glyphs: ["✉️", "📦", "🎀", "🏷️", "📌", "📎", "💌", "📮"],
+  },
+  {
+    id: "night",
+    title: "After dark",
+    blurb: "The hour the lamp is the only honest light.",
+    price: 5,
+    glyphs: ["🌙", "✨", "🕯️", "🦇", "🦉", "🌌", "⭐", "🛌"],
+  },
+  {
+    id: "travel",
+    title: "Ticket stubs",
+    blurb: "Maps folded wrong and kept anyway.",
+    price: 5,
+    glyphs: ["🚂", "🗺️", "🧭", "🧳", "🚲", "⛵", "🗽", "🎫"],
+  },
+  {
+    id: "kitchen",
+    title: "Sunday kitchen",
+    blurb: "Butter on the counter, something in the oven.",
+    price: 4,
+    glyphs: ["🥐", "🫖", "🍯", "🧁", "🧀", "🥖", "🍓", "🥄"],
+  },
+];
+
+export const STARTING_STAMPS = 12;
+
+export function packById(id: string): StickerPack | undefined {
+  return STICKER_PACKS.find((p) => p.id === id);
+}
+
+export function ownedStickerGlyphs(ownedPackIds: string[]): string[] {
+  const ids = new Set(ownedPackIds.includes(EVERYDAY_PACK_ID) ? ownedPackIds : [EVERYDAY_PACK_ID, ...ownedPackIds]);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const pack of STICKER_PACKS) {
+    if (!ids.has(pack.id)) continue;
+    for (const g of pack.glyphs) {
+      if (seen.has(g)) continue;
+      seen.add(g);
+      out.push(g);
+    }
+  }
+  return out;
+}
