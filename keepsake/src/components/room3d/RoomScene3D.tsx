@@ -560,7 +560,8 @@ function EyeCamera({ face, seated, touring }: { face: RoomFace; seated: boolean;
     };
     const move = (e: PointerEvent) => {
       if (!dragging.current || touringRef.current) return;
-      yaw.current -= e.movementX * LOOK_YAW;
+      // Mouse right looks right; mouse up looks up. Screen Y grows downward.
+      yaw.current += e.movementX * LOOK_YAW;
       pitch.current = THREE.MathUtils.clamp(pitch.current - e.movementY * LOOK_PITCH, PITCH_MIN, PITCH_MAX);
     };
     const up = (e: PointerEvent) => {
