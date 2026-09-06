@@ -207,7 +207,8 @@ function ResizeHandle({
   const active = useRef(false);
   const start = useRef({ x: 0, y: 0, dist: 1, w: size });
 
-  const down = (e: ReactPointerEvent<HTMLButtonElement>) => {
+  const down = (e: ReactPointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
     e.stopPropagation();
     const el = (e.currentTarget as HTMLElement).closest(".ks-el") as HTMLElement | null;
     if (!el) return;
@@ -224,24 +225,29 @@ function ResizeHandle({
     active.current = true;
   };
 
-  const move = (e: ReactPointerEvent<HTMLButtonElement>) => {
+  const move = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!active.current) return;
+    e.preventDefault();
+    e.stopPropagation();
     const dist = Math.hypot(e.clientX - start.current.x, e.clientY - start.current.y);
     onResize(clamp((start.current.w * dist) / start.current.dist, 8, 92));
   };
 
-  const up = (e: ReactPointerEvent<HTMLButtonElement>) => {
+  const up = (e: ReactPointerEvent<HTMLDivElement>) => {
     active.current = false;
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
   };
 
   return (
-    <button
-      type="button"
+    <div
       data-no-drag
       data-resize={corner}
       className={`ks-el-resize ks-el-resize--${corner}`}
+      role="slider"
       aria-label={`Resize from the ${corner} corner`}
+      aria-valuemin={8}
+      aria-valuemax={92}
+      aria-valuenow={Math.round(size)}
       title="Drag to resize"
       onPointerDown={down}
       onPointerMove={move}

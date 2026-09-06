@@ -651,6 +651,7 @@ function EyeCamera({ face, seated, touring }: { face: RoomFace; seated: boolean;
     if (host instanceof HTMLElement) {
       host.dataset.cam = `${camera.position.x.toFixed(3)},${camera.position.y.toFixed(3)},${camera.position.z.toFixed(3)}`;
       host.dataset.eye = camera.position.y.toFixed(3);
+      host.dataset.look = `${yaw.current.toFixed(3)},${pitch.current.toFixed(3)}`;
       host.dataset.walk = keys.current.f || keys.current.r ? "1" : "0";
     }
   });
