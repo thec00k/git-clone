@@ -30,9 +30,9 @@ const SEATED_VIEW = {
   target: new THREE.Vector3(-0.5, 0.76, -1.18),
 };
 
-const CHAIR_POS: [number, number, number] = [-0.22, 0, -0.52];
-/** Face the desk, then yaw 30° toward the CRT (right from the standing view). */
-const CHAIR_YAW = Math.PI - Math.PI / 6;
+const CHAIR_POS: [number, number, number] = [-0.28, 0, -0.5];
+/** Desk-facing chair, yawed 30° toward the CRT (right from the standing view). */
+const CHAIR_YAW = THREE.MathUtils.degToRad(-30);
 
 type HotspotAction = Exclude<HotspotId, "hud" | "timeline">;
 
@@ -377,7 +377,7 @@ function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
         <boxGeometry args={[0.42, 0.05, 0.4]} />
         <meshStandardMaterial color={oak} roughness={0.72} />
       </mesh>
-      <mesh position={[0, 0.52, -0.17]}>
+      <mesh position={[0, 0.52, 0.17]}>
         <boxGeometry args={[0.42, 0.5, 0.05]} />
         <meshStandardMaterial color={oak} roughness={0.72} />
       </mesh>
