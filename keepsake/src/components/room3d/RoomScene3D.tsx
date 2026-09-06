@@ -6,7 +6,6 @@ import * as THREE from "three";
 import type { HotspotId } from "../../lib/hotspots";
 import { HOTSPOT_LABEL, ROOM_GLB, hotspotFromObjectName } from "../../lib/roomHotspots";
 import type { RoomFace } from "../../lib/roomLayout";
-import { nextFace } from "../../lib/roomLayout";
 import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
 import { StickerStore } from "../StickerStore";
@@ -117,20 +116,11 @@ export function RoomScene3D({
       if (e.key === "Escape" && seated) {
         e.preventDefault();
         stand();
-        return;
-      }
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        turn(nextFace(roomFace, "left"));
-      }
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        turn(nextFace(roomFace, "right"));
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [touring, roomFace, seated, shopOpen, setRoomFace]);
+  }, [touring, seated, shopOpen]);
 
   return (
     <div className="ks-room3d" data-room-face={roomFace} data-seated={seated ? "1" : "0"} aria-label="The scrapbook room">
@@ -504,23 +494,106 @@ function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
   );
 }
 
+const ROOM_WALK = { minX: -1.7, maxX: 1.75, minZ: -1.12, maxZ: 2.28 };
+const WALK_SPEED = 1.65;
+
+function walkIntent(e: KeyboardEvent): { axis: "f" | "r"; dir: -1 | 1 } | null {
+  const code = e.code;
+  if (code === "KeyW" || e.key === "ArrowUp") return { axis: "f", dir: 1 };
+  if (code === "KeyS" || e.key === "ArrowDown") return { axis: "f", dir: -1 };
+  if (code === "KeyA" || e.key === "ArrowLeft") return { axis: "r", dir: -1 };
+  if (code === "KeyD" || e.key === "ArrowRight") return { axis: "r", dir: 1 };
+  return null;
+}
+
 function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean; touring: boolean }) {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const controls = useRef<OrbitControlsImpl>(null);
+  const keys = useRef({ f: 0, r: 0 });
+  const userMoved = useRef(false);
+  const touringRef = useRef(touring);
+  touringRef.current = touring;
   const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const view = seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face];
+
+  useEffect(() => {
+    userMoved.current = false;
+  }, [face, seated, touring]);
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (touringRef.current || seated) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target instanceof HTMLElement && e.target.closest("input, textarea, select, [contenteditable='true'], [aria-modal='true']")) {
+        return;
+      }
+      const intent = walkIntent(e);
+      if (!intent) return;
+      e.preventDefault();
+      keys.current[intent.axis] = intent.dir;
+      userMoved.current = true;
+    };
+    const up = (e: KeyboardEvent) => {
+      const intent = walkIntent(e);
+      if (!intent) return;
+      if (keys.current[intent.axis] === intent.dir) keys.current[intent.axis] = 0;
+    };
+    const clear = () => {
+      keys.current.f = 0;
+      keys.current.r = 0;
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    window.addEventListener("blur", clear);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", clear);
+    };
+  }, [seated]);
 
   useFrame((_, dt) => {
-    const view = seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face];
-    const t = reduced ? 1 : 1 - Math.pow(0.0008, dt);
-    camera.position.lerp(view.position, t);
     const ctrl = controls.current;
+    const followPreset = touring || !userMoved.current;
+
+    if (followPreset && !userMoved.current) {
+      const t = reduced || touring ? 1 : 1 - Math.pow(0.0008, dt);
+      camera.position.lerp(view.position, t);
+      if (ctrl) ctrl.target.lerp(view.target, t);
+    }
+
+    if (!touring && !seated && (keys.current.f || keys.current.r) && ctrl) {
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      forward.y = 0;
+      if (forward.lengthSq() > 1e-6) forward.normalize();
+      const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0));
+      if (right.lengthSq() > 1e-6) right.normalize();
+      const step = new THREE.Vector3()
+        .addScaledVector(forward, keys.current.f * WALK_SPEED * dt)
+        .addScaledVector(right, keys.current.r * WALK_SPEED * dt);
+      const next = camera.position.clone().add(step);
+      next.x = THREE.MathUtils.clamp(next.x, ROOM_WALK.minX, ROOM_WALK.maxX);
+      next.z = THREE.MathUtils.clamp(next.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
+      const applied = next.sub(camera.position);
+      camera.position.add(applied);
+      ctrl.target.add(applied);
+    }
+
     if (ctrl) {
-      ctrl.target.lerp(view.target, t);
-      ctrl.minDistance = seated ? 0.55 : 1.1;
-      ctrl.maxDistance = seated ? 1.8 : 3.4;
+      ctrl.minDistance = seated ? 0.45 : 0.4;
+      ctrl.maxDistance = seated ? 2.2 : 4.8;
       ctrl.update();
-    } else {
+    } else if (followPreset) {
       camera.lookAt(view.target);
+    }
+
+    const host = gl.domElement.closest(".ks-room3d");
+    if (host instanceof HTMLElement) {
+      const dist = ctrl ? camera.position.distanceTo(ctrl.target) : 0;
+      host.dataset.cam = `${camera.position.x.toFixed(3)},${camera.position.y.toFixed(3)},${camera.position.z.toFixed(3)}`;
+      host.dataset.zoom = dist.toFixed(3);
+      host.dataset.walk = keys.current.f || keys.current.r ? "1" : "0";
     }
   });
 
@@ -530,11 +603,15 @@ function FaceCamera({ face, seated, touring }: { face: RoomFace; seated: boolean
       enablePan={false}
       enableZoom={!touring}
       enableRotate={!touring}
-      minDistance={seated ? 0.55 : 1.1}
-      maxDistance={seated ? 1.8 : 3.4}
-      maxPolarAngle={seated ? Math.PI * 0.78 : Math.PI * 0.58}
-      minPolarAngle={seated ? Math.PI * 0.12 : Math.PI * 0.28}
-      target={(seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face]).target.toArray()}
+      zoomSpeed={0.85}
+      minDistance={seated ? 0.45 : 0.4}
+      maxDistance={seated ? 2.2 : 4.8}
+      maxPolarAngle={seated ? Math.PI * 0.78 : Math.PI * 0.72}
+      minPolarAngle={seated ? Math.PI * 0.12 : Math.PI * 0.18}
+      target={view.target.toArray()}
+      onStart={() => {
+        if (!touringRef.current) userMoved.current = true;
+      }}
     />
   );
 }

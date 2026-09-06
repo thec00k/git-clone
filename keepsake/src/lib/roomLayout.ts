@@ -14,7 +14,7 @@ export function roomLayoutFromSearch(search: string = typeof window === "undefin
   return "glb";
 }
 
-/** Which wall the tour (and arrow keys) should face for a given object. */
+/** Which wall the tour (and the side rails) should face for a given object. */
 export function faceForHotspot(id: HotspotId | null | undefined): RoomFace {
   if (id === "shelf") return "right";
   if (id === "map") return "left";
