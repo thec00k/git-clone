@@ -23,7 +23,14 @@ const ListenContext = createContext<ListenContextValue | null>(null);
 
 function readPreview(): boolean {
   if (typeof window === "undefined") return false;
-  if (listenPreviewFromSearch()) return true;
+  if (listenPreviewFromSearch()) {
+    try {
+      sessionStorage.setItem(LISTEN_PREVIEW_KEY, "1");
+    } catch {
+      /* private mode */
+    }
+    return true;
+  }
   try {
     return sessionStorage.getItem(LISTEN_PREVIEW_KEY) === "1";
   } catch {
