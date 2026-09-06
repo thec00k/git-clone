@@ -10,6 +10,7 @@ import { nextFace } from "../../lib/roomLayout";
 import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
 import { StickerStore } from "../StickerStore";
+import { useListen } from "../../store/listen";
 
 const FACE_VIEW: Record<RoomFace, { position: THREE.Vector3; target: THREE.Vector3 }> = {
   front: {
@@ -60,11 +61,28 @@ export function RoomScene3D({
 }) {
   const [seated, setSeated] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const { bindScene } = useListen();
 
   const stand = () => {
     setShopOpen(false);
     setSeated(false);
   };
+
+  const sit = () => {
+    setRoomFace("front");
+    setSeated(true);
+  };
+
+  useEffect(() => {
+    bindScene({
+      sit,
+      stand,
+      openDrawer: () => setShopOpen(true),
+      seated,
+      shopOpen,
+    });
+    return () => bindScene(null);
+  }, [bindScene, seated, shopOpen, setRoomFace]);
 
   const activate = (id: HotspotAction) => {
     if (id === "window") onOpenWindow();
@@ -116,6 +134,7 @@ export function RoomScene3D({
 
   return (
     <div className="ks-room3d" data-room-face={roomFace} data-seated={seated ? "1" : "0"} aria-label="The scrapbook room">
+      <div className="ks-room3d-picture" aria-hidden="true">
       <Canvas
         camera={{ fov: seated ? 38 : 42, near: 0.08, far: 40, position: FACE_VIEW.front.position.toArray() }}
         dpr={[1, 1.75]}
@@ -138,15 +157,16 @@ export function RoomScene3D({
             onActivate={activate}
             onOpenDrawer={() => setShopOpen(true)}
           />
-          <DeskChair seated={seated} onSit={() => { setRoomFace("front"); setSeated(true); }} />
+          <DeskChair seated={seated} onSit={sit} />
           <DeskProps />
           <RoomLights phase={phase} environment={environment} />
         </Suspense>
         <FaceCamera face={roomFace} seated={seated} touring={touring} />
       </Canvas>
+      </div>
       <WallReturns face={roomFace} onTurn={turn} />
       {seated && (
-        <button type="button" className="ks-stand-up" onClick={stand}>
+        <button type="button" className="ks-stand-up" aria-hidden="true" tabIndex={-1} onClick={stand}>
           Stand up
         </button>
       )}
@@ -273,7 +293,7 @@ function DrawerPrompt({ onOpen }: { onOpen: () => void }) {
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       <Html center occlude={false} style={{ pointerEvents: "auto" }}>
-        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-open-drawer onClick={onOpen}>
+        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-open-drawer aria-hidden="true" tabIndex={-1} onClick={onOpen}>
           Open the drawer
         </button>
       </Html>
@@ -346,6 +366,8 @@ function HotspotAnchor({
           type="button"
           className={`ks-hot3d${active ? " is-tour" : ""}${prompt ? " ks-hot3d--label" : ""}`}
           data-tour={id}
+          aria-hidden="true"
+          tabIndex={-1}
           aria-label={HOTSPOT_LABEL[id] ?? id}
           onClick={(e) => {
             e.stopPropagation();
@@ -473,7 +495,7 @@ function DeskChair({ seated, onSit }: { seated: boolean; onSit: () => void }) {
       </mesh>
       {!seated && (
         <Html position={[0, 0.32, -0.02]} center occlude={false} style={{ pointerEvents: "auto" }}>
-          <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-sit-down onClick={onSit}>
+          <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" data-sit-down aria-hidden="true" tabIndex={-1} onClick={onSit}>
             Sit down
           </button>
         </Html>

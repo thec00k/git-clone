@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
+import { useListen } from "../../store/listen";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { setPlaybackVolume } from "../../lib/spotify";
 import { applyPlaybackVolume } from "../../lib/spotifyPlayback";
@@ -13,6 +14,7 @@ const WEATHERS: Weather[] = ["clear", "rain", "snow"];
 export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
   const { state, environment, setEnvironment, setProfile } = useApp();
   const { startTour } = useNav();
+  const { preview, setPreview } = useListen();
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, onClose);
 
@@ -95,8 +97,24 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
           />
         </div>
 
+        <div className="mt-5 rounded-lg bg-black/20 px-3 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm text-paper/80">Let the house speak the room</span>
+            <button
+              className={`ks-tool ${preview ? "ks-tool--accent" : ""}`}
+              aria-pressed={preview}
+              onClick={() => setPreview(!preview)}
+            >
+              {preview ? "On" : "Off"}
+            </button>
+          </div>
+          <p className="mt-2 text-sm text-paper/55">
+            VoiceOver and TalkBack swipe a list of things. The 3D room stays a picture. Turn this on to see that list.
+          </p>
+        </div>
+
         <button
-          className="ks-tool mt-5 w-full justify-center"
+          className="ks-tool mt-4 w-full justify-center"
           onClick={() => {
             onClose();
             startTour();

@@ -46,6 +46,8 @@ export function RoomFlat({
           data-tour="window"
           style={HOTSPOTS.window}
           onClick={onOpenWindow}
+          aria-hidden="true"
+          tabIndex={-1}
           aria-label="Window and room settings"
         >
           <WindowPane phase={phase} weather={environment.weather} />
@@ -59,6 +61,8 @@ export function RoomFlat({
           data-tour="shelf"
           style={HOTSPOTS.shelf}
           onClick={() => onGo("shelf")}
+          aria-hidden="true"
+          tabIndex={-1}
           aria-label="Bookshelf"
         >
           <MiniShelf count={bookCount} lit={environment.shelfLit} />
@@ -69,6 +73,8 @@ export function RoomFlat({
           data-tour="map"
           style={HOTSPOTS.map}
           onClick={() => onGo("atlas")}
+          aria-hidden="true"
+          tabIndex={-1}
           aria-label="Memory map"
         >
           <div
@@ -164,6 +170,8 @@ export function DeskLayer({
         data-tour="archive"
         style={archive}
         onClick={() => onGo("archive")}
+        aria-hidden="true"
+        tabIndex={-1}
         aria-label="Filing cabinet"
       >
         <Cabinet />
@@ -174,6 +182,8 @@ export function DeskLayer({
         data-tour="book"
         style={book}
         onClick={() => onGo("book")}
+        aria-hidden="true"
+        tabIndex={-1}
         aria-label={`Open ${activeBook?.title ?? "book"}`}
       >
         <div
@@ -199,6 +209,8 @@ export function DeskLayer({
         data-tour="guestbook"
         style={guestbook}
         onClick={() => onGo("guestbook")}
+        aria-hidden="true"
+        tabIndex={-1}
         aria-label="Guest book"
       >
         <div
@@ -209,7 +221,7 @@ export function DeskLayer({
         </div>
         <span className="ks-obj-label">the guest book</span>
       </button>
-      <button className={`ks-obj${tourClass("crt")}`} data-tour="crt" style={crt} onClick={onOpenMusic} aria-label="CRT music">
+      <button className={`ks-obj${tourClass("crt")}`} data-tour="crt" style={crt} onClick={onOpenMusic} aria-hidden="true" tabIndex={-1} aria-label="CRT music">
         <CRT on={environment.musicOn} />
         <span className="ks-obj-label">{environment.musicOn ? "music: on" : "the CRT"}</span>
       </button>

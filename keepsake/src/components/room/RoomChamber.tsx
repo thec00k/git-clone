@@ -113,8 +113,9 @@ export function RoomChamber({
               data-tour="window"
               style={CHAMBER_HOTSPOTS.window}
               onClick={onOpenWindow}
+              aria-hidden="true"
+              tabIndex={-1}
               aria-label="Window and room settings"
-              tabIndex={roomFace === "front" ? 0 : -1}
             >
               <WindowPane phase={phase} weather={environment.weather} />
               <span className="ks-obj-label">the window</span>
@@ -150,8 +151,9 @@ export function RoomChamber({
               className={`ks-obj ks-wall-piece${tourClass("map")}`}
               data-tour="map"
               onClick={() => onGo("atlas")}
+              aria-hidden="true"
+              tabIndex={-1}
               aria-label="Open the memory map"
-              tabIndex={roomFace === "left" ? 0 : -1}
             >
               <CorkboardWall pins={pins} />
               <span className="ks-wall-open">Open the map</span>

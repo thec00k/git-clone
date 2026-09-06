@@ -19,6 +19,9 @@ import { RoomChamber } from "./RoomChamber";
 import { RoomScene3D } from "../room3d/RoomScene3D";
 import { WebGLGuard } from "../room3d/WebGLGuard";
 import { HomeChip } from "../views/ViewShell";
+import { RoomListen } from "./RoomListen";
+import { useListen } from "../../store/listen";
+import type { ListenId } from "../../lib/roomListen";
 
 export function Room() {
   const {
@@ -36,6 +39,7 @@ export function Room() {
     setEnvironment,
   } = useApp();
   const { go, viewAs, setViewAs, touring, tourFocus, startTour, roomFace, setRoomFace } = useNav();
+  const { scene } = useListen();
   const [envOpen, setEnvOpen] = useState(false);
   const [achOpen, setAchOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
@@ -85,9 +89,14 @@ export function Room() {
       className={`ks-room flex h-dvh flex-col overflow-hidden${layout !== "flat" ? " ks-room--chamber" : ""}`}
       data-room-layout={layout}
     >
-      <a className="ks-skip" href="#ks-main">
-        Skip to the room
-      </a>
+      <nav className="ks-skips" aria-label="Skip">
+        <a className="ks-skip" href="#ks-main">
+          Skip to the room
+        </a>
+        <a className="ks-skip" href="#ks-room-things">
+          Things in the room
+        </a>
+      </nav>
       <h1 className="sr-only">{state.profile.displayName}&rsquo;s scrapbook room</h1>
       <header
         data-tour="hud"
@@ -138,7 +147,7 @@ export function Room() {
         </div>
       </header>
 
-      <main id="ks-main" ref={sceneRef} className="ks-scene flex-1" onPointerMove={onMove}>
+      <main id="ks-main" ref={sceneRef} className="ks-scene flex-1" tabIndex={-1} onPointerMove={onMove}>
         {layout === "glb" ? (
           <WebGLGuard
             fallback={
@@ -229,7 +238,51 @@ export function Room() {
           />
         )}
 
-        <div className="pointer-events-none absolute inset-0 z-10">
+        <RoomListen
+          onAct={(id: ListenId) => {
+            if (id === "book") {
+              go("book");
+              return;
+            }
+            if (id === "window") {
+              setEnvOpen(true);
+              return;
+            }
+            if (id === "shelf") {
+              go("shelf");
+              return;
+            }
+            if (id === "archive") {
+              go("archive");
+              return;
+            }
+            if (id === "map") {
+              go("atlas");
+              return;
+            }
+            if (id === "guestbook") {
+              go("guestbook");
+              return;
+            }
+            if (id === "crt") {
+              setMusicOpen(true);
+              return;
+            }
+            if (id === "chair") {
+              scene?.sit();
+              return;
+            }
+            if (id === "drawer") {
+              scene?.openDrawer();
+              return;
+            }
+            if (id === "stand") {
+              scene?.stand();
+            }
+          }}
+        />
+
+        <div className="pointer-events-none absolute inset-0 z-10" aria-hidden="true">
           {motes.map((m, i) => (
             <span
               key={i}
