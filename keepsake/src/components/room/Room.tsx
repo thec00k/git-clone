@@ -17,6 +17,7 @@ import { PhaseBadge, phaseOf } from "./RoomFurniture";
 import { RoomFlat } from "./RoomFlat";
 import { RoomChamber } from "./RoomChamber";
 import { RoomScene3D } from "../room3d/RoomScene3D";
+import { WebGLGuard } from "../room3d/WebGLGuard";
 import { HomeChip } from "../views/ViewShell";
 
 export function Room() {
@@ -139,17 +140,51 @@ export function Room() {
 
       <main id="ks-main" ref={sceneRef} className="ks-scene flex-1" onPointerMove={onMove}>
         {layout === "glb" ? (
-          <RoomScene3D
-            roomFace={roomFace}
-            setRoomFace={setRoomFace}
-            phase={phase}
-            environment={environment}
-            tourFocus={tourFocus}
-            touring={touring}
-            onOpenWindow={() => setEnvOpen(true)}
-            onOpenMusic={() => setMusicOpen(true)}
-            onGo={go}
-          />
+          <WebGLGuard
+            fallback={
+              <RoomChamber
+                roomFace={roomFace}
+                setRoomFace={setRoomFace}
+                phase={phase}
+                environment={environment}
+                activeBook={activeBook}
+                books={state.books}
+                pins={state.pins}
+                viewAs={viewAs}
+                touring={touring}
+                tourFocus={tourFocus}
+                layer={layer}
+                onOpenWindow={() => setEnvOpen(true)}
+                onOpenMusic={() => setMusicOpen(true)}
+                onSetEnvironment={setEnvironment}
+                onGo={go}
+                onOpenBook={(id) => {
+                  setActiveBook(id);
+                  go("book");
+                }}
+                onRenameBook={(id, title) => {
+                  const book = state.books.find((b) => b.id === id);
+                  if (book) renameBook(id, title, book.subtitle);
+                }}
+                onPlaceBook={setBookShelf}
+                onNewBook={() => {
+                  addBook();
+                }}
+              />
+            }
+          >
+            <RoomScene3D
+              roomFace={roomFace}
+              setRoomFace={setRoomFace}
+              phase={phase}
+              environment={environment}
+              tourFocus={tourFocus}
+              touring={touring}
+              onOpenWindow={() => setEnvOpen(true)}
+              onOpenMusic={() => setMusicOpen(true)}
+              onGo={go}
+            />
+          </WebGLGuard>
         ) : layout === "flat" ? (
           <RoomFlat
             phase={phase}

@@ -82,7 +82,12 @@ export function RoomScene3D({
       <Canvas
         camera={{ fov: 42, near: 0.08, far: 40, position: FACE_VIEW.front.position.toArray() }}
         dpr={[1, 1.75]}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
+        gl={{
+          antialias: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          failIfMajorPerformanceCaveat: false,
+          powerPreference: "default",
+        }}
       >
         <color attach="background" args={[phase === "night" ? "#1a1410" : phase === "dusk" ? "#3a2418" : "#c4a078"]} />
         <Suspense fallback={null}>
