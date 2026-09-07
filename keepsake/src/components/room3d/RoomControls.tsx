@@ -18,7 +18,7 @@ export function RoomControls({ seated, environment, quality, setQuality, onBook,
       <button className="ks-room-primary" onClick={onBook}><BookOpen size={17} /> Open scrapbook</button>
       <button onClick={onFiles}><Archive size={17} /> Files</button>
       <button onClick={onSeat}><Armchair size={17} /> {seated ? "Stand up" : "Take a seat"}</button>
-      {seated && <button onClick={onDrawer}>Craft drawer</button>}
+      {!isVisitor && <button onClick={onDrawer}>Drawer shop</button>}
       <details className="ks-room-menu" onKeyDown={e => {
         if (e.key === "Escape") { e.currentTarget.open = false; e.currentTarget.querySelector("summary")?.focus(); }
       }}>

@@ -1,3 +1,4 @@
+import {useNav} from '../../store/nav';
 import { MemoryObjects } from './MemoryObjects';
 import { Suspense, useMemo } from "react";
 import { RoomWorldMap } from "./RoomWorldMap";
@@ -37,6 +38,7 @@ export function RoomModel({
   onToggleLamp: () => void;
   onToggleCeiling: () => void;
 }) {
+  const {isVisitor}=useNav();
   const cloned = useRoomAsset(phase, environment);
   const roots = useMemo(() => collectHotspotRoots(cloned), [cloned]);
 
@@ -59,7 +61,7 @@ export function RoomModel({
       <ChairSit scene={cloned} seated={seated} onSit={onSit} />
       <RoomDoor scene={cloned} onOpen={onOpenDoor} />
       <RoomLights phase={phase} environment={environment} scene={cloned} />
-      {seated && !drawerOpen && <DrawerPrompt scene={cloned} onOpen={onOpenDrawer} />}
+      {!isVisitor && !drawerOpen && <DrawerPrompt scene={cloned} onOpen={onOpenDrawer} />}
       {roots
         .filter(({ id }) => id !== "archive" && id !== "shelf")
         .map(({ id, object }) => (

@@ -1,3 +1,5 @@
+import {SillDecoration} from './SillDecoration';
+import {CRT_COLORS} from '../../lib/roomMusic';
 import { useCrtPlayerSlot } from '../../store/spotifyUi';
 import {DiscoveryObject} from './DiscoveryObject';
 import { useEffect, useMemo, useState, useRef } from 'react';
@@ -45,7 +47,7 @@ export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>vo
  useEffect(()=>{const palette=['#76694c','#684838','#64735c','#a1875b','#514b3a','#8b6958'];fillers.forEach((object,i)=>object.traverse(o=>{if(o instanceof THREE.Mesh){const materials=Array.isArray(o.material)?o.material:[o.material];materials.forEach(m=>{if(m instanceof THREE.MeshStandardMaterial){m.color.set(palette[i%palette.length]);m.roughness=.94;}});}}));},[fillers]);
  const sheet=scene.getObjectByName('Map_Sheet'); const mapBox=sheet?new THREE.Box3().setFromObject(sheet):null;
  return <group name="personal-memories">
-  <DiscoveryObject/>
+  <DiscoveryObject/><SillDecoration/>
   {!isVisitor&&<ShelfMemory book={{id:"blank-book",title:"Create a scrapbook",subtitle:"A new beginning",coverStyle:"forest",pages:[],visibility:"private",createdAt:0,updatedAt:0} as Scrapbook} index={0} chosen={chosen} onChoose={()=>setChosen("blank-book")} onOpen={()=>{addBook();setBookPageId(null);onBook();}}/>}
   <MemoryDisplays scene={scene}/>
   <DeskBook scene={scene}/>
@@ -62,12 +64,13 @@ function MemoryDisplays({scene}:{scene:THREE.Object3D}) {
  const {state,activeBook,environment}=useApp(); const {isVisitor}=useNav();
  const {nowPlaying}=useCrtPlayerSlot();
  const photo=isVisitor?undefined:(state.archive.find(a=>a.id===state.framePhotoId)??state.archive.find(a=>a.favorite)??state.archive[0]);
- const screen=useLettering(environment.musicProvider!=='ambient'?(nowPlaying?`${nowPlaying.paused?'PAUSED':'NOW PLAYING'}\n${nowPlaying.title}\n${nowPlaying.artist}`:`KEEPSAKE RADIO\n${environment.musicProvider==='soundcloud'?'SoundCloud':'Spotify'} · player below`):environment.musicOn?'KEEPSAKE RADIO\nWoodland ambient · playing':'KEEPSAKE RADIO\nA quiet moment', '#1a302c','#b9cba7');
+ const tint=CRT_COLORS[environment.crtColor??'green'];
+ const screen=useLettering(environment.musicProvider!=='ambient'?(nowPlaying?`${nowPlaying.paused?'PAUSED':'NOW PLAYING'}\n${nowPlaying.title}\n${nowPlaying.artist}`:`KEEPSAKE RADIO\n${environment.musicProvider==='lofi'?'Mellow Skies':environment.musicProvider==='soundcloud'?'SoundCloud':'Spotify'} · player below`):environment.musicOn?'KEEPSAKE RADIO\nWoodland ambient · playing':'KEEPSAKE RADIO\nA quiet moment', tint.background,tint.ink);
  screen.flipY=false;
  const note=useLettering('a little something\nto remember','#e9dfc4','#6b6250',false,true);
  useEffect(()=>{
   const object=scene.getObjectByName('CRT_Screen');if(!(object instanceof THREE.Mesh))return;
-  const old=object.material;const material=new THREE.MeshStandardMaterial({map:screen,emissiveMap:screen,emissive:'#ffffff',emissiveIntensity:.28,roughness:.75});object.material=material;
+  const old=object.material;const material=new THREE.MeshStandardMaterial({map:screen,emissiveMap:screen,emissive:'#ffffff',emissiveIntensity:.75,roughness:.6,toneMapped:false});object.material=material;
   return()=>{object.material=old;material.dispose();};
  },[scene,screen,activeBook?.playlistUri]);
  useEffect(()=>{
@@ -108,7 +111,23 @@ function DeskBook({scene}:{scene:THREE.Object3D}){
  const visible=activeBook&&(!isVisitor||canSee(activeBook.visibility,viewAs));
  const cover=activeBook?COVER_STYLES[activeBook.coverStyle]:COVER_STYLES.forest;
  const texture=useLettering(visible?activeBook.title+'\n'+activeBook.subtitle:'Keepsake',cover.leather,cover.ink);
- const box=useMemo(()=>{const o=scene.getObjectByName('ks_book');return o?new THREE.Box3().setFromObject(o):null;},[scene]);
- if(!box)return null;
- return <group position={[(box.min.x+box.max.x)/2,box.max.y+.002,(box.min.z+box.max.z)/2]} rotation={[-Math.PI/2,0,0]}><mesh><planeGeometry args={[(box.max.x-box.min.x)*.94,(box.max.z-box.min.z)*.94]}/><meshStandardMaterial map={texture} roughness={.9}/></mesh></group>;
+ useEffect(()=>{
+  const object=scene.getObjectByName('ks_book');if(!(object instanceof THREE.Mesh))return;
+  const oldGeometry=object.geometry;const oldMaterial=object.material;const geometry=oldGeometry.clone();
+  const position=geometry.getAttribute('position');const normal=geometry.getAttribute('normal');const uv=geometry.getAttribute('uv');const index=geometry.index;
+  if(!normal||!uv||!index){geometry.dispose();return;}
+  const top:number[]=[];for(let i=0;i<position.count;i++)if(normal.getY(i)>.99)top.push(i);
+  const points=top.map(i=>new THREE.Vector3().fromBufferAttribute(position,i));
+  if(points.length<4){geometry.dispose();return;}
+  const center=points.reduce((c,p)=>c.add(p),new THREE.Vector3()).divideScalar(points.length);
+  const edges=points.slice(1).map(p=>p.clone().sub(points[0])).filter(e=>e.lengthSq()>1e-8).sort((a,b)=>a.lengthSq()-b.lengthSq());
+  const u=edges[0].clone().normalize();if(u.x<0)u.negate();const v=u.clone().cross(new THREE.Vector3(0,1,0)).normalize();
+  const width=Math.max(...points.map(p=>Math.abs(p.clone().sub(center).dot(u))))*2;const depth=Math.max(...points.map(p=>Math.abs(p.clone().sub(center).dot(v))))*2;
+  top.forEach(i=>{const p=new THREE.Vector3().fromBufferAttribute(position,i).sub(center);uv.setXY(i,.5+p.dot(u)/width,.5-p.dot(v)/depth);});uv.needsUpdate=true;
+  geometry.clearGroups();let groupStart=0;let materialIndex=normal.getY(index.getX(0))>.99?0:1;for(let i=3;i<=index.count;i+=3){const next=i<index.count?(normal.getY(index.getX(i))>.99?0:1):-1;if(next!==materialIndex){geometry.addGroup(groupStart,i-groupStart,materialIndex);groupStart=i;materialIndex=next;}}
+  const face=new THREE.MeshStandardMaterial({map:texture,roughness:.9});const sides=new THREE.MeshStandardMaterial({color:cover.leather,roughness:.9});
+  object.geometry=geometry;object.material=[face,sides];
+  return()=>{object.geometry=oldGeometry;object.material=oldMaterial;geometry.dispose();face.dispose();sides.dispose();};
+ },[scene,texture,cover.leather]);
+ return null;
 }

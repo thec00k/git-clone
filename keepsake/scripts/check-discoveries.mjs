@@ -31,3 +31,6 @@ guestRoom.discoveries={...discoveryState(guestRoom),guestNotesOnDesk:false,entri
 guestRoom.discoveries.entries=[postcard];assert.deepEqual(parseRoomBackup(serializeRoom(guestRoom)),guestRoom,'guest attribution and owner settings survive backups');
 guestRoom.discoveries.entries=[{...postcard,keptAt:now}];assert.notEqual(nextDiscovery(guestRoom,now,()=>.1)?.guestEntryId,'friend-1','guest message delivered once');
 console.log('Guest surprises: chance, owner setting, attribution, persistence and no repeats passed');
+const cosmeticsRoom={...s,roomDecor:{owned:['fox'],sillItem:'fox'},environment:{...s.environment,entryMusic:'mellow',crtColor:'pink'}};
+assert.deepEqual(parseRoomBackup(serializeRoom(cosmeticsRoom)),cosmeticsRoom,'room shop inventory, entry music and CRT color survive backups');
+assert.throws(()=>parseRoomBackup(serializeRoom({...cosmeticsRoom,roomDecor:{owned:['fox'],sillItem:'bird'}})),'cannot import an unowned equipped decoration');

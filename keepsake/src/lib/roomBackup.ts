@@ -1,3 +1,4 @@
+import {ROOM_GOODS} from './roomShop.ts';
 import {soundCloudUrl} from './soundcloud.ts';
 import type { AppState } from '../types/app';
 import {PLACES,REWARDS} from './discoveries.ts';
@@ -32,9 +33,12 @@ export function parseRoomBackup(text:string):AppState{
  ensure(object(s.achievementsAt)&&Object.values(s.achievementsAt).every(number)&&object(s.receipts)&&Object.values(s.receipts).every(number));
  ensure(object(s.progress)&&['visitedAtNight','previewedAsVisitor','completedTour'].every(k=>typeof s.progress ==='object'&&typeof (s.progress as RecordValue)[k]==='boolean'));
  const e=s.environment;ensure(object(e)&&['auto','day','dusk','night'].includes(e.timeMode as string)&&['spring','summer','autumn','winter'].includes(e.season as string)&&['clear','rain','snow'].includes(e.weather as string)&&['ambient','spotify','lofi','soundcloud'].includes(e.musicProvider as string));
+ ensure(e.entryMusic===undefined||['off','mellow','spotify','soundcloud'].includes(e.entryMusic as string));
+ ensure(e.crtColor===undefined||['blue','green','purple','pink','orange','red'].includes(e.crtColor as string));
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
  ensure(['lampOn','ceilingOn','shelfLit','musicOn','pinsLocked'].every(k=>typeof e[k]==='boolean')&&['volume','ambienceVolume'].every(k=>number(e[k])&&(e[k] as number)>=0&&(e[k] as number)<=1));
  ensure(s.latestPrint===undefined || object(s.latestPrint)&&image(s.latestPrint.src)&&number(s.latestPrint.printedAt));
+ ensure(s.roomDecor===undefined||object(s.roomDecor)&&strings(s.roomDecor.owned)&&(s.roomDecor.owned as string[]).every(id=>ROOM_GOODS.some(g=>g.id===id))&&new Set(s.roomDecor.owned as string[]).size===(s.roomDecor.owned as string[]).length&&(s.roomDecor.sillItem===undefined||string(s.roomDecor.sillItem)&&(s.roomDecor.owned as string[]).includes(s.roomDecor.sillItem as string)));
  ensure(s.framePhotoId===undefined||string(s.framePhotoId));
  ensure(s.achievementBaseline===undefined||object(s.achievementBaseline)&&['elements','books','pins','guests'].every(k=>strings((s.achievementBaseline as RecordValue)[k])));
  ensure(s.discoveries===undefined||object(s.discoveries)&&['quiet','occasional','off'].includes(s.discoveries.frequency as string)&&typeof s.discoveries.hints==='boolean'&&(s.discoveries.guestNotesOnDesk===undefined||typeof s.discoveries.guestNotesOnDesk==='boolean')&&['lastFoundAt','lastVisitAt'].every(k=>s.discoveries&&((s.discoveries as RecordValue)[k]===undefined||number((s.discoveries as RecordValue)[k])))&&records(s.discoveries.entries,d=>string(d.id)&&string(d.title)&&string(d.text)&&PLACES.some(p=>p.id===d.location)&&number(d.appearedAt)&&['foundAt','readAt','keptAt'].every(k=>d[k]===undefined||number(d[k]))&&['bookId','pageId','story','author','guestEntryId'].every(k=>d[k]===undefined||string(d[k]))&&(d.delivery===undefined||['desk','book'].includes(d.delivery as string))&&(d.reward===undefined||string(d.reward)&&Object.hasOwn(REWARDS,d.reward))));

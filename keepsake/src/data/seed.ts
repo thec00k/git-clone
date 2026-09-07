@@ -163,8 +163,11 @@ export function createSeed(): AppState {
     archiveTabs,
     environment: {
       ...TIDY_ROOM,
-      musicOn: false,
-      musicProvider: "ambient",
+      musicOn: true,
+      entryMusic: "mellow",
+      crtColor: "green",
+
+      musicProvider: "lofi",
       volume: 0.5,
       ambienceVolume: 0.4,
     },

@@ -1,3 +1,5 @@
+import {useNav} from '../store/nav';
+import {RoomShopGoods,ShopRoomColors} from './RoomShopGoods';
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
@@ -5,11 +7,13 @@ import { EVERYDAY_PACK_ID, STICKER_PACKS } from "../lib/stickerPacks";
 import { useApp } from "../store/appStore";
 
 export function StickerStore({ onClose }: { onClose: () => void }) {
-  const { state, buyStickerPack } = useApp();
+  const { state, buyStickerPack } = useApp(); const {isVisitor}=useNav();
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, onClose);
+  const [tab,setTab]=useState('stickers');
   const [note, setNote] = useState<string | null>(null);
 
+  if(isVisitor)return null;
   return (
     <div className="ks-sticker-shop" role="presentation" onClick={onClose}>
       <div
@@ -17,7 +21,7 @@ export function StickerStore({ onClose }: { onClose: () => void }) {
         className="ks-sticker-shop-panel ks-panel"
         role="dialog"
         aria-modal="true"
-        aria-label="Sticker pack drawer"
+        aria-label="The drawer mini shop"
         data-sticker-store
         onClick={(e) => e.stopPropagation()}
       >
@@ -25,7 +29,7 @@ export function StickerStore({ onClose }: { onClose: () => void }) {
           <div>
             <p className="font-display text-xl text-paper">The drawer</p>
             <p className="ks-caption text-paper/70" style={{ fontSize: "1.05rem" }}>
-              little packs, paid in stamps
+              little treasures, paid in stamps
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -43,7 +47,8 @@ export function StickerStore({ onClose }: { onClose: () => void }) {
             {note}
           </p>
         )}
-        <ul className="ks-sticker-shop-list">
+        <div className="flex gap-2 mb-4" role="group" aria-label="Shop categories">{[['stickers','Sticker packs'],['sill','Windowsill'],['colors','Room colors']].map(([id,label])=><button key={id} className="ks-tool" aria-pressed={tab===id} onClick={()=>setTab(id)}>{label}</button>)}</div>
+        {tab==='sill'?<RoomShopGoods/>:tab==='colors'?<ShopRoomColors/>:<ul className="ks-sticker-shop-list">
           {STICKER_PACKS.filter((p) => p.id !== EVERYDAY_PACK_ID).map((pack) => {
             const owned = state.ownedStickerPacks.includes(pack.id);
             const short = !owned && state.stamps < pack.price;
@@ -75,7 +80,7 @@ export function StickerStore({ onClose }: { onClose: () => void }) {
               </li>
             );
           })}
-        </ul>
+        </ul>}
       </div>
     </div>
   );

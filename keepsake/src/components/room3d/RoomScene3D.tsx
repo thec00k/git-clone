@@ -43,7 +43,7 @@ export function RoomScene3D({
   onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
   const quality=environment.roomQuality??"balanced";
-  const {discoveryOpen}=useNav();const [tabVisible,setTabVisible]=useState(!document.hidden);
+  const {discoveryOpen,isVisitor}=useNav();const [tabVisible,setTabVisible]=useState(!document.hidden);
   useEffect(()=>{const change=()=>setTabVisible(!document.hidden);document.addEventListener('visibilitychange',change);return()=>document.removeEventListener('visibilitychange',change);},[]);
   const setQuality=(value:RoomQuality)=>setEnvironment({roomQuality:value});
   const [viewRevision, setViewRevision] = useState(0);
@@ -68,7 +68,7 @@ export function RoomScene3D({
     setReading(false);setSeated(true);
   }, [setRoomFace]);
 
-  const openCraft=useCallback(()=>{playRoomSound("drawer",environment.ambienceVolume);setShopOpen(true);},[environment.ambienceVolume]);
+  const openCraft=useCallback(()=>{if(isVisitor)return;playRoomSound("drawer",environment.ambienceVolume);setShopOpen(true);},[environment.ambienceVolume,isVisitor]);
   const toggleLamp = useCallback(() => setEnvironment({ lampOn: !environment.lampOn }), [setEnvironment, environment.lampOn]);
   const toggleCeiling = useCallback(() => setEnvironment({ ceilingOn: environment.ceilingOn === false }), [setEnvironment, environment.ceilingOn]);
 

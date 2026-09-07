@@ -25,6 +25,7 @@ export function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boole
   useFrame((_, dt) => {
     if (!drawer) return;
     if (restZ.current == null) restZ.current = drawer.position.z;
+    drawer.userData.ksDrawerRestZ=restZ.current;
     const target = restZ.current + (open ? DRAWER_OPEN_Z : 0);
     drawer.position.z = reduced ? target : THREE.MathUtils.damp(drawer.position.z, target, 8, dt);
   });
@@ -64,6 +65,7 @@ export function ArchiveCabinet({
   useFrame((_, dt) => {
     if (drawer) {
       if (restZ.current == null) restZ.current = drawer.position.z;
+    drawer.userData.ksDrawerRestZ=restZ.current;
       const target = restZ.current + (open ? ARCHIVE_DRAWER_OPEN_Z : 0);
       drawer.position.z = reduced ? target : THREE.MathUtils.damp(drawer.position.z, target, 7, dt);
     }
@@ -155,7 +157,7 @@ export function ArchiveCabinet({
 export function DrawerPrompt({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void }) {
   const at = useMemo(() => {
     const desk = measureDesk(scene);
-    return new THREE.Vector3((desk.minX + desk.maxX) / 2, desk.y - 0.28, desk.maxZ + 0.04);
+    const drawer=scene.getObjectByName(DESK_DRAWER);if(drawer){const b=new THREE.Box3().setFromObject(drawer);return new THREE.Vector3((b.min.x+b.max.x)/2,(b.min.y+b.max.y)/2,b.max.z-(drawer.position.z-(drawer.userData.ksDrawerRestZ??drawer.position.z))+.015);}return new THREE.Vector3((desk.minX + desk.maxX) / 2, desk.y - 0.1, desk.maxZ + 0.04);
   }, [scene]);
   return (
     <group position={at.toArray()}>
@@ -175,8 +177,8 @@ export function DrawerPrompt({ scene, onOpen }: { scene: THREE.Object3D; onOpen:
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       <FacedHtml point={at}>
-        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" aria-label="Open craft drawer" data-open-drawer aria-hidden="true" tabIndex={-1} onClick={onOpen}>
-          Open the drawer
+        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" aria-label="Open desk drawer shop" data-open-drawer onClick={onOpen}>
+          Open drawer · shop
         </button>
       </FacedHtml>
     </group>
@@ -580,7 +582,3 @@ export function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seat
 }
 
 /** Stay inside the plaster — no walking through walls, floor, or the desk. */
-
-
-
-

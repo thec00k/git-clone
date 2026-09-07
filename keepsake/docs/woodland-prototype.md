@@ -91,3 +91,27 @@ Browser checks: physical letter opens; unread letter persists through reload; ke
 
 Additional browser verification: guestbook desk toggle switches the physical surprise to an open book; its message dialog retains the friend's name; saving and reloading retains the correspondence entry. Paper MP3 decodes successfully (1.094 seconds). SoundCloud widget loads metadata from a public playlist. Mellow Skies remains an opt-in taste candidate, not the default room music. Full SoundCloud OAuth has not been implemented or represented as connected.
 SoundCloud final control check: the public Mellow Skies playlist advanced from Warm Horizon to Dancing Dandelions and updated the room metadata; Stop left the room intact with no browser errors. An iframe teardown error discovered during verification was fixed by guarding late callbacks and detached-widget cleanup.
+
+## Room entry music and CRT colors
+
+New rooms default to Purrple Cat's Mellow Skies. Existing rooms without an entry preference start silently. The CRT saves an entry choice: Mellow Skies, off, the active book's Spotify playlist, or the saved SoundCloud selection. It is applied when the site opens; moving between editor and room within one visit preserves playback. The album selection does not overwrite the user's custom SoundCloud URL. Browser autoplay is attempted with a single first-interaction retry and explicit Play controls; provider/browser restrictions still apply.
+
+CRT screen emission increased from 0.28 to 0.75, with six coordinated screen/background colors. Pink uses a brighter magenta background and pink text to distinguish it from the deeper red preset.
+
+## Proposed next backend slice (not implemented)
+
+Shared scrapbooks: signed-in accounts, invite-only owner/editor/viewer roles, one shared book record, live element-level edits, conflict handling, presence, and version recovery. Photo access must follow book permissions. Offline edits need a queue and merge policy; browser-only copies must never be labeled live shared books.
+
+Visitor theme song: owner selects a public music URL as room metadata; visitors can mute/opt out, with first-interaction playback when browsers require it. Do not share the owner's provider credentials. Real room visits and theme-song delivery depend on the same account/room backend. No public or cross-device sharing is currently implemented.
+
+Suggested follow-on priorities after this pass: implement the account/shared-book foundation; preserve camera position on editor return; refine music transition fades and loading/error feedback. Treat these as proposals, not automatic authorization to start them.
+
+Verified automatic progression with the real SoundCloud player: seeking to the final second of Warm Horizon resulted in Dancing Dandelions playing automatically. Reload retained the pink screen selection and applied the Mellow Skies entry preference. A full first-visit browser autoplay guarantee is not possible; native Play controls and the first-interaction retry remain available.
+
+The desk book now uses its original cover mesh with a title texture mapped to the rotated face, replacing the detached bounding-box overlay. Page geometry stays unchanged. Cover sides match the chosen leather color.
+
+## Drawer mini shop
+
+The desk drawer shop can be opened from its physical handle or the room toolbar without taking a seat. Opening/closing uses the existing drawer animation. Categories: existing sticker packs; a woodland fern, clay fox, brass bird and flower vase for the sill; included CRT colors. Purchases use existing local stamps, are idempotent, and immediately equip the item. Only one sill accent is displayed at a time; cactus remains. Owned decorations can be swapped or stored at no additional cost. Inventory, active decoration and remaining stamps persist in backups. Visitors cannot purchase.
+
+Verified a four-stamp fox purchase, ownership of the previous bird, and free re-placement through state tests. New tests cover duplicate buys, insufficient balance and unowned placement. The starting stamp balance is finite; a milestone-based way to earn more is a suggested next step, not implemented in this pass.

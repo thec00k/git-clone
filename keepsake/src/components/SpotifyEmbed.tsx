@@ -1,8 +1,9 @@
+import {startWithGesture} from '../lib/musicAutoplay';
 import {useEffect,useRef,useState} from 'react';
 import {useCrtPlayerSlot} from '../store/spotifyUi';
 import {getAccessToken} from '../lib/spotify';
 type PlaybackEvent={data:{playingURI?:string;isPaused?:boolean}};
-type Controller={togglePlay:()=>void;destroy:()=>void;addListener:(name:string,fn:(e:PlaybackEvent)=>void)=>void};
+type Controller={play:()=>void;togglePlay:()=>void;destroy:()=>void;addListener:(name:string,fn:(e:PlaybackEvent)=>void)=>void};
 type IframeApi={createController:(el:HTMLElement,options:{uri:string;width:number;height:number},callback:(c:Controller)=>void)=>void};
 let apiPromise:Promise<IframeApi>|null=null;
 function iframeApi(){
@@ -27,14 +28,14 @@ export async function trackLabel(uri:string){
 }
 export function SpotifyEmbed({id,height}:{id:string;height:number}){
  const root=useRef<HTMLDivElement>(null);const {setNowPlaying,setControls}=useCrtPlayerSlot();const [fallback,setFallback]=useState(false);
- useEffect(()=>{let live=true;let controller:Controller|undefined;let currentUri='';let paused=true;const host=root.current!;
+ useEffect(()=>{let live=true;let controller:Controller|undefined;let cancelStart=()=>{};let currentUri='';let paused=true;const host=root.current!;
   setNowPlaying(null);setFallback(false);
-  const update=(e:PlaybackEvent)=>{if(!live)return;paused=e.data.isPaused??false;const uri=e.data.playingURI;if(!uri)return;
+  const update=(e:PlaybackEvent)=>{if(!live)return;paused=e.data.isPaused??false;if(!paused)cancelStart();const uri=e.data.playingURI;if(!uri)return;
    if(uri===currentUri){setNowPlaying(p=>p?{...p,paused}:p);return;}currentUri=uri;setNowPlaying(null);
    void trackLabel(uri).then(label=>{if(live&&currentUri===uri&&label)setNowPlaying({...label,paused});}).catch(()=>{if(live&&currentUri===uri)setNowPlaying(null);});
   };
-  void iframeApi().then(api=>{if(!live)return;const mount=document.createElement('div');host.append(mount);api.createController(mount,{uri:`spotify:playlist:${id}`,width:Math.round(host.getBoundingClientRect().width)||350,height:Number(host.dataset.height)||152},c=>{if(!live){c.destroy();return;}controller=c;setControls({toggle:()=>c.togglePlay()});c.addListener('playback_update',update);c.addListener('playback_started',update);const frame=host.querySelector('iframe');if(frame){frame.title='Spotify player';frame.style.width='100%';frame.height=host.dataset.height??'152';}});}).catch(error=>{if(live){console.warn("Spotify live controller unavailable",error);host.replaceChildren();setFallback(true);}});
-  return()=>{live=false;controller?.destroy();host.replaceChildren();setNowPlaying(null);setControls(null);};
+  void iframeApi().then(api=>{if(!live)return;const mount=document.createElement('div');host.append(mount);api.createController(mount,{uri:`spotify:playlist:${id}`,width:Math.round(host.getBoundingClientRect().width)||350,height:Number(host.dataset.height)||152},c=>{if(!live){c.destroy();return;}controller=c;c.addListener('ready',()=>{if(live)cancelStart=startWithGesture(()=>c.play());});setControls({toggle:()=>c.togglePlay()});c.addListener('playback_update',update);c.addListener('playback_started',update);const frame=host.querySelector('iframe');if(frame){frame.title='Spotify player';frame.style.width='100%';frame.height=host.dataset.height??'152';}});}).catch(error=>{if(live){console.warn("Spotify live controller unavailable",error);host.replaceChildren();setFallback(true);}});
+  return()=>{live=false;cancelStart();controller?.destroy();host.replaceChildren();setNowPlaying(null);setControls(null);};
  },[id,setNowPlaying,setControls]);
  useEffect(()=>{const frame=root.current?.querySelector('iframe');if(frame)frame.height=String(height);},[height,fallback]);
  return <><div ref={root} data-height={height}/>{fallback&&<iframe title="Spotify player" src={`https://open.spotify.com/embed/playlist/${id}?theme=0`} width="100%" height={height} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"/>}</>;

@@ -1,3 +1,4 @@
+import {musicOnEntry} from '../lib/roomMusic';
 import {
   createContext,
   useCallback,
@@ -142,7 +143,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         : createSeed();
       if(!initial.achievementBaseline)initial.achievementBaseline=baseline(initial);
-      setState(initial);
+      setState(musicOnEntry(initial));
       loadedRef.current = true;
     })();
     return () => {

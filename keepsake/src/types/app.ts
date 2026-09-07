@@ -44,6 +44,8 @@ export interface Environment {
   musicOn: boolean;
   musicProvider: MusicProvider;
   soundCloudUrl?: string;
+  entryMusic?: "off" | "mellow" | "spotify" | "soundcloud";
+  crtColor?: "blue" | "green" | "purple" | "pink" | "orange" | "red";
   volume: number; // 0..1
   ambienceVolume: number; // 0..1
   /** When true, map pins cannot be dragged (click still opens edit). */
@@ -129,6 +131,7 @@ export interface AppState {
   archive: ArchivePhoto[];
   archiveTabs: ArchiveTab[];
   environment: Environment;
+  roomDecor?: {owned:string[];sillItem?:string};
   guestbook: GuestEntry[];
   notes: PageNote[];
   pinNotes: PinNote[];
