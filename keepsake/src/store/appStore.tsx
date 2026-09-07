@@ -28,6 +28,7 @@ import { uid } from "../lib/id";
 import { createSeed } from "../data/seed";
 import { loadState, saveState } from "../lib/storage";
 import { evaluate } from "../lib/achievements";
+import {baseline} from '../lib/discoveries';
 import type { Progress } from "../types/app";
 import { EVERYDAY_PACK_ID, STARTING_STAMPS, packById } from "../lib/stickerPacks";
 
@@ -64,7 +65,7 @@ interface AppContextValue {
   flushSave: () => Promise<void>;
   restoreRoom: (state: AppState) => Promise<void>;
 
-  addGuestEntry: (author: string, message: string) => void;
+  addGuestEntry: (author: string, message: string,deskCopy?:boolean) => void;
   addNote: (bookId: string, pageId: string, author: string, message: string) => void;
   approveNote: (id: string) => void;
   deleteNote: (id: string) => void;
@@ -123,6 +124,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             achievementsAt: stored.achievementsAt ?? {},
             achievementsSeen: stored.achievementsSeen ?? [],
             progress: {
+              ...stored.progress,
               visitedAtNight: stored.progress?.visitedAtNight ?? false,
               previewedAsVisitor: stored.progress?.previewedAsVisitor ?? false,
               completedTour: stored.progress?.completedTour ?? false,
@@ -139,6 +141,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             })),
           }
         : createSeed();
+      if(!initial.achievementBaseline)initial.achievementBaseline=baseline(initial);
       setState(initial);
       loadedRef.current = true;
     })();
@@ -175,6 +178,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [state]);
 
   const restoreRoom = useCallback(async (next: AppState) => {
+    next={...next,achievementBaseline:next.achievementBaseline??baseline(next)};
     window.clearTimeout(saveTimer.current);
     await saveState(next);
     stateRef.current=next;setState(next);setNewlyUnlocked([]);setSaveStatus('saved');
@@ -345,8 +349,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addGuestEntry = useCallback(
-    (author: string, message: string) =>
-      update((p) => ({ ...p, guestbook: [{ id: uid("g"), author, message, createdAt: Date.now() }, ...p.guestbook] })),
+    (author: string, message: string,deskCopy=false) =>
+      update((p) => ({ ...p, guestbook: [{ id: uid("g"), author, message,deskCopy,createdAt: Date.now() }, ...p.guestbook] })),
     [update],
   );
 

@@ -66,7 +66,7 @@ export function RoomLights({
     <>
       <ambientLight ref={ambientRef} intensity={.25} color="#fff4e6" />
       <hemisphereLight ref={skyRef} args={["#bac4ba", "#3f4931", .4]} />
-      <directionalLight position={windowSun.toArray()} ref={sunRef} intensity={1} color="#ffe6b8" castShadow shadow-mapSize={[1024,1024]} shadow-bias={-.001} shadow-normalBias={.025} />
+      <directionalLight position={windowSun.toArray()} ref={sunRef} intensity={1} color="#ffe6b8" castShadow shadow-mapSize={[2048,2048]} shadow-camera-near={.1} shadow-camera-far={12} shadow-camera-left={-4} shadow-camera-right={4} shadow-camera-top={4} shadow-camera-bottom={-4} shadow-bias={-.00008} shadow-normalBias={.003} />
       {(
         <pointLight ref={ceilingRef} position={ceiling.toArray()} intensity={3.2} color="#fff6ea" distance={9} />
       )}

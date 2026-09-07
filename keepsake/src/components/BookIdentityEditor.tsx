@@ -19,19 +19,20 @@ export function BookIdentityEditor({
 }) {
   const cover = COVER_STYLES[coverStyle];
   return (
-    <div className="space-y-2">
+    <div className="ks-identity-layout"><div className="ks-cover-preview" style={{backgroundColor:cover.leather,color:cover.ink}} aria-label="Scrapbook cover preview"><strong>{title||'Your title here'}</strong><span>{subtitle}</span></div><div className="space-y-3">
       <label className="block text-sm text-paper/60">
         Title
         <input
           name="bookTitle"
           aria-label="Book title"
           className="mt-1 w-full rounded bg-black/25 px-2 py-1.5 text-sm text-paper outline-none"
+          maxLength={120}
           value={title}
           onChange={(e) => onTitle(e.target.value)}
         />
       </label>
       <label className="block text-sm text-paper/60">
-        Title-page line
+        Subtitle · optional
         <input
           name="bookSubtitle"
           aria-label="Book subtitle"
@@ -69,5 +70,5 @@ export function BookIdentityEditor({
         </div>
       </div>
     </div>
-  );
+  </div>);
 }

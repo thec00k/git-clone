@@ -4,7 +4,7 @@
  * licensing as a risk; synthesised audio side-steps it for now). The CRT toggles
  * it; volume follows the room settings.
  *
- * Page-turn rustle is the same idea: a short filtered-noise flap, not a file.
+ * Page turns use the licensed paper-slide recording; a soft noise fallback covers failed loads.
  */
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -92,52 +92,30 @@ function stop() {
   running = false;
 }
 
-/** A short paper-flap for the page-turn. Honour reduced-motion as "no sfx". */
-export function playPageTurn(volume = 0.5) {
-  if(volume<=0)return;
-  if (typeof window === "undefined") return;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const c = getCtx();
-  void c.resume();
-  const now = c.currentTime;
-  const dur = 0.32;
-  const frames = Math.floor(c.sampleRate * dur);
-  const buffer = c.createBuffer(1, frames, c.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < frames; i++) {
-    const t = i / frames;
-    const env = Math.pow(1 - t, 1.35) * Math.min(1, t * 18);
-    data[i] = (Math.random() * 2 - 1) * env;
-  }
-  const src = c.createBufferSource();
-  src.buffer = buffer;
-  const filter = c.createBiquadFilter();
-  filter.type = "bandpass";
-  filter.frequency.setValueAtTime(900, now);
-  filter.frequency.exponentialRampToValueAtTime(2400, now + 0.12);
-  filter.Q.value = 0.85;
-  const gain = c.createGain();
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(Math.max(0.001, volume * 0.42), now + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-  src.connect(filter).connect(gain).connect(c.destination);
-  src.start(now);
-  src.stop(now + dur + 0.02);
-
-  // A second, drier "leaf slap" as the page settles.
-  const slap = c.createOscillator();
-  slap.type = "triangle";
-  slap.frequency.setValueAtTime(180, now + 0.08);
-  slap.frequency.exponentialRampToValueAtTime(70, now + 0.22);
-  const slapGain = c.createGain();
-  slapGain.gain.setValueAtTime(0.0001, now + 0.08);
-  slapGain.gain.exponentialRampToValueAtTime(volume * 0.08, now + 0.1);
-  slapGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
-  slap.connect(slapGain).connect(c.destination);
-  slap.start(now + 0.08);
-  slap.stop(now + 0.28);
+/** Recorded paper sliding, with a soft noise-only fallback for offline first use. */
+let paperBytes:Promise<ArrayBuffer>|null=null;
+let paperDecoded:Promise<AudioBuffer>|null=null;
+export function preloadPageSound(){
+ if(!paperBytes)paperBytes=fetch('/audio/paper-slide.mp3').then(r=>{if(!r.ok)throw Error('Paper audio unavailable');return r.arrayBuffer();}).catch(error=>{paperBytes=null;throw error;});
+ return paperBytes;
 }
-
+export function playPageTurn(volume=0.5){
+ if(volume<=0||typeof window==='undefined'||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const c=getCtx();void c.resume();const requested=performance.now();
+ if(!paperDecoded)paperDecoded=preloadPageSound().then(bytes=>c.decodeAudioData(bytes.slice(0))).catch(error=>{paperDecoded=null;throw error;});
+ void paperDecoded.then(buffer=>{
+  if(performance.now()-requested>500)return;
+  const now=c.currentTime;const src=c.createBufferSource();src.buffer=buffer;src.playbackRate.value=.96;
+  const duration=buffer.duration/.96;const gain=c.createGain();const filter=c.createBiquadFilter();filter.type='lowpass';filter.frequency.value=4800;filter.Q.value=.5;
+  gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(Math.min(1,volume)*.32,now+.1);gain.gain.setValueAtTime(Math.min(1,volume)*.32,now+Math.max(.1,duration-.25));gain.gain.linearRampToValueAtTime(0,now+duration);
+  src.connect(filter).connect(gain).connect(c.destination);src.start(now);src.onended=()=>{src.disconnect();filter.disconnect();gain.disconnect();};
+ }).catch(()=>{
+  if(performance.now()-requested>500)return;
+  const duration=.62,buffer=c.createBuffer(1,Math.floor(c.sampleRate*duration),c.sampleRate),data=buffer.getChannelData(0);let colored=0;
+  for(let i=0;i<data.length;i++){const t=i/(data.length-1);colored=.78*colored+.22*(Math.random()*2-1);data[i]=colored*Math.pow(Math.sin(Math.PI*t),1.8);}
+  const source=c.createBufferSource();source.buffer=buffer;const gain=c.createGain();gain.gain.value=Math.min(1,volume)*.22;source.connect(gain).connect(c.destination);source.start();source.onended=()=>{source.disconnect();gain.disconnect();};
+ });
+}
 /** Short, restrained room foley. Every sound obeys the ambience volume. */
 export function playRoomSound(kind:'wood'|'drawer', volume:number){
  if(volume<=0)return;

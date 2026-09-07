@@ -11,7 +11,7 @@ export function RoomControls({ seated, environment, quality, setQuality, onBook,
   onBook: () => void; onFiles: () => void; onSeat: () => void; onMusic: () => void;
   onLamp: () => void; onCeiling: () => void; onLook: (face: RoomFace) => void; onDrawer: () => void;
 }) {
-  const { setPrinterOpen, isVisitor } = useNav();
+  const { setPrinterOpen, isVisitor,setDiscoveryOpen } = useNav();
   return <>
     <div className="ks-room-name"><span>YOUR QUIET CORNER</span><h2>{activeRoom.title}</h2></div>
     <nav className="ks-room-controls" aria-label="Room actions">
@@ -35,6 +35,7 @@ export function RoomControls({ seated, environment, quality, setQuality, onBook,
           {!isVisitor && <button onClick={() => setPrinterOpen(true)}><Printer size={16}/> Print a photo</button>}
           <button onClick={onLibrary}><Library size={16}/> Browse all scrapbooks</button>
           <button onClick={onMusic}><Music2 size={16}/> Music</button>
+          {!isVisitor&&<button onClick={()=>setDiscoveryOpen('collection')}><BookOpen size={16}/> Correspondence</button>}
           <p>LIGHTING</p>
           <button aria-pressed={environment.lampOn} onClick={onLamp}><Lamp size={16} /> Desk lamp <span>{environment.lampOn ? "On" : "Off"}</span></button>
           <button aria-pressed={environment.ceilingOn !== false} onClick={onCeiling}><Lightbulb size={16} /> Ceiling light <span>{environment.ceilingOn !== false ? "On" : "Off"}</span></button>

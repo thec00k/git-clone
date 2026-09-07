@@ -22,7 +22,7 @@ function world(index) {
   );
   return parents.has(index) ? world(parents.get(index)).multiply(local) : local;
 }
-function bounds(name) {
+export function bounds(name) {
   const index = json.nodes.findIndex(node => node.name === name);
   assert.ok(index >= 0, `${name} exists`);
   const box = new Box3();
@@ -75,3 +75,4 @@ console.log(JSON.stringify({ bytes: bytes.length, triangles, materials: json.mat
 const bowl=bounds('Fan_Bowl');
 for(const name of ['Fan_Chain_0','Fan_Chain_1','Fan_ChainWeight']){const chain=bounds(name);assert.ok(chain.max.x<bowl.min.x || chain.min.x>bowl.max.x,'Pull chain clears the light bowl: '+name);}
 console.log('Ceiling pull chains and weight clear the light bowl.');
+export {json};

@@ -18,6 +18,8 @@ export type View =
   | "guestbook";
 
 interface NavContextValue {
+  discoveryOpen: string | null;
+  setDiscoveryOpen: (id:string|null)=>void;
   printerOpen: boolean;
   setPrinterOpen: (open: boolean) => void;
   pendingPrint: { src: string; photoId?: string } | null;
@@ -48,6 +50,7 @@ interface NavContextValue {
 const NavContext = createContext<NavContextValue | null>(null);
 
 export function NavProvider({ children }: { children: ReactNode }) {
+  const [discoveryOpen,setDiscoveryOpen]=useState<string|null>(null);
   const [printerOpen, setPrinterOpen] = useState(false);
   const [pendingPrint, setPendingPrint] = useState<{ src: string; photoId?: string } | null>(null);
   const [bookPageId, setBookPageId] = useState<string | null>(null);
@@ -91,6 +94,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<NavContextValue>(
     () => ({
+      discoveryOpen,setDiscoveryOpen,
       printerOpen, setPrinterOpen, pendingPrint, setPendingPrint, bookPageId, setBookPageId,
       view,
       go,
@@ -112,7 +116,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
       backAria,
       backLabel,
     }),
-    [view, go, back, archiveFolder, openArchiveFolder, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace, printerOpen, pendingPrint, bookPageId],
+    [view, go, back, archiveFolder, openArchiveFolder, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace, printerOpen, pendingPrint, bookPageId,discoveryOpen],
   );
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;

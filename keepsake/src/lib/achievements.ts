@@ -6,6 +6,7 @@
  * merges the result and stamps a completion time for anything newly true.
  */
 import type { AppState } from "../types/app";
+import {discoveryState,LETTERS} from './discoveries.ts';
 
 type Rule = (s: AppState) => boolean;
 
@@ -17,7 +18,7 @@ const totalPhotos = (s: AppState) =>
 
 const totalCaptions = (s: AppState) =>
   s.books.reduce(
-    (n, b) => n + b.pages.reduce((m, p) => m + p.elements.filter((e) => e.type === "caption").length, 0),
+    (n, b) => n + b.pages.reduce((m, p) => m + p.elements.filter((e) => e.type === "caption"&&!e.id.startsWith('house_')).length, 0),
     0,
   );
 
@@ -37,7 +38,13 @@ const RULES: Record<string, Rule> = {
 
 /** All achievement ids that are currently satisfied by the state. */
 export function evaluate(state: AppState): string[] {
-  return Object.entries(RULES)
-    .filter(([, rule]) => rule(state))
-    .map(([id]) => id);
+  const base=state.achievementBaseline;
+  const earned=base?{...state,books:state.books.map(b=>({...b,pages:b.pages.map(p=>({...p,elements:p.elements.filter(e=>!base.elements.includes(e.id))}))})),pins:state.pins.filter(p=>!base.pins.includes(p.id)),guestbook:state.guestbook.filter(g=>!base.guests.includes(g.id))}:state;
+  const result=Object.entries(RULES).filter(([id,rule])=>id==='librarian'&&base?state.books.some(b=>!base.books.includes(b.id)):rule(earned)).map(([id])=>id);
+  const entries=discoveryState(state).entries;
+  if(entries.some(e=>e.keptAt&&!e.reward))result.push('correspondence');
+  if(entries.some(e=>e.location==='shelf'&&e.readAt&&!e.reward))result.push('between-lines');
+  if([...new Set(LETTERS.map(l=>l.story).filter(Boolean))].some(story=>LETTERS.filter(l=>l.story===story).every(l=>entries.some(e=>e.id===l.id&&e.readAt))))result.push('story-kept');
+  if(state.progress.printedToBook)result.push('printed-memory');
+  return result;
 }

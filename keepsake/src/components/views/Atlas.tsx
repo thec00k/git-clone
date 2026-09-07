@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import {PinPageLink} from '../PinPageLink';
 import type { PointerEvent as ReactPointerEvent, RefObject } from "react";
 import { ImagePlus, Lock, MapPin, Pencil, Trash2, Unlock, X } from "lucide-react";
 import { useApp } from "../../store/appStore";
@@ -200,6 +201,7 @@ export function Atlas() {
           className="ks-atlas-editor"
           data-pin-editor={peeking ? "fridge" : editing ? "edit" : draft ? "new" : "idle"}
         >
+          {(peeking||editing)&&<PinPageLink pin={(peeking||editing)!}/>}
           {peeking ? (
             <FridgeNotePanel
               pin={peeking}
@@ -586,7 +588,7 @@ function MapPinMarker({
       style={{ left: `${pin.x}%`, top: `${pin.y}%`, cursor: locked ? "pointer" : "grab" }}
       aria-label={pin.photoSrc ? `Open photograph: ${pin.label}` : `${selected ? "Editing" : "Edit"} pin: ${pin.label}`}
       data-pin-id={pin.id}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {e.stopPropagation();if(e.detail===0)onSelect();}}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}

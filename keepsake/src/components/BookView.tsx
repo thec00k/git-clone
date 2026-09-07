@@ -41,7 +41,7 @@ import { DeskClutter } from "./DeskClutter";
 export function BookView() {
   const sb = useScrapbook();
   const { addArchivePhoto, renameBook, setBookCover, state } = useApp();
-  const stickerGlyphs = ownedStickerGlyphs(state.ownedStickerPacks);
+  const stickerGlyphs = [...ownedStickerGlyphs(state.ownedStickerPacks),...new Set(discoveryState(state).entries.filter(e=>e.reward&&e.keptAt).map(e=>REWARDS[e.reward!].glyph))];
   const { viewAs, isVisitor, setPrinterOpen, printerOpen, bookPageId, setBookPageId } = useNav();
   useEffect(() => {
     if (!bookPageId) return;
@@ -56,7 +56,7 @@ export function BookView() {
   const [showPrint, setShowPrint] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [showKeys, setShowKeys] = useState(false);
-  const [showCover, setShowCover] = useState(false);
+  const [showCover, setShowCover] = useState(sb.book?.title === "New book");
   const [drawInk, setDrawInk] = useState<string | null>(null);
   const addInputRef = useRef<HTMLInputElement>(null);
   const turningRef = useRef(false);
@@ -215,7 +215,7 @@ export function BookView() {
                 aria-expanded={showCover}
                 onClick={() => { setShowCover((v) => !v); setShowStickers(false); setShowPresets(false); }}
               >
-                <BookMarked size={16} />
+                <BookMarked size={16} /> Cover & title
               </button>
             )}
             <button className="ks-chip" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" onClick={() => setShowKeys(true)}>
@@ -243,8 +243,8 @@ export function BookView() {
         isVisitor ? null : (
           <div className="ks-editor-dock">
             {showCover && sb.book && (
-              <div className="ks-panel w-full max-w-md p-3">
-                <p className="mb-2 font-display text-paper">Cover &amp; title page</p>
+              <div className="ks-panel ks-cover-editor p-4">
+                <div className="flex justify-between mb-2"><p className="font-display text-paper">Make this book yours</p><button className="ks-chip" onClick={()=>setShowCover(false)}>Done</button></div>
                 <BookIdentityEditor
                   title={sb.book.title}
                   subtitle={sb.book.subtitle}
@@ -282,13 +282,13 @@ export function BookView() {
                     <button
                       key={g}
                       className="ks-chip text-lg"
-                      aria-label={`Add sticker ${g}`}
+                      aria-label={`Add sticker ${Object.values(REWARDS).find(r=>r.glyph===g)?.title??g}`}
                       onClick={() => {
                         if (targetPageId) sb.addSticker(targetPageId, g);
                         setShowStickers(false);
                       }}
                     >
-                      {g}
+                      <KeepsakeGlyph glyph={g}/>
                     </button>
                   ))}
                 </div>
@@ -461,3 +461,5 @@ function Row({ k, v }: { k: string; v: string }) {
     </div>
   );
 }
+import {KeepsakeGlyph} from './KeepsakeGlyph';
+import {discoveryState,REWARDS} from '../lib/discoveries';

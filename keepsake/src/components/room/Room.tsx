@@ -67,6 +67,7 @@ export function Room() {
   }, [phase, recordProgress]);
 
   const onMove = (e: React.PointerEvent) => {
+    if(layout === 'glb')return;
     if (touring) return;
     if (layout === "chamber" && roomFace !== "front") return;
     const r = sceneRef.current?.getBoundingClientRect();
@@ -354,6 +355,7 @@ export function Room() {
 }
 
 function AchievementsPanel({ onClose, unlocked }: { onClose: () => void; unlocked: string[] }) {
+  const {setDiscoveryOpen,isVisitor}=useNav();const {state}=useApp();
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, onClose);
   return (
@@ -370,7 +372,8 @@ function AchievementsPanel({ onClose, unlocked }: { onClose: () => void; unlocke
           <Sparkles size={18} className="text-accent" />
           <h2 className="font-display text-xl">Keepsakes found</h2>
         </div>
-        <ul className="space-y-2">
+        {!isVisitor&&<button className="ks-tool mb-3" onClick={()=>{onClose();setDiscoveryOpen('collection');}}>Letters and keepsakes</button>}
+        <ul className="space-y-2" style={{maxHeight:'58vh',overflowY:'auto'}}>
           {ACHIEVEMENTS.map((a) => {
             const has = unlocked.includes(a.id);
             return (
@@ -378,6 +381,7 @@ function AchievementsPanel({ onClose, unlocked }: { onClose: () => void; unlocke
                 <div>
                   <p className={has ? "text-paper" : "text-paper/40"}>{has ? a.title : "???"}</p>
                   <p className="text-sm text-paper/50">{a.hint}</p>
+                  {has&&state.achievementsAt[a.id]&&<small>Found {new Date(state.achievementsAt[a.id]).toLocaleDateString()}</small>}
                 </div>
                 <span className={has ? "text-accent" : "text-paper/30"}>{has ? "✦" : "·"}</span>
               </li>

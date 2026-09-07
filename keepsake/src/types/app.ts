@@ -29,7 +29,7 @@ export type TimeMode = "auto" | "day" | "dusk" | "night";
 export type Season = "spring" | "summer" | "autumn" | "winter";
 export type Weather = "clear" | "rain" | "snow";
 
-export type MusicProvider = "ambient" | "spotify";
+export type MusicProvider = "ambient" | "spotify" | "lofi" | "soundcloud";
 
 export interface Environment {
   roomQuality?: "balanced" | "high";
@@ -43,6 +43,7 @@ export interface Environment {
   shelfLit: boolean;
   musicOn: boolean;
   musicProvider: MusicProvider;
+  soundCloudUrl?: string;
   volume: number; // 0..1
   ambienceVolume: number; // 0..1
   /** When true, map pins cannot be dragged (click still opens edit). */
@@ -64,6 +65,7 @@ export const TIDY_ROOM: Pick<
 };
 
 export interface GuestEntry {
+  deskCopy?: boolean;
   id: string;
   author: string;
   message: string;
@@ -84,6 +86,8 @@ export interface PageNote {
 export type ViewAs = "owner" | "close" | "friend" | "public";
 
 export interface MemoryPin {
+  bookId?: string;
+  pageId?: string;
   id: string;
   label: string;
   /** normalized 0..100 position on the illustrated map */
@@ -107,12 +111,16 @@ export interface PinNote {
 
 /** Notable one-off events that feed achievement rules (part of the ledger). */
 export interface Progress {
+  printedToBook?: boolean;
   visitedAtNight: boolean;
   previewedAsVisitor: boolean;
   completedTour: boolean;
 }
 
 export interface AppState {
+  framePhotoId?: string;
+  discoveries?: import('../lib/discoveries').DiscoveryState;
+  achievementBaseline?: { elements: string[]; books: string[]; pins: string[]; guests: string[] };
   latestPrint?: { src: string; photoId?: string; printedAt: number };
   version: number;
   profile: Profile;
@@ -143,6 +151,10 @@ export interface AchievementDef {
 }
 
 export const ACHIEVEMENTS: AchievementDef[] = [
+  { id: "correspondence", title: "A Little Correspondence", hint: "Keep a discovered letter." },
+  { id: "between-lines", title: "Between the Lines", hint: "Read a note tucked among the books." },
+  { id: "story-kept", title: "A Story Kept", hint: "Read the three letters of a woodland story." },
+  { id: "printed-memory", title: "From Here to There", hint: "Print a photograph and place it in a scrapbook." },
   { id: "first-photo", title: "First Light", hint: "Place your first photograph." },
   { id: "full-spread", title: "A Full Page", hint: "Put several photos on one page." },
   { id: "wordsmith", title: "In Your Own Hand", hint: "Write a caption." },

@@ -1,4 +1,5 @@
 import { RoomSound } from './RoomSound';
+import {RoomPerformance} from './RoomPerformance';
 import { playRoomSound } from '../../lib/audio';
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -9,6 +10,7 @@ import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
 import { StickerStore } from "../StickerStore";
 import { useApp } from "../../store/appStore";
+import {useNav} from '../../store/nav';
 import { useListen } from "../../store/listen";
 import { FACE_VIEW, EyeCamera } from "./RoomCamera";
 import { RoomModel } from "./RoomModel";
@@ -41,6 +43,8 @@ export function RoomScene3D({
   onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
   const quality=environment.roomQuality??"balanced";
+  const {discoveryOpen}=useNav();const [tabVisible,setTabVisible]=useState(!document.hidden);
+  useEffect(()=>{const change=()=>setTabVisible(!document.hidden);document.addEventListener('visibilitychange',change);return()=>document.removeEventListener('visibilitychange',change);},[]);
   const setQuality=(value:RoomQuality)=>setEnvironment({roomQuality:value});
   const [viewRevision, setViewRevision] = useState(0);
   const [reading,setReading]=useState(false);
@@ -148,6 +152,7 @@ export function RoomScene3D({
       <RoomSound environment={environment}/>
       <div className="ks-room3d-picture" role="group" aria-label="Interactive room">
       <Canvas
+        frameloop={tabVisible&&!discoveryOpen?'always':'demand'}
         camera={{ fov: seated ? 38 : activeRoom.fov, near: 0.08, far: 40, position: FACE_VIEW.front.position.toArray() }}
         dpr={[1, profile.dpr]}
         shadows={profile.shadows}
@@ -160,6 +165,7 @@ export function RoomScene3D({
         }}
       >
         <color attach="background" args={[phase === "night" ? "#12161c" : phase === "dusk" ? "#2a1c14" : "#5a6570"]} />
+        <RoomPerformance/>
         <Suspense fallback={<RoomLoading />}>
           <RoomModel
             phase={phase}

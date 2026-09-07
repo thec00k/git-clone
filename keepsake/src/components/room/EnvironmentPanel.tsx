@@ -1,4 +1,6 @@
 import { RoomBackup } from '../RoomBackup';
+import {FramePhotoPicker} from '../FramePhotoPicker';
+import {DiscoveryPreferences} from '../Discoveries';
 import { useRef } from "react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
@@ -22,6 +24,8 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
       <div ref={panelRef} className="ks-panel w-full max-w-md p-5 ks-room-settings" role="dialog" aria-modal="true" aria-label="Room settings" onClick={(e) => e.stopPropagation()}>
         <h2 className="mb-4 font-display text-xl">The room</h2><p className="ks-handnote">Settle in, stay awhile.</p>
         <RoomBackup/>
+        <FramePhotoPicker/>
+        <DiscoveryPreferences/>
 
         <label className="mb-4 block" htmlFor="ks-name">
           <span className="text-sm text-paper/60">Your name</span>

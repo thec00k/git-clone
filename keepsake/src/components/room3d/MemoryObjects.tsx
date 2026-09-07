@@ -1,4 +1,5 @@
 import { useCrtPlayerSlot } from '../../store/spotifyUi';
+import {DiscoveryObject} from './DiscoveryObject';
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
@@ -36,18 +37,21 @@ function Spine({title,color,ink,width,height,handwritten=false}:{title:string;co
  return <mesh><planeGeometry args={[width,height]}/><meshStandardMaterial map={map} roughness={.92}/></mesh>;
 }
 export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>void}) {
- const {state,setActiveBook}=useApp(); const {viewAs,isVisitor}=useNav();
+ const {state,setActiveBook,addBook}=useApp(); const {viewAs,isVisitor,go,setBookPageId}=useNav();
  const books=state.books.filter(b=>canSee(b.visibility,viewAs));
  const fillers=useMemo(()=>Array.from({length:45},(_,i)=>scene.getObjectByName(`ks_shelf_book_${i}`)).filter((o):o is THREE.Object3D=>!!o),[scene]);
  const [chosen,setChosen]=useState<string|null>(null);
- useEffect(()=>{fillers.forEach(object=>{const b=new THREE.Box3().setFromObject(object);const row=Math.max(0,Math.min(3,3-Math.round(b.min.y/.46)));object.visible=row>=Math.ceil(books.length/12);});return()=>fillers.forEach(object=>{object.visible=true;});},[fillers,books.length]);
+ useEffect(()=>{fillers.forEach(object=>{const b=new THREE.Box3().setFromObject(object);const row=Math.max(0,Math.min(3,3-Math.round(b.min.y/.46)));object.visible=row>=Math.ceil((books.length+(isVisitor?0:1))/12);});return()=>fillers.forEach(object=>{object.visible=true;});},[fillers,books.length,isVisitor]);
  useEffect(()=>{const palette=['#76694c','#684838','#64735c','#a1875b','#514b3a','#8b6958'];fillers.forEach((object,i)=>object.traverse(o=>{if(o instanceof THREE.Mesh){const materials=Array.isArray(o.material)?o.material:[o.material];materials.forEach(m=>{if(m instanceof THREE.MeshStandardMaterial){m.color.set(palette[i%palette.length]);m.roughness=.94;}});}}));},[fillers]);
  const sheet=scene.getObjectByName('Map_Sheet'); const mapBox=sheet?new THREE.Box3().setFromObject(sheet):null;
  return <group name="personal-memories">
+  <DiscoveryObject/>
+  {!isVisitor&&<ShelfMemory book={{id:"blank-book",title:"Create a scrapbook",subtitle:"A new beginning",coverStyle:"forest",pages:[],visibility:"private",createdAt:0,updatedAt:0} as Scrapbook} index={0} chosen={chosen} onChoose={()=>setChosen("blank-book")} onOpen={()=>{addBook();setBookPageId(null);onBook();}}/>}
   <MemoryDisplays scene={scene}/>
-  <CollectedSpines objects={fillers} occupiedRows={Math.ceil(books.length/12)}/>
-  {books.slice(0,48).map((book,i)=><ShelfMemory key={book.id} book={book} index={i} chosen={chosen} onChoose={()=>setChosen(book.id)} onOpen={()=>{setActiveBook(book.id);onBook();}}/>)}
-  {!isVisitor && mapBox && state.pins.map(pin=>{const width=(mapBox.max.z-mapBox.min.z)*.96;const height=Math.min((mapBox.max.y-mapBox.min.y)*.96,width*620/950);return <group key={pin.id} position={[mapBox.max.x+.012,(mapBox.min.y+mapBox.max.y)/2+(50-pin.y)/100*height,(mapBox.min.z+mapBox.max.z)/2+(50-pin.x)/100*width]} rotation={[0,Math.PI/2,0]}>
+  <DeskBook scene={scene}/>
+  <CollectedSpines objects={fillers} occupiedRows={Math.ceil((books.length+(isVisitor?0:1))/12)}/>
+  {books.slice(0,isVisitor?48:47).map((book,i)=><ShelfMemory key={book.id} book={book} index={i+(isVisitor?0:1)} chosen={chosen} onChoose={()=>setChosen(book.id)} onOpen={()=>{setActiveBook(book.id);onBook();}}/>)}
+  {!isVisitor && mapBox && state.pins.map(pin=>{const width=(mapBox.max.z-mapBox.min.z)*.96;const height=Math.min((mapBox.max.y-mapBox.min.y)*.96,width*620/950);return <group key={pin.id} onClick={e=>{e.stopPropagation();if(e.delta>4)return;const b=state.books.find(b=>b.id===pin.bookId);if(b?.pages.some(p=>p.id===pin.pageId)){setActiveBook(b.id);setBookPageId(pin.pageId!);go('book');}else go('atlas');}} position={[mapBox.max.x+.012,(mapBox.min.y+mapBox.max.y)/2+(50-pin.y)/100*height,(mapBox.min.z+mapBox.max.z)/2+(50-pin.x)/100*width]} rotation={[0,Math.PI/2,0]}>
    {pin.photoSrc && <group position={[0,-.033,0]}><mesh><planeGeometry args={[.11,.105]}/><meshStandardMaterial color="#f1e8d2"/></mesh><group position={[0,.007,.001]}><PhotoSurface src={pin.photoSrc} width={.094} height={.07}/></group></group>}
    <mesh position={[0,.007,.005]}><sphereGeometry args={[.009,8,6]}/><meshStandardMaterial color="#a55339" roughness={.5}/></mesh>
   </group>;})}
@@ -57,8 +61,8 @@ export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>vo
 function MemoryDisplays({scene}:{scene:THREE.Object3D}) {
  const {state,activeBook,environment}=useApp(); const {isVisitor}=useNav();
  const {nowPlaying}=useCrtPlayerSlot();
- const photo=isVisitor?undefined:(state.archive.find(a=>a.favorite)??state.archive[0]);
- const screen=useLettering(environment.musicProvider==='spotify'?(nowPlaying?`${nowPlaying.paused?'PAUSED':'NOW PLAYING'}\n${nowPlaying.title}\n${nowPlaying.artist}`:'KEEPSAKE RADIO\nSpotify · player below'):environment.musicOn?'KEEPSAKE RADIO\nWoodland ambient · playing':'KEEPSAKE RADIO\nA quiet moment', '#1a302c','#b9cba7');
+ const photo=isVisitor?undefined:(state.archive.find(a=>a.id===state.framePhotoId)??state.archive.find(a=>a.favorite)??state.archive[0]);
+ const screen=useLettering(environment.musicProvider!=='ambient'?(nowPlaying?`${nowPlaying.paused?'PAUSED':'NOW PLAYING'}\n${nowPlaying.title}\n${nowPlaying.artist}`:`KEEPSAKE RADIO\n${environment.musicProvider==='soundcloud'?'SoundCloud':'Spotify'} · player below`):environment.musicOn?'KEEPSAKE RADIO\nWoodland ambient · playing':'KEEPSAKE RADIO\nA quiet moment', '#1a302c','#b9cba7');
  screen.flipY=false;
  const note=useLettering('a little something\nto remember','#e9dfc4','#6b6250',false,true);
  useEffect(()=>{
@@ -80,7 +84,7 @@ function ShelfMemory({book,index,chosen,onChoose,onOpen}:{book:Scrapbook;index:n
  const openRef=useRef(onOpen);openRef.current=onOpen;
  useEffect(()=>{if(!selected)return;const timer=window.setTimeout(()=>openRef.current(),reduced?0:780);return()=>window.clearTimeout(timer);},[selected,reduced]);
  const coverMap=useLettering(book.title+'\n'+book.subtitle,COVER_STYLES[book.coverStyle].leather,COVER_STYLES[book.coverStyle].ink);
- const row=Math.floor(index/12);const z=-.65+(index%12)*.108;const y=1.39-row*.46;const height=.32+(index%3)*.025;const thick=.066+Math.min(book.pages.length,32)*.0005;const cover=COVER_STYLES[book.coverStyle];
+ const row=Math.floor(index/12);const z=-.69+(index%12)*.1015;const y=1.39-row*.46;const height=.32+(index%3)*.025;const thick=.066+Math.min(book.pages.length,32)*.0005;const cover=COVER_STYLES[book.coverStyle];
  useFrame((_,dt)=>{if(!group.current)return;const t=reduced?1:1-Math.exp(-dt*9);group.current.position.x=THREE.MathUtils.lerp(group.current.position.x,selected?1.57:2.20,t);group.current.position.y=THREE.MathUtils.lerp(group.current.position.y,selected?y+.11:y,t);group.current.rotation.z=THREE.MathUtils.lerp(group.current.rotation.z,selected?.28:hover?.16:0,t);});
  return <group ref={group} position={[2.20,y,z]} onPointerOver={e=>{e.stopPropagation();if(!chosen)setHover(true);}} onPointerOut={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(e.delta<4&&!chosen)onChoose();}}>
   <mesh position={[0,height/2,0]}><boxGeometry args={[.22,height,thick]}/><meshStandardMaterial color={cover.leather} roughness={.92}/></mesh>
@@ -89,7 +93,7 @@ function ShelfMemory({book,index,chosen,onChoose,onOpen}:{book:Scrapbook;index:n
   <group position={[-.112,height/2,0]} rotation={[0,-Math.PI/2,0]}><Spine title={book.title} color={cover.leather} ink={cover.ink} width={thick*.96} height={height*.98}/></group>
   {[.035,height-.035].map(v=><mesh key={v} position={[-.113,v,0]}><boxGeometry args={[.002,.003,thick*.88]}/><meshStandardMaterial color={cover.ink} roughness={.65}/></mesh>)}
   <Html transform distanceFactor={1} position={[-.115,height/2,0]} rotation={[0,-Math.PI/2,0]} style={{backfaceVisibility:'hidden'}}>
-   <button className="ks-spine-hit" style={{width:thick*400,height:height*400}} aria-label={`Open scrapbook: ${book.title}`} disabled={!!chosen} onPointerEnter={()=>setHover(true)} onPointerLeave={()=>setHover(false)} onFocus={()=>setHover(true)} onBlur={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(!chosen)onChoose();}}/>
+   <button className="ks-spine-hit" style={{width:thick*400,height:height*400}} aria-label={book.id==='blank-book'?'Create a new scrapbook':`Open scrapbook: ${book.title}`} disabled={!!chosen} onPointerEnter={()=>setHover(true)} onPointerLeave={()=>setHover(false)} onFocus={()=>setHover(true)} onBlur={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(!chosen)onChoose();}}/>
   </Html>
   {hover&&!selected&&<Html position={[-.17,height+.07,0]} center style={{pointerEvents:'none'}}><span className="ks-shelf-book-label">{book.title}</span></Html>}
  </group>;
@@ -97,4 +101,14 @@ function ShelfMemory({book,index,chosen,onChoose,onOpen}:{book:Scrapbook;index:n
 
 function CollectedSpines({objects,occupiedRows}:{objects:THREE.Object3D[];occupiedRows:number}){
  return <>{objects.filter((_,i)=>i%3===1).map((o,i)=>{const b=new THREE.Box3().setFromObject(o);const row=Math.max(0,Math.min(3,3-Math.round(b.min.y/.46)));if(row<occupiedRows)return null;const size=b.getSize(new THREE.Vector3());return <group key={o.uuid} position={[b.min.x-.001,(b.min.y+b.max.y)/2,(b.min.z+b.max.z)/2]} rotation={[0,-Math.PI/2,0]}><Spine handwritten title={['Field notes','Letters','Woodland','Sketches'][i%4]} color={['#76694c','#64735c','#514b3a'][i%3]} ink="#ded0ac" width={size.z*.82} height={size.y*.85}/></group>;})}</>;
+}
+
+function DeskBook({scene}:{scene:THREE.Object3D}){
+ const {activeBook}=useApp();const {isVisitor,viewAs}=useNav();
+ const visible=activeBook&&(!isVisitor||canSee(activeBook.visibility,viewAs));
+ const cover=activeBook?COVER_STYLES[activeBook.coverStyle]:COVER_STYLES.forest;
+ const texture=useLettering(visible?activeBook.title+'\n'+activeBook.subtitle:'Keepsake',cover.leather,cover.ink);
+ const box=useMemo(()=>{const o=scene.getObjectByName('ks_book');return o?new THREE.Box3().setFromObject(o):null;},[scene]);
+ if(!box)return null;
+ return <group position={[(box.min.x+box.max.x)/2,box.max.y+.002,(box.min.z+box.max.z)/2]} rotation={[-Math.PI/2,0,0]}><mesh><planeGeometry args={[(box.max.x-box.min.x)*.94,(box.max.z-box.min.z)*.94]}/><meshStandardMaterial map={texture} roughness={.9}/></mesh></group>;
 }

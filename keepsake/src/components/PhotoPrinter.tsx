@@ -36,6 +36,7 @@ export function PhotoPrinter({onClose}:{onClose:()=>void}) {
   const placed=photoRows({...page,elements:[...page.elements,el]},state.archive);
   if(!placed){setError("There is not enough clear space here. Choose a fresh spread to keep your writing uncovered.");return;}
   update(s=>({...s,books:s.books.map(b=>b.id===bookId?{...b,updatedAt:Date.now(),pages:pageId==="new"?[...b.pages,...(b.pages.length%2?[{id:uid("page"),elements:[]}]:[]),placed,{id:uid("page"),elements:[]}]:b.pages.map(p=>p.id===id?placed:p)}:b)}));
+  update(s=>({...s,progress:{...s.progress,printedToBook:true}}));
   setActiveBook(bookId);setBookPageId(id);onClose();go("book");
  }
  return <div className="ks-photo-printer-overlay" onClick={onClose}>

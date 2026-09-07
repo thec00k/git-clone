@@ -104,7 +104,7 @@ function TransformableElement({
             filter: "drop-shadow(0 4px 6px rgb(20 14 10 / 0.35))",
           }}
         >
-          {element.glyph}
+          <KeepsakeGlyph glyph={element.glyph}/>
         </div>
       )}
 
@@ -370,3 +370,4 @@ function CaptionView({
     </div>
   );
 }
+import {KeepsakeGlyph} from './KeepsakeGlyph';

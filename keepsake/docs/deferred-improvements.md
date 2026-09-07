@@ -1,15 +1,17 @@
-# Deferred improvements
+# Music and discovery pass — September 7, 2026
 
-Saved at the user's request on September 7, 2026. These are intended future work; do not start them during the achievement and discovery-system discussion.
+The three previously deferred prototype tasks are implemented: cabinet photograph choice, map-pin links to exact scrapbook pages, and opt-in desktop performance instrumentation/tuning. Performance numbers are observations on this local browser, not a low-end hardware certification.
 
-- Measure and tune desktop performance on the target device.
-- Let the user choose which photograph appears in the cabinet frame.
-- Link map pins directly to relevant scrapbook pages.
+Achievements and discoveries now include twelve authored letters, three connected stories, five physical placements, persistent unread notes, a correspondence collection, scrapbook insertion, gentle frequency/hints/off settings, and four reusable illustrated keepsakes. Existing demo content is excluded from new milestones. Existing earned achievements are preserved.
 
-Current discussion: review achievements and discoverable notes/events. Suggestions in this discussion are design proposals, not yet authorization to implement them.
+Guest signatures can request a desk copy. Later room visits may reveal the message as a postcard or open guestbook. Owner desk-note preferences and message attribution persist in room backups. Cross-device delivery requires the future social/backend service.
 
-## Achievement and discovery proposal to resume
+Blank shelf book creates a scrapbook and opens its cover editor. The active book's title appears on the desk; title editing has a full cover preview. The physical shelf displays up to 47 saved books plus the creation book; the library still holds all saved books.
 
-Audit found: RoomCurator is hidden in GLB mode; completedTour suppresses later opportunity selection; distinct priorities make selection mostly deterministic; note text is selected during render; receipts record presentation rather than discovery; seeded demo content can earn user milestones.
+Paper turns use Mixkit's Paper slide recording, with softer envelopes and a noise fallback. High-mode directional shadow depth range and bias were tightened; guestbook interaction now anchors above its cover.
 
-Proposed first slice: persistent physical letters, five safe room locations, about twelve authored house notes, a correspondence collection, and three discovery achievements. Keep chosen text/location stable across reloads. Separate appearance, finding, reading and keeping; unread letters do not expire. Offer Keep in scrapbook, Save in correspondence or Leave here. Later add short connected stories, tangible cosmetic rewards, Quiet/Occasional/Off settings, optional hints and keyboard access. Avoid streaks and fabricated claims about user activity.
+SoundCloud public profile/track/playlist playback is implemented with next/previous, volume, metadata on the CRT, and removal/reload controls. Full account OAuth remains pending: SoundCloud requires a confidential client secret and server-side token exchange, plus registered app credentials. No secrets belong in the Vite client.
+
+The f2klaus playlist was removed at the user's request. Mellow Skies by Purrple Cat is an optional candidate in the SoundCloud panel, not an automatically selected replacement. It includes ten tracks. Artist album page links CC BY-SA 4.0: https://purrplecat.bandcamp.com/album/mellow-skies . Streaming uses the artist's unmodified SoundCloud playlist: https://soundcloud.com/purrplecat/sets/mellow-skies . Attribution remains in the UI. No album downloads are bundled.
+
+Remaining external work: SoundCloud account sign-in, actual multi-user guestbook delivery, target hardware performance validation, and user taste review of replacement music. No additional feature suggestions were started.

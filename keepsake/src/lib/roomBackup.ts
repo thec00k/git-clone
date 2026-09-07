@@ -1,4 +1,6 @@
+import {soundCloudUrl} from './soundcloud.ts';
 import type { AppState } from '../types/app';
+import {PLACES,REWARDS} from './discoveries.ts';
 type RecordValue = Record<string, unknown>;
 function object(v:unknown):v is RecordValue{return !!v && typeof v==='object' && !Array.isArray(v);}
 function ensure(ok:unknown):asserts ok{if(!ok)throw new Error('This file is not a complete, supported Keepsake room backup.');}
@@ -23,16 +25,23 @@ export function parseRoomBackup(text:string):AppState{
  ensure(records(s.archive,a=>string(a.id)&&image(a.src)&&number(a.aspect)&&(a.aspect as number)>0&&number(a.createdAt)&&strings(a.categories)&&typeof a.favorite==='boolean'));
  ensure(records(s.archiveTabs,a=>string(a.id)&&string(a.name)));
  ensure(records(s.pins,p=>string(p.id)&&string(p.label)&&string(p.caption)&&number(p.createdAt)&&number(p.x)&&number(p.y)&&(p.x as number)>=0&&(p.x as number)<=100&&(p.y as number)>=0&&(p.y as number)<=100&&(p.photoSrc===undefined||image(p.photoSrc))));
- ensure(records(s.guestbook,g=>string(g.id)&&string(g.author)&&string(g.message)&&number(g.createdAt)));
+ ensure(records(s.guestbook,g=>string(g.id)&&string(g.author)&&string(g.message)&&number(g.createdAt)&&(g.deskCopy===undefined||typeof g.deskCopy==='boolean')));
  ensure(records(s.notes,n=>string(n.id)&&string(n.bookId)&&string(n.pageId)&&string(n.author)&&string(n.message)&&number(n.createdAt)&&typeof n.approved==='boolean'));
  ensure(records(s.pinNotes,n=>string(n.id)&&string(n.pinId)&&string(n.author)&&string(n.message)&&number(n.createdAt)));
  ensure(strings(s.achievements)&&strings(s.achievementsSeen)&&strings(s.ownedStickerPacks)&&number(s.stamps));
  ensure(object(s.achievementsAt)&&Object.values(s.achievementsAt).every(number)&&object(s.receipts)&&Object.values(s.receipts).every(number));
  ensure(object(s.progress)&&['visitedAtNight','previewedAsVisitor','completedTour'].every(k=>typeof s.progress ==='object'&&typeof (s.progress as RecordValue)[k]==='boolean'));
- const e=s.environment;ensure(object(e)&&['auto','day','dusk','night'].includes(e.timeMode as string)&&['spring','summer','autumn','winter'].includes(e.season as string)&&['clear','rain','snow'].includes(e.weather as string)&&['ambient','spotify'].includes(e.musicProvider as string));
+ const e=s.environment;ensure(object(e)&&['auto','day','dusk','night'].includes(e.timeMode as string)&&['spring','summer','autumn','winter'].includes(e.season as string)&&['clear','rain','snow'].includes(e.weather as string)&&['ambient','spotify','lofi','soundcloud'].includes(e.musicProvider as string));
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
  ensure(['lampOn','ceilingOn','shelfLit','musicOn','pinsLocked'].every(k=>typeof e[k]==='boolean')&&['volume','ambienceVolume'].every(k=>number(e[k])&&(e[k] as number)>=0&&(e[k] as number)<=1));
  ensure(s.latestPrint===undefined || object(s.latestPrint)&&image(s.latestPrint.src)&&number(s.latestPrint.printedAt));
+ ensure(s.framePhotoId===undefined||string(s.framePhotoId));
+ ensure(s.achievementBaseline===undefined||object(s.achievementBaseline)&&['elements','books','pins','guests'].every(k=>strings((s.achievementBaseline as RecordValue)[k])));
+ ensure(s.discoveries===undefined||object(s.discoveries)&&['quiet','occasional','off'].includes(s.discoveries.frequency as string)&&typeof s.discoveries.hints==='boolean'&&(s.discoveries.guestNotesOnDesk===undefined||typeof s.discoveries.guestNotesOnDesk==='boolean')&&['lastFoundAt','lastVisitAt'].every(k=>s.discoveries&&((s.discoveries as RecordValue)[k]===undefined||number((s.discoveries as RecordValue)[k])))&&records(s.discoveries.entries,d=>string(d.id)&&string(d.title)&&string(d.text)&&PLACES.some(p=>p.id===d.location)&&number(d.appearedAt)&&['foundAt','readAt','keptAt'].every(k=>d[k]===undefined||number(d[k]))&&['bookId','pageId','story','author','guestEntryId'].every(k=>d[k]===undefined||string(d[k]))&&(d.delivery===undefined||['desk','book'].includes(d.delivery as string))&&(d.reward===undefined||string(d.reward)&&Object.hasOwn(REWARDS,d.reward))));
+ ensure(e.soundCloudUrl===undefined||string(e.soundCloudUrl)&&soundCloudUrl(e.soundCloudUrl)!==null);
+ if(object(s.discoveries)){const entries=s.discoveries.entries as {id:string;keptAt?:number}[];ensure(new Set(entries.map(e=>e.id)).size===entries.length&&entries.filter(e=>!e.keptAt).length<=1);}
+ ensure((s.pins as RecordValue[]).every(p=>(p.bookId===undefined||string(p.bookId))&&(p.pageId===undefined||string(p.pageId))));
+ ensure(s.progress.printedToBook===undefined||typeof s.progress.printedToBook==='boolean');
  return s as unknown as AppState;
 }
 export function serializeRoom(state:AppState){return JSON.stringify({format:'keepsake-room',backupVersion:1,savedAt:new Date().toISOString(),state});}

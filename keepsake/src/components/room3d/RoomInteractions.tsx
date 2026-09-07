@@ -33,7 +33,11 @@ export function HotspotAnchor({
   prompt?: string;
   onActivate: () => void;
 }) {
-  const box = useMemo(() => objectAnchor(object, 0.88), [object]);
+  const box = useMemo(() => {
+    const cover=id==='guestbook'?object.getObjectByName('Guestbook_Cover'):undefined;
+    if(cover){const b=new THREE.Box3().setFromObject(cover);return new THREE.Vector3((b.min.x+b.max.x)/2,b.max.y+.025,(b.min.z+b.max.z)/2);}
+    return objectAnchor(object,0.88);
+  }, [object,id]);
 
   return (
     <group position={box}>
@@ -50,7 +54,7 @@ export function HotspotAnchor({
           document.body.style.cursor = "";
         }}
       >
-        <sphereGeometry args={[0.18, 10, 10]} />
+        <sphereGeometry args={[id==='guestbook'?.10:.18, 10, 10]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       <FacedHtml point={box}>

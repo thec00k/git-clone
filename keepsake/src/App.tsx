@@ -1,3 +1,4 @@
+import {SoundCloudDock} from './components/SoundCloudDock';
 import { useNav } from "./store/nav";
 import { Room } from "./components/room/Room";
 import { BookView } from "./components/BookView";
@@ -9,6 +10,7 @@ import { Guestbook } from "./components/views/Guestbook";
 import { AmbientAudio } from "./components/AmbientAudio";
 import { SpotifyDock } from "./components/SpotifyDock";
 import { PhotoPrinter } from "./components/PhotoPrinter";
+import {DiscoverySystem} from './components/Discoveries';
 import { CrtPlayerSlotProvider } from "./store/spotifyUi";
 
 function CurrentView() {
@@ -36,8 +38,9 @@ export default function App() {
   return (
     <CrtPlayerSlotProvider>
       <AmbientAudio />
-      <SpotifyDock />
+      <SpotifyDock /><SoundCloudDock/>
       <CurrentView />
+      <DiscoverySystem/>
       {printerOpen && !isVisitor && <PhotoPrinter onClose={() => setPrinterOpen(false)} />}
     </CrtPlayerSlotProvider>
   );

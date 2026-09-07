@@ -80,3 +80,14 @@ Both ceiling pull chains now sit outside the bowl at Blender X ±0.126 m, with s
 
 Spotify uses the official IFrame API with native embed fallback, lifecycle cleanup and retry. A browser check started preview playback through the mini control and received the real track title “halo Houston” for the dock and CRT. Stop destroys the player; the square button now explains its purpose. The volume popover is disabled with an explanation unless a connected device reports volume support. Spotify Premium is required for the volume API. Device targeting, volume bounds, disconnected/offline handling and HTTP 204/403 responses pass synthetic tests in `node scripts/check-spotify.mjs`; authenticated device volume was not tested against a personal account.
 
+
+## September 7 discovery and identity pass
+
+See deferred-improvements.md for implemented scope and external dependencies. Automated checks cover persistence, backup validation, achievement baseline exclusion, cooldowns/no repeats, story order, guest attribution/delivery settings and all five placement bounds. Editor layout and memory backup tests pass.
+
+Local browser observations at DPR 1: Balanced sampled roughly 111–127 fps (p95 8.9–11.6 ms); High initially 96 fps (p95 12.6 ms), and later 47–60 fps while several review scenes were open. These runs differ in scene/tab workload and are not a controlled before/after benchmark. Use ?perf=1 for FPS, p95 frame time, draw calls and triangle counts. Rendering pauses on hidden documents and rests while correspondence is open. High mode uses a tighter sun-shadow depth range and reduced bias to address the detached light strip.
+
+Browser checks: physical letter opens; unread letter persists through reload; keep-in-book adds a fresh spread; map pin opens the exact linked page; cabinet photo selection persists; shelf creation opens the cover editor and live title updates its preview and spine. Isolated verification fixtures are restricted to port 5176; personal room data on 5174 is not modified.
+
+Additional browser verification: guestbook desk toggle switches the physical surprise to an open book; its message dialog retains the friend's name; saving and reloading retains the correspondence entry. Paper MP3 decodes successfully (1.094 seconds). SoundCloud widget loads metadata from a public playlist. Mellow Skies remains an opt-in taste candidate, not the default room music. Full SoundCloud OAuth has not been implemented or represented as connected.
+SoundCloud final control check: the public Mellow Skies playlist advanced from Warm Horizon to Dancing Dandelions and updated the room metadata; Stop left the room intact with no browser errors. An iframe teardown error discovered during verification was fixed by guarding late callbacks and detached-widget cleanup.
