@@ -32,6 +32,7 @@ export type Weather = "clear" | "rain" | "snow";
 export type MusicProvider = "ambient" | "spotify" | "lofi" | "soundcloud";
 
 export interface Environment {
+  roomTheme?: "woodland" | "beachfront";
   roomQuality?: "balanced" | "high";
   timeMode: TimeMode;
   season: Season;
@@ -45,7 +46,7 @@ export interface Environment {
   musicProvider: MusicProvider;
   soundCloudUrl?: string;
   entryMusic?: "off" | "mellow" | "spotify" | "soundcloud";
-  crtColor?: "blue" | "green" | "purple" | "pink" | "orange" | "red";
+  crtColor?: "blue" | "green" | "purple" | "pink" | "orange" | "red" | "coastal";
   volume: number; // 0..1
   ambienceVolume: number; // 0..1
   /** When true, map pins cannot be dragged (click still opens edit). */
@@ -131,7 +132,8 @@ export interface AppState {
   archive: ArchivePhoto[];
   archiveTabs: ArchiveTab[];
   environment: Environment;
-  roomDecor?: {owned:string[];sillItem?:string;posterItem?:string};
+  ownedRoomThemes?: ("woodland" | "beachfront")[];
+  roomDecor?: {owned:string[];sillItem?:string;posterItem?:string;layouts?:Partial<Record<"woodland"|"beachfront",{sillItem?:string;posterItem?:string;crtColor?:Environment['crtColor']}>>};
   guestbook: GuestEntry[];
   notes: PageNote[];
   pinNotes: PinNote[];

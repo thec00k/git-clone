@@ -2,10 +2,10 @@ import {Html} from '@react-three/drei';
 import {useApp} from '../../store/appStore';
 import {useNav} from '../../store/nav';
 import {activeDiscovery,discoveryState,PLACES,REWARDS,discover} from '../../lib/discoveries';
-import {activeRoom} from './themes';
+import {useActiveRoom} from './useActiveRoom';
 export function DiscoveryObject(){
  const {state,update}=useApp();const {isVisitor,touring,setDiscoveryOpen}=useNav();
- const letter=activeDiscovery(state);if(!activeRoom.woodland||!letter||isVisitor||touring||discoveryState(state).frequency==='off')return null;
+ const activeRoom=useActiveRoom();const letter=activeDiscovery(state);if(activeRoom.id==="classic"||!letter||isVisitor||touring||discoveryState(state).frequency==='off')return null;
  const inBook=!!letter.guestEntryId&&(letter.delivery==='book'||discoveryState(state).guestNotesOnDesk===false);
  const place=PLACES.find(p=>p.id===(inBook?'guestbook':letter.location))!;
  const open=()=>{update(s=>discover(s,letter.id,Date.now()));setDiscoveryOpen(letter.id);};

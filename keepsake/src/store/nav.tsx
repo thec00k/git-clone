@@ -10,6 +10,8 @@ export type ArchiveFolderKey = "all" | "favorites" | string;
 
 export type View =
   | "room"
+  | "closed"
+  | "friends"
   | "book"
   | "shelf"
   | "archive"
@@ -18,6 +20,8 @@ export type View =
   | "guestbook";
 
 interface NavContextValue {
+  closeRoom: () => void;
+  enterRoom: () => void;
   discoveryOpen: string | null;
   setDiscoveryOpen: (id:string|null)=>void;
   printerOpen: boolean;
@@ -54,7 +58,10 @@ export function NavProvider({ children }: { children: ReactNode }) {
   const [printerOpen, setPrinterOpen] = useState(false);
   const [pendingPrint, setPendingPrint] = useState<{ src: string; photoId?: string } | null>(null);
   const [bookPageId, setBookPageId] = useState<string | null>(null);
-  const [stack, setStack] = useState<View[]>(["room"]);
+  const [stack, setStack] = useState<View[]>(() => {
+    try { return [sessionStorage.getItem('keepsake-room-closed') === '1' ? 'closed' : 'room']; }
+    catch { return ['room']; }
+  });
   const [viewAs, setViewAs] = useState<ViewAs>("owner");
   const [touring, setTouring] = useState(false);
   const [tourFocus, setTourFocus] = useState<HotspotId | null>(null);
@@ -62,6 +69,15 @@ export function NavProvider({ children }: { children: ReactNode }) {
   const [archiveFolder, setArchiveFolder] = useState<ArchiveFolderKey>("all");
 
   const go = useCallback((v: View) => setStack((s) => [...s, v]), []);
+  const closeRoom = useCallback(() => {
+    try { sessionStorage.setItem('keepsake-room-closed', '1'); } catch { /* Tab storage may be unavailable. */ }
+    setPrinterOpen(false); setDiscoveryOpen(null); setTouring(false); setTourFocus(null);
+    setViewAs('owner'); setStack(['closed']);
+  }, []);
+  const enterRoom = useCallback(() => {
+    try { sessionStorage.removeItem('keepsake-room-closed'); } catch { /* Still allow returning. */ }
+    setStack(['room']);
+  }, []);
   const openArchiveFolder = useCallback((tab: ArchiveFolderKey) => {
     setArchiveFolder(tab);
     setStack((s) => [...s, "archiveFolder"]);
@@ -94,6 +110,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<NavContextValue>(
     () => ({
+      closeRoom, enterRoom,
       discoveryOpen,setDiscoveryOpen,
       printerOpen, setPrinterOpen, pendingPrint, setPendingPrint, bookPageId, setBookPageId,
       view,
@@ -116,7 +133,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
       backAria,
       backLabel,
     }),
-    [view, go, back, archiveFolder, openArchiveFolder, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace, printerOpen, pendingPrint, bookPageId,discoveryOpen],
+    [view, go, back, archiveFolder, openArchiveFolder, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace, printerOpen, pendingPrint, bookPageId,discoveryOpen,closeRoom,enterRoom],
   );
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;

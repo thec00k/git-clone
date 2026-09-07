@@ -12,6 +12,7 @@ import { SpotifyDock } from "./components/SpotifyDock";
 import { PhotoPrinter } from "./components/PhotoPrinter";
 import {DiscoverySystem} from './components/Discoveries';
 import { CrtPlayerSlotProvider } from "./store/spotifyUi";
+import {DoorLanding} from './components/room/DoorLanding';
 
 function CurrentView() {
   const { view } = useNav();
@@ -34,7 +35,8 @@ function CurrentView() {
 }
 
 export default function App() {
-  const { printerOpen, setPrinterOpen, isVisitor } = useNav();
+  const { printerOpen, setPrinterOpen, isVisitor, view } = useNav();
+  if (view === 'closed' || view === 'friends') return <DoorLanding friends={view === 'friends'}/>;
   return (
     <CrtPlayerSlotProvider>
       <AmbientAudio />

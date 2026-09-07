@@ -39,7 +39,7 @@ Spotify is optional. SoundCloud plays public links; account OAuth is pending. Th
 - CSS fallbacks: ?room=chamber and ?room=flat
 - Performance display: ?perf=1
 
-Beachfront is the next planned environment, followed by Cyberpunk Cityscape, Snowy Mountain and Stormy Lighthouse Room. Future room cards do not yet switch scenes. Content must remain independent of environment selection.
+Beachfront is available as a first playable coastal slice in Drawer shop > Room variants. Switching preserves memories and per-room decoration choices. See [Beachfront notes](docs/beachfront-prototype.md). Cyberpunk Cityscape, Snowy Mountain and Stormy Lighthouse Room remain planned.
 
 After Blender edits, export the Woodland asset to its own path and run npm run check:room. Follow the source/export instructions in the prototype notes; do not overwrite the original asset inadvertently.
 

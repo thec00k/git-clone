@@ -25,8 +25,9 @@ export const classicRoom: RoomTheme = {
   ...woodlandRoom, id: "classic", title: "The original room", asset: "/room/keepsake.glb", woodland: false,
   views: { ...sharedViews, front: { position: [.05,1.32,.62], target: [-.15,.88,-1.62] } }, fov: 42,
 };
-export const roomThemes = { woodland: woodlandRoom, classic: classicRoom };
-export const activeRoom = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("theme") === "classic" ? classicRoom : woodlandRoom;
+export const beachfrontRoom: RoomTheme = {...woodlandRoom, id: "beachfront", title: "Beachfront", subtitle: "Salt air and afternoons worth keeping.", asset: "/room/beachfront/beachfront.glb", woodland: false};
+export const roomThemes = { woodland: woodlandRoom, beachfront: beachfrontRoom, classic: classicRoom };
+
 export const qualityProfiles = {
   balanced: { dpr: 1.25, shadows: false, particles: 70 },
   high: { dpr: 1.75, shadows: true, particles: 150 },

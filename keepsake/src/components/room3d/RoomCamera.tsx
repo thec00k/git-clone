@@ -1,15 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { RoomFace } from "../../lib/roomLayout";
-import { activeRoom } from "./themes";
+import {useActiveRoom} from "./useActiveRoom";
 const EYE_Y = 1.32;
 
-export const FACE_VIEW = Object.fromEntries(Object.entries(activeRoom.views).map(([face, view]) => [face, {
-  position: new THREE.Vector3(...view.position), target: new THREE.Vector3(...view.target),
-}])) as Record<RoomFace, { position: THREE.Vector3; target: THREE.Vector3 }>;
 const READING_VIEW = {position:new THREE.Vector3(.25,1.32,.45),target:new THREE.Vector3(-1.9,.45,1.35)};
-const SEATED_VIEW = { position: new THREE.Vector3(...activeRoom.seated.position), target: new THREE.Vector3(...activeRoom.seated.target) };
 /** Straight down on the oak. Open `?look=desk` to check contact. */
 const DESK_OVERHEAD_VIEW = {
   position: new THREE.Vector3(-0.15, 2.05, -1.72),
@@ -21,7 +17,7 @@ function wantsDeskOverhead() {
   return new URLSearchParams(window.location.search).get("look") === "desk";
 }
 
-const ROOM_WALK = activeRoom.walkBounds;
+
 const WALK_SPEED = 1.55;
 const LOOK_YAW = 0.0034;
 const LOOK_PITCH = 0.0028;
@@ -52,13 +48,17 @@ function lookDir(yaw: number, pitch: number) {
   return new THREE.Vector3(Math.sin(yaw) * cp, Math.sin(pitch), -Math.cos(yaw) * cp);
 }
 
-function clampInRoom(pos: THREE.Vector3) {
+function clampInRoom(pos: THREE.Vector3, ROOM_WALK: {minX:number;maxX:number;minZ:number;maxZ:number}) {
   pos.x = THREE.MathUtils.clamp(pos.x, ROOM_WALK.minX, ROOM_WALK.maxX);
   pos.z = THREE.MathUtils.clamp(pos.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
 }
 
 /** Eye-height look: yaw/pitch only. The camera never leaves standing height. */
 export function EyeCamera({ face, seated, touring, viewRevision, reading = false }: { face: RoomFace; seated: boolean; touring: boolean; viewRevision: number; reading?: boolean }) {
+  const activeRoom = useActiveRoom();
+  const ROOM_WALK = activeRoom.walkBounds;
+  const FACE_VIEW = useMemo(() => Object.fromEntries(Object.entries(activeRoom.views).map(([face,v]) => [face,{position:new THREE.Vector3(...v.position),target:new THREE.Vector3(...v.target)}])) as Record<RoomFace,{position:THREE.Vector3;target:THREE.Vector3}>, [activeRoom]);
+  const SEATED_VIEW = useMemo(() => ({position:new THREE.Vector3(...activeRoom.seated.position),target:new THREE.Vector3(...activeRoom.seated.target)}),[activeRoom]);
   const { camera, gl } = useThree();
   const keys = useRef({ f: 0, r: 0 });
   const yaw = useRef(0);
@@ -107,7 +107,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
       userMoved.current = true;
       const dir = lookDir(yaw.current, 0);
       camera.position.addScaledVector(dir, -e.deltaY * 0.0022);
-      clampInRoom(camera.position);
+      clampInRoom(camera.position, ROOM_WALK);
       camera.position.y = EYE_Y;
     };
     el.addEventListener("contextmenu", blockMenu);
@@ -122,7 +122,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
       window.removeEventListener("pointerup", up);
       el.removeEventListener("wheel", wheel);
     };
-  }, [camera, gl]);
+  }, [camera, gl, ROOM_WALK]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -167,7 +167,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
         camera.position.copy(view.position);
       } else if (!seated) {
         camera.position.y = EYE_Y;
-        clampInRoom(camera.position);
+        clampInRoom(camera.position, ROOM_WALK);
       }
       camera.lookAt(view.target);
     } else {
@@ -181,7 +181,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
         camera.position.copy(SEATED_VIEW.position);
       } else {
         camera.position.y = EYE_Y;
-        clampInRoom(camera.position);
+        clampInRoom(camera.position, ROOM_WALK);
       }
       camera.lookAt(camera.position.clone().add(lookDir(yaw.current, pitch.current)));
     }

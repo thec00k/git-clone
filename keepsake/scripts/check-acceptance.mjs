@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 const scripts = [
   'check-woodland.mjs', 'check-editor.mjs', 'check-memory-features.mjs',
   'check-discoveries.mjs', 'check-discovery-geometry.mjs', 'check-room-music.mjs',
-  'check-room-shop.mjs', 'check-soundcloud.mjs', 'check-spotify.mjs',
+  'check-room-shop.mjs', 'check-soundcloud.mjs', 'check-spotify.mjs', 'check-room-themes.mjs',
 ];
 for (const script of scripts) {
   process.stdout.write(`\nChecking ${script}\n`);

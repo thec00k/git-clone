@@ -1,14 +1,15 @@
-import { useEffect, useMemo } from "react";
-import { useGLTF } from "@react-three/drei";
+import { use, useEffect, useMemo } from "react";
+import {loadRoomAsset} from "./roomAssetCache";
 import * as THREE from "three";
 import { LAMP_BULB } from "../../lib/roomHotspots";
 import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
-import { activeRoom } from "./themes";
+import {useActiveRoom} from "./useActiveRoom";
 
 /** Clone materials once. The GLTF cache retains ownership of geometry/textures. */
 export function useRoomAsset(phase: Phase, environment: Environment) {
-  const { scene } = useGLTF(activeRoom.asset);
+  const activeRoom = useActiveRoom();
+  const {scene} = use(loadRoomAsset(activeRoom.asset));
   const { cloned, materials } = useMemo(() => {
     const cloned = scene.clone(true);
     const materials: THREE.Material[] = [];
@@ -23,11 +24,11 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
       if (obj.name === "Outside_View" || obj.name === "Win_Glass") {
         const material = new THREE.MeshBasicMaterial();
         materials.push(material); obj.material = material;
-        if (activeRoom.woodland) obj.visible = false;
+        if (activeRoom.id !== "classic") obj.visible = false;
       }
     });
     return { cloned, materials };
-  }, [scene]);
+  }, [scene, activeRoom.id]);
   useEffect(() => () => materials.forEach(material => material.dispose()), [materials]);
   useEffect(() => {
     cloned.traverse(obj => {

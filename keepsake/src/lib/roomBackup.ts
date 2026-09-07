@@ -1,3 +1,5 @@
+import {ownsRoomTheme} from './roomThemes.ts';
+import {CRT_COLORS} from './roomMusic.ts';
 import {ROOM_GOODS,SHOP_GOODS,EXTRA_GOODS} from './roomShop.ts';
 import {soundCloudUrl} from './soundcloud.ts';
 import type { AppState } from '../types/app';
@@ -34,12 +36,26 @@ export function parseRoomBackup(text:string):AppState{
  ensure(object(s.progress)&&['visitedAtNight','previewedAsVisitor','completedTour'].every(k=>typeof s.progress ==='object'&&typeof (s.progress as RecordValue)[k]==='boolean'));
  const e=s.environment;ensure(object(e)&&['auto','day','dusk','night'].includes(e.timeMode as string)&&['spring','summer','autumn','winter'].includes(e.season as string)&&['clear','rain','snow'].includes(e.weather as string)&&['ambient','spotify','lofi','soundcloud'].includes(e.musicProvider as string));
  ensure(e.entryMusic===undefined||['off','mellow','spotify','soundcloud'].includes(e.entryMusic as string));
- ensure(e.crtColor===undefined||['blue','green','purple','pink','orange','red'].includes(e.crtColor as string));
+ ensure(e.crtColor===undefined||Object.hasOwn(CRT_COLORS,e.crtColor as string));
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
+ ensure(e.roomTheme===undefined || ['woodland','beachfront'].includes(e.roomTheme as string));
+ ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
+ ensure(e.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));
  ensure(['lampOn','ceilingOn','shelfLit','musicOn','pinsLocked'].every(k=>typeof e[k]==='boolean')&&['volume','ambienceVolume'].every(k=>number(e[k])&&(e[k] as number)>=0&&(e[k] as number)<=1));
  ensure(s.latestPrint===undefined || object(s.latestPrint)&&image(s.latestPrint.src)&&number(s.latestPrint.printedAt));
  ensure(s.roomDecor===undefined||object(s.roomDecor)&&strings(s.roomDecor.owned)&&(s.roomDecor.owned as string[]).every(id=>SHOP_GOODS.some(g=>g.id===id))&&new Set(s.roomDecor.owned as string[]).size===(s.roomDecor.owned as string[]).length&&(s.roomDecor.sillItem===undefined||string(s.roomDecor.sillItem)&&(s.roomDecor.owned as string[]).includes(s.roomDecor.sillItem as string)&&ROOM_GOODS.some(i=>i.id===(s.roomDecor as RecordValue).sillItem)));
  if(object(s.roomDecor))ensure(s.roomDecor.posterItem===undefined||string(s.roomDecor.posterItem)&&(s.roomDecor.owned as string[]).includes(s.roomDecor.posterItem as string)&&EXTRA_GOODS.some(i=>i.id===(s.roomDecor as RecordValue).posterItem&&i.kind==='Poster'));
+ if(object(s.roomDecor)&&s.roomDecor.layouts!==undefined){
+   ensure(object(s.roomDecor.layouts));
+   const owned=s.roomDecor.owned as string[];
+   for(const [theme,layout] of Object.entries(s.roomDecor.layouts)){
+     ensure(['woodland','beachfront'].includes(theme)&&object(layout));
+     ensure(layout.crtColor===undefined||string(layout.crtColor)&&Object.hasOwn(CRT_COLORS,layout.crtColor as string));
+     ensure(layout.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));
+     ensure(layout.sillItem===undefined||string(layout.sillItem)&&owned.includes(layout.sillItem as string)&&ROOM_GOODS.some(i=>i.id===layout.sillItem));
+     ensure(layout.posterItem===undefined||string(layout.posterItem)&&owned.includes(layout.posterItem as string)&&EXTRA_GOODS.some(i=>i.id===layout.posterItem&&i.kind==='Poster'));
+   }
+ }
  ensure(s.framePhotoId===undefined||string(s.framePhotoId));
  ensure(s.achievementBaseline===undefined||object(s.achievementBaseline)&&['elements','books','pins','guests'].every(k=>strings((s.achievementBaseline as RecordValue)[k])));
  ensure(s.discoveries===undefined||object(s.discoveries)&&['quiet','occasional','off'].includes(s.discoveries.frequency as string)&&typeof s.discoveries.hints==='boolean'&&(s.discoveries.guestNotesOnDesk===undefined||typeof s.discoveries.guestNotesOnDesk==='boolean')&&['lastFoundAt','lastVisitAt'].every(k=>s.discoveries&&((s.discoveries as RecordValue)[k]===undefined||number((s.discoveries as RecordValue)[k])))&&records(s.discoveries.entries,d=>string(d.id)&&string(d.title)&&string(d.text)&&PLACES.some(p=>p.id===d.location)&&number(d.appearedAt)&&['foundAt','readAt','keptAt'].every(k=>d[k]===undefined||number(d[k]))&&['bookId','pageId','story','author','guestEntryId'].every(k=>d[k]===undefined||string(d[k]))&&(d.delivery===undefined||['desk','book'].includes(d.delivery as string))&&(d.reward===undefined||string(d.reward)&&Object.hasOwn(REWARDS,d.reward))));

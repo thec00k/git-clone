@@ -39,14 +39,14 @@ Latest automated checks passed September 7. Performance observations in woodland
 
 All environments belong in this repository and share product systems. Development branches are temporary, not user-selectable rooms.
 
-- [ ] Build the Beachfront shell, coastal exterior, materials and soundscape.
+- [x] First playable Beachfront shell, coastal exterior, materials and synthesized surf; further art polish remains.
 - [ ] Generalize theme configuration beyond the existing Woodland/classic asset choice: lighting, scenery, functional anchors, camera views and decoration slots.
-- [ ] Add an owner preview and Make this my room action under Drawer > Room Variants.
-- [ ] Persist the selected room and each room's decoration arrangement.
-- [ ] Load only the selected environment; preserve the old room if loading fails.
+- [x] Add an owner style preview and Make this my room action under Drawer > Room Variants.
+- [x] Persist the selected room and each room's decoration arrangement.
+- [x] Load and validate the requested asset before changing the selected environment; retain the old selection on load failure.
 - [ ] Verify switching and reloading preserves all books, photos, pins, guest messages, inventory and achievements. Unsupported display items remain in inventory.
 
-Planned lineup: Woodland Writing Room (built), Beachfront, Cyberpunk Cityscape, Snowy Mountain, Stormy Lighthouse Room. The lighthouse replaces the original Stormwatch Library concept: stormy sea views, curved coastal architecture, rain-streaked glass, aged brass and warm lantern light. Future-room shop cards are previews, not purchasable scenes.
+Planned lineup: Woodland Writing Room (built), Beachfront (first playable slice), Cyberpunk Cityscape, Snowy Mountain, Stormy Lighthouse Room. The lighthouse replaces the original Stormwatch Library concept: stormy sea views, curved coastal architecture, rain-streaked glass, aged brass and warm lantern light. Woodland and Beachfront can be selected without a stamp charge. The other three shop cards remain planned. See [Beachfront implementation notes](beachfront-prototype.md).
 
 ## 3. Reliable cloud saving and photo ownership
 
@@ -78,3 +78,7 @@ Milestone-based stamp earnings; camera restoration after editing; music fades an
 The app and Blender source are versioned on codex/keepsake-rebuild. The user confirmed the GitHub destination, and the saved build through 11b6c79 was successfully pushed to both origin/codex/keepsake-rebuild and origin/main on September 7. Acceptance changes are saved in the subsequent checkpoint.
 
 Run from keepsake/: npm run check:acceptance, npm run build, npm run lint. Lint currently reports warnings. Browser checks must preserve user data; never reset the personal 5174 origin to install test fixtures.
+
+## Latest checkpoint
+
+Door actions are implemented: save-and-close local logout, non-destructive tidy with save result, and an honest friends-room landing screen pending real visits. Beachfront is a playable first slice with the requested pale woods/blue trims, arched window, preserved desk clutter, sunset, moonlit water, rocks and exclusive Coastal Blue CRT preset. Switching and exclusive-color ownership have automated regression coverage; dusk/night and switching both ways were checked in the browser. Further visual and device acceptance remains open.

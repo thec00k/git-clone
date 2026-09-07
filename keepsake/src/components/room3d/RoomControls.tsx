@@ -1,16 +1,19 @@
 import { Archive, Armchair, BookOpen, ChevronDown, Lamp, Lightbulb, Music2, Printer, Library, Home, MapPinned, Pencil, Armchair as ReadingChair } from "lucide-react";
 import type { Environment } from "../../types/app";
 import type { RoomFace } from "../../lib/roomLayout";
-import { activeRoom, type RoomQuality } from "./themes";
+import {type RoomQuality} from "./themes";
+import {useActiveRoom} from "./useActiveRoom";
 import { useNav } from "../../store/nav";
 
-export function RoomControls({ seated, environment, quality, setQuality, onBook, onFiles, onSeat, onLamp, onCeiling, onLook, onDrawer, onMusic, onReading, onLibrary }: {
+export function RoomControls({ seated, environment, quality, setQuality, onBook, onFiles, onSeat, onLamp, onCeiling, onLook, onDrawer, onMusic, onReading, onLibrary, onDoor }: {
+  onDoor: () => void;
   onReading: () => void; onLibrary: () => void;
   seated: boolean; environment: Environment; quality: RoomQuality;
   setQuality: (quality: RoomQuality) => void;
   onBook: () => void; onFiles: () => void; onSeat: () => void; onMusic: () => void;
   onLamp: () => void; onCeiling: () => void; onLook: (face: RoomFace) => void; onDrawer: () => void;
 }) {
+  const activeRoom = useActiveRoom();
   const { setPrinterOpen, isVisitor,setDiscoveryOpen } = useNav();
   return <>
     <div className="ks-room-name"><span>YOUR QUIET CORNER</span><h2>{activeRoom.title}</h2></div>
@@ -35,6 +38,7 @@ export function RoomControls({ seated, environment, quality, setQuality, onBook,
           {!isVisitor && <button onClick={() => setPrinterOpen(true)}><Printer size={16}/> Print a photo</button>}
           <button onClick={onLibrary}><Library size={16}/> Browse all scrapbooks</button>
           <button onClick={onMusic}><Music2 size={16}/> Music</button>
+          <button onClick={onDoor}>Exit through the door</button>
           {!isVisitor&&<button onClick={()=>setDiscoveryOpen('collection')}><BookOpen size={16}/> Correspondence</button>}
           <p>LIGHTING</p>
           <button aria-pressed={environment.lampOn} onClick={onLamp}><Lamp size={16} /> Desk lamp <span>{environment.lampOn ? "On" : "Off"}</span></button>

@@ -1,0 +1,8 @@
+{
+  "room": "beachfront",
+  "updated": "2026-09-07",
+  "assets": [
+    {"id":"inherited-furniture","source":"../woodland/woodland.blend","provenance":"Reuses the existing Keepsake furniture and functional anchors. See ../woodland/asset-ledger.json. Inherited third-party texture origins remain unverified; this pass makes no new license claim for them."},
+    {"id":"coastal-original-work","creator":"Original work authored for Keepsake","source":"build-beachfront.py; coastal-palette.py; ../../src/components/room3d/BeachfrontScenery.tsx","includes":["arched window and plaster arch wall","sailcloth curtains","arched string lights","teak and whitewood procedural grain textures","coastal palette","ocean layers, clouds, sailboat and shoreline","illustrated style previews"],"externalDownloads":false,"sourceFile":"beachfront.blend","runtimeFile":"../../public/room/beachfront/beachfront.glb","optimization":"256px generated wood textures; retained compact inherited textures; 62,548 triangles and 4,826,888 bytes at first export"}
+  ]
+}

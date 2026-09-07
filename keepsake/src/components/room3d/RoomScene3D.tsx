@@ -1,3 +1,5 @@
+import {useActiveRoom} from "./useActiveRoom";
+import {BeachfrontScenery} from "./BeachfrontScenery";
 import { RoomSound } from './RoomSound';
 import {RoomPerformance} from './RoomPerformance';
 import { playRoomSound } from '../../lib/audio';
@@ -12,10 +14,10 @@ import { StickerStore } from "../StickerStore";
 import { useApp } from "../../store/appStore";
 import {useNav} from '../../store/nav';
 import { useListen } from "../../store/listen";
-import { FACE_VIEW, EyeCamera } from "./RoomCamera";
+import { EyeCamera } from "./RoomCamera";
 import { RoomModel } from "./RoomModel";
 import type { HotspotAction } from "./RoomInteractions";
-import { activeRoom, qualityProfiles, type RoomQuality } from "./themes";
+import { qualityProfiles, type RoomQuality } from "./themes";
 import { WoodlandScenery } from "./WoodlandScenery";
 import { RoomControls } from "./RoomControls";
 import { RoomLoading } from "./RoomLoading";
@@ -42,6 +44,7 @@ export function RoomScene3D({
   onOpenDoor: () => void;
   onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
+  const activeRoom=useActiveRoom();
   const quality=environment.roomQuality??"balanced";
   const {discoveryOpen,isVisitor}=useNav();const [tabVisible,setTabVisible]=useState(!document.hidden);
   useEffect(()=>{const change=()=>setTabVisible(!document.hidden);document.addEventListener('visibilitychange',change);return()=>document.removeEventListener('visibilitychange',change);},[]);
@@ -151,15 +154,15 @@ export function RoomScene3D({
     >
       <RoomSound environment={environment}/>
       <div className="ks-room3d-picture" role="group" aria-label="Interactive room">
-      <Canvas
+      <Canvas key={activeRoom.id}
         frameloop={tabVisible&&!discoveryOpen?'always':'demand'}
-        camera={{ fov: seated ? 38 : activeRoom.fov, near: 0.08, far: 40, position: FACE_VIEW.front.position.toArray() }}
+        camera={{ fov: seated ? 38 : activeRoom.fov, near: 0.08, far: 40, position: activeRoom.views.front.position }}
         dpr={[1, profile.dpr]}
         shadows={profile.shadows}
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: activeRoom.woodland ? 1.05 : 0.62,
+          toneMappingExposure: activeRoom.id === "classic" ? .62 : activeRoom.id === "beachfront" ? 1.12 : 1.05,
           failIfMajorPerformanceCaveat: false,
           powerPreference: "default",
         }}
@@ -184,12 +187,13 @@ export function RoomScene3D({
           />
         </Suspense>
         {activeRoom.woodland && <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />}
+        {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment}/>}
         <EyeCamera reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>
       </div>
       {!touring && <RoomControls onLibrary={()=>onGo("shelf")} onReading={()=>{setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment} quality={quality} setQuality={setQuality}
         onBook={() => onGo("book")} onFiles={openArchive} onSeat={seated ? stand : sit}
-        onMusic={onOpenMusic} onLamp={toggleLamp} onCeiling={toggleCeiling} onLook={face => { stand(); lookAt(face); }} onDrawer={openCraft} />}
+        onDoor={onOpenDoor} onMusic={onOpenMusic} onLamp={toggleLamp} onCeiling={toggleCeiling} onLook={face => { stand(); lookAt(face); }} onDrawer={openCraft} />}
       {shopOpen && <StickerStore onClose={() => setShopOpen(false)} />}
     </div>
   );

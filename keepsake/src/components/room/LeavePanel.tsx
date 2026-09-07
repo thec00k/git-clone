@@ -1,94 +1,44 @@
-import { useRef, useState } from "react";
-import { useApp } from "../../store/appStore";
-import { useNav } from "../../store/nav";
-import { useFocusTrap } from "../../hooks/useFocusTrap";
-import { logout as spotifyLogout } from "../../lib/spotify";
+import {useRef, useState} from 'react';
+import {DoorOpen, LogOut, Sparkles, Users} from 'lucide-react';
+import {useApp} from '../../store/appStore';
+import {useNav} from '../../store/nav';
+import {useFocusTrap} from '../../hooks/useFocusTrap';
+import {logout as spotifyLogout} from '../../lib/spotify';
 
-/** The door: leave the room as it is, tidy it, preview as a visitor, or close up. */
-export function LeavePanel({ onClose }: { onClose: () => void }) {
-  const { flushSave, tidyRoom, saveStatus, recordProgress } = useApp();
-  const { setViewAs } = useNav();
+export function LeavePanel({onClose}: {onClose: () => void}) {
+  const {flushSave, tidyRoom} = useApp();
+  const {go, closeRoom, isVisitor} = useNav();
   const panelRef = useRef<HTMLDivElement>(null);
-  const [note, setNote] = useState<string | null>(null);
-  useFocusTrap(panelRef, onClose);
-
-  return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div
-        ref={panelRef}
-        className="ks-panel w-full max-w-md p-5"
-        role="dialog"
-        aria-modal="true"
-        aria-label="The door"
-        data-leave-panel
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="mb-1 font-display text-xl">The door</h2>
-        <p className="mb-4 text-sm text-paper/60">
-          Opposite the window. You can step out, leave the room as it is, or tidy it before you go.
-        </p>
-
-        <button
-          type="button"
-          className="ks-tool mt-1 w-full justify-center"
-          data-leave-friends
-          onClick={() => {
-            setViewAs("friend");
-            recordProgress({ previewedAsVisitor: true });
-            setNote("Friends' rooms are not through this door yet. You are previewing your own room as a friend would see it.");
-          }}
-        >
-          Visit friends
-        </button>
-        <button
-          type="button"
-          className="ks-tool mt-2 w-full justify-center"
-          data-leave-save
-          onClick={() => {
-            void flushSave().then(() => {
-              setNote("The room will wait. Clutter, books, and light are kept as they are.");
-            });
-          }}
-        >
-          Leave it as it is
-        </button>
-        <button
-          type="button"
-          className="ks-tool mt-2 w-full justify-center"
-          data-leave-tidy
-          onClick={() => {
-            tidyRoom();
-            void flushSave();
-            setNote("Tidied. Hour, weather, lamp, fan, and shelf lights are back to their usual quiet. Your books and photographs stayed.");
-          }}
-        >
-          Tidy up
-        </button>
-        <button
-          type="button"
-          className="ks-tool mt-2 w-full justify-center"
-          data-leave-logout
-          onClick={() => {
-            spotifyLogout();
-            setViewAs("owner");
-            void flushSave();
-            setNote("There is no account on this door yet. Spotify is closed if it was open. The room stays on this machine.");
-          }}
-        >
-          Log out
-        </button>
-
-        {note && (
-          <p className="mt-4 text-sm text-paper/75" data-leave-note>
-            {note}
-            {saveStatus === "saving" ? " Saving…" : saveStatus === "saved" ? " Saved." : ""}
-          </p>
-        )}
-
-        <button type="button" className="ks-tool ks-tool--accent mt-4 w-full justify-center" onClick={onClose}>
-          Stay in the room
-        </button>
-      </div>
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState('');
+  useFocusTrap(panelRef, () => { if (!busy) onClose(); });
+  const leave = async (destination: 'closed' | 'friends') => {
+    setBusy(true); setNote('Saving your room…');
+    if (!await flushSave()) {
+      setBusy(false); setNote('Your room could not be saved. Please try again before leaving.'); return;
+    }
+    if (destination === 'closed') { spotifyLogout(); closeRoom(); }
+    else go('friends');
+    onClose();
+  };
+  const tidy = async () => {
+    setBusy(true); setNote('Putting the room in order…');
+    const saved = await tidyRoom();
+    setBusy(false);
+    setNote(saved ? 'All settled. The hour follows the day, the weather is clear, and the lights are on. Your books, photos and decorations are untouched.' : 'The room is tidied, but saving failed. Please try again before leaving.');
+  };
+  return <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={() => {if (!busy) onClose();}}>
+    <div ref={panelRef} className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="The door" aria-busy={busy} data-leave-panel onClick={e => e.stopPropagation()}>
+      <DoorOpen size={24} className="mb-3"/>
+      <h2 className="font-display text-2xl">Before you go</h2>
+      <p className="ks-handnote mb-4">Your quiet corner will be here.</p>
+      <button className="ks-tool mt-2 w-full justify-center" disabled={busy} data-leave-friends onClick={() => void leave('friends')}><Users size={17}/> Visit friends’ rooms</button>
+      {!isVisitor && <button className="ks-tool mt-2 w-full justify-center" disabled={busy} data-leave-tidy onClick={() => void tidy()}><Sparkles size={17}/> Tidy up room</button>}
+      <p className="mt-2 text-xs text-paper/60">Tidying resets the hour, weather and lights. It keeps your memories and decorations.</p>
+      <button className="ks-tool mt-3 w-full justify-center" disabled={busy} data-leave-logout onClick={() => void leave('closed')}><LogOut size={17}/> Log out</button>
+      <p className="mt-2 text-xs text-paper/60">For now, logging out saves and closes this local room. Accounts and online visits are coming later.</p>
+      <p className="mt-3 text-sm text-paper/80" role="status" data-leave-note>{note}</p>
+      <button className="ks-tool ks-tool--accent mt-3 w-full justify-center" disabled={busy} onClick={onClose}>Stay in the room</button>
     </div>
-  );
+  </div>;
 }

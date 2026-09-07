@@ -1,4 +1,5 @@
 import {musicOnEntry} from '../lib/roomMusic';
+import {ownsRoomTheme} from '../lib/roomThemes';
 import {
   createContext,
   useCallback,
@@ -62,8 +63,8 @@ interface AppContextValue {
   removeArchiveTab: (id: string) => void;
 
   setEnvironment: (patch: Partial<Environment>) => void;
-  tidyRoom: () => void;
-  flushSave: () => Promise<void>;
+  tidyRoom: () => Promise<boolean>;
+  flushSave: (transform?: (state: AppState) => AppState) => Promise<boolean>;
   restoreRoom: (state: AppState) => Promise<void>;
 
   addGuestEntry: (author: string, message: string,deskCopy?:boolean) => void;
@@ -143,6 +144,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         : createSeed();
       if(!initial.achievementBaseline)initial.achievementBaseline=baseline(initial);
+      if (!initial.ownedRoomThemes && initial.environment.roomTheme === 'beachfront') {
+        initial.ownedRoomThemes = ['woodland','beachfront'];
+        initial.environment = {...initial.environment, crtColor:'coastal'};
+      }
       setState(musicOnEntry(initial));
       loadedRef.current = true;
     })();
@@ -329,25 +334,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [update],
   );
 
-  const setEnvironment = useCallback((patch: Partial<Environment>) => update((p) => ({ ...p, environment: { ...p.environment, ...patch } })), [update]);
+  const setEnvironment = useCallback((patch: Partial<Environment>) => update((p) => {
+    if (patch.crtColor === 'coastal' && !ownsRoomTheme(p,'beachfront')) return p;
+    return {...p, environment: {...p.environment,...patch}};
+  }), [update]);
 
-  const tidyRoom = useCallback(
-    () => update((p) => ({ ...p, environment: { ...p.environment, ...TIDY_ROOM } })),
-    [update],
-  );
-
-  const flushSave = useCallback(async () => {
-    const snap = stateRef.current;
-    if (!snap) return;
+  const flushSave = useCallback(async (transform?: (state: AppState) => AppState) => {
+    const current = stateRef.current;
+    if (!current) return false;
+    const snap = transform ? transform(current) : current;
+    if (transform) { stateRef.current = snap; setState(snap); }
     window.clearTimeout(saveTimer.current);
     setSaveStatus("saving");
     try {
       await saveState(snap);
       setSaveStatus("saved");
+      return true;
     } catch {
       setSaveStatus("error");
+      return false;
     }
   }, []);
+
+  const tidyRoom = useCallback(
+    () => flushSave(p => ({ ...p, environment: { ...p.environment, ...TIDY_ROOM } })),
+    [flushSave],
+  );
 
   const addGuestEntry = useCallback(
     (author: string, message: string,deskCopy=false) =>
