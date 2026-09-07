@@ -1,3 +1,5 @@
+> Historical record. For current completion status and the ordered roadmap, use [project-status.md](project-status.md). Later music and shop changes supersede several statements below.
+
 # Music and discovery pass — September 7, 2026
 
 The three previously deferred prototype tasks are implemented: cabinet photograph choice, map-pin links to exact scrapbook pages, and opt-in desktop performance instrumentation/tuning. Performance numbers are observations on this local browser, not a low-end hardware certification.

@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "check:room": "node scripts/check-woodland.mjs",
+    "check:acceptance": "node scripts/check-acceptance.mjs",
     "check:editor": "node scripts/check-editor.mjs",
     "check:memories": "node scripts/check-memory-features.mjs",
     "check:discoveries": "node scripts/check-discoveries.mjs && node scripts/check-discovery-geometry.mjs"

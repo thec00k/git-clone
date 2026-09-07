@@ -7,6 +7,7 @@ const SELECTOR = [
   "input:not([disabled])",
   "select:not([disabled])",
   "textarea:not([disabled])",
+  "summary",
   "[tabindex]:not([tabindex='-1'])",
 ].join(",");
 
@@ -19,7 +20,10 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, onClose: () => 
     if (!root) return;
     const prev = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const list = () =>
-      [...root.querySelectorAll<HTMLElement>(SELECTOR)].filter((el) => !el.closest("[aria-hidden='true']"));
+      [...root.querySelectorAll<HTMLElement>(SELECTOR)].filter((el) =>
+        !el.closest("[aria-hidden='true'], [hidden], [inert]") &&
+        el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden"
+      );
     list()[0]?.focus();
 
     const onKey = (e: KeyboardEvent) => {

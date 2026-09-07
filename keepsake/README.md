@@ -1,121 +1,52 @@
 # Keepsake
 
-A calm, tactile **digital scrapbook** in a handcrafted room: sit at the oak
-desk, open the book, pin prints, and wander the house. Prototype of the
-*Keepsake Vision & Design Bible v3.0* (cream plaster, honey oak, terracotta,
-Fraunces + Caveat).
+A calm digital scrapbook in a handcrafted 3D room. React/TypeScript/Vite application in this folder; desktop is the first target.
 
-The Bible PDF is **not** in this repo. Nearby docs are
-[`docs/keepsake-worklog.pdf`](docs/keepsake-worklog.pdf) and
-[`docs/keepsake-suggestions.pdf`](docs/keepsake-suggestions.pdf).
+## Current build
 
-## Woodland rebuild — current branch
+Woodland Writing Room is the playable local prototype. It includes a scrapbook editor, interactive shelf books, photo archive and printer, visible memory map, guestbook/discoveries, day/night and weather, CRT music, and a drawer shop.
 
-The first Woodland Writing Room slice is implemented with a modular 3D architecture, seasonal forest scenery, rain/snow, quality controls, and a remodeled stitched beanbag. The working scrapbook editor and local storage are preserved. See [prototype notes and remaining acceptance checks](docs/woodland-prototype.md) and [asset provenance](art/woodland/asset-ledger.json).
+Start with the [current project checklist](docs/project-status.md) for verified work, remaining acceptance checks and the ordered roadmap. [Prototype implementation notes](docs/woodland-prototype.md) contain historical detail; [asset provenance](art/woodland/asset-ledger.json) tracks room sources.
 
-The default room is `public/room/woodland/woodland.glb`; use `?theme=classic` for the previous asset. Blender source: `art/woodland/woodland.blend`. Validate an export with `npm run check:room`. Browser acceptance is pending a Windows sandbox repair; Blender inspection, build and GLB validation have been completed.
+The original pitch and design-bible PDFs are not included here. Older worklog/suggestion PDFs are historical, not the current implementation contract.
 
-## Original baseline
+## Run and check
 
-The room is a WebGL scene from [`public/room/keepsake.glb`](public/room/keepsake.glb)
-(desk, chair, CRT, lamp, archive, shelf, map, guestbook, door, fan, clock,
-window). Click a named prop to open that system. Sit in the chair, walk with
-WASD / arrows, look with the mouse, zoom with the wheel.
+From keepsake/:
 
-### Scrapbook
-
-- Leather book on the desk → two-page spread on the oak
-- Upload photos (downscaled locally); polaroid / tape / flush frames; up to 6 per page
-- Drag, rotate, resize, restack, replace, remove; corner handles; pinch/twist on touch
-- Handwritten captions (short, character-limited) and desk-marker ink
-- Stickers; Grid / Column / Scatter presets
-- Page-turn across the spine (buttons or ← / →), with a rustle; reduced-motion swaps instantly
-- Undo / redo; `?` shortcuts
-- Print / Save as PDF
-- Autosave to **IndexedDB** (book, layout, photos, room settings)
-
-### The house
-
-- **Window** — day / dusk / night (auto or forced), season, weather
-- **Lamp** — click the fixture; **ceiling** — plate left of the window
-- **Clock** — rolling digits on `ks_clock_digits` (live in Auto; still times for day/dusk/night)
-- **CRT** — ambient pad and optional **Spotify** (PKCE; Client ID only, never the secret)
-- **Bookshelf** — multiple books, covers, titles, visibility
-- **Archive** — cabinet drawer → hanging files → albums, favourites, place-in-book
-- **Desk drawer** — sticker packs (while seated)
-- **Corkboard map** — pins and notes (no exact GPS)
-- **Guestbook** — flat notes; page notes wait for owner approval, then can whisper
-- **Door** — leave or tidy
-- First-visit house tour (skippable); hidden “keepsakes found”; curator ambience
-- `?listen=1` — spoken room for VoiceOver / TalkBack
-
-### Local only
-
-There is **no backend**. “View as” (owner / close / friend / public) is a
-preview, not security. Visibility, visiting, and notes are UI-only. Photos are
-data URLs in IndexedDB.
-
-## Left to build
-
-**Product / Bible (needs a server)**
-
-- Accounts, auth, cloud photo storage, real multi-user visiting
-- Server-side permission inheritance (Bible §17) before any real sharing
-- Hosted production URL (and Spotify redirect URIs for it)
-
-**Room / art**
-
-- The Design Bible file itself (upload or add under `docs/` if you want it in git)
-- Optional locators still empty: `ks_window_sun`, `ks_ceiling_fan_light`
-- Fan blades do not spin as a separate `ks_ceiling_fan_blades` clip yet
-- Further Blender polish (materials, lighting, props) — export the whole scene
-  to `public/room/keepsake.glb`, +Y Up, tangents off unless you use normal maps
-
-**Editor / house**
-
-- Timeline wall was removed on purpose; do not treat it as missing
-- Licensed sticker / craft packs beyond the starter drawer
-- Spotify Web Playback SDK in-app control (Premium + Client ID)
-- A real-device VoiceOver / TalkBack pass beyond the first a11y cut
-- Physical print / hardware (software PDF is in)
-
-**Fallbacks**
-
-- `?room=flat` — original single-wall diorama
-- `?room=chamber` — CSS three-wall room  
-  Default is the GLB.
-
-## Run
-
-From this folder (`keepsake/`):
-
-```bash
+```sh
 npm install
-npm run dev      # http://127.0.0.1:5174  (Spotify rejects localhost as a redirect URI)
-npm run build    # typecheck (tsc -b) + production build
-npm run preview
+npm run dev
+npm run check:acceptance
+npm run build
+npm run lint
 ```
 
-Brave: open `http://127.0.0.1:5174/` then hard-refresh (**Ctrl+Shift+R**) after a
-new `keepsake.glb`. Copy `.env.example` to `.env` for `VITE_SPOTIFY_CLIENT_ID`
-only — never `SPOTIFY_CLIENT_SECRET`.
+The development server requests port 5174; use the URL it actually reports if that port is occupied. Browser data belongs to that origin, so changing ports opens a separate local room. Use the Room Settings backup/export before moving between origins.
 
-Debug views: `?look=desk` (overhead oak), `?time=day|dusk|night`, `?tour=1`.
+## What is local
 
-## Stack
+Books, photographs, settings, inventory and discoveries persist in IndexedDB. Room backup/restore is available in Settings. There is no account or shared database. View as, visibility and guestbook delivery demonstrate behavior locally; they are not real privacy enforcement or multiplayer.
 
-React 19 + TypeScript + Vite 8, Tailwind CSS v4, Three.js + React Three Fiber /
-Drei, lucide-react. Service worker + web manifest for a production install /
-offline shell.
+Spotify is optional. SoundCloud plays public links; account OAuth is pending. The ambient Mellow Skies playlist starts with Day's End by Purrple Cat and needs an internet connection. Browser/provider restrictions can require pressing Play. Attribution is shown in the player. No music album is bundled for offline playback.
 
-## Layout
+## Rooms and source assets
 
-```
-public/room/keepsake.glb   Blender room (meshes parented to ks_* / Desk)
-src/components/room3d/     WebGL room, clock, WebGL fallback
-src/components/room/       Hub chrome, tour, window panel, listen
-src/components/views/      Shelf, archive drawer/files, atlas, guestbook
-src/components/            Book editor, clutter, print, Spotify dock
-src/store/                 App state + IndexedDB autosave, nav, listen
-src/lib/                   Hotspots, tour, Spotify PKCE, stickers, clock
-```
+- Default: public/room/woodland/woodland.glb
+- Blender source: art/woodland/woodland.blend
+- Modular runtime: src/components/room3d/
+- Previous room: ?theme=classic
+- CSS fallbacks: ?room=chamber and ?room=flat
+- Performance display: ?perf=1
+
+Beachfront is the next planned environment, followed by Cyberpunk Cityscape, Snowy Mountain and Stormy Lighthouse Room. Future room cards do not yet switch scenes. Content must remain independent of environment selection.
+
+After Blender edits, export the Woodland asset to its own path and run npm run check:room. Follow the source/export instructions in the prototype notes; do not overwrite the original asset inadvertently.
+
+## Provider configuration
+
+Copy .env.example only when configuring Spotify. Use VITE_SPOTIFY_CLIENT_ID, never a client secret in browser code. Personal credentials and .env files are ignored by Git. Full SoundCloud account linking needs a server-side exchange and is not implemented.
+
+## Acceptance limits
+
+Build and automated acceptance checks pass. Desktop browser checks exist, but target-hardware performance, full keyboard/screen-reader coverage, weather/quality combinations and mobile acceptance remain tracked work. Lint has existing warnings and the 3D bundle remains large. Browser testing is no longer waiting on a sandbox repair.

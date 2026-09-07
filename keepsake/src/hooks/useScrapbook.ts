@@ -79,7 +79,7 @@ export function useScrapbook() {
     setHistoryTick((n) => n + 1);
   }, [updateActiveBook]);
 
-  const pages = book?.pages ?? [];
+  const pages = useMemo(() => book?.pages ?? [], [book?.pages]);
   const spreadCount = Math.max(1, Math.ceil(pages.length / 2));
   const currentSpread = clamp(spread, 0, spreadCount - 1);
   const leftPage = pages[currentSpread * 2] ?? null;
