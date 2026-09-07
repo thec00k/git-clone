@@ -819,10 +819,14 @@ function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeMode: Ti
  * `ks_book` is at local (0, top, 0.08) — keep the pile around those pages, not past the front lip.
  */
 function OakDeskClutter({ topY }: { topY: number }) {
-  const sit = (half: number) => topY + half + 0.0008;
+  const sit = (half: number) => topY + half - 0.001;
   return (
     <group>
-      <group position={[0.2, sit(0.006), 0.07]} rotation={[0, 0.35, 0]}>
+      <group position={[0.2, sit(0.006), 0.06]} rotation={[0, 0.35, 0]}>
+        <mesh position={[0.01, -0.005, 0.016]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.05, 12]} />
+          <meshBasicMaterial color="#2a1810" transparent opacity={0.22} depthWrite={false} />
+        </mesh>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
           { z: 0.016, color: "#2c221c", yaw: 0.04 },
@@ -834,7 +838,11 @@ function OakDeskClutter({ topY }: { topY: number }) {
           </mesh>
         ))}
       </group>
-      <group position={[0.36, sit(0.02), 0.05]} rotation={[0, 0.18, 0]}>
+      <group position={[0.36, sit(0.02), 0.04]} rotation={[0, 0.18, 0]}>
+        <mesh position={[0, -0.019, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.08, 12]} />
+          <meshBasicMaterial color="#2a1810" transparent opacity={0.22} depthWrite={false} />
+        </mesh>
         <mesh>
           <boxGeometry args={[0.14, 0.04, 0.1]} />
           <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
@@ -852,7 +860,11 @@ function OakDeskClutter({ topY }: { topY: number }) {
           <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
         </mesh>
       </group>
-      <group position={[-0.22, sit(0.025), 0.09]} rotation={[0, 0.32, 0]}>
+      <group position={[-0.22, sit(0.025), 0.06]} rotation={[0, 0.32, 0]}>
+        <mesh position={[0, -0.024, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.07, 12]} />
+          <meshBasicMaterial color="#2a1810" transparent opacity={0.22} depthWrite={false} />
+        </mesh>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#f2d04a" roughness={0.48} />
@@ -892,10 +904,11 @@ function StandInClock({ topY, timeMode }: { topY: number; timeMode: TimeMode }) 
         occlude={false}
         distanceFactor={400}
         position={[0, 0.006, 0.038]}
+        rotation={[-0.12, 0, 0]}
         scale={0.125 / CLOCK_FACE_PX}
-        style={{ pointerEvents: "none" }}
+        style={{ pointerEvents: "none", backfaceVisibility: "hidden" }}
       >
-        <div className="ks-clock-lock" data-clock-locked="1">
+        <div data-clock-locked="1">
           <RollingClock timeMode={timeMode} />
         </div>
       </Html>
@@ -1005,7 +1018,7 @@ function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeM
   return (
     <group position={pose.pos.toArray()} quaternion={pose.quat}>
       <Html transform occlude={false} distanceFactor={400} position={[0, 0, 0]} scale={pose.scale} style={{ pointerEvents: "none" }}>
-        <div className="ks-clock-lock" data-clock-locked="1">
+        <div data-clock-locked="1">
           <RollingClock timeMode={timeMode} />
         </div>
       </Html>
