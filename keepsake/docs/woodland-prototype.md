@@ -128,3 +128,8 @@ The drawer is accessible while seated using the room toolbar, and directly from 
 
 Mellow Skies now opens on Day's End by Purrple Cat (playlist track 4, zero-based start_track=3). The complete album stays available for next/previous and automatic progression. Other playlists and saved entry on/off preferences retain their behavior. Verified the real widget displays Day's End on a fresh room load; production build passes.
 
+
+## Planned fifth room
+
+The user replaced the original Stormwatch Library concept with Stormy Lighthouse Room. The planned lineup is Woodland Writing Room, Beachfront, Cyberpunk Cityscape, Snowy Mountain, and Stormy Lighthouse Room. The lighthouse should combine a curved coastal room, stormy ocean views, rain-streaked windows, aged brass, and warm lantern light. It is listed as Coming later in Room Variants; its scene is not built yet.
+
