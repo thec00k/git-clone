@@ -24,6 +24,9 @@ export const DOOR_OBJECT = "ks_door";
 /** Desk body. The drawer slides when `Desk_Drawer` is a child. */
 export const DESK_OBJECT = "Desk";
 export const DESK_DRAWER = "Desk_Drawer";
+/** Filing cabinet. The drawer slides when `ks_archive_drawer` is a child. */
+export const ARCHIVE_OBJECT = "ks_archive";
+export const ARCHIVE_DRAWER = "ks_archive_drawer";
 
 export const HOTSPOT_OBJECT: Record<Exclude<HotspotId, "hud">, string> = {
   window: "ks_window",

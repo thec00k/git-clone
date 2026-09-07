@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BookPlus, Check, Heart, Lock, Pencil, Plus, Search, Upload, X } from "lucide-react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
@@ -21,9 +21,12 @@ export function Archive() {
     renameArchiveTab,
     removeArchiveTab,
   } = useApp();
-  const { isVisitor } = useNav();
+  const { isVisitor, archiveFolder, back } = useNav();
   const [query, setQuery] = useState("");
-  const [tab, setTab] = useState<TabKey>("all");
+  const [tab, setTab] = useState<TabKey>(archiveFolder);
+  useEffect(() => {
+    setTab(archiveFolder);
+  }, [archiveFolder]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
   const [adding, setAdding] = useState(false);
@@ -122,9 +125,14 @@ export function Archive() {
       title="The archive"
       subtitle="every photograph you've kept"
       actions={
-        <button className="ks-tool ks-tool--accent" onClick={() => inputRef.current?.click()}>
-          <Upload size={16} /> Upload
-        </button>
+        <>
+          <button type="button" className="ks-tool" data-archive-back-files onClick={back}>
+            The files
+          </button>
+          <button className="ks-tool ks-tool--accent" onClick={() => inputRef.current?.click()}>
+            <Upload size={16} /> Upload
+          </button>
+        </>
       }
     >
       <input ref={inputRef} type="file" accept="image/*" multiple hidden aria-label="Upload photographs" onChange={(e) => { upload(e.target.files); e.target.value = ""; }} />

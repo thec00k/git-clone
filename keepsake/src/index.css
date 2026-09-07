@@ -1544,6 +1544,102 @@
     .ks-clock-colon.is-live { animation: none; }
   }
 
+  .ks-archive-well {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    padding: 1.25rem 1rem 2rem;
+    background:
+      linear-gradient(180deg, rgb(44 28 20 / 0.2), rgb(20 12 8 / 0.35)),
+      #5c3a24;
+    box-shadow: inset 0 18px 40px rgb(20 10 6 / 0.35);
+  }
+
+  .ks-archive-well-note {
+    margin: 0 auto 1.25rem;
+    max-width: 28rem;
+    color: var(--color-paper);
+    font-size: 0.95rem;
+    text-align: center;
+    opacity: 0.82;
+  }
+
+  .ks-archive-rail {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 22rem;
+    padding: 1rem 0.5rem 2.5rem;
+    overflow-x: auto;
+  }
+
+  .ks-archive-file {
+    display: flex;
+    flex-direction: column;
+    width: 7.4rem;
+    min-width: 7.4rem;
+    height: 18rem;
+    padding: 0;
+    border: 1px solid #c9b8a4;
+    border-radius: 3px 10px 4px 4px;
+    background: linear-gradient(180deg, #f6efe4 0%, #eadcc8 100%);
+    color: var(--color-ink);
+    box-shadow: 4px 8px 0 rgb(20 10 6 / 0.18);
+    transform: translateY(0);
+    transition: transform 0.28s var(--ease-out);
+  }
+
+  .ks-archive-file:hover,
+  .ks-archive-file:focus-visible {
+    transform: translateY(-0.85rem);
+  }
+
+  .ks-archive-file-tab {
+    display: block;
+    margin: 0.45rem 0.45rem 0 auto;
+    max-width: 78%;
+    padding: 0.22rem 0.55rem;
+    border-radius: 3px 6px 0 0;
+    background: #d8c4a8;
+    font-family: var(--font-script);
+    font-size: 1.15rem;
+    line-height: 1.1;
+    text-align: right;
+  }
+
+  .ks-archive-file--all .ks-archive-file-tab {
+    background: var(--color-accent);
+    color: var(--color-accent-fg);
+  }
+
+  .ks-archive-file--favorites .ks-archive-file-tab {
+    background: #8b3a32;
+    color: #fff8f0;
+  }
+
+  .ks-archive-file-body {
+    display: flex;
+    flex: 1;
+    align-items: flex-end;
+    padding: 0.7rem 0.65rem 0.85rem;
+  }
+
+  .ks-archive-file-count {
+    color: var(--color-ink-soft);
+    font-size: 0.78rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ks-archive-file,
+    .ks-archive-file:hover,
+    .ks-archive-file:focus-visible {
+      transition: none;
+      transform: none;
+    }
+  }
+
   .ks-sticker-shop {
     position: absolute;
     inset: 0;

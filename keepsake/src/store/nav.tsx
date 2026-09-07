@@ -6,11 +6,14 @@ import type { RoomFace } from "../lib/roomLayout";
 
 export type { RoomFace };
 
+export type ArchiveFolderKey = "all" | "favorites" | string;
+
 export type View =
   | "room"
   | "book"
   | "shelf"
   | "archive"
+  | "archiveFolder"
   | "atlas"
   | "guestbook";
 
@@ -18,6 +21,8 @@ interface NavContextValue {
   view: View;
   go: (v: View) => void;
   back: () => void;
+  archiveFolder: ArchiveFolderKey;
+  openArchiveFolder: (tab: ArchiveFolderKey) => void;
   goDesk: () => void;
   goWall: (face: RoomFace) => void;
   viewAs: ViewAs;
@@ -42,8 +47,13 @@ export function NavProvider({ children }: { children: ReactNode }) {
   const [touring, setTouring] = useState(false);
   const [tourFocus, setTourFocus] = useState<HotspotId | null>(null);
   const [roomFace, setRoomFace] = useState<RoomFace>("front");
+  const [archiveFolder, setArchiveFolder] = useState<ArchiveFolderKey>("all");
 
   const go = useCallback((v: View) => setStack((s) => [...s, v]), []);
+  const openArchiveFolder = useCallback((tab: ArchiveFolderKey) => {
+    setArchiveFolder(tab);
+    setStack((s) => [...s, "archiveFolder"]);
+  }, []);
   const back = useCallback(() => {
     setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
   }, []);
@@ -75,6 +85,8 @@ export function NavProvider({ children }: { children: ReactNode }) {
       view,
       go,
       back,
+      archiveFolder,
+      openArchiveFolder,
       goDesk,
       goWall,
       viewAs,
@@ -90,7 +102,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
       backAria,
       backLabel,
     }),
-    [view, go, back, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace],
+    [view, go, back, archiveFolder, openArchiveFolder, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace],
   );
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;
