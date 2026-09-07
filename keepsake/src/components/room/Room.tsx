@@ -52,7 +52,11 @@ export function Room() {
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     if (q.get("tour") === "1" && !tourAlreadyFinished()) startTour();
-  }, [startTour]);
+    const time = q.get("time");
+    if (time === "day" || time === "dusk" || time === "night" || time === "auto") {
+      setEnvironment({ timeMode: time });
+    }
+  }, [startTour, setEnvironment]);
 
   const phase = phaseOf(environment.timeMode);
 

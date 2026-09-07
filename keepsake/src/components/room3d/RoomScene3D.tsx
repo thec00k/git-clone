@@ -55,6 +55,17 @@ const SEATED_VIEW = {
   target: new THREE.Vector3(-0.15, 0.82, -1.68),
 };
 
+/** Straight down on the oak. Open `?look=desk` to check contact. */
+const DESK_OVERHEAD_VIEW = {
+  position: new THREE.Vector3(-0.15, 2.05, -1.72),
+  target: new THREE.Vector3(-0.15, 0.75, -1.76),
+};
+
+function wantsDeskOverhead() {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("look") === "desk";
+}
+
 type HotspotAction = Exclude<HotspotId, "hud">;
 
 export function RoomScene3D({
@@ -612,6 +623,17 @@ function isDeskSized(object: THREE.Object3D | undefined) {
   return size.x > 0.7 && size.z > 0.28 && box.max.y > 0.45;
 }
 
+function findDeskObject(scene: THREE.Object3D) {
+  const named = scene.getObjectByName(DESK_OBJECT);
+  if (isDeskSized(named)) return named;
+  let found: THREE.Object3D | undefined;
+  scene.traverse((obj) => {
+    if (found || !/desk/i.test(obj.name)) return;
+    if (isDeskSized(obj)) found = obj;
+  });
+  return found ?? named;
+}
+
 /** Underside of `ks_book` — the plane the pages rest on. */
 function bookContactY(scene: THREE.Object3D): number | null {
   const book = scene.getObjectByName("ks_book");
@@ -638,7 +660,7 @@ const STAND_IN_DESK: DeskMeasure = {
 };
 
 function measureDesk(scene: THREE.Object3D): DeskMeasure {
-  const desk = scene.getObjectByName(DESK_OBJECT);
+  const desk = findDeskObject(scene);
   const bookY = bookContactY(scene);
   if (desk && isDeskSized(desk)) {
     const box = new THREE.Box3().setFromObject(desk);
@@ -800,7 +822,7 @@ type BookOnDesk = { x: number; z: number; halfW: number; halfD: number };
  * prop's y is only its half-height, so bottoms cannot leave the wood.
  */
 function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeMode }) {
-  const desk = useMemo(() => scene.getObjectByName(DESK_OBJECT), [scene]);
+  const desk = useMemo(() => findDeskObject(scene), [scene]);
   const clockSolid = hasGeometry(scene.getObjectByName(CLOCK_OBJECT));
   const surface = useMemo(() => {
     const measured = measureDesk(scene);
@@ -833,6 +855,14 @@ function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeMode: Ti
   }, [scene, surface.x, surface.z]);
 
   const legH = Math.max(0.2, surface.y - STAND_IN_TOP_THICK);
+
+  useEffect(() => {
+    const host = document.querySelector(".ks-room3d");
+    if (host instanceof HTMLElement) {
+      host.dataset.deskSurface = `${surface.x.toFixed(3)},${surface.y.toFixed(3)},${surface.z.toFixed(3)}`;
+      host.dataset.deskSolid = surface.solid ? "1" : "0";
+    }
+  }, [surface]);
 
   return (
     <group position={[surface.x, surface.y, surface.z]}>
@@ -869,7 +899,7 @@ function clampOnTop(n: number, limit: number) {
 
 /** Markers / printer / camera. y = 0 is the oak; sit() is only half-height. */
 function OakDeskClutter({ book }: { book: BookOnDesk }) {
-  const sit = (half: number) => half - 0.0008;
+  const sit = (half: number) => half - 0.003;
   const insetX = STAND_IN_TOP_W / 2 - 0.14;
   const insetZ = STAND_IN_TOP_D / 2 - 0.12;
   const markerX = clampOnTop(book.x + book.halfW + 0.07, insetX);
@@ -879,27 +909,19 @@ function OakDeskClutter({ book }: { book: BookOnDesk }) {
 
   return (
     <group>
-      <group position={[markerX, sit(0.006), rowZ]} rotation={[0, 0.35, 0]}>
-        <mesh position={[0.01, -0.005, 0.016]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.05, 12]} />
-          <meshBasicMaterial color="#2a1810" transparent opacity={0.22} depthWrite={false} />
-        </mesh>
+      <group position={[markerX, sit(0.008), rowZ]} rotation={[0, 0.35, 0]}>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
-          { z: 0.016, color: "#2c221c", yaw: 0.04 },
-          { z: 0.032, color: "#4a7c59", yaw: 0.12 },
+          { z: 0.018, color: "#2c221c", yaw: 0.04 },
+          { z: 0.036, color: "#4a7c59", yaw: 0.12 },
         ].map((m) => (
           <mesh key={m.color} position={[0, 0, m.z]} rotation={[0, 0, Math.PI / 2 + m.yaw]}>
-            <cylinderGeometry args={[0.006, 0.006, 0.13, 8]} />
+            <cylinderGeometry args={[0.008, 0.008, 0.13, 8]} />
             <meshStandardMaterial color={m.color} roughness={0.42} />
           </mesh>
         ))}
       </group>
       <group position={[printerX, sit(0.02), rowZ - 0.02]} rotation={[0, 0.18, 0]}>
-        <mesh position={[0, -0.019, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.08, 12]} />
-          <meshBasicMaterial color="#2a1810" transparent opacity={0.22} depthWrite={false} />
-        </mesh>
         <mesh>
           <boxGeometry args={[0.14, 0.04, 0.1]} />
           <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
@@ -918,10 +940,6 @@ function OakDeskClutter({ book }: { book: BookOnDesk }) {
         </mesh>
       </group>
       <group position={[cameraX, sit(0.025), rowZ]} rotation={[0, 0.32, 0]}>
-        <mesh position={[0, -0.024, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.07, 12]} />
-          <meshBasicMaterial color="#2a1810" transparent opacity={0.22} depthWrite={false} />
-        </mesh>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#f2d04a" roughness={0.48} />
@@ -949,7 +967,7 @@ function StandInClock({ book, timeMode }: { book: BookOnDesk; timeMode: TimeMode
   const x = clampOnTop(book.x - book.halfW - 0.36, STAND_IN_TOP_W / 2 - 0.12);
   const z = clampOnTop(book.z - 0.22, STAND_IN_TOP_D / 2 - 0.1);
   return (
-    <group position={[x, caseH / 2, z]}>
+    <group position={[x, caseH / 2 - 0.003, z]}>
       <mesh>
         <boxGeometry args={[0.16, caseH, 0.07]} />
         <meshStandardMaterial color="#3a2a20" roughness={0.58} />
@@ -1270,7 +1288,8 @@ function EyeCamera({ face, seated, touring }: { face: RoomFace; seated: boolean;
   const seatedRef = useRef(seated);
   seatedRef.current = seated;
   const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const view = seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face];
+  const overhead = wantsDeskOverhead();
+  const view = overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face];
 
   useEffect(() => {
     userMoved.current = false;
@@ -1358,7 +1377,9 @@ function EyeCamera({ face, seated, touring }: { face: RoomFace; seated: boolean;
     if (touring || !userMoved.current) {
       const t = reduced || touring ? 1 : 1 - Math.pow(0.0008, dt);
       camera.position.lerp(view.position, t);
-      if (!seated) {
+      if (overhead) {
+        camera.position.copy(view.position);
+      } else if (!seated) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position);
       }
