@@ -796,33 +796,34 @@ function DeskStandIn({ scene }: { scene: THREE.Object3D }) {
 
 function DeskProps({ scene }: { scene: THREE.Object3D }) {
   const desk = useMemo(() => measureDesk(scene), [scene]);
-  const y = desk.y + 0.004;
   const along = (t: number) => desk.minX + (desk.maxX - desk.minX) * t;
   const depth = (t: number) => desk.minZ + (desk.maxZ - desk.minZ) * t;
+  /** Mesh origins are centered — lift by half-height so the bottom kisses the top. */
+  const sit = (half: number) => desk.y + half;
   return (
     <group>
-      <group position={[along(0.68), y, depth(0.56)]} rotation={[0, 0.45, 0]}>
+      <group position={[along(0.56), sit(0.006), depth(0.4)]} rotation={[0, 0.45, 0]}>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
           { z: 0.016, color: "#2c221c", yaw: 0.04 },
           { z: 0.032, color: "#4a7c59", yaw: 0.12 },
         ].map((m) => (
-          <mesh key={m.color} position={[0, 0.006, m.z]} rotation={[0, 0, Math.PI / 2 + m.yaw]}>
+          <mesh key={m.color} position={[0, 0, m.z]} rotation={[0, 0, Math.PI / 2 + m.yaw]}>
             <cylinderGeometry args={[0.006, 0.006, 0.13, 8]} />
             <meshStandardMaterial color={m.color} roughness={0.42} />
           </mesh>
         ))}
       </group>
-      <group position={[along(0.42), y + 0.002, depth(0.52)]} rotation={[0, 0.22, 0]}>
+      <group position={[along(0.4), sit(0.02), depth(0.38)]} rotation={[0, 0.22, 0]}>
         <mesh>
           <boxGeometry args={[0.14, 0.04, 0.1]} />
           <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
         </mesh>
-        <mesh position={[-0.01, 0.036, 0]}>
+        <mesh position={[-0.01, 0.023, 0]}>
           <boxGeometry args={[0.055, 0.006, 0.07]} />
           <meshStandardMaterial color="#fffef8" roughness={0.68} />
         </mesh>
-        <mesh position={[-0.01, 0.05, 0]}>
+        <mesh position={[-0.01, 0.037, 0]}>
           <boxGeometry args={[0.04, 0.022, 0.05]} />
           <meshStandardMaterial color="#c4a078" roughness={0.7} />
         </mesh>
@@ -831,12 +832,12 @@ function DeskProps({ scene }: { scene: THREE.Object3D }) {
           <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
         </mesh>
       </group>
-      <group position={[along(0.28), y + 0.002, depth(0.5)]} rotation={[0, 0.4, 0]}>
+      <group position={[along(0.3), sit(0.025), depth(0.36)]} rotation={[0, 0.4, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#f2d04a" roughness={0.48} />
         </mesh>
-        <mesh position={[0, -0.008, 0]}>
+        <mesh position={[0, -0.011, 0]}>
           <boxGeometry args={[0.122, 0.028, 0.066]} />
           <meshStandardMaterial color="#2c221c" roughness={0.7} />
         </mesh>

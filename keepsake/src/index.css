@@ -1859,8 +1859,8 @@
 
   .ks-clutter-markers {
     position: absolute;
-    right: max(0.55rem, calc(var(--return-w) + 0.1rem));
-    bottom: 5%;
+    left: max(0.55rem, calc(var(--return-w) + 0.15rem));
+    top: 38%;
     display: flex;
     align-items: flex-end;
     gap: 0.4rem;
@@ -1941,7 +1941,7 @@
 
   .ks-mini-printer {
     left: max(0.7rem, calc(var(--return-w) + 0.15rem));
-    bottom: 14%;
+    bottom: 24%;
     transform: rotate(-12deg);
   }
 
@@ -2002,7 +2002,8 @@
 
   .ks-disposable {
     right: max(0.7rem, calc(var(--return-w) + 0.15rem));
-    top: 13%;
+    top: auto;
+    bottom: 36%;
     transform: rotate(16deg);
   }
 
@@ -2067,7 +2068,7 @@
   @media (max-width: 720px) {
     .ks-clutter-markers {
       transform: scale(0.82);
-      transform-origin: bottom right;
+      transform-origin: center left;
     }
 
     .ks-mini-printer {
