@@ -123,3 +123,8 @@ Shop categories are now Sticker Packs, Windowsill, Room Variants, and Creative E
 Creative Extras sells a gold/rose sparkly marker pair (persistent vector glints on strokes), an original reusable fern stamp in the sticker tray, and two original wall posters. Posters use a separate owned wall slot and can be changed or put away without repurchasing. Buying a marker or stamp never displaces the sill decoration. Ownership and poster placement survive room backup validation.
 
 The drawer is accessible while seated using the room toolbar, and directly from the open scrapbook's header. Browser checks opened the shop from both contexts and verified all four categories and insufficient-balance disabling. Automated checks cover extras purchase idempotence, correct placement slots and backup round trips.
+
+## Opening track
+
+Mellow Skies now opens on Day's End by Purrple Cat (playlist track 4, zero-based start_track=3). The complete album stays available for next/previous and automatic progression. Other playlists and saved entry on/off preferences retain their behavior. Verified the real widget displays Day's End on a fresh room load; production build passes.
+
