@@ -816,15 +816,15 @@ function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeM
           </mesh>
         </>
       )}
-      <Html
-        transform
-        occlude={false}
-        position={pose.standIn ? [0, 0.03, 0.036] : [0, 0, 0]}
-        scale={pose.scale}
-        style={{ pointerEvents: "none" }}
-      >
-        <RollingClock timeMode={timeMode} />
-      </Html>
+      {pose.standIn ? (
+        <Html center occlude={false} position={[0, 0.08, 0.04]} style={{ pointerEvents: "none" }}>
+          <RollingClock timeMode={timeMode} />
+        </Html>
+      ) : (
+        <Html transform occlude={false} position={[0, 0, 0]} scale={pose.scale} style={{ pointerEvents: "none" }}>
+          <RollingClock timeMode={timeMode} />
+        </Html>
+      )}
     </group>
   );
 }
