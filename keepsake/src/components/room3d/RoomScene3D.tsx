@@ -603,6 +603,24 @@ function hasGeometry(object: THREE.Object3D | undefined) {
   return found;
 }
 
+/** Tiny empty helpers do not count as a modeled desk. */
+function isDeskSized(object: THREE.Object3D | undefined) {
+  if (!object || !hasGeometry(object)) return false;
+  const box = new THREE.Box3().setFromObject(object);
+  if (box.isEmpty()) return false;
+  const size = box.getSize(new THREE.Vector3());
+  return size.x > 0.7 && size.z > 0.28 && box.max.y > 0.45;
+}
+
+/** Underside of `ks_book` — the plane the pages rest on. */
+function bookContactY(scene: THREE.Object3D): number | null {
+  const book = scene.getObjectByName("ks_book");
+  if (!book || !hasGeometry(book)) return null;
+  const box = new THREE.Box3().setFromObject(book);
+  if (box.isEmpty()) return null;
+  return box.min.y;
+}
+
 type DeskMeasure = {
   minX: number;
   maxX: number;
@@ -621,11 +639,13 @@ const STAND_IN_DESK: DeskMeasure = {
 
 function measureDesk(scene: THREE.Object3D): DeskMeasure {
   const desk = scene.getObjectByName(DESK_OBJECT);
-  if (desk && hasGeometry(desk)) {
+  const bookY = bookContactY(scene);
+  if (desk && isDeskSized(desk)) {
     const box = new THREE.Box3().setFromObject(desk);
-    return { minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z, y: box.max.y };
+    const y = bookY != null && Math.abs(bookY - box.max.y) < 0.08 ? bookY : box.max.y;
+    return { minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z, y };
   }
-  return STAND_IN_DESK;
+  return { ...STAND_IN_DESK, y: bookY ?? STAND_IN_TOP_Y };
 }
 
 /** Left-back corner of the desktop — where the lamp belongs. */
@@ -768,29 +788,58 @@ function RoomLights({
 
 const STAND_IN_ORIGIN = new THREE.Vector3(-0.15, 0, -1.765);
 const STAND_IN_TOP_THICK = 0.045;
-const STAND_IN_TOP_CENTER_Y = 0.742;
-const STAND_IN_TOP_Y = STAND_IN_TOP_CENTER_Y + STAND_IN_TOP_THICK / 2;
+const STAND_IN_TOP_Y = 0.742 + STAND_IN_TOP_THICK / 2;
+const STAND_IN_TOP_W = 1.78;
+const STAND_IN_TOP_D = 0.7;
 const CLOCK_FACE_PX = 168;
 
-/** Oak top + the small things that live on it. Local so they cannot drift off the wood. */
+type BookOnDesk = { x: number; z: number; halfW: number; halfD: number };
+
+/**
+ * Group origin is the oak face (y = 0). The slab hangs below that, and every
+ * prop's y is only its half-height, so bottoms cannot leave the wood.
+ */
 function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeMode }) {
   const desk = useMemo(() => scene.getObjectByName(DESK_OBJECT), [scene]);
   const clockSolid = hasGeometry(scene.getObjectByName(CLOCK_OBJECT));
-  const origin = useMemo(() => {
-    if (!desk) return STAND_IN_ORIGIN.clone();
-    const p = new THREE.Vector3();
-    desk.getWorldPosition(p);
-    return p;
-  }, [desk]);
-  const solid = hasGeometry(desk);
-  const topY = solid ? measureDesk(scene).y - origin.y : STAND_IN_TOP_Y;
+  const surface = useMemo(() => {
+    const measured = measureDesk(scene);
+    const origin = new THREE.Vector3();
+    if (desk) desk.getWorldPosition(origin);
+    else origin.copy(STAND_IN_ORIGIN);
+    const solid = isDeskSized(desk);
+    return {
+      x: solid ? (measured.minX + measured.maxX) / 2 : origin.x,
+      y: measured.y,
+      z: solid ? (measured.minZ + measured.maxZ) / 2 : origin.z,
+      solid,
+    };
+  }, [scene, desk]);
+
+  const book = useMemo<BookOnDesk>(() => {
+    const mesh = scene.getObjectByName("ks_book");
+    if (!mesh || !hasGeometry(mesh)) {
+      return { x: 0, z: 0.08, halfW: 0.09, halfD: 0.12 };
+    }
+    const box = new THREE.Box3().setFromObject(mesh);
+    const c = box.getCenter(new THREE.Vector3());
+    const s = box.getSize(new THREE.Vector3());
+    return {
+      x: c.x - surface.x,
+      z: c.z - surface.z,
+      halfW: s.x / 2,
+      halfD: s.z / 2,
+    };
+  }, [scene, surface.x, surface.z]);
+
+  const legH = Math.max(0.2, surface.y - STAND_IN_TOP_THICK);
 
   return (
-    <group position={origin.toArray()}>
-      {!solid && (
+    <group position={[surface.x, surface.y, surface.z]}>
+      {!surface.solid && (
         <>
-          <mesh position={[0, STAND_IN_TOP_CENTER_Y, 0]}>
-            <boxGeometry args={[1.78, STAND_IN_TOP_THICK, 0.7]} />
+          <mesh name="ks_standin_desktop" position={[0, -STAND_IN_TOP_THICK / 2, 0]}>
+            <boxGeometry args={[STAND_IN_TOP_W, STAND_IN_TOP_THICK, STAND_IN_TOP_D]} />
             <meshStandardMaterial color="#8d5a36" roughness={0.66} />
           </mesh>
           {(
@@ -801,28 +850,36 @@ function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeMode: Ti
               [0.78, 0.28],
             ] as const
           ).map(([x, z]) => (
-            <mesh key={`${x}:${z}`} position={[x, 0.36, z]}>
-              <boxGeometry args={[0.07, 0.72, 0.07]} />
+            <mesh key={`${x}:${z}`} position={[x, -STAND_IN_TOP_THICK - legH / 2, z]}>
+              <boxGeometry args={[0.07, legH, 0.07]} />
               <meshStandardMaterial color="#7a4c2e" roughness={0.74} />
             </mesh>
           ))}
         </>
       )}
-      <OakDeskClutter topY={topY} />
-      {!clockSolid && <StandInClock topY={topY} timeMode={timeMode} />}
+      <OakDeskClutter book={book} />
+      {!clockSolid && <StandInClock book={book} timeMode={timeMode} />}
     </group>
   );
 }
 
-/**
- * Markers / printer / camera sit on the oak in local desk space.
- * `ks_book` is at local (0, top, 0.08) — keep the pile around those pages, not past the front lip.
- */
-function OakDeskClutter({ topY }: { topY: number }) {
-  const sit = (half: number) => topY + half - 0.001;
+function clampOnTop(n: number, limit: number) {
+  return THREE.MathUtils.clamp(n, -limit, limit);
+}
+
+/** Markers / printer / camera. y = 0 is the oak; sit() is only half-height. */
+function OakDeskClutter({ book }: { book: BookOnDesk }) {
+  const sit = (half: number) => half - 0.0008;
+  const insetX = STAND_IN_TOP_W / 2 - 0.14;
+  const insetZ = STAND_IN_TOP_D / 2 - 0.12;
+  const markerX = clampOnTop(book.x + book.halfW + 0.07, insetX);
+  const printerX = clampOnTop(book.x + book.halfW + 0.26, insetX);
+  const cameraX = clampOnTop(book.x - book.halfW - 0.1, insetX);
+  const rowZ = clampOnTop(book.z, insetZ);
+
   return (
     <group>
-      <group position={[0.2, sit(0.006), 0.06]} rotation={[0, 0.35, 0]}>
+      <group position={[markerX, sit(0.006), rowZ]} rotation={[0, 0.35, 0]}>
         <mesh position={[0.01, -0.005, 0.016]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.05, 12]} />
           <meshBasicMaterial color="#2a1810" transparent opacity={0.22} depthWrite={false} />
@@ -838,7 +895,7 @@ function OakDeskClutter({ topY }: { topY: number }) {
           </mesh>
         ))}
       </group>
-      <group position={[0.36, sit(0.02), 0.04]} rotation={[0, 0.18, 0]}>
+      <group position={[printerX, sit(0.02), rowZ - 0.02]} rotation={[0, 0.18, 0]}>
         <mesh position={[0, -0.019, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.08, 12]} />
           <meshBasicMaterial color="#2a1810" transparent opacity={0.22} depthWrite={false} />
@@ -860,7 +917,7 @@ function OakDeskClutter({ topY }: { topY: number }) {
           <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
         </mesh>
       </group>
-      <group position={[-0.22, sit(0.025), 0.06]} rotation={[0, 0.32, 0]}>
+      <group position={[cameraX, sit(0.025), rowZ]} rotation={[0, 0.32, 0]}>
         <mesh position={[0, -0.024, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.07, 12]} />
           <meshBasicMaterial color="#2a1810" transparent opacity={0.22} depthWrite={false} />
@@ -887,10 +944,12 @@ function OakDeskClutter({ topY }: { topY: number }) {
 }
 
 /** Retro case on the oak; digits live on the +Z face (toward the chair). */
-function StandInClock({ topY, timeMode }: { topY: number; timeMode: TimeMode }) {
+function StandInClock({ book, timeMode }: { book: BookOnDesk; timeMode: TimeMode }) {
   const caseH = 0.05;
+  const x = clampOnTop(book.x - book.halfW - 0.36, STAND_IN_TOP_W / 2 - 0.12);
+  const z = clampOnTop(book.z - 0.22, STAND_IN_TOP_D / 2 - 0.1);
   return (
-    <group position={[-0.52, topY + caseH / 2, -0.16]}>
+    <group position={[x, caseH / 2, z]}>
       <mesh>
         <boxGeometry args={[0.16, caseH, 0.07]} />
         <meshStandardMaterial color="#3a2a20" roughness={0.58} />
