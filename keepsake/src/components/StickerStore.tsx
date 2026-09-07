@@ -1,5 +1,6 @@
+import {ShopRoomVariants,ShopCreativeExtras} from './ShopCreativeExtras';
 import {useNav} from '../store/nav';
-import {RoomShopGoods,ShopRoomColors} from './RoomShopGoods';
+import {RoomShopGoods} from './RoomShopGoods';
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
@@ -47,8 +48,8 @@ export function StickerStore({ onClose }: { onClose: () => void }) {
             {note}
           </p>
         )}
-        <div className="flex gap-2 mb-4" role="group" aria-label="Shop categories">{[['stickers','Sticker packs'],['sill','Windowsill'],['colors','Room colors']].map(([id,label])=><button key={id} className="ks-tool" aria-pressed={tab===id} onClick={()=>setTab(id)}>{label}</button>)}</div>
-        {tab==='sill'?<RoomShopGoods/>:tab==='colors'?<ShopRoomColors/>:<ul className="ks-sticker-shop-list">
+        <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Shop categories">{[['stickers','Sticker packs'],['sill','Windowsill'],['variants','Room variants'],['extras','Creative extras']].map(([id,label])=><button key={id} className="ks-tool" aria-pressed={tab===id} onClick={()=>setTab(id)}>{label}</button>)}</div>
+        {tab==='sill'?<RoomShopGoods/>:tab==='variants'?<ShopRoomVariants/>:tab==='extras'?<ShopCreativeExtras/>:<ul className="ks-sticker-shop-list">
           {STICKER_PACKS.filter((p) => p.id !== EVERYDAY_PACK_ID).map((pack) => {
             const owned = state.ownedStickerPacks.includes(pack.id);
             const short = !owned && state.stamps < pack.price;

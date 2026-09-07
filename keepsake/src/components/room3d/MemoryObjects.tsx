@@ -1,3 +1,4 @@
+import {RoomPoster} from './RoomPoster';
 import {SillDecoration} from './SillDecoration';
 import {CRT_COLORS} from '../../lib/roomMusic';
 import { useCrtPlayerSlot } from '../../store/spotifyUi';
@@ -47,7 +48,7 @@ export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>vo
  useEffect(()=>{const palette=['#76694c','#684838','#64735c','#a1875b','#514b3a','#8b6958'];fillers.forEach((object,i)=>object.traverse(o=>{if(o instanceof THREE.Mesh){const materials=Array.isArray(o.material)?o.material:[o.material];materials.forEach(m=>{if(m instanceof THREE.MeshStandardMaterial){m.color.set(palette[i%palette.length]);m.roughness=.94;}});}}));},[fillers]);
  const sheet=scene.getObjectByName('Map_Sheet'); const mapBox=sheet?new THREE.Box3().setFromObject(sheet):null;
  return <group name="personal-memories">
-  <DiscoveryObject/><SillDecoration/>
+  <DiscoveryObject/><SillDecoration/><RoomPoster/>
   {!isVisitor&&<ShelfMemory book={{id:"blank-book",title:"Create a scrapbook",subtitle:"A new beginning",coverStyle:"forest",pages:[],visibility:"private",createdAt:0,updatedAt:0} as Scrapbook} index={0} chosen={chosen} onChoose={()=>setChosen("blank-book")} onOpen={()=>{addBook();setBookPageId(null);onBook();}}/>}
   <MemoryDisplays scene={scene}/>
   <DeskBook scene={scene}/>

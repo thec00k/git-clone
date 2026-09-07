@@ -1,3 +1,4 @@
+import {InkGlints} from './InkGlints';
 import { useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Page, PageElement, StrokeElement } from "../types/scrapbook";
@@ -116,7 +117,7 @@ function PageInk({ strokes }: { strokes: StrokeElement[] }) {
   return (
     <svg className="ks-page-ink" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       {strokes.map((s) => (
-        <polyline
+        <g key={s.id}><polyline
           key={s.id}
           points={s.points.map((p) => `${p.x},${p.y}`).join(" ")}
           fill="none"
@@ -124,7 +125,7 @@ function PageInk({ strokes }: { strokes: StrokeElement[] }) {
           strokeWidth={s.width}
           strokeLinecap="round"
           strokeLinejoin="round"
-        />
+        /><InkGlints color={s.color} points={s.points}/></g>
       ))}
     </svg>
   );
@@ -186,7 +187,7 @@ function DrawLayer({
             strokeWidth={1.7}
             strokeLinecap="round"
             strokeLinejoin="round"
-          />
+          /><InkGlints color={color} points={live}/>
         </svg>
       )}
     </div>

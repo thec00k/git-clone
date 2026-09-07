@@ -131,7 +131,7 @@ export interface AppState {
   archive: ArchivePhoto[];
   archiveTabs: ArchiveTab[];
   environment: Environment;
-  roomDecor?: {owned:string[];sillItem?:string};
+  roomDecor?: {owned:string[];sillItem?:string;posterItem?:string};
   guestbook: GuestEntry[];
   notes: PageNote[];
   pinNotes: PinNote[];

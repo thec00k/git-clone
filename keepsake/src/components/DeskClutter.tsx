@@ -1,3 +1,5 @@
+import {useApp} from '../store/appStore';
+import {SPARKLE_INKS} from '../lib/roomShop';
 import { MARKER_INKS } from "../types/scrapbook";
 
 /** Desk props around the open scrapbook. Printer, camera, and markers are usable. */
@@ -12,16 +14,19 @@ export function DeskClutter({
   ink?: string | null;
   onPickInk?: (color: string | null) => void;
 }) {
+  const {state}=useApp();
+  const inks={...MARKER_INKS,...(state.roomDecor?.owned.includes('sparkle-markers')?SPARKLE_INKS:{})};
   return (
     <div className="ks-clutter" aria-hidden={false}>
       <div className="ks-clutter-markers" role="group" aria-label="Markers">
-        {(Object.entries(MARKER_INKS) as [keyof typeof MARKER_INKS, string][]).map(([name, color]) => {
+        {Object.entries(inks).map(([name, color]) => {
           const selected = ink === color;
           return (
             <button
               key={name}
               type="button"
               className={`ks-marker${selected ? " is-selected" : ""}`}
+              style={{backgroundColor:color}}
               data-ink={name}
               data-desk-marker
               aria-label={`${selected ? "Put down" : "Draw with"} the ${name} marker`}

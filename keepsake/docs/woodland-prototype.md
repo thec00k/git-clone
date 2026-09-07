@@ -115,3 +115,11 @@ The desk book now uses its original cover mesh with a title texture mapped to th
 The desk drawer shop can be opened from its physical handle or the room toolbar without taking a seat. Opening/closing uses the existing drawer animation. Categories: existing sticker packs; a woodland fern, clay fox, brass bird and flower vase for the sill; included CRT colors. Purchases use existing local stamps, are idempotent, and immediately equip the item. Only one sill accent is displayed at a time; cactus remains. Owned decorations can be swapped or stored at no additional cost. Inventory, active decoration and remaining stamps persist in backups. Visitors cannot purchase.
 
 Verified a four-stamp fox purchase, ownership of the previous bird, and free re-placement through state tests. New tests cover duplicate buys, insufficient balance and unowned placement. The starting stamp balance is finite; a milestone-based way to earn more is a suggested next step, not implemented in this pass.
+
+## Shop categories and seated access
+
+Shop categories are now Sticker Packs, Windowsill, Room Variants, and Creative Extras. CRT colors were removed from the shop and remain in CRT settings. Beachfront, Cyberpunk Cityscape, and Snowy Mountain are explicitly planned, with no purchase action or stamp charge until built.
+
+Creative Extras sells a gold/rose sparkly marker pair (persistent vector glints on strokes), an original reusable fern stamp in the sticker tray, and two original wall posters. Posters use a separate owned wall slot and can be changed or put away without repurchasing. Buying a marker or stamp never displaces the sill decoration. Ownership and poster placement survive room backup validation.
+
+The drawer is accessible while seated using the room toolbar, and directly from the open scrapbook's header. Browser checks opened the shop from both contexts and verified all four categories and insufficient-balance disabling. Automated checks cover extras purchase idempotence, correct placement slots and backup round trips.

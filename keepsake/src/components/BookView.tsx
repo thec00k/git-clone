@@ -1,3 +1,4 @@
+import {StickerStore} from './StickerStore';
 import { SpreadOverview } from './SpreadOverview';
 import { useEffect, useRef, useState } from "react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
@@ -41,7 +42,7 @@ import { DeskClutter } from "./DeskClutter";
 export function BookView() {
   const sb = useScrapbook();
   const { addArchivePhoto, renameBook, setBookCover, state } = useApp();
-  const stickerGlyphs = [...ownedStickerGlyphs(state.ownedStickerPacks),...new Set(discoveryState(state).entries.filter(e=>e.reward&&e.keptAt).map(e=>REWARDS[e.reward!].glyph))];
+  const stickerGlyphs = [...ownedStickerGlyphs(state.ownedStickerPacks),...(state.roomDecor?.owned.includes('fern-stamp')?['keepsake:fern-stamp']:[]),...new Set(discoveryState(state).entries.filter(e=>e.reward&&e.keptAt).map(e=>REWARDS[e.reward!].glyph))];
   const { viewAs, isVisitor, setPrinterOpen, printerOpen, bookPageId, setBookPageId } = useNav();
   useEffect(() => {
     if (!bookPageId) return;
@@ -57,6 +58,7 @@ export function BookView() {
   const [showNotes, setShowNotes] = useState(false);
   const [showKeys, setShowKeys] = useState(false);
   const [showCover, setShowCover] = useState(sb.book?.title === "New book");
+  const [showShop,setShowShop]=useState(false);
   const [drawInk, setDrawInk] = useState<string | null>(null);
   const addInputRef = useRef<HTMLInputElement>(null);
   const turningRef = useRef(false);
@@ -207,6 +209,7 @@ export function BookView() {
           </div>
 
           <div className="flex items-center gap-2">
+            {!isVisitor&&<button className="ks-chip" style={{width:'auto',paddingInline:12}} onClick={()=>setShowShop(true)}>Drawer shop</button>}
             {!isVisitor && (
               <button
                 className="ks-chip"
@@ -282,7 +285,7 @@ export function BookView() {
                     <button
                       key={g}
                       className="ks-chip text-lg"
-                      aria-label={`Add sticker ${Object.values(REWARDS).find(r=>r.glyph===g)?.title??g}`}
+                      aria-label={`Add sticker ${g==='keepsake:fern-stamp'?'Woodland fern stamp':Object.values(REWARDS).find(r=>r.glyph===g)?.title??g}`}
                       onClick={() => {
                         if (targetPageId) sb.addSticker(targetPageId, g);
                         setShowStickers(false);
@@ -334,6 +337,7 @@ export function BookView() {
         )
       }
     >
+      {showShop&&!isVisitor&&<StickerStore onClose={()=>setShowShop(false)}/>}
       <div className="ks-desk-top" data-desk-top data-draw-ink={drawInk ?? ""}>
         <DeskClutter
           ink={isVisitor ? null : drawInk}

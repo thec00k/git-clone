@@ -34,3 +34,6 @@ console.log('Guest surprises: chance, owner setting, attribution, persistence an
 const cosmeticsRoom={...s,roomDecor:{owned:['fox'],sillItem:'fox'},environment:{...s.environment,entryMusic:'mellow',crtColor:'pink'}};
 assert.deepEqual(parseRoomBackup(serializeRoom(cosmeticsRoom)),cosmeticsRoom,'room shop inventory, entry music and CRT color survive backups');
 assert.throws(()=>parseRoomBackup(serializeRoom({...cosmeticsRoom,roomDecor:{owned:['fox'],sillItem:'bird'}})),'cannot import an unowned equipped decoration');
+const extrasRoom={...s,roomDecor:{owned:['sparkle-markers','fern-stamp','poster-night'],posterItem:'poster-night'}};
+assert.deepEqual(parseRoomBackup(serializeRoom(extrasRoom)),extrasRoom,'creative extras and poster persist');
+assert.throws(()=>parseRoomBackup(serializeRoom({...extrasRoom,roomDecor:{...extrasRoom.roomDecor,sillItem:'poster-night'}})),'poster cannot occupy sill slot');
