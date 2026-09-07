@@ -1487,6 +1487,12 @@
     box-shadow: 0 4px 10px rgb(20 10 6 / 0.4);
   }
 
+  /* CSS3D Y is down — flip the face so rolling digits read upright on the case. */
+  .ks-clock-lock {
+    transform: scaleY(-1);
+    transform-origin: center center;
+  }
+
   .ks-clock-face {
     display: flex;
     align-items: center;

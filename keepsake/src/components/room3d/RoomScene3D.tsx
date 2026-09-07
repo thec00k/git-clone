@@ -310,8 +310,7 @@ function RoomModel({
         active={tourFocus === "archive"}
         onOpen={onOpenArchive}
       />
-      <DeskStandIn scene={cloned} />
-      <DeskProps scene={cloned} />
+      <DeskAssembly scene={cloned} timeMode={environment.timeMode} />
       <LampFixture scene={cloned} on={environment.lampOn} onToggle={onToggleLamp} />
       <DeskClock scene={cloned} timeMode={environment.timeMode} />
       <CeilingSwitch scene={cloned} on={environment.ceilingOn !== false} onToggle={onToggleCeiling} />
@@ -767,42 +766,63 @@ function RoomLights({
   );
 }
 
-/** Temporary oak top while `Desk` is still an empty locator. */
-function DeskStandIn({ scene }: { scene: THREE.Object3D }) {
+const STAND_IN_ORIGIN = new THREE.Vector3(-0.15, 0, -1.765);
+const STAND_IN_TOP_THICK = 0.045;
+const STAND_IN_TOP_CENTER_Y = 0.742;
+const STAND_IN_TOP_Y = STAND_IN_TOP_CENTER_Y + STAND_IN_TOP_THICK / 2;
+const CLOCK_FACE_PX = 168;
+
+/** Oak top + the small things that live on it. Local so they cannot drift off the wood. */
+function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeMode }) {
   const desk = useMemo(() => scene.getObjectByName(DESK_OBJECT), [scene]);
-  if (hasGeometry(desk)) return null;
+  const clockSolid = hasGeometry(scene.getObjectByName(CLOCK_OBJECT));
+  const origin = useMemo(() => {
+    if (!desk) return STAND_IN_ORIGIN.clone();
+    const p = new THREE.Vector3();
+    desk.getWorldPosition(p);
+    return p;
+  }, [desk]);
+  const solid = hasGeometry(desk);
+  const topY = solid ? measureDesk(scene).y - origin.y : STAND_IN_TOP_Y;
+
   return (
-    <group position={[-0.15, 0, -1.765]}>
-      <mesh position={[0, 0.742, 0]}>
-        <boxGeometry args={[1.78, 0.045, 0.7]} />
-        <meshStandardMaterial color="#8d5a36" roughness={0.66} />
-      </mesh>
-      {(
-        [
-          [-0.78, -0.28],
-          [0.78, -0.28],
-          [-0.78, 0.28],
-          [0.78, 0.28],
-        ] as const
-      ).map(([x, z]) => (
-        <mesh key={`${x}:${z}`} position={[x, 0.36, z]}>
-          <boxGeometry args={[0.07, 0.72, 0.07]} />
-          <meshStandardMaterial color="#7a4c2e" roughness={0.74} />
-        </mesh>
-      ))}
+    <group position={origin.toArray()}>
+      {!solid && (
+        <>
+          <mesh position={[0, STAND_IN_TOP_CENTER_Y, 0]}>
+            <boxGeometry args={[1.78, STAND_IN_TOP_THICK, 0.7]} />
+            <meshStandardMaterial color="#8d5a36" roughness={0.66} />
+          </mesh>
+          {(
+            [
+              [-0.78, -0.28],
+              [0.78, -0.28],
+              [-0.78, 0.28],
+              [0.78, 0.28],
+            ] as const
+          ).map(([x, z]) => (
+            <mesh key={`${x}:${z}`} position={[x, 0.36, z]}>
+              <boxGeometry args={[0.07, 0.72, 0.07]} />
+              <meshStandardMaterial color="#7a4c2e" roughness={0.74} />
+            </mesh>
+          ))}
+        </>
+      )}
+      <OakDeskClutter topY={topY} />
+      {!clockSolid && <StandInClock topY={topY} timeMode={timeMode} />}
     </group>
   );
 }
 
-function DeskProps({ scene }: { scene: THREE.Object3D }) {
-  const desk = useMemo(() => measureDesk(scene), [scene]);
-  const along = (t: number) => desk.minX + (desk.maxX - desk.minX) * t;
-  const depth = (t: number) => desk.minZ + (desk.maxZ - desk.minZ) * t;
-  /** Mesh origins are centered — lift by half-height so the bottom kisses the top. */
-  const sit = (half: number) => desk.y + half;
+/**
+ * Markers / printer / camera sit on the oak in local desk space.
+ * `ks_book` is at local (0, top, 0.08) — keep the pile around those pages, not past the front lip.
+ */
+function OakDeskClutter({ topY }: { topY: number }) {
+  const sit = (half: number) => topY + half + 0.0008;
   return (
     <group>
-      <group position={[along(0.56), sit(0.006), depth(0.4)]} rotation={[0, 0.45, 0]}>
+      <group position={[0.2, sit(0.006), 0.07]} rotation={[0, 0.35, 0]}>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
           { z: 0.016, color: "#2c221c", yaw: 0.04 },
@@ -814,7 +834,7 @@ function DeskProps({ scene }: { scene: THREE.Object3D }) {
           </mesh>
         ))}
       </group>
-      <group position={[along(0.4), sit(0.02), depth(0.38)]} rotation={[0, 0.22, 0]}>
+      <group position={[0.36, sit(0.02), 0.05]} rotation={[0, 0.18, 0]}>
         <mesh>
           <boxGeometry args={[0.14, 0.04, 0.1]} />
           <meshStandardMaterial color="#f3ebe0" roughness={0.55} />
@@ -832,7 +852,7 @@ function DeskProps({ scene }: { scene: THREE.Object3D }) {
           <meshStandardMaterial color="#1a3a3a" roughness={0.35} metalness={0.2} />
         </mesh>
       </group>
-      <group position={[along(0.3), sit(0.025), depth(0.36)]} rotation={[0, 0.4, 0]}>
+      <group position={[-0.22, sit(0.025), 0.09]} rotation={[0, 0.32, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#f2d04a" roughness={0.48} />
@@ -850,6 +870,35 @@ function DeskProps({ scene }: { scene: THREE.Object3D }) {
           <meshStandardMaterial color="#f6efe4" roughness={0.4} />
         </mesh>
       </group>
+    </group>
+  );
+}
+
+/** Retro case on the oak; digits live on the +Z face (toward the chair). */
+function StandInClock({ topY, timeMode }: { topY: number; timeMode: TimeMode }) {
+  const caseH = 0.05;
+  return (
+    <group position={[-0.52, topY + caseH / 2, -0.16]}>
+      <mesh>
+        <boxGeometry args={[0.16, caseH, 0.07]} />
+        <meshStandardMaterial color="#3a2a20" roughness={0.58} />
+      </mesh>
+      <mesh position={[0, 0.006, 0.032]}>
+        <boxGeometry args={[0.13, 0.028, 0.008]} />
+        <meshStandardMaterial color="#12140e" roughness={0.4} />
+      </mesh>
+      <Html
+        transform
+        occlude={false}
+        distanceFactor={400}
+        position={[0, 0.006, 0.038]}
+        scale={0.125 / CLOCK_FACE_PX}
+        style={{ pointerEvents: "none" }}
+      >
+        <div className="ks-clock-lock" data-clock-locked="1">
+          <RollingClock timeMode={timeMode} />
+        </div>
+      </Html>
     </group>
   );
 }
@@ -935,57 +984,31 @@ function LampFixture({
   );
 }
 
-const CLOCK_FACE_PX = 168;
-
 function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeMode }) {
   const clock = useMemo(() => scene.getObjectByName(CLOCK_OBJECT), [scene]);
   const digits = useMemo(() => scene.getObjectByName(CLOCK_DIGITS), [scene]);
   const pose = useMemo(() => {
     const face = digits && hasGeometry(digits) ? digits : clock && hasGeometry(clock) ? clock : null;
-    if (face) {
-      const box = new THREE.Box3().setFromObject(face);
-      const pos = new THREE.Vector3();
-      box.getCenter(pos);
-      if (!digits || !hasGeometry(digits)) pos.z = box.max.z + 0.004;
-      const size = box.getSize(new THREE.Vector3());
-      const width = Math.max(size.x, size.z, 0.1);
-      const quat = new THREE.Quaternion();
-      face.getWorldQuaternion(quat);
-      return { pos, quat, scale: width / CLOCK_FACE_PX, standIn: false };
-    }
-    const desk = measureDesk(scene);
-    const lamp = deskLampCorner(desk);
-    return {
-      pos: new THREE.Vector3(lamp.x + 0.24, desk.y + 0.035, lamp.z + 0.04),
-      quat: new THREE.Quaternion(),
-      scale: 0.14 / CLOCK_FACE_PX,
-      standIn: true,
-    };
+    if (!face) return null;
+    const box = new THREE.Box3().setFromObject(face);
+    const pos = new THREE.Vector3();
+    box.getCenter(pos);
+    if (!digits || !hasGeometry(digits)) pos.z = box.max.z + 0.004;
+    const size = box.getSize(new THREE.Vector3());
+    const width = Math.max(size.x, size.z, 0.1);
+    const quat = new THREE.Quaternion();
+    face.getWorldQuaternion(quat);
+    return { pos, quat, scale: width / CLOCK_FACE_PX };
   }, [scene, clock, digits]);
 
+  if (!pose) return null;
   return (
     <group position={pose.pos.toArray()} quaternion={pose.quat}>
-      {pose.standIn && (
-        <>
-          <mesh position={[0, 0.008, 0]}>
-            <boxGeometry args={[0.16, 0.05, 0.07]} />
-            <meshStandardMaterial color="#3a2a20" roughness={0.58} />
-          </mesh>
-          <mesh position={[0, 0.03, 0.028]}>
-            <boxGeometry args={[0.13, 0.032, 0.01]} />
-            <meshStandardMaterial color="#12140e" roughness={0.4} />
-          </mesh>
-        </>
-      )}
-      {pose.standIn ? (
-        <Html center occlude={false} position={[0, 0.08, 0.04]} style={{ pointerEvents: "none" }}>
+      <Html transform occlude={false} distanceFactor={400} position={[0, 0, 0]} scale={pose.scale} style={{ pointerEvents: "none" }}>
+        <div className="ks-clock-lock" data-clock-locked="1">
           <RollingClock timeMode={timeMode} />
-        </Html>
-      ) : (
-        <Html transform occlude={false} position={[0, 0, 0]} scale={pose.scale} style={{ pointerEvents: "none" }}>
-          <RollingClock timeMode={timeMode} />
-        </Html>
-      )}
+        </div>
+      </Html>
     </group>
   );
 }
