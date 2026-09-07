@@ -1,66 +1,115 @@
 # Keepsake
 
-A calm, tactile **digital scrapbook** — open the book, add your photographs,
-arrange them like real prints, and revisit small days. This is the Phase A→B
-scrapbook prototype from the *Keepsake Vision & Design Bible v3.0*, rendered in
-the cozy, handcrafted "room" aesthetic (warm palette, Fraunces + Caveat type,
-paper / leather / polaroid / tape materials).
+A calm, tactile **digital scrapbook** in a handcrafted room: sit at the oak
+desk, open the book, pin prints, and wander the house. Prototype of the
+*Keepsake Vision & Design Bible v3.0* (cream plaster, honey oak, terracotta,
+Fraunces + Caveat).
 
-## What it does
+The Bible PDF is **not** in this repo. Nearby docs are
+[`docs/keepsake-worklog.pdf`](docs/keepsake-worklog.pdf) and
+[`docs/keepsake-suggestions.pdf`](docs/keepsake-suggestions.pdf).
 
-The core solo memory loop, scrapbook-first (per the Bible's priority order —
-photographs → scrapbook → organization first):
+## Now
 
-- **Cover → open**: a leather-bound book on a wooden desk; open it into a
-  two-page spread.
-- **Add photographs**: upload images (downscaled locally); they land as
-  polaroid / taped / flush prints, up to 6 per page.
-- **Arrange like prints**: select, drag, rotate, resize, restack (bring
-  forward / send back), change frame, replace, and remove.
-- **Handwritten captions**: add and edit captions inline in a handwriting font
-  (short, character-limited), with sharpie ink colours.
-- **Layout presets**: one-tap **Grid / Column / Scatter** arrangements for fast
-  users, alongside full freeform placement for those who enjoy the craft.
-- **Tactile page turns**: a directional 3D page-flip animation across the spine
-  (buttons or ← / → keys), with a reduced-motion fallback that swaps instantly.
-- **Multi-page book**: add and delete spreads.
-- **It remembers**: the whole book (layout, captions, and photos) autosaves to
-  **IndexedDB**, so it survives a refresh.
+The room is a WebGL scene from [`public/room/keepsake.glb`](public/room/keepsake.glb)
+(desk, chair, CRT, lamp, archive, shelf, map, guestbook, door, fan, clock,
+window). Click a named prop to open that system. Sit in the chair, walk with
+WASD / arrows, look with the mouse, zoom with the wheel.
 
-## Stack
+### Scrapbook
 
-React 19 + TypeScript + Vite, Tailwind CSS v4, lucide-react icons. No backend —
-state lives in the browser (IndexedDB), matching the Bible's "prove the
-scrapbook experience first" prototype stage.
+- Leather book on the desk → two-page spread on the oak
+- Upload photos (downscaled locally); polaroid / tape / flush frames; up to 6 per page
+- Drag, rotate, resize, restack, replace, remove; corner handles; pinch/twist on touch
+- Handwritten captions (short, character-limited) and desk-marker ink
+- Stickers; Grid / Column / Scatter presets
+- Page-turn across the spine (buttons or ← / →), with a rustle; reduced-motion swaps instantly
+- Undo / redo; `?` shortcuts
+- Print / Save as PDF
+- Autosave to **IndexedDB** (book, layout, photos, room settings)
+
+### The house
+
+- **Window** — day / dusk / night (auto or forced), season, weather
+- **Lamp** — click the fixture; **ceiling** — plate left of the window
+- **Clock** — rolling digits on `ks_clock_digits` (live in Auto; still times for day/dusk/night)
+- **CRT** — ambient pad and optional **Spotify** (PKCE; Client ID only, never the secret)
+- **Bookshelf** — multiple books, covers, titles, visibility
+- **Archive** — cabinet drawer → hanging files → albums, favourites, place-in-book
+- **Desk drawer** — sticker packs (while seated)
+- **Corkboard map** — pins and notes (no exact GPS)
+- **Guestbook** — flat notes; page notes wait for owner approval, then can whisper
+- **Door** — leave or tidy
+- First-visit house tour (skippable); hidden “keepsakes found”; curator ambience
+- `?listen=1` — spoken room for VoiceOver / TalkBack
+
+### Local only
+
+There is **no backend**. “View as” (owner / close / friend / public) is a
+preview, not security. Visibility, visiting, and notes are UI-only. Photos are
+data URLs in IndexedDB.
+
+## Left to build
+
+**Product / Bible (needs a server)**
+
+- Accounts, auth, cloud photo storage, real multi-user visiting
+- Server-side permission inheritance (Bible §17) before any real sharing
+- Hosted production URL (and Spotify redirect URIs for it)
+
+**Room / art**
+
+- The Design Bible file itself (upload or add under `docs/` if you want it in git)
+- Optional locators still empty: `ks_window_sun`, `ks_ceiling_fan_light`
+- Fan blades do not spin as a separate `ks_ceiling_fan_blades` clip yet
+- Further Blender polish (materials, lighting, props) — export the whole scene
+  to `public/room/keepsake.glb`, +Y Up, tangents off unless you use normal maps
+
+**Editor / house**
+
+- Timeline wall was removed on purpose; do not treat it as missing
+- Licensed sticker / craft packs beyond the starter drawer
+- Spotify Web Playback SDK in-app control (Premium + Client ID)
+- A real-device VoiceOver / TalkBack pass beyond the first a11y cut
+- Physical print / hardware (software PDF is in)
+
+**Fallbacks**
+
+- `?room=flat` — original single-wall diorama
+- `?room=chamber` — CSS three-wall room  
+  Default is the GLB.
 
 ## Run
+
+From this folder (`keepsake/`):
 
 ```bash
 npm install
 npm run dev      # http://127.0.0.1:5174  (Spotify rejects localhost as a redirect URI)
 npm run build    # typecheck (tsc -b) + production build
-npm run preview  # preview the production build
+npm run preview
 ```
 
-The desk hub is a WebGL room (`keepsake.glb`). Click the named props — book,
-CRT, cabinet, window, guestbook, map, shelf — to open the same screens as
-before. Side tabs look at the corkboard or bookshelf. Add `?room=flat` for the
-original single-wall diorama, or `?room=chamber` for the CSS three-wall room.
+Brave: open `http://127.0.0.1:5174/` then hard-refresh (**Ctrl+Shift+R**) after a
+new `keepsake.glb`. Copy `.env.example` to `.env` for `VITE_SPOTIFY_CLIENT_ID`
+only — never `SPOTIFY_CLIENT_SECRET`.
+
+Debug views: `?look=desk` (overhead oak), `?time=day|dusk|night`, `?tour=1`.
+
+## Stack
+
+React 19 + TypeScript + Vite 8, Tailwind CSS v4, Three.js + React Three Fiber /
+Drei, lucide-react. Service worker + web manifest for a production install /
+offline shell.
 
 ## Layout
 
 ```
-src/
-  components/    RoomFrame, BookCover, Spread, ScrapbookPage,
-                 ElementView, SelectionToolbar, SaveIndicator
-  hooks/         useScrapbook (state + autosave), usePointerDrag
-  lib/           id, clamp, image (downscale), storage (IndexedDB)
-  data/          seed (starter book)
-  types/         scrapbook (Scrapbook → Page → PageElement)
+public/room/keepsake.glb   Blender room (meshes parented to ks_* / Desk)
+src/components/room3d/     WebGL room, clock, WebGL fallback
+src/components/room/       Hub chrome, tour, window panel, listen
+src/components/views/      Shelf, archive drawer/files, atlas, guestbook
+src/components/            Book editor, clutter, print, Spotify dock
+src/store/                 App state + IndexedDB autosave, nav, listen
+src/lib/                   Hotspots, tour, Spotify PKCE, stickers, clock
 ```
-
-## Not built yet (intentionally — later Bible phases)
-
-The 3D room, bookshelf, filing cabinet, accounts / privacy, social visiting,
-achievements, music, printing, and offline sync are deliberately out of scope
-until the solo scrapbook loop is stable and satisfying.
