@@ -62,6 +62,7 @@ interface AppContextValue {
   setEnvironment: (patch: Partial<Environment>) => void;
   tidyRoom: () => void;
   flushSave: () => Promise<void>;
+  restoreRoom: (state: AppState) => Promise<void>;
 
   addGuestEntry: (author: string, message: string) => void;
   addNote: (bookId: string, pageId: string, author: string, message: string) => void;
@@ -173,6 +174,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(saveTimer.current);
   }, [state]);
 
+  const restoreRoom = useCallback(async (next: AppState) => {
+    window.clearTimeout(saveTimer.current);
+    await saveState(next);
+    stateRef.current=next;setState(next);setNewlyUnlocked([]);setSaveStatus('saved');
+  }, []);
   const update = useCallback((fn: (prev: AppState) => AppState) => {
     setState((prev) => (prev ? fn(prev) : prev));
   }, []);
@@ -516,6 +522,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setEnvironment,
     tidyRoom,
     flushSave,
+    restoreRoom,
     addGuestEntry,
     addNote,
     approveNote,

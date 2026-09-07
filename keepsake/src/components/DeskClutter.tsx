@@ -36,8 +36,8 @@ export function DeskClutter({
         type="button"
         className="ks-mini-printer"
         data-desk-printer
-        aria-label="Print this book from the mini photo printer"
-        title="Print this book"
+        aria-label="Print a photo with the mini printer"
+        title="Print a photo"
         onClick={onPrint}
       >
         <span className="ks-mini-printer-body">

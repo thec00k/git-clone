@@ -223,7 +223,7 @@ async function api<T>(path: string): Promise<T | null> {
   const res = await fetch(`https://api.spotify.com/v1${path}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!res.ok) return null;
+  if (!res.ok || res.status === 204) return null;
   return (await res.json()) as T;
 }
 
@@ -318,6 +318,17 @@ export async function getPlaylists(): Promise<SpotifyPlaylist[]> {
 
 /** Turn a playlist URL or URI into an embeddable id, for the iframe player. */
 export function playlistEmbedId(uriOrUrl: string): string | null {
-  const uri = uriOrUrl.match(/playlist[:/]([a-zA-Z0-9]+)/);
-  return uri ? uri[1] : null;
+  const value = uriOrUrl.trim();
+  const uri = value.match(/^spotify:playlist:([a-zA-Z0-9]{22})$/);
+  if (uri) return uri[1];
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.hostname !== "open.spotify.com") return null;
+    return url.pathname.match(/^\/(?:intl-[a-z-]+\/)?(?:embed\/)?playlist\/([a-zA-Z0-9]{22})\/?$/)?.[1] ?? null;
+  } catch { return null; }
+}
+
+export interface PlaybackDevice {id:string;name:string;volume_percent:number|null;supports_volume:boolean;is_restricted:boolean}
+export async function getPlaybackDevice():Promise<PlaybackDevice|null>{
+ try{const data=await api<{device:PlaybackDevice}>('/me/player');return data?.device??null;}catch{return null;}
 }

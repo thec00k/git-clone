@@ -8,6 +8,7 @@ import { Atlas } from "./components/views/Atlas";
 import { Guestbook } from "./components/views/Guestbook";
 import { AmbientAudio } from "./components/AmbientAudio";
 import { SpotifyDock } from "./components/SpotifyDock";
+import { PhotoPrinter } from "./components/PhotoPrinter";
 import { CrtPlayerSlotProvider } from "./store/spotifyUi";
 
 function CurrentView() {
@@ -31,11 +32,13 @@ function CurrentView() {
 }
 
 export default function App() {
+  const { printerOpen, setPrinterOpen, isVisitor } = useNav();
   return (
     <CrtPlayerSlotProvider>
       <AmbientAudio />
       <SpotifyDock />
       <CurrentView />
+      {printerOpen && !isVisitor && <PhotoPrinter onClose={() => setPrinterOpen(false)} />}
     </CrtPlayerSlotProvider>
   );
 }

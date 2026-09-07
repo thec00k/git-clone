@@ -9,6 +9,7 @@
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let voices: OscillatorNode[] = [];
+let modulation: OscillatorNode[] = [];
 let running = false;
 
 function getCtx(): AudioContext {
@@ -55,7 +56,7 @@ function start(volume: number) {
     const lfoGain = c.createGain();
     lfoGain.gain.value = 1.6;
     lfo.connect(lfoGain).connect(osc.frequency);
-    lfo.start();
+    lfo.start();modulation.push(lfo);
 
     osc.connect(g).connect(master!);
     osc.start();
@@ -69,7 +70,8 @@ function start(volume: number) {
 function stop() {
   if (!running || !ctx || !master) return;
   const m = master;
-  const dying = voices;
+  const dying = [...voices,...modulation];
+  modulation=[];
   m.gain.setTargetAtTime(0, ctx.currentTime, 0.4);
   window.setTimeout(() => {
     dying.forEach((o) => {
@@ -92,6 +94,7 @@ function stop() {
 
 /** A short paper-flap for the page-turn. Honour reduced-motion as "no sfx". */
 export function playPageTurn(volume = 0.5) {
+  if(volume<=0)return;
   if (typeof window === "undefined") return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const c = getCtx();
@@ -133,4 +136,22 @@ export function playPageTurn(volume = 0.5) {
   slap.connect(slapGain).connect(c.destination);
   slap.start(now + 0.08);
   slap.stop(now + 0.28);
+}
+
+/** Short, restrained room foley. Every sound obeys the ambience volume. */
+export function playRoomSound(kind:'wood'|'drawer', volume:number){
+ if(volume<=0)return;
+ const c=getCtx();void c.resume();const now=c.currentTime;const osc=c.createOscillator();const gain=c.createGain();
+ osc.type='triangle';osc.frequency.setValueAtTime(kind==='wood'?110:180,now);osc.frequency.exponentialRampToValueAtTime(kind==='wood'?72:65,now+.28);
+ gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(Math.max(.0001,volume*.035),now+.06);gain.gain.exponentialRampToValueAtTime(.0001,now+.38);
+ osc.connect(gain).connect(c.destination);osc.start();osc.stop(now+.4);osc.onended=()=>{osc.disconnect();gain.disconnect();};
+ if(kind==='drawer')playPageTurn(volume*.25);
+}
+export function startWeather(weather:string,volume:number):()=>void{
+ if(volume<=0)return()=>{};
+ const c=getCtx();void c.resume();const buffer=c.createBuffer(1,c.sampleRate*4,c.sampleRate);const data=buffer.getChannelData(0);let brown=0;
+ for(let i=0;i<data.length;i++){brown=(brown+(Math.random()*2-1)*.025)/1.025;data[i]=weather==='rain'?(Math.random()*2-1)*.45+brown:brown;}
+ const source=c.createBufferSource();source.buffer=buffer;source.loop=true;const filter=c.createBiquadFilter();filter.type='lowpass';filter.frequency.value=weather==='rain'?2400:500;
+ const gain=c.createGain();gain.gain.value=0;gain.gain.setTargetAtTime(volume*(weather==='rain'?.085:.045),c.currentTime,.8);source.connect(filter).connect(gain).connect(c.destination);source.start();
+ return()=>{source.stop();source.disconnect();filter.disconnect();gain.disconnect();};
 }

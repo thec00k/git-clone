@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Settings2, Sparkles } from "lucide-react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
@@ -17,7 +17,7 @@ import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { PhaseBadge, phaseOf } from "./RoomFurniture";
 import { RoomFlat } from "./RoomFlat";
 import { RoomChamber } from "./RoomChamber";
-import { RoomScene3D } from "../room3d/RoomScene3D";
+const RoomScene3D = lazy(() => import("../room3d/RoomScene3D").then(module => ({ default: module.RoomScene3D })));
 import { WebGLGuard } from "../room3d/WebGLGuard";
 import { HomeChip } from "../views/ViewShell";
 import { RoomListen } from "./RoomListen";
@@ -45,6 +45,8 @@ export function Room() {
   const [achOpen, setAchOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
   const [doorOpen, setDoorOpen] = useState(false);
+  // The scene registers this callback with ListenProvider; keep it stable across context updates.
+  const openDoor = useCallback(() => setDoorOpen(true), []);
   const sceneRef = useRef<HTMLDivElement>(null);
   const [par, setPar] = useState({ x: 0, y: 0 });
   const layout = useMemo(() => roomLayoutFromSearch(), []);
@@ -155,7 +157,7 @@ export function Room() {
 
       <main id="ks-main" ref={sceneRef} className="ks-scene flex-1" tabIndex={-1} onPointerMove={onMove}>
         {layout === "glb" ? (
-          <WebGLGuard
+          <Suspense fallback={<div className="ks-room-loading" role="status">Opening your room…</div>}><WebGLGuard
             fallback={
               <RoomChamber
                 roomFace={roomFace}
@@ -197,10 +199,10 @@ export function Room() {
               touring={touring}
               onOpenWindow={() => setEnvOpen(true)}
               onOpenMusic={() => setMusicOpen(true)}
-              onOpenDoor={() => setDoorOpen(true)}
+              onOpenDoor={openDoor}
               onGo={go}
             />
-          </WebGLGuard>
+          </WebGLGuard></Suspense>
         ) : layout === "flat" ? (
           <RoomFlat
             phase={phase}

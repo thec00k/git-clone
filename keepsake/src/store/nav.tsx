@@ -18,6 +18,12 @@ export type View =
   | "guestbook";
 
 interface NavContextValue {
+  printerOpen: boolean;
+  setPrinterOpen: (open: boolean) => void;
+  pendingPrint: { src: string; photoId?: string } | null;
+  setPendingPrint: (photo: { src: string; photoId?: string } | null) => void;
+  bookPageId: string | null;
+  setBookPageId: (id: string | null) => void;
   view: View;
   go: (v: View) => void;
   back: () => void;
@@ -42,6 +48,9 @@ interface NavContextValue {
 const NavContext = createContext<NavContextValue | null>(null);
 
 export function NavProvider({ children }: { children: ReactNode }) {
+  const [printerOpen, setPrinterOpen] = useState(false);
+  const [pendingPrint, setPendingPrint] = useState<{ src: string; photoId?: string } | null>(null);
+  const [bookPageId, setBookPageId] = useState<string | null>(null);
   const [stack, setStack] = useState<View[]>(["room"]);
   const [viewAs, setViewAs] = useState<ViewAs>("owner");
   const [touring, setTouring] = useState(false);
@@ -82,6 +91,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<NavContextValue>(
     () => ({
+      printerOpen, setPrinterOpen, pendingPrint, setPendingPrint, bookPageId, setBookPageId,
       view,
       go,
       back,
@@ -102,7 +112,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
       backAria,
       backLabel,
     }),
-    [view, go, back, archiveFolder, openArchiveFolder, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace],
+    [view, go, back, archiveFolder, openArchiveFolder, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace, printerOpen, pendingPrint, bookPageId],
   );
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;

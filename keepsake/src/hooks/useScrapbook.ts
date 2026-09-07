@@ -1,3 +1,4 @@
+import { movePageSpread } from '../lib/spreads';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CaptionElement,
@@ -13,6 +14,7 @@ import { uid } from "../lib/id";
 import { clamp } from "../lib/clamp";
 import { computeLayout, type LayoutPreset } from "../lib/layout";
 import { useApp } from "../store/appStore";
+import { photoRows } from "../lib/photoRows";
 
 export interface ElementLocation {
   pageId: string;
@@ -25,7 +27,7 @@ export interface ElementLocation {
  * and exposes the mutation API the scrapbook editor uses.
  */
 export function useScrapbook() {
-  const { activeBook, updateActiveBook, saveStatus } = useApp();
+  const { activeBook, updateActiveBook, saveStatus, state } = useApp();
   const book = activeBook;
 
   const [spread, setSpread] = useState(0);
@@ -297,6 +299,12 @@ export function useScrapbook() {
       if (!page) return;
       const photoCount = page.elements.filter((e) => e.type === "photo").length;
       const placements = computeLayout(preset, photoCount);
+      if (preset === "grid") {
+        const arranged = photoRows(page, state.archive);
+        if (!arranged) return false;
+        mutatePageElements(pageId, () => arranged.elements);
+        return true;
+      }
       mutatePageElements(pageId, (els) => {
         let i = 0;
         return els.map((e) => {
@@ -306,7 +314,7 @@ export function useScrapbook() {
         });
       });
     },
-    [pages, mutatePageElements],
+    [pages, mutatePageElements, state.archive],
   );
 
   const addSpread = useCallback(() => {
@@ -331,6 +339,13 @@ export function useScrapbook() {
     setSelectedId(null);
   }, [updateActiveBook, spreadCount, currentSpread, remember]);
 
+  const moveSpread = useCallback((from: number, to: number) => {
+    if(from===to || from<0 || to<0 || from>=spreadCount || to>=spreadCount)return;
+    remember(true);
+    updateActiveBook(b=>({...b,pages:movePageSpread(b.pages,from,to,uid('page'))}));
+    setSpread(to);setSelectedId(null);setActivePageId(null);
+  },[spreadCount,remember,updateActiveBook]);
+
   const goPrev = useCallback(() => {
     setSelectedId(null);
     setSpread((s) => Math.max(0, s - 1));
@@ -352,6 +367,11 @@ export function useScrapbook() {
   useEffect(() => {
     setSpread(0);
     setSelectedId(null);
+    setActivePageId(null);
+    pastRef.current = [];
+    futureRef.current = [];
+    burstRef.current = false;
+    setHistoryTick(n => n + 1);
   }, [book?.id]);
 
   const selected = useMemo(
@@ -363,6 +383,7 @@ export function useScrapbook() {
     book: book as Scrapbook | null,
     pages,
     spread: currentSpread,
+    setSpread,
     spreadCount,
     leftPage,
     rightPage,
@@ -388,6 +409,7 @@ export function useScrapbook() {
     arrangePage,
     addSpread,
     deleteCurrentSpread,
+    moveSpread,
     goPrev,
     goNext,
     undo,

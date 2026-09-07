@@ -13,13 +13,13 @@ import { PIN_NOTE_MAX } from "../../types/app";
 export function Atlas() {
   const { state, environment, setEnvironment, addPin, updatePin, removePin, addPinNote, updatePinNote, deletePinNote, recordProgress } =
     useApp();
-  const { isVisitor, viewAs, setViewAs } = useNav();
-  const [draft, setDraft] = useState<{ x: number; y: number } | null>(null);
+  const { isVisitor, viewAs, setViewAs, pendingPrint, setPendingPrint } = useNav();
+  const [draft, setDraft] = useState<{ x: number; y: number } | null>(pendingPrint ? { x: 50, y: 50 } : null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [peekId, setPeekId] = useState<string | null>(null);
   const [label, setLabel] = useState("");
   const [caption, setCaption] = useState("");
-  const [photoSrc, setPhotoSrc] = useState<string | undefined>();
+  const [photoSrc, setPhotoSrc] = useState<string | undefined>(pendingPrint?.src);
   const photoRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -36,9 +36,8 @@ export function Atlas() {
     setPeekId(null);
     setEditingId(null);
     setDraft({ x, y });
-    setLabel("");
-    setCaption("");
-    setPhotoSrc(undefined);
+    if (!pendingPrint) { setLabel(""); setCaption(""); }
+    setPhotoSrc(pendingPrint?.src);
   };
 
   const onMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -73,6 +72,7 @@ export function Atlas() {
   const commitNew = () => {
     if (!draft || !label.trim()) return;
     addPin({ x: draft.x, y: draft.y, label: label.trim(), caption: caption.trim(), photoSrc });
+    setPendingPrint(null);
     setDraft(null);
     setPhotoSrc(undefined);
   };
@@ -96,6 +96,7 @@ export function Atlas() {
   }
 
   const closeForm = () => {
+    setPendingPrint(null);
     setDraft(null);
     setEditingId(null);
     setLabel("");
@@ -156,6 +157,7 @@ export function Atlas() {
       }
     >
       <div className="ks-atlas">
+        {pendingPrint && <div className="ks-print-map-hint" role="status">Your photo is ready to pin. Click a place on the map, add a name, then save the pin. <button onClick={closeForm}>Cancel print</button></div>}
         <div className="ks-atlas-board">
           <div className="ks-cork ks-atlas-cork">
             <div

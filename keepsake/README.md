@@ -9,7 +9,13 @@ The Bible PDF is **not** in this repo. Nearby docs are
 [`docs/keepsake-worklog.pdf`](docs/keepsake-worklog.pdf) and
 [`docs/keepsake-suggestions.pdf`](docs/keepsake-suggestions.pdf).
 
-## Now
+## Woodland rebuild — current branch
+
+The first Woodland Writing Room slice is implemented with a modular 3D architecture, seasonal forest scenery, rain/snow, quality controls, and a remodeled stitched beanbag. The working scrapbook editor and local storage are preserved. See [prototype notes and remaining acceptance checks](docs/woodland-prototype.md) and [asset provenance](art/woodland/asset-ledger.json).
+
+The default room is `public/room/woodland/woodland.glb`; use `?theme=classic` for the previous asset. Blender source: `art/woodland/woodland.blend`. Validate an export with `npm run check:room`. Browser acceptance is pending a Windows sandbox repair; Blender inspection, build and GLB validation have been completed.
+
+## Original baseline
 
 The room is a WebGL scene from [`public/room/keepsake.glb`](public/room/keepsake.glb)
 (desk, chair, CRT, lamp, archive, shelf, map, guestbook, door, fan, clock,

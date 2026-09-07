@@ -32,6 +32,7 @@ export type Weather = "clear" | "rain" | "snow";
 export type MusicProvider = "ambient" | "spotify";
 
 export interface Environment {
+  roomQuality?: "balanced" | "high";
   timeMode: TimeMode;
   season: Season;
   weather: Weather;
@@ -112,6 +113,7 @@ export interface Progress {
 }
 
 export interface AppState {
+  latestPrint?: { src: string; photoId?: string; printedAt: number };
   version: number;
   profile: Profile;
   books: Scrapbook[];

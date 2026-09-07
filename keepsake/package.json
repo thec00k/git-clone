@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:room": "node scripts/check-woodland.mjs",
+    "check:editor": "node scripts/check-editor.mjs",
+    "check:memories": "node scripts/check-memory-features.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

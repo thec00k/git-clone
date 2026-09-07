@@ -1,10 +1,9 @@
+import { RoomBackup } from '../RoomBackup';
 import { useRef } from "react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
 import { useListen } from "../../store/listen";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
-import { setPlaybackVolume } from "../../lib/spotify";
-import { applyPlaybackVolume } from "../../lib/spotifyPlayback";
 import type { Season, TimeMode, Weather } from "../../types/app";
 
 const TIMES: TimeMode[] = ["auto", "day", "dusk", "night"];
@@ -20,8 +19,9 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div ref={panelRef} className="ks-panel w-full max-w-md p-5" role="dialog" aria-modal="true" aria-label="Room settings" onClick={(e) => e.stopPropagation()}>
-        <h2 className="mb-4 font-display text-xl">The room</h2>
+      <div ref={panelRef} className="ks-panel w-full max-w-md p-5 ks-room-settings" role="dialog" aria-modal="true" aria-label="Room settings" onClick={(e) => e.stopPropagation()}>
+        <h2 className="mb-4 font-display text-xl">The room</h2><p className="ks-handnote">Settle in, stay awhile.</p>
+        <RoomBackup/>
 
         <label className="mb-4 block" htmlFor="ks-name">
           <span className="text-sm text-paper/60">Your name</span>
@@ -50,7 +50,7 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="mt-3">
-          <label className="text-sm text-paper/60" htmlFor="ks-music-vol">Music volume</label>
+          <label className="text-sm text-paper/60" htmlFor="ks-music-vol">Ambient music volume</label>
           <input
             id="ks-music-vol"
             name="musicVolume"
@@ -62,10 +62,6 @@ export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
             onChange={(e) => {
               const v = Number(e.target.value);
               setEnvironment({ volume: v });
-              if (environment.musicProvider === "spotify") {
-                void applyPlaybackVolume(v);
-                void setPlaybackVolume(v);
-              }
             }}
             className="mt-1 w-full accent-[var(--color-accent)]"
           />

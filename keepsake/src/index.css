@@ -1429,6 +1429,7 @@
   .ks-room3d-picture {
     position: absolute;
     inset: 0;
+    z-index: 0;
   }
 
   .ks-room3d-picture,
@@ -2405,3 +2406,199 @@
     margin: 0 auto 8mm auto !important;
   }
 }
+
+/* Woodland title card: scoped to the 3D room; scrapbook styles are unchanged. */
+.ks-woodland-intro { position:absolute; left:clamp(22px,3.5vw,64px); bottom:32px; z-index:20; color:#f2e8d5; max-width:420px; padding:24px 26px 18px; background:linear-gradient(135deg,rgba(24,39,32,.94),rgba(29,39,33,.82)); border:1px solid #dac79c35; border-radius:3px 18px 3px 3px; box-shadow:0 16px 60px #101b2240; backdrop-filter:blur(12px); }
+.ks-woodland-intro .ks-woodland-eyebrow { font:10px/1.4 sans-serif; letter-spacing:.24em; color:#d5b984; margin:0 0 9px; }
+.ks-woodland-intro h2 { font-family:var(--font-display,Georgia,serif); font-size:clamp(23px,2.3vw,34px); font-weight:400; line-height:1.12; margin:0 0 9px; max-width:310px; }
+.ks-woodland-intro p { color:#d0cebd; font-size:13px; margin:0; }
+.ks-woodland-actions { display:flex; gap:10px; margin:21px 0 15px; }
+.ks-woodland-actions button { background:#dac59d; color:#26372c; border:1px solid #dac59d; border-radius:3px; padding:10px 14px; font-size:12px; cursor:pointer; }
+.ks-woodland-actions button + button { color:#e3d7be; background:transparent; border-color:#b5b39855; }
+.ks-woodland-actions button span { margin-left:18px; }
+.ks-woodland-navigation { display:flex; gap:14px; border-top:1px solid #d8c7a225; padding-top:12px; }
+.ks-woodland-navigation button { color:#c7c9b7; background:none; border:none; cursor:pointer; font-size:10px; padding:4px 0; }
+.ks-woodland-intro .ks-woodland-hint { font-size:10px; color:#aaafa0; margin-top:10px; }
+.ks-room-quality { display:flex; align-items:center; gap:8px; color:#b4b7a6; font-size:10px; margin-top:8px; }
+.ks-room-quality select { color:#e8dfc9; background:#26382f; border:1px solid #c7b78840; padding:3px 6px; border-radius:3px; }
+.ks-woodland-intro button:hover { filter:brightness(1.15); }
+.ks-woodland-intro button:focus-visible, .ks-room-quality select:focus-visible { outline:2px solid #f0d69c; outline-offset:4px; }
+.ks-room-loading { min-width:230px; padding:22px; color:#f0e4cc; background:#253b31; border:1px solid #b8ac82; border-radius:5px; font-size:13px; }
+.ks-room-loading progress { width:100%; display:block; margin-top:12px; accent-color:#d6bc87; }
+@media (max-width:700px), (max-height:650px) { .ks-woodland-intro { left:14px; bottom:18px; padding:16px; max-width:300px; } .ks-woodland-intro h2 { font-size:23px; } .ks-woodland-hint, .ks-woodland-navigation { display:none; } .ks-woodland-actions { margin:13px 0 8px; } }
+@media (prefers-reduced-motion:reduce) { .ks-mote { animation:none !important; } }
+
+/* Calm room controls: object-sized targets, labels only on hover, actions at the edge. */
+.ks-room3d .ks-hot3d, .ks-room3d .ks-sit-prompt { position:relative; width:44px; height:44px; min-height:44px; padding:0; background:transparent; box-shadow:none; font-size:0; line-height:0; }
+.ks-room3d .ks-hot3d::before, .ks-room3d .ks-sit-prompt::before { content:""; position:absolute; left:19px; top:19px; width:6px; height:6px; border-radius:50%; background:#f6ebd4; box-shadow:0 0 0 2px #26392e60; opacity:.55; }
+.ks-room3d .ks-hot3d:hover::after, .ks-room3d .ks-sit-prompt:hover::after { content:attr(aria-label); position:absolute; left:50%; bottom:39px; transform:translateX(-50%); width:max-content; max-width:190px; padding:8px 11px; background:#23382ff2; color:#f3e7d0; border:1px solid #d9c49d50; border-radius:5px; font:12px/1.3 sans-serif; pointer-events:none; }
+.ks-room-name { position:absolute; left:24px; top:82px; z-index:12; color:#f6eddb; text-shadow:0 1px 8px #14221b; pointer-events:none; }
+.ks-room-name span { font-size:9px; letter-spacing:.2em; }
+.ks-room-name h2 { font:22px/1.2 var(--font-display,Georgia,serif); margin:4px 0; }
+.ks-room-controls { position:absolute; bottom:22px; left:50%; transform:translateX(-50%); z-index:25; display:flex; align-items:center; gap:4px; width:max-content; max-width:calc(100% - 120px); padding:7px; border:1px solid #bba78360; border-radius:12px; background:#20362df5; box-shadow:0 12px 28px #14251b40; color:#eee4cf; }
+.ks-room-controls button, .ks-room-controls summary { display:flex; align-items:center; justify-content:center; gap:7px; border:0; border-radius:6px; padding:10px 12px; background:transparent; color:inherit; font-size:12px; cursor:pointer; min-height:40px; }
+.ks-room-controls .ks-room-primary { background:#decca7; color:#26382d; }
+.ks-room-controls button:hover, .ks-room-controls summary:hover { background:#5c705b; color:#fff5df; }
+.ks-room-controls button:focus-visible, .ks-room-controls summary:focus-visible { outline:2px solid #e5c487; outline-offset:2px; }
+.ks-room-menu { position:relative; }
+.ks-room-menu summary { list-style:none; }
+.ks-room-menu-panel { position:absolute; bottom:calc(100% + 16px); right:0; width:270px; border:1px solid #bba78360; border-radius:10px; padding:16px; background:#22382ffb; box-shadow:0 12px 32px #14251b55; }
+.ks-room-menu-panel p { color:#c6b490; font-size:9px; letter-spacing:.18em; margin:6px 0; }
+.ks-room-menu-panel > button { width:100%; justify-content:flex-start; }
+.ks-room-menu-panel > button span { margin-left:auto; font-size:11px; color:#d5c29b; }
+.ks-room-views { display:flex; flex-wrap:wrap; margin-bottom:12px; }
+.ks-room-menu-panel label { display:flex; align-items:center; justify-content:space-between; font-size:12px; padding:12px 0; border-top:1px solid #d0bc9425; margin-top:10px; }
+.ks-room-menu-panel select { color:#f2e9d6; background:#314d3f; border:1px solid #bba78360; border-radius:4px; padding:5px; }
+.ks-room-menu-panel small { color:#b7bba6; font-size:10px; }
+
+/* The page, arrows and page-turn animation share a single measured canvas. */
+.ks-room--desk-top > header { gap:16px; background:#f1e7d7ed; border-bottom:1px solid #5b422520; }
+.ks-book-progress { border:1px solid #71593830; border-radius:30px; padding:7px 14px; white-space:nowrap; }
+.ks-desk-top .ks-book-stage { position:relative; container-type:size; flex:1; min-height:0; }
+.ks-book-canvas { position:relative; flex:none; width:min(calc(100cqw - 10rem),calc((100cqh - 5rem) * 1.5)); aspect-ratio:3/2; }
+.ks-book-canvas .ks-stage { padding:0; height:100%; width:100%; }
+.ks-desk-top .ks-book-canvas .ks-spread { width:100%; height:100%; max-height:none; }
+.ks-book-canvas .ks-page-turn--prev { left:-54px; }
+.ks-book-canvas .ks-page-turn--next { right:-54px; }
+.ks-book-canvas .ks-page-turn { width:44px; height:54px; border-radius:10px; box-shadow:0 3px 12px #251b1830; }
+.ks-page-navigation-hint { position:absolute; top:calc(100% + 15px); left:0; right:0; text-align:center; color:#f6eddd; font-size:11px; letter-spacing:.04em; text-shadow:0 1px 4px #3b2b1d; }
+.ks-page-navigation-hint span { margin:0 14px; opacity:.6; }
+.ks-desk-top .ks-clutter-markers { left:auto; top:auto; right:24px; bottom:22px; padding:12px 14px 8px; background:#e7d6b640; border:1px solid #f9ebd640; border-radius:8px; transform:none; gap:12px; }
+.ks-desk-top .ks-mini-printer { left:24px; bottom:20px; transform:rotate(-6deg) scale(.7); transform-origin:bottom left; }
+.ks-desk-top .ks-disposable { right:24px; top:22px; bottom:auto; transform:rotate(8deg) scale(.7); transform-origin:top right; }
+.ks-clutter-label { font-size:.85rem; box-shadow:none; }
+.ks-editor-dock { position:relative; z-index:15; display:flex; flex-direction:column; align-items:center; gap:9px; padding:12px 20px 16px; background:#eaddc8f5; border-top:1px solid #71593830; box-shadow:0 -8px 30px #3c2d1414; }
+.ks-page-target { display:flex; align-items:center; gap:6px; font-size:11px; color:#65543e; }
+.ks-page-target > span { margin-right:5px; }
+.ks-page-target button { border:1px solid #6e5a3830; border-radius:5px; padding:5px 11px; color:#4b4935; background:#f6efdf; }
+.ks-page-target button[aria-pressed="true"] { background:#344b3e; color:#fff2d9; border-color:#344b3e; }
+.ks-editor-toolbar { display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; background:#263b31; color:#f5ead7; padding:7px; border-radius:10px; box-shadow:0 3px 8px #2b331920; }
+.ks-editor-toolbar .ks-tool { border-radius:5px; min-height:40px; }
+.ks-editor-history { display:flex; padding-right:8px; margin-right:3px; border-right:1px solid #e9d2a640; }
+.ks-book-pages-menu { position:relative; }
+.ks-book-pages-menu summary { display:flex; align-items:center; gap:5px; padding:10px 13px; font-size:13px; cursor:pointer; list-style:none; }
+.ks-book-pages-menu > div { position:absolute; right:0; bottom:calc(100% + 18px); width:220px; padding:10px; background:#263b31; border:1px solid #cbb38b60; border-radius:8px; box-shadow:0 8px 24px #2b331950; }
+.ks-book-pages-menu > div button { display:flex; width:100%; }
+.ks-book-pages-menu p { color:#c9c3aa; font-size:10px; margin:9px 5px 3px; }
+.ks-editor-dock button:focus-visible, .ks-editor-dock summary:focus-visible { outline:2px solid #b07933; outline-offset:3px; }
+@media(max-width:700px) {
+  .ks-room-name { left:16px; top:78px; } .ks-room-name h2 { font-size:18px; }
+  .ks-room-controls { bottom:54px; max-width:calc(100% - 24px); gap:0; } .ks-room-controls button, .ks-room-controls summary { padding:9px; font-size:11px; }
+  .ks-room-controls svg { display:none; } .ks-room-menu-panel { right:-2px; }
+  .ks-room--desk-top > header { flex-wrap:wrap; gap:8px; padding:10px 14px; } .ks-book-progress { font-size:11px; }
+  .ks-book-canvas { width:min(calc(100cqw - 6rem),calc((100cqh - 5rem) * 1.5)); }
+  .ks-book-canvas .ks-page-turn--prev { left:-45px; } .ks-book-canvas .ks-page-turn--next { right:-45px; }
+  .ks-book-canvas .ks-page-turn { width:36px; height:44px; }
+  .ks-desk-top .ks-mini-printer, .ks-desk-top .ks-disposable { display:none; }
+  .ks-desk-top .ks-clutter-markers { right:12px; bottom:8px; padding:7px 10px; transform:scale(.8); transform-origin:bottom right; }
+  .ks-editor-dock { padding:8px; } .ks-editor-toolbar { gap:2px; padding:5px; } .ks-editor-toolbar .ks-tool { padding:7px; font-size:11px; }
+}
+
+/* Instant printer: rounded shell, paper slot and an emerging bordered print. */
+.ks-mini-printer-body { width:116px; height:98px; border-radius:19px; background:linear-gradient(145deg,#fffaf0,#d2caba); border:1px solid #b5ad9e; box-shadow:inset 0 3px 2px #fff,0 9px 0 #b8b0a3,0 12px 18px #21170c40; }
+.ks-mini-printer-body::after { content:""; position:absolute; width:22px; height:25px; left:46px; top:16px; background:linear-gradient(90deg,#bd7652 33%,#d6b775 33% 66%,#759079 66%); border-radius:2px; }
+.ks-mini-printer-slot { left:13px; right:13px; top:auto; bottom:11px; width:auto; height:7px; background:#27392f; border-radius:5px; }
+.ks-mini-printer-print { left:25px; top:78px; width:65px; height:49px; padding:4px 4px 11px; transform:none; background:#fffdf5; box-shadow:0 4px 6px #281c1630; }
+.ks-mini-printer-print::after { inset:4px 4px 11px; background:linear-gradient(145deg,#b8cbbb 45%,#5d7b68 46% 68%,#90a080 69%); }
+.ks-mini-printer-lens { width:5px; height:5px; top:15px; right:13px; background:#8fad7c; border:none; box-shadow:0 0 4px #a7d098; }
+.ks-mini-printer .ks-clutter-label { margin-top:28px; }
+.ks-photo-printer-overlay { position:fixed; inset:0; z-index:70; display:grid; place-items:center; padding:20px; background:#10231ccd; backdrop-filter:blur(5px); }
+.ks-photo-printer-dialog { width:min(620px,100%); max-height:90dvh; overflow:auto; padding:26px; border-radius:18px; color:#2e3d32; background:#f2e9d8; box-shadow:0 30px 90px #06120b60; }
+.ks-photo-printer-dialog header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.ks-photo-printer-dialog h2 { font:26px/1.3 var(--font-display); margin:4px 0 12px; }
+.ks-photo-printer-dialog small { font:9px/1.4 sans-serif; letter-spacing:.16em; color:#77715d; }
+.ks-photo-printer-dialog p { font-size:14px; line-height:1.55; margin:12px 0; }
+.ks-photo-printer-dialog button { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:1px solid #adad9550; border-radius:8px; padding:10px 14px; background:#e3dbc8; cursor:pointer; }
+.ks-photo-printer-dialog button:disabled { opacity:.4; cursor:default; }
+.ks-photo-printer-dialog button:focus-visible { outline:3px solid #b37a3a; outline-offset:2px; }
+.ks-photo-printer-dialog .is-primary { background:#304c3c; color:#fff4df; }
+.ks-photo-printer-dialog footer { display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; margin-top:20px; }
+.ks-print-picker { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:18px; max-height:280px; overflow:auto; padding:4px; }
+.ks-print-picker button { padding:5px 5px 13px; background:#fffdf5; border:2px solid transparent; }
+.ks-print-picker button[aria-pressed=true] { border-color:#477554; box-shadow:0 0 0 2px #477554; }
+.ks-print-picker img { width:100%; aspect-ratio:1; object-fit:cover; }
+.ks-ready-print { width:180px; margin:18px auto; padding:10px 10px 24px; background:#fffdf5; transform:rotate(-3deg); box-shadow:0 12px 25px #27372530; animation:ks-print-reveal .7s ease-out; }
+.ks-ready-print img { width:100%; max-height:200px; object-fit:contain; }
+.ks-ready-print span { display:block; margin-top:9px; font:16px var(--font-script); text-align:center; }
+.ks-print-destination { display:flex; gap:12px; }
+.ks-print-destination label { display:flex; flex:1; min-width:0; flex-direction:column; gap:5px; font-size:12px; }
+.ks-print-destination select { padding:10px; background:#fff9ed; border:1px solid #b4b59e; border-radius:7px; width:100%; }
+.ks-photo-printer-dialog .ks-print-again { border:0; background:transparent; padding-left:0; margin-top:8px; font-size:12px; }
+.ks-print-map-hint { position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:20; width:min(90%,680px); background:#f4ecd9; color:#304a38; border-radius:8px; padding:12px; font-size:13px; }
+.ks-print-map-hint button { text-decoration:underline; margin-left:8px; }
+.ks-arrange-note { font-size:12px; color:#394e3a; text-align:center; }
+@keyframes ks-print-reveal { from { opacity:0; transform:translateY(-25px) rotate(0); } to { opacity:1; transform:translateY(0) rotate(-3deg); } }
+@media(prefers-reduced-motion:reduce) { .ks-ready-print { animation:none; } }
+/* Never crop Spotify's native controls. Collapsing preserves the same iframe. */
+.ks-spotify-dock { height:auto; width:220px; bottom:12px; overflow:visible; color:#eee6d3; border:1px solid #b8ad8850; background:#20342c; }
+.ks-spotify-dock.is-expanded { width:min(350px,calc(100vw - 24px)); bottom:90px; }
+.ks-spotify-dock.is-on-crt { height:auto; bottom:auto; border:0; }
+.ks-music-dock-bar { display:flex; align-items:center; justify-content:space-between; padding:4px 7px; }
+.ks-music-dock-bar button,.ks-music-dock-bar a { display:flex; align-items:center; gap:8px; padding:8px; font-size:12px; border-radius:6px; }
+.ks-music-dock-bar button:hover,.ks-music-dock-bar a:hover { background:#536c54; }
+.ks-music-player-body iframe { display:block; border:0; border-radius:0 0 10px 10px; }
+.ks-music-player-help { display:flex; justify-content:space-between; padding:8px; gap:8px; font-size:10px; }
+.ks-music-player-help button { text-decoration:underline; }
+.ks-music-start { padding:16px; width:100%; }
+.ks-crt-player-slot { min-height:428px; }
+@media(max-width:650px) { .ks-photo-printer-dialog { padding:18px; } .ks-print-picker { grid-template-columns:repeat(3,1fr); } .ks-spotify-dock { bottom:8px; left:8px; } .ks-spotify-dock.is-expanded { bottom:110px; } .ks-room-controls { bottom:62px; } }
+.ks-spotify-dock { left:88px; }
+.ks-spotify-dock.is-expanded { left:12px; }
+@media(max-width:380px) { .ks-spotify-dock { width:190px; left:76px; } .ks-spotify-dock.is-expanded { width:calc(100vw - 24px); left:12px; } }
+
+/* Woodland paper tools: navigation stays compact, details open on demand. */
+.ks-room-settings{max-height:90dvh;overflow:auto}
+.ks-backup{margin:12px 0;padding:12px;border:1px solid #b69a6844;border-radius:8px;background:#d7c1960a}
+.ks-backup summary{cursor:pointer;color:#d9c397;font-family:Georgia,serif}
+.ks-backup p{font-size:12px;line-height:1.5;margin:8px 0;opacity:.8}
+.ks-restore-preview{border-top:1px solid #b69a6844;padding-top:12px;margin-top:12px}
+.ks-spread-overview{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-height:42vh;overflow:auto;width:min(520px,75vw);padding:8px!important;background:#ede3cc;color:#403b2c}
+.ks-spread-overview>p{grid-column:1/-1;font-size:11px}
+.ks-spread-overview article{padding:8px;border:1px solid #a9926855;border-radius:4px}
+.ks-spread-overview article[aria-current=page]{outline:2px solid #6a7758}
+.ks-spread-overview article>div{display:flex;gap:6px;padding:0;position:static;background:none;box-shadow:none}
+.ks-spread-overview article button{font-size:11px;padding:5px}
+.ks-spread-preview{display:flex!important;width:100%;gap:2px;background:#a28d6955!important;padding:4px!important}
+.ks-page-mini{position:relative;display:block;width:50%;aspect-ratio:3/4;background:#f7f0de;overflow:hidden;color:#3d392d;font-size:8px}
+.ks-page-mini img{width:100%;border:2px solid #fffbec}
+.ks-page-mini small{position:absolute;bottom:2px;left:45%;font-size:7px}
+.ks-mini-title{position:absolute;inset:30% 5%;font:10px Georgia}
+.ks-spread-overview .ks-spread-capacity{display:flex;flex-direction:column;font-size:10px;margin:4px 0}
+.ks-printing{height:320px;text-align:center;padding-top:20px}
+.ks-printer-body{margin:auto;width:180px;height:70px;border-radius:20px 20px 8px 8px;background:linear-gradient(#eee5d3,#c8bea8);box-shadow:0 8px 15px #29291f33;letter-spacing:.3em;padding-top:20px;font:10px Georgia;color:#77715d}
+.ks-print-slot{width:150px;height:170px;overflow:hidden;margin:auto;border-top:7px solid #343c32}
+.ks-emerging-photo{width:118px;background:#fff9ea;padding:8px 8px 22px;margin:auto;animation:ks-paper-emerge 1.8s ease-in-out both;box-shadow:0 3px 5px #302f2922}
+.ks-emerging-photo img{width:100%;aspect-ratio:1;object-fit:cover}
+@keyframes ks-paper-emerge{from{transform:translateY(-100%)}to{transform:translateY(0) rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){.ks-emerging-photo{animation:none}}
+.ks-room-menu-panel button:hover,.ks-editor-toolbar .ks-tool:hover{color:#e5c688}
+.ks-room-controls,.ks-editor-toolbar{border-color:#b59a6244}
+
+.ks-shelf-book-label{display:block;white-space:nowrap;border:1px solid #aa9468;background:#eee3c9;color:#353d2e;padding:7px 13px;border-radius:3px;font:15px Georgia;box-shadow:0 3px 12px #181c2544}
+
+.ks-book-pages-menu>div{width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 160px);overflow:auto}
+.ks-book-pages-menu .ks-spread-overview{width:100%;max-height:40vh}
+.ks-book-pages-menu .ks-spread-overview p{color:#514d3d}
+.ks-book-pages-menu .ks-spread-overview article>div>button{width:auto;flex:1}
+@media(max-width:640px){.ks-book-pages-menu>div{position:fixed;left:16px;right:16px;bottom:125px}.ks-spread-overview{grid-template-columns:1fr}}
+
+.ks-spine-hit{display:block;background:transparent;border:0;cursor:pointer;padding:0}.ks-spine-hit:focus-visible{outline:1px solid #efdfb1;outline-offset:2px}
+
+.ks-spread-preview{justify-content:center}.ks-page-mini{width:87px;height:116px;flex:none}
+
+/* Finishing pass: restrained handwriting, paper tabs, one brass/ink icon system. */
+.ks-handnote{font-family:var(--font-script);font-size:20px!important;line-height:1.25;letter-spacing:0!important;text-transform:none!important;color:#d4c099!important;margin:5px 0 12px!important;font-weight:400}
+.ks-spread-overview .ks-handnote{color:#62563d!important;grid-column:1/-1;margin:2px 4px!important}
+.ks-page-target button{border-radius:7px 7px 1px 1px;border-bottom:2px solid #ad95684d;background:linear-gradient(120deg,#f2e8d3,#dfd0af);color:#4a4637;box-shadow:1px 1px 2px #443b2920}
+.ks-page-target button[aria-pressed=true]{background:linear-gradient(120deg,#66735b,#405340);color:#fff5df;border-bottom-color:#b9a06b}
+.ks-room-menu-panel svg,.ks-editor-toolbar svg,.ks-backup svg{color:#cbb27d;stroke-width:1.65;flex:none}
+.ks-backup .ks-tool{display:inline-flex;gap:7px;align-items:center;margin:3px 4px 3px 0}
+.ks-room-menu-panel button{display:flex;align-items:center;gap:7px}
+.ks-room-views{grid-template-columns:1fr 1fr}
+.ks-room-menu-panel{max-height:calc(100dvh - 150px);overflow:auto}
+.ks-room-menu-panel>p:not(.ks-handnote){border-bottom:1px solid #cab38433;padding-bottom:5px;color:#d9c9a8}
+.ks-backup{border-left:3px solid #aa9465;background:linear-gradient(120deg,#cfb87e12,transparent)}
+.ks-editor-toolbar .ks-tool:focus-visible,.ks-room-controls button:focus-visible,.ks-backup button:focus-visible{outline:2px solid #d6bb83;outline-offset:3px}
+
+.ks-spotify-volume{position:relative}.ks-volume-popover{position:absolute;bottom:calc(100% + 16px);left:-80px;width:240px;background:#263b31;color:#f2e8d4;padding:12px;border:1px solid #a78f60;border-radius:8px;box-shadow:0 8px 25px #0005}
+.ks-volume-popover label{display:block;font-size:12px}.ks-volume-popover input{width:100%;accent-color:#c4a775;margin:10px 0}.ks-volume-popover small{display:block;line-height:1.5;font-size:11px}.ks-volume-popover input:disabled{opacity:.4}

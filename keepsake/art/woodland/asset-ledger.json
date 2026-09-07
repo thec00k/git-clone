@@ -1,0 +1,72 @@
+{
+  "room": "woodland",
+  "updated": "2026-09-07",
+  "assets": [
+    {
+      "id": "inherited-room",
+      "source": "Existing connected Blender scene and repository room",
+      "sourceUrl": null,
+      "creator": "Prior Keepsake project contributors; individual origins not recorded in this checkout",
+      "license": "Inherited asset provenance not independently verified",
+      "commercialUse": "Not independently verified",
+      "attribution": "Retain prior project attribution; audit inherited texture sources before distribution",
+      "original": "public/room/keepsake.glb; local art/woodland/original-room-backup.blend",
+      "modified": "public/room/woodland/woodland.glb",
+      "optimization": "Textures capped at 512 pixels and embedded as JPEG; stable interaction roots retained"
+    },
+    {
+      "id": "woodland-original-details",
+      "source": "Created directly in Blender for Keepsake in this session",
+      "sourceUrl": null,
+      "creator": "Keepsake project / Codex-assisted modeling",
+      "license": "Original project work; no third-party models downloaded",
+      "commercialUse": "No additional third-party model license introduced",
+      "attribution": "None required for newly authored geometry",
+      "created": "2026-09-07",
+      "original": "art/woodland/woodland.blend",
+      "modified": "public/room/woodland/woodland.glb",
+      "optimization": "Static paneling, floor, curtains and botanical details merged by material; beanbag seams consolidated",
+      "includes": [
+        "paneling",
+        "beams",
+        "floorboards",
+        "linen curtains",
+        "botanical studies",
+        "fern",
+        "remodeled beanbag",
+        "procedural oatmeal weave",
+        "linen chair cushion",
+        "oak guestbook table",
+        "window string lights",
+        "conforming folded throw",
+        "guestbook bookmark",
+        "coffee ring",
+        "cabinet flowers",
+        "softened furniture edges",
+        "subtle contact wear",
+        "asymmetric flowers and curved stems",
+        "ceiling pull-chain support arms"
+      ],
+      "inheritedTextures": "Beanbag normal texture is inherited from the existing Blender scene; see inherited-room provenance"
+    },
+    {
+      "id": "runtime-woodland",
+      "source": "Original procedural scene code",
+      "sourceUrl": null,
+      "creator": "Keepsake project / Codex-assisted implementation",
+      "license": "Original project work",
+      "commercialUse": "No additional third-party asset license introduced",
+      "attribution": "None",
+      "original": "src/components/room3d/WoodlandScenery.tsx",
+      "optimization": "40 trunks and 200 irregular leaf cards in two instanced meshes; generated foliage texture; weather in one instanced mesh"
+    },
+    {
+      "id": "room-world-map",
+      "source": "Existing public/maps/world.svg in this project; recolored for the room",
+      "original": "public/maps/world.svg",
+      "modified": "public/maps/world-room.svg",
+      "license": "Inherited map provenance; no new external map downloaded",
+      "optimization": "Shared 950 by 620 SVG silhouette used as a room texture"
+    }
+  ]
+}

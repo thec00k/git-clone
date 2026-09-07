@@ -1,3 +1,4 @@
+import { SpreadOverview } from './SpreadOverview';
 import { useEffect, useRef, useState } from "react";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import {
@@ -11,8 +12,6 @@ import {
   Plus,
   Printer,
   Redo2,
-  Rows3,
-  Shuffle,
   Smile,
   StickyNote,
   Trash2,
@@ -43,9 +42,16 @@ export function BookView() {
   const sb = useScrapbook();
   const { addArchivePhoto, renameBook, setBookCover, state } = useApp();
   const stickerGlyphs = ownedStickerGlyphs(state.ownedStickerPacks);
-  const { viewAs, isVisitor } = useNav();
+  const { viewAs, isVisitor, setPrinterOpen, printerOpen, bookPageId, setBookPageId } = useNav();
+  useEffect(() => {
+    if (!bookPageId) return;
+    const index = sb.pages.findIndex(p => p.id === bookPageId);
+    if (index >= 0) { sb.setSpread(Math.floor(index / 2)); sb.setActivePageId(bookPageId); }
+    setBookPageId(null);
+  }, [bookPageId, sb.pages, sb.setSpread, sb.setActivePageId, setBookPageId]);
   const [turn, setTurn] = useState<{ dir: "next" | "prev" } | null>(null);
   const [showPresets, setShowPresets] = useState(false);
+  const [arrangeNote, setArrangeNote] = useState("");
   const [showStickers, setShowStickers] = useState(false);
   const [showPrint, setShowPrint] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -55,7 +61,8 @@ export function BookView() {
   const addInputRef = useRef<HTMLInputElement>(null);
   const turningRef = useRef(false);
 
-  const targetPageId = sb.activePageId ?? sb.leftPage?.id ?? sb.rightPage?.id ?? null;
+  const targetPageId = sb.activePageId && [sb.leftPage?.id, sb.rightPage?.id].includes(sb.activePageId)
+    ? sb.activePageId : sb.leftPage?.id ?? sb.rightPage?.id ?? null;
   const canView = sb.book ? canSee(sb.book.visibility, viewAs) : true;
 
   async function handleFiles(files: FileList | null) {
@@ -85,7 +92,10 @@ export function BookView() {
       !!id && !!sb.pages.find((p) => p.id === id)?.elements.some((e) => e.type === "photo");
     let pid = targetPageId;
     if (!hasPhotos(pid)) pid = [sb.leftPage, sb.rightPage].find((p) => hasPhotos(p?.id))?.id ?? pid;
-    if (pid) sb.arrangePage(pid, preset);
+    if (pid) {
+      const ok=sb.arrangePage(pid, preset);
+      setArrangeNote(ok===false ? "Not enough clear space. Move writing or use a fresh page, then try again." : "Photos aligned in two columns. Undo restores your previous arrangement.");
+    }
     setShowPresets(false);
   };
 
@@ -100,7 +110,7 @@ export function BookView() {
       return;
     }
     turningRef.current = true;
-    playPageTurn();
+    playPageTurn(state.environment.ambienceVolume);
     setTurn({ dir });
   };
 
@@ -115,15 +125,16 @@ export function BookView() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
-      if (t && (t.tagName === "TEXTAREA" || t.tagName === "INPUT")) return;
+      if (e.defaultPrevented || showPrint || showNotes || showKeys || printerOpen) return;
+      if (t?.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')) return;
       const mod = e.metaKey || e.ctrlKey;
-      if (mod && e.key.toLowerCase() === "z") {
+      if (!isVisitor && !turn && mod && e.key.toLowerCase() === "z") {
         e.preventDefault();
         if (e.shiftKey) sb.redo();
         else sb.undo();
         return;
       }
-      if (mod && e.key.toLowerCase() === "y") {
+      if (!isVisitor && !turn && mod && e.key.toLowerCase() === "y") {
         e.preventDefault();
         sb.redo();
         return;
@@ -141,6 +152,9 @@ export function BookView() {
       } else if (e.key === "Escape") {
         sb.setSelectedId(null);
         setDrawInk(null);
+        setShowStickers(false);
+        setShowPresets(false);
+        setShowCover(false);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -186,33 +200,10 @@ export function BookView() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="ks-book-progress">
             <span className="min-w-14 text-center text-sm text-ink/70" aria-live="polite">
               Spread {sb.spread + 1} of {sb.spreadCount}
             </span>
-            {!isVisitor && (
-              <>
-                <span className="mx-1 h-6 w-px bg-paper/15" />
-                <button className="ks-chip" aria-label="Undo" title="Undo (⌘Z)" onClick={sb.undo} disabled={!sb.canUndo}>
-                  <Undo2 size={16} />
-                </button>
-                <button className="ks-chip" aria-label="Redo" title="Redo (⌘⇧Z)" onClick={sb.redo} disabled={!sb.canRedo}>
-                  <Redo2 size={16} />
-                </button>
-                <button className="ks-chip" aria-label="Add a spread" title="Add spread" onClick={sb.addSpread}>
-                  <Plus size={16} />
-                </button>
-                <button
-                  className="ks-chip hover:!bg-seal"
-                  aria-label="Delete this spread"
-                  title="Delete this spread"
-                  onClick={sb.deleteCurrentSpread}
-                  disabled={sb.spreadCount <= 1}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </>
-            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -222,7 +213,7 @@ export function BookView() {
                 aria-label="Edit cover and title page"
                 title="Cover & title page"
                 aria-expanded={showCover}
-                onClick={() => setShowCover((v) => !v)}
+                onClick={() => { setShowCover((v) => !v); setShowStickers(false); setShowPresets(false); }}
               >
                 <BookMarked size={16} />
               </button>
@@ -250,7 +241,7 @@ export function BookView() {
       }
       footer={
         isVisitor ? null : (
-          <div className="flex flex-col items-center gap-2 px-4 pb-4">
+          <div className="ks-editor-dock">
             {showCover && sb.book && (
               <div className="ks-panel w-full max-w-md p-3">
                 <p className="mb-2 font-display text-paper">Cover &amp; title page</p>
@@ -280,16 +271,8 @@ export function BookView() {
             )}
             {showPresets && (
               <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-full bg-[rgb(28_22_16/0.92)] px-2 py-1.5 shadow-lg">
-                <span className="px-1 text-sm text-paper/60">Arrange photos:</span>
-                <button className="ks-tool" onClick={() => applyPreset("grid")}>
-                  <LayoutGrid size={16} /> Grid
-                </button>
-                <button className="ks-tool" onClick={() => applyPreset("column")}>
-                  <Rows3 size={16} /> Column
-                </button>
-                <button className="ks-tool" onClick={() => applyPreset("scatter")}>
-                  <Shuffle size={16} /> Scatter
-                </button>
+                <span className="px-1 text-sm text-paper/60">Two columns · room for 4–6 photos</span>
+                <button className="ks-tool" onClick={() => applyPreset("grid")}><LayoutGrid size={16} /> Align side by side</button>
               </div>
             )}
             {showStickers && (
@@ -312,19 +295,40 @@ export function BookView() {
                 <p className="text-center text-sm text-paper/50">More packs live in the desk drawer.</p>
               </div>
             )}
-            <div className="ks-desk flex w-full max-w-xl flex-wrap items-center justify-center gap-2 rounded-2xl px-3 py-2" role="toolbar" aria-label="Add to the page">
+            {arrangeNote && <p className="ks-arrange-note" role="status">{arrangeNote}</p>}
+            <div className="ks-page-target" role="group" aria-label="Page to edit">
+              <span>{drawInk ? "Drawing on" : "Adding to"}</span>
+              <button type="button" aria-pressed={targetPageId === sb.leftPage?.id} disabled={!sb.leftPage || !!turn} onClick={() => sb.leftPage && sb.setActivePageId(sb.leftPage.id)}>Left page</button>
+              <button type="button" aria-pressed={targetPageId === sb.rightPage?.id} disabled={!sb.rightPage || !!turn} onClick={() => sb.rightPage && sb.setActivePageId(sb.rightPage.id)}>Right page</button>
+              {drawInk && <button type="button" onClick={() => setDrawInk(null)}>Finish drawing</button>}
+            </div>
+            <div className="ks-editor-toolbar" role="toolbar" aria-label="Scrapbook editing tools">
+              <div className="ks-editor-history" role="group" aria-label="Edit history">
+                <button className="ks-tool" aria-label="Undo" title="Undo (Ctrl/⌘ Z)" onClick={sb.undo} disabled={!sb.canUndo}><Undo2 size={17} /> Undo</button>
+                <button className="ks-tool" aria-label="Redo" title="Redo (Ctrl Y / ⌘ Shift Z)" onClick={sb.redo} disabled={!sb.canRedo}><Redo2 size={17} /> Redo</button>
+              </div>
               <button className="ks-tool ks-tool--accent" onClick={() => addInputRef.current?.click()}>
                 <ImagePlus size={18} /> Add photo
               </button>
               <button className="ks-tool" onClick={() => targetPageId && sb.addCaption(targetPageId)}>
                 <Type size={18} /> Add caption
               </button>
-              <button className="ks-tool" aria-expanded={showStickers} onClick={() => setShowStickers((v) => !v)}>
+              <button className="ks-tool" aria-expanded={showStickers} onClick={() => { setShowStickers((v) => !v); setShowPresets(false); setShowCover(false); }}>
                 <Smile size={18} /> Stickers
               </button>
-              <button className="ks-tool" aria-expanded={showPresets} onClick={() => setShowPresets((v) => !v)}>
+              <button className="ks-tool" aria-expanded={showPresets} onClick={() => { setShowPresets((v) => !v); setShowStickers(false); setShowCover(false); }}>
                 <Wand2 size={18} /> Arrange
               </button>
+              <button className="ks-tool" onClick={() => setPrinterOpen(true)}><Printer size={17} /> Print photo</button>
+              <details className="ks-book-pages-menu" onKeyDown={e => { if (e.key === "Escape") { e.currentTarget.open = false; e.currentTarget.querySelector("summary")?.focus(); } }}>
+                <summary>Pages <ChevronRight size={14} /></summary>
+                <div>
+                  <button className="ks-tool" onClick={sb.addSpread} disabled={!!turn}><Plus size={16} /> Add a spread</button>
+                  <button className="ks-tool" onClick={sb.deleteCurrentSpread} disabled={sb.spreadCount <= 1 || !!turn}><Trash2 size={16} /> Delete this spread</button>
+                  <p>Deleted a spread by mistake? Use Undo.</p>
+                  <SpreadOverview pages={sb.pages} current={sb.spread} disabled={!!turn} onJump={i=>{sb.setSpread(i);sb.setSelectedId(null);}} onMove={sb.moveSpread}/>
+                </div>
+              </details>
             </div>
           </div>
         )
@@ -334,7 +338,7 @@ export function BookView() {
         <DeskClutter
           ink={isVisitor ? null : drawInk}
           onPickInk={isVisitor ? undefined : setDrawInk}
-          onPrint={() => setShowPrint(true)}
+          onPrint={() => isVisitor ? setShowPrint(true) : setPrinterOpen(true)}
           onSnap={() => {
             if (!isVisitor) addInputRef.current?.click();
           }}
@@ -352,6 +356,7 @@ export function BookView() {
           }}
         />
         <div className="ks-book-stage">
+          <div className="ks-book-canvas">
           <button
             type="button"
             className="ks-page-turn ks-page-turn--prev"
@@ -377,7 +382,7 @@ export function BookView() {
             <Spread
               leftPage={sb.leftPage}
               rightPage={sb.rightPage}
-              activePageId={isVisitor ? null : sb.activePageId}
+              activePageId={isVisitor ? null : targetPageId}
               bookTitle={sb.book.title}
               bookSubtitle={sb.book.subtitle}
               selectedId={isVisitor ? null : sb.selectedId}
@@ -401,6 +406,8 @@ export function BookView() {
           >
             <ChevronRight size={22} />
           </button>
+          <p className="ks-page-navigation-hint">{sb.spread === 0 ? "The beginning" : "← Previous"} <span>·</span> {sb.spread === sb.spreadCount - 1 ? "The latest chapter" : "Next →"}</p>
+          </div>
         </div>
       </div>
       {showKeys && <ShortcutsHelp onClose={() => setShowKeys(false)} />}

@@ -1,3 +1,4 @@
+import { RoomBackup } from '../RoomBackup';
 import { useState } from "react";
 import { Eye, Globe, Lock, Plus, Trash2, Users } from "lucide-react";
 import { useApp } from "../../store/appStore";
@@ -33,6 +34,7 @@ export function Shelf() {
         )
       }
     >
+      {!isVisitor && <RoomBackup/>}
       {books.length === 0 && (
         <p className="mt-10 text-center text-paper/60">No books to show here.</p>
       )}

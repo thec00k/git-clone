@@ -27,3 +27,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Blender safety copies; the authored woodland.blend remains versioned.
+art/woodland/original-room-backup.blend
+art/**/*.blend1
