@@ -35,8 +35,9 @@ export function ArchiveDrawer() {
     <ViewShell title="The archive" subtitle="the drawer is open" fill>
       <div className="ks-archive-well" data-archive-drawer>
         <p className="ks-archive-well-note">
-          Hanging files. The front one is every photograph. The others keep a category.
+          Lift a file by the tab. The front one is every photograph. The others keep a category.
         </p>
+        <div className="ks-archive-bar" aria-hidden="true" />
         <div className="ks-archive-rail" role="list" aria-label="Archive files">
           {files.map((file, i) => (
             <button
@@ -44,7 +45,7 @@ export function ArchiveDrawer() {
               type="button"
               role="listitem"
               className={`ks-archive-file ks-archive-file--${file.kind}`}
-              style={{ zIndex: files.length - i }}
+              style={{ zIndex: files.length - i, ["--ks-file-i" as string]: i }}
               data-archive-file={file.id}
               aria-label={
                 file.id === "all"
@@ -53,6 +54,7 @@ export function ArchiveDrawer() {
               }
               onClick={() => openArchiveFolder(file.id)}
             >
+              <span className="ks-archive-file-hook" aria-hidden="true" />
               <span className="ks-archive-file-tab">{file.name}</span>
               <span className="ks-archive-file-body">
                 <span className="ks-archive-file-count">

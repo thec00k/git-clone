@@ -24,9 +24,11 @@ export const DOOR_OBJECT = "ks_door";
 /** Desk body. The drawer slides when `Desk_Drawer` is a child. */
 export const DESK_OBJECT = "Desk";
 export const DESK_DRAWER = "Desk_Drawer";
-/** Filing cabinet. The drawer slides when `ks_archive_drawer` is a child. */
+/** Filing cabinet. Body stays put; child `ks_archive_drawer` slides +local Z. */
 export const ARCHIVE_OBJECT = "ks_archive";
 export const ARCHIVE_DRAWER = "ks_archive_drawer";
+/** Optional rail inside the drawer. The app does not move it on its own. */
+export const ARCHIVE_RAIL = "ks_archive_rail";
 
 export const HOTSPOT_OBJECT: Record<Exclude<HotspotId, "hud">, string> = {
   window: "ks_window",

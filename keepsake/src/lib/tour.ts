@@ -63,7 +63,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: "archive",
     speaker: TOUR_SPEAKER,
-    text: "The cabinet is the archive. Every photograph you bring in is kept here, so you can find it again and place it in a book.",
+    text: "The cabinet is the archive. Open the drawer and the hanging files lift. All is every photograph; the others keep a category.",
     focus: "archive",
   },
   {

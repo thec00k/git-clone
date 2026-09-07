@@ -51,7 +51,7 @@ const THINGS: Record<ListenId, Omit<ListenThing, "id">> = {
   },
   archive: {
     name: "The archive",
-    hint: "The cabinet is the archive. Every photograph you bring in is kept here, so you can find it again.",
+    hint: "The cabinet is the archive. Open the drawer and the hanging files lift. All is every photograph; the others keep a category.",
     face: "front",
   },
   map: {

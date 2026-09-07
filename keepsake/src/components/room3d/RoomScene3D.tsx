@@ -4,6 +4,8 @@ import { Html, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { HotspotId } from "../../lib/hotspots";
 import {
+  ARCHIVE_DRAWER,
+  ARCHIVE_OBJECT,
   CEILING_FAN_BLADES,
   CEILING_FAN_LIGHT,
   CEILING_FAN_OBJECT,
@@ -80,6 +82,8 @@ export function RoomScene3D({
 }) {
   const [seated, setSeated] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const [cabinetOpen, setCabinetOpen] = useState(false);
+  const archiveTimer = useRef<number | null>(null);
   const { bindScene } = useListen();
   const { setEnvironment } = useApp();
 
@@ -110,11 +114,29 @@ export function RoomScene3D({
     return () => bindScene(null);
   }, [bindScene, seated, shopOpen, setRoomFace, onOpenDoor, environment.lampOn, environment.ceilingOn, setEnvironment]);
 
+  const openArchive = () => {
+    if (archiveTimer.current != null) return;
+    setCabinetOpen(true);
+    const delay =
+      typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 560;
+    archiveTimer.current = window.setTimeout(() => {
+      archiveTimer.current = null;
+      onGo("archive");
+    }, delay);
+  };
+
+  useEffect(
+    () => () => {
+      if (archiveTimer.current != null) window.clearTimeout(archiveTimer.current);
+    },
+    [],
+  );
+
   const activate = (id: HotspotAction) => {
     if (id === "window") onOpenWindow();
     else if (id === "crt") onOpenMusic();
     else if (id === "book") onGo("book");
-    else if (id === "archive") onGo("archive");
+    else if (id === "archive") openArchive();
     else if (id === "guestbook") onGo("guestbook");
     else if (id === "map") onGo("atlas");
     else if (id === "shelf") onGo("shelf");
@@ -151,6 +173,7 @@ export function RoomScene3D({
       data-seated={seated ? "1" : "0"}
       data-ceiling={environment.ceilingOn !== false ? "1" : "0"}
       data-lamp={environment.lampOn ? "1" : "0"}
+      data-archive-open={cabinetOpen ? "1" : "0"}
       aria-label="The scrapbook room"
     >
       <div className="ks-room3d-picture" aria-hidden="true">
@@ -173,7 +196,9 @@ export function RoomScene3D({
             tourFocus={tourFocus}
             seated={seated}
             drawerOpen={shopOpen}
+            cabinetOpen={cabinetOpen}
             onActivate={activate}
+            onOpenArchive={openArchive}
             onOpenDrawer={() => setShopOpen(true)}
             onSit={sit}
             onOpenDoor={onOpenDoor}
@@ -200,7 +225,9 @@ function RoomModel({
   tourFocus,
   seated,
   drawerOpen,
+  cabinetOpen,
   onActivate,
+  onOpenArchive,
   onOpenDrawer,
   onSit,
   onOpenDoor,
@@ -212,7 +239,9 @@ function RoomModel({
   tourFocus: HotspotId | null;
   seated: boolean;
   drawerOpen: boolean;
+  cabinetOpen: boolean;
   onActivate: (id: HotspotAction) => void;
+  onOpenArchive: () => void;
   onOpenDrawer: () => void;
   onSit: () => void;
   onOpenDoor: () => void;
@@ -275,6 +304,12 @@ function RoomModel({
     <group>
       <primitive object={cloned} />
       <DeskDrawer scene={cloned} open={drawerOpen} />
+      <ArchiveCabinet
+        scene={cloned}
+        open={cabinetOpen}
+        active={tourFocus === "archive"}
+        onOpen={onOpenArchive}
+      />
       <DeskStandIn scene={cloned} />
       <DeskProps scene={cloned} />
       <LampFixture scene={cloned} on={environment.lampOn} onToggle={onToggleLamp} />
@@ -284,7 +319,9 @@ function RoomModel({
       <RoomDoor scene={cloned} onOpen={onOpenDoor} />
       <RoomLights phase={phase} environment={environment} scene={cloned} />
       {seated && !drawerOpen && <DrawerPrompt scene={cloned} onOpen={onOpenDrawer} />}
-      {roots.map(({ id, object }) => (
+      {roots
+        .filter(({ id }) => id !== "archive")
+        .map(({ id, object }) => (
         <HotspotAnchor
           key={id}
           id={id}
@@ -299,18 +336,141 @@ function RoomModel({
 }
 
 const DRAWER_OPEN_Z = 0.26;
+/** Local +Z of `ks_archive_drawer` — toward the chair, into the room. */
+const ARCHIVE_DRAWER_OPEN_Z = 0.34;
+const ARCHIVE_FALLBACK = new THREE.Vector3(1.22, 0, -1.805);
 
 function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boolean }) {
   const drawer = useMemo(() => scene.getObjectByName(DESK_DRAWER), [scene]);
   const restZ = useRef<number | null>(null);
-  if (drawer && restZ.current == null) restZ.current = drawer.position.z;
 
   useFrame((_, dt) => {
-    if (!drawer || restZ.current == null) return;
+    if (!drawer) return;
+    if (restZ.current == null) restZ.current = drawer.position.z;
     const target = restZ.current + (open ? DRAWER_OPEN_Z : 0);
     drawer.position.z = THREE.MathUtils.damp(drawer.position.z, target, 8, dt);
   });
   return null;
+}
+
+function ArchiveCabinet({
+  scene,
+  open,
+  active,
+  onOpen,
+}: {
+  scene: THREE.Object3D;
+  open: boolean;
+  active: boolean;
+  onOpen: () => void;
+}) {
+  const cabinet = useMemo(() => scene.getObjectByName(ARCHIVE_OBJECT), [scene]);
+  const drawer = useMemo(() => scene.getObjectByName(ARCHIVE_DRAWER), [scene]);
+  const solid = hasGeometry(cabinet);
+  const restZ = useRef<number | null>(null);
+  const standInDrawer = useRef<THREE.Group>(null);
+
+  const origin = useMemo(() => {
+    if (!cabinet) return ARCHIVE_FALLBACK.clone();
+    const p = new THREE.Vector3();
+    cabinet.getWorldPosition(p);
+    return p;
+  }, [cabinet]);
+
+  const labelAt = useMemo(
+    () => new THREE.Vector3(origin.x, origin.y + 0.92, origin.z + 0.28),
+    [origin],
+  );
+
+  useFrame((_, dt) => {
+    if (drawer) {
+      if (restZ.current == null) restZ.current = drawer.position.z;
+      const target = restZ.current + (open ? ARCHIVE_DRAWER_OPEN_Z : 0);
+      drawer.position.z = THREE.MathUtils.damp(drawer.position.z, target, 7, dt);
+    }
+    if (standInDrawer.current) {
+      standInDrawer.current.position.z = THREE.MathUtils.damp(
+        standInDrawer.current.position.z,
+        open ? ARCHIVE_DRAWER_OPEN_Z : 0,
+        7,
+        dt,
+      );
+    }
+  });
+
+  return (
+    <group>
+      {!solid && (
+        <group position={origin.toArray()}>
+          <mesh position={[0, 0.43, -0.02]}>
+            <boxGeometry args={[0.58, 0.86, 0.46]} />
+            <meshStandardMaterial color="#6e4328" roughness={0.74} />
+          </mesh>
+          <mesh position={[0, 0.87, -0.01]}>
+            <boxGeometry args={[0.62, 0.04, 0.5]} />
+            <meshStandardMaterial color="#8d5a36" roughness={0.62} />
+          </mesh>
+          <mesh position={[0, 0.03, 0]}>
+            <boxGeometry args={[0.6, 0.06, 0.48]} />
+            <meshStandardMaterial color="#5c3a24" roughness={0.8} />
+          </mesh>
+          <group ref={standInDrawer} position={[0, 0.5, 0.01]}>
+            <mesh>
+              <boxGeometry args={[0.52, 0.58, 0.4]} />
+              <meshStandardMaterial color="#8b5a3c" roughness={0.66} />
+            </mesh>
+            <mesh position={[0, 0, 0.208]}>
+              <boxGeometry args={[0.5, 0.54, 0.02]} />
+              <meshStandardMaterial color="#7a4c2e" roughness={0.58} />
+            </mesh>
+            <mesh position={[0, -0.02, 0.228]}>
+              <boxGeometry args={[0.12, 0.018, 0.028]} />
+              <meshStandardMaterial color="#c4a078" roughness={0.38} metalness={0.18} />
+            </mesh>
+            <mesh position={[0, 0.22, 0]}>
+              <cylinderGeometry args={[0.006, 0.006, 0.46, 8]} />
+              <meshStandardMaterial color="#c4a078" roughness={0.4} metalness={0.22} />
+            </mesh>
+            {(
+              [
+                [-0.16, "#c45c3e"],
+                [-0.02, "#8b3a32"],
+                [0.12, "#d8c4a8"],
+                [0.22, "#eadcc8"],
+              ] as const
+            ).map(([x, color]) => (
+              <mesh key={`${x}:${color}`} position={[x, 0.265, 0.06]} rotation={[0.08, 0, 0]}>
+                <boxGeometry args={[0.09, 0.028, 0.16]} />
+                <meshStandardMaterial color={color} roughness={0.55} />
+              </mesh>
+            ))}
+          </group>
+        </group>
+      )}
+      <group position={[origin.x, origin.y + 0.5, origin.z + 0.18]}>
+        <ClickHit size={[0.66, 0.96, 0.7]} onClick={onOpen} />
+      </group>
+      <group position={labelAt.toArray()}>
+        <FacedHtml point={labelAt}>
+          <button
+            type="button"
+            className={`ks-hot3d${active ? " is-tour" : ""} ks-hot3d--label`}
+            data-tour="archive"
+            data-open-archive
+            aria-hidden="true"
+            tabIndex={-1}
+            aria-label={HOTSPOT_LABEL.archive}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen();
+            }}
+          >
+            Open the files
+          </button>
+        </FacedHtml>
+      </group>
+    </group>
+  );
 }
 
 function DrawerPrompt({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void }) {
