@@ -17,5 +17,5 @@ export function clockFromMode(timeMode: TimeMode, now: Date = new Date()): { h: 
 export function clockLabel(h: number, m: number): string {
   const hh = ((h % 24) + 24) % 24;
   const mm = ((m % 60) + 60) % 60;
-  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  return `${hh % 12 || 12}:${String(mm).padStart(2, "0")} ${hh >= 12 ? "PM" : "AM"}`;
 }

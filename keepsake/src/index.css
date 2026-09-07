@@ -1507,6 +1507,12 @@
     backface-visibility: hidden;
   }
 
+  .ks-clock-period {
+    margin-left: 6px;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
   .ks-clock-wheel {
     display: inline-block;
     height: 1em;

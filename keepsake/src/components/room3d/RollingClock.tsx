@@ -33,8 +33,9 @@ export function RollingClock({ timeMode }: { timeMode: TimeMode }) {
     if (host instanceof HTMLElement) host.dataset.clock = label;
   }, [label]);
 
-  const tensH = Math.floor(h / 10);
-  const onesH = h % 10;
+  const displayHour = h % 12 || 12;
+  const tensH = Math.floor(displayHour / 10);
+  const onesH = displayHour % 10;
   const tensM = Math.floor(m / 10);
   const onesM = m % 10;
 
@@ -46,6 +47,7 @@ export function RollingClock({ timeMode }: { timeMode: TimeMode }) {
       <span className={`ks-clock-colon${live ? " is-live" : ""}`}>:</span>
       <RollingDigit value={tensM} />
       <RollingDigit value={onesM} />
+      <span className="ks-clock-period">{h >= 12 ? "PM" : "AM"}</span>
     </div>
   );
 }
