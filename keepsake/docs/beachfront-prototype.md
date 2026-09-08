@@ -18,6 +18,8 @@ Run node scripts/check-woodland.mjs --beachfront to validate the same functional
 
 The window uses shorter gathered sailcloth side panels on individual rods outside the arch. The light strand follows the outer trim with a clear gap from the fabric; the old straight tieback bars have been removed. A fresh browser load was visually checked at night.
 
+Blender now includes a labeled `Beachfront Scenery Preview (Blender only)` collection so the window no longer faces an empty background while authoring. Run `scenery-preview.py` after the room scripts to recreate it; optionally set `PHASE='dusk'` or `PHASE='night'` before executing it. This static preview supplies sky, ocean, waves, sun/moon, reflections, clouds and shoreline rocks. The app still creates its animated exterior in `BeachfrontScenery.tsx`. The exporter explicitly excludes preview objects to avoid doubling the scenery or covering the live day/night view.
+
 ## Theme switching
 
 Environment.roomTheme persists in the room backup. The loader fetches and parses the destination asset before switching, verifies required anchors, caches it for the session, and leaves the current room selected on a load failure. Only selected/requested room assets load. Room cameras use the selected theme's configuration.

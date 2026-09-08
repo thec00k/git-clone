@@ -77,6 +77,7 @@ const bowl=bounds('Fan_Bowl');
 for(const name of ['Fan_Chain_0','Fan_Chain_1','Fan_ChainWeight']){const chain=bounds(name);assert.ok(chain.max.x<bowl.min.x || chain.min.x>bowl.max.x,'Pull chain clears the light bowl: '+name);}
 console.log('Ceiling pull chains and weight clear the light bowl.');
 if (theme === 'beachfront') {
+  assert.ok(!json.nodes.some(node => node.name.startsWith('Beachfront_Preview_')), 'Blender scenery preview stays out of the live room asset');
   const curtains = [bounds('Beachfront_Curtain_-1'), bounds('Beachfront_Curtain_1')];
   const lightNames = json.nodes.filter(node => /^Beachfront_Window_(Bulb|Lights_Cord)/.test(node.name)).map(node => node.name);
   assert.ok(lightNames.length >= 18, 'Window strand and bulbs exported');
