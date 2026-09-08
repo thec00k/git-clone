@@ -1,4 +1,5 @@
 import { PhotoSurface } from './MemoryObjects';
+import {useActiveRoom} from './useActiveRoom';
 import { useApp } from '../../store/appStore';
 import { useNav } from "../../store/nav";
 import { useEffect, useMemo, useRef } from "react";
@@ -418,6 +419,7 @@ export function LampFixture({
 }
 
 export function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeMode }) {
+  const room = useActiveRoom();
   const clock = useMemo(() => scene.getObjectByName(CLOCK_OBJECT), [scene]);
   const digits = useMemo(() => scene.getObjectByName(CLOCK_DIGITS), [scene]);
   const pose = useMemo(() => {
@@ -438,7 +440,7 @@ export function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode
   return (
     <group position={pose.pos.toArray()} quaternion={pose.quat}>
       <Html transform occlude={false} distanceFactor={400} position={[0, 0, 0]} scale={pose.scale} style={{ pointerEvents: "none" }}>
-        <div data-clock-locked="1">
+        <div data-clock-locked="1" className={room.id === 'beachfront' ? 'ks-coastal-clock' : undefined}>
           <RollingClock timeMode={timeMode} />
         </div>
       </Html>

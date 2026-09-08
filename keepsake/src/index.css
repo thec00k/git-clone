@@ -1513,6 +1513,16 @@
     letter-spacing: 0;
   }
 
+  .ks-coastal-clock .ks-clock-face {
+    background: #18323b;
+    color: #def6f3;
+    border-radius: 8px;
+    font-weight: 300;
+    text-shadow: 0 0 5px rgb(182 236 230 / .35);
+    letter-spacing: .025em;
+  }
+  .ks-coastal-clock .ks-clock-reel { transition: none; }
+
   .ks-clock-wheel {
     display: inline-block;
     height: 1em;

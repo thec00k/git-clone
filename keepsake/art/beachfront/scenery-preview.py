@@ -61,9 +61,7 @@ finish('Moon' if night else 'Sun',sun)
 if night or dusk:
     for i in range(22):
         plane('Reflection_%02d'%i,(-.7+math.sin(i)*.04,2.16-i*.065,-28.98),(.16+i*.025+math.sin(i*2)*.055,.011+(i%3)*.006),sun)
-for i,(x,y,z,sx,sy,sz) in enumerate([(-1.35,.84,-5.1,1.05,.62,.8),(1.65,.79,-5.8,1.2,.57,.9),(-2.05,.72,-4.4,.55,.35,.5)]):
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=1,location=pos((x,y,z)))
-    ob=finish('Rock_'+str(i),rock);ob.scale=(sx,sz,sy);ob.rotation_euler=(.15,.1,i*.8)
+# Shore rocks are authored by coastal-props.py and shared with the app export.
 for i in range(3):
     for j in range(3):
         bpy.ops.mesh.primitive_uv_sphere_add(segments=12,ring_count=6,radius=1,location=pos((-12+i*10+j*.8,6+(i%2)*2+math.sin(j)*.15,-26)))

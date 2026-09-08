@@ -8,6 +8,7 @@ import type { Phase } from "../room/RoomFurniture";
 import type { Environment } from "../../types/app";
 import { worldPos, lampShadePos, deskLampCorner, STAND_IN_DESK } from "./sceneGeometry";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import {useActiveRoom} from './useActiveRoom';
 const CEILING_FALLBACK = new THREE.Vector3(0, 3.02, 0);
 const WINDOW_SUN_FALLBACK = new THREE.Vector3(-0.15, 2.28, -2.63);
 
@@ -22,6 +23,7 @@ export function RoomLights({
   scene?: THREE.Object3D;
 }) {
   const reduced = useReducedMotion();
+  const coastal = useActiveRoom().id === 'beachfront';
   const night = phase === "night";
   const dusk = phase === "dusk";
   const ceiling = useMemo(() => {
@@ -46,7 +48,7 @@ export function RoomLights({
   useFrame((_, dt) => {
     const t=reduced?1:1-Math.exp(-dt*3);
     const lights:[[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number]]=[
-      [ambientRef.current,night?.16:dusk?.24:.34],[sunRef.current,night?.55:dusk?1.35:2.1],[ceilingRef.current,environment.ceilingOn!==false?3.2:0],[lampRef.current,environment.lampOn?(night?3.8:dusk?2.8:1.6):0],[skyRef.current,night?.25:.55]];
+      [ambientRef.current,night?.16:dusk?.24:.34],[sunRef.current,night?.55:dusk?1.35:2.1],[ceilingRef.current,environment.ceilingOn!==false?3.2:0],[lampRef.current,environment.lampOn?(night?3.8:dusk?2.8:1.6)*(coastal?.4:1):0],[skyRef.current,night?.25:.55]];
     lights.forEach(([light,target])=>{if(light)light.intensity=THREE.MathUtils.lerp(light.intensity,target,t);});
     sunRef.current?.color.lerp(lightColor,t);ambientRef.current?.color.lerp(ambientColor,t);
     const blades =
@@ -75,7 +77,7 @@ export function RoomLights({
           ref={lampRef}
           position={(scene ? lampShadePos(scene) : deskLampCorner(STAND_IN_DESK)).toArray()}
           intensity={1.6}
-          color="#ffb56a"
+          color={coastal ? '#ffe1b5' : '#ffb56a'}
           distance={1.85}
         />
       )}

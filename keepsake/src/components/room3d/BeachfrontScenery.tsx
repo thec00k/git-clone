@@ -24,13 +24,12 @@ export function BeachfrontScenery({phase,environment}: {phase:Phase;environment:
   });
   return <group>
     <mesh position={[0,6,-30]}><planeGeometry args={[65,25]}/><meshBasicMaterial color={sky}/></mesh>
-    <mesh position={[0,.55,-4.5]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[35,5]}/><meshStandardMaterial color={night?'#6b6c63':'#dfcaa8'} roughness={1}/></mesh>
+    <mesh position={[0,.55,-4.7]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[35,5]}/><meshStandardMaterial color={night?'#6b6c63':'#dfcaa8'} roughness={1}/></mesh>
     <mesh position={[0,.65,-20]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[65,31]}/><meshBasicMaterial color={water}/></mesh>
     <mesh position={[0,-.2,-29]}><planeGeometry args={[65,4.8]}/><meshBasicMaterial color={water}/></mesh>
     <group ref={waves}>{Array.from({length:25},(_,i)=><mesh key={i} position={[Math.sin(i*3)*2,.665,-5-i*.9]} rotation={[-Math.PI/2,0,Math.sin(i)*.025]}><planeGeometry args={[9+i*.6,.018+(i%3)*.012]}/><meshBasicMaterial color={night?'#688c9a':'#d9e9dd'} transparent opacity={.18+(i%4)*.08}/></mesh>)}</group>
     <mesh position={[-.7,night?4.2:dusk?2.53:6,-29.4]}><circleGeometry args={[night?.43:dusk?.55:.6,48]}/><meshBasicMaterial color={night?'#eff4e4':dusk?'#ffcf83':'#fff0ce'} transparent opacity={storm?.65:1}/></mesh>
     {(night||dusk)&&<group ref={reflection}>{Array.from({length:22},(_,i)=><mesh key={i} position={[-.7+Math.sin(i)*.04,2.16-i*.065,-28.98]}><planeGeometry args={[.16+i*.025+Math.sin(i*2)*.055,.011+(i%3)*.006]}/><meshBasicMaterial color={night?'#d4e8ea':'#ffe3a0'} transparent opacity={(storm?.35:.62)*(1-i*.025)} depthWrite={false}/></mesh>)}</group>}
-    {[[-1.35,.84,-5.1,1.05,.62,.8],[1.65,.79,-5.8,1.2,.57,.9],[-2.05,.72,-4.4,.55,.35,.5]].map(([x,y,z,sx,sy,sz],i)=><mesh key={`rock-${i}`} position={[x,y,z]} rotation={[.15,i*.8,.1]} scale={[sx,sy,sz]} receiveShadow><icosahedronGeometry args={[1,1]}/><meshStandardMaterial color={night?'#6b7d84':i===1?'#a39780':'#aaa797'} roughness={.97} flatShading/></mesh>)}
     {[0,1,2].map(i=><group key={i} position={[-12+i*10,6+(i%2)*2,-26]}>{[0,1,2].map(j=><mesh key={j} position={[j*.8,Math.sin(j)*.15,0]} scale={[1.4,.35,.6]}><sphereGeometry args={[1,12,6]}/><meshBasicMaterial color={night?'#304256':storm?'#b7c5c5':'#eaf1e7'}/></mesh>)}</group>)}
     {[0,1,2,3].map(i=><mesh key={i} position={[-15+i*1.9,.9,-24]} scale={[3,.65+(i%2)*.4,1.5]}><sphereGeometry args={[1,12,6]}/><meshBasicMaterial color={night?'#233b49':'#819c98'}/></mesh>)}
     <group ref={boat} position={[3,.86,-14]}>

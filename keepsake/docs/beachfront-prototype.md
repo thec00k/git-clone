@@ -20,6 +20,14 @@ The window uses shorter gathered sailcloth side panels on individual rods outsid
 
 Blender now includes a labeled `Beachfront Scenery Preview (Blender only)` collection so the window no longer faces an empty background while authoring. Run `scenery-preview.py` after the room scripts to recreate it; optionally set `PHASE='dusk'` or `PHASE='night'` before executing it. This static preview supplies sky, ocean, waves, sun/moon, reflections, clouds and shoreline rocks. The app still creates its animated exterior in `BeachfrontScenery.tsx`. The exporter explicitly excludes preview objects to avoid doubling the scenery or covering the live day/night view.
 
+## Coastal prop pass
+
+`coastal-props.py` authors a larger spiral conch with a pink inner lip, open glass fishbowl with water/pebbles/copper fish on a teak coaster, glazed ceramic lamp with linen shade, and rounded modern digital clock. Run it after `window-clearance.py`, then `open-casements.py`, `scenery-preview.py` and `export-beachfront.py` to reproduce the current room. Clock and lamp retain their existing named interaction anchors; each new model has a separate `Beachfront_Prop_` object name for replacement. The live clock uses a cool white display and still keeps 12-hour time.
+
+Three `Beachfront_ShoreRock_` meshes now live in the GLB and Blender source, replacing both sets of stand-in rocks. Erosion, broken contours, fissures and vertex colors are authored once for both views. The sky/water remain live app layers. Glass avoids opaque shadow/depth artifacts in the app; the coastal lamp has gentler warm output. The beach plane now clears the back wall.
+
+This export is 5,975,528 bytes, 124,892 triangles, 76 materials and 309 primitives, within the existing room budget. Geometry checks cover shell/sill contact, bowl/cabinet fit, removal of old plants, rock placement and window-light clearance. Browser review covered standing/seated views, day/dusk/night, clock readability and the lamp toggle.
+
 ## Theme switching
 
 Environment.roomTheme persists in the room backup. The loader fetches and parses the destination asset before switching, verifies required anchors, caches it for the session, and leaves the current room selected on a load failure. Only selected/requested room assets load. Room cameras use the selected theme's configuration.
@@ -37,3 +45,6 @@ The physical door and Room > Exit through the door open three choices: visit fri
 Coastal Blue is a seventh CRT color exclusive to Beachfront ownership. Choosing Beachfront acquires it at no charge during the prototype and uses it as the initial room preset. Room-specific CRT colors are restored on subsequent switches. The CRT button is disabled without ownership, state updates enforce the same gate, and backup validation rejects unowned exclusive colors. Existing first-pass Beachfront rooms migrate to the acquired preset on load.
 
 The ocean displays a low sun at dusk and a visible moon with moving reflected streaks at night. Three shoreline rocks frame the view. Reduced motion freezes water/reflections, boat movement and precipitation. The same DeskAssembly and inherited desk props remain in both rooms. Browser checks inspected dusk/night and switched Woodland > Beachfront > Woodland > Beachfront; a fresh load retained Beachfront.
+
+
+The two independent arched casement leaves are posed open 62 degrees outward toward the ocean, with brass hinges and handles. Their pivots are at the side jambs for later animation. This pass adds the open model; it does not add an open/close control. Export checks verify clearance from the sill, curtains and interior light strand.

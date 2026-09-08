@@ -44,10 +44,10 @@ const desk = bounds('Desk_Top');
 const book = bounds('ks_book');
 const map = bounds('ks_map');
 const shelf = bounds('ks_shelf');
-const cactus = bounds('Accent_Pot');
+const cactus = bounds(theme === 'beachfront' ? 'Beachfront_Prop_Seashell' : 'Accent_Pot');
 const sill = bounds('Win_Sill');
-assert.ok(cactus.min.x >= sill.min.x && cactus.max.x <= sill.max.x && cactus.min.z >= sill.min.z && cactus.max.z <= sill.max.z, 'Cactus pot fully fits the sill');
-assert.ok(Math.abs(cactus.min.y - sill.max.y) < .006, 'Cactus sits on the sill');
+assert.ok(cactus.min.x >= sill.min.x && cactus.max.x <= sill.max.x && cactus.min.z >= sill.min.z && cactus.max.z <= sill.max.z, 'Default decoration fully fits the sill');
+assert.ok(Math.abs(cactus.min.y - sill.max.y) < .006, 'Default decoration sits on the sill');
 assert.ok(!json.nodes.some(node => node.name === 'Rug_Oval' || /Cozy_.*Vine|Cozy_Woodland_Vine_Leaf/.test(node.name)), 'Duplicate rug and vines removed');
 assert.ok(json.nodes.some(node => node.name === 'Cozy_Chair_Cushion'), 'Chair cushion exported');
 const readingSeat = bounds('Beanbag');
@@ -77,6 +77,18 @@ const bowl=bounds('Fan_Bowl');
 for(const name of ['Fan_Chain_0','Fan_Chain_1','Fan_ChainWeight']){const chain=bounds(name);assert.ok(chain.max.x<bowl.min.x || chain.min.x>bowl.max.x,'Pull chain clears the light bowl: '+name);}
 console.log('Ceiling pull chains and weight clear the light bowl.');
 if (theme === 'beachfront') {
+  assert.ok(!json.nodes.some(node => /^(Accent_Leaf|Accent_Pot|Cabinet_Flowers|Fern_Stems)/.test(node.name)), 'Coastal props replace the original plants');
+  const bowl = bounds('Beachfront_Prop_Fishbowl');
+  for (const side of ['Left', 'Right']) {
+    const sash = bounds(`Beachfront_Casement_${side}_Sash`);
+    assert.ok(sash.max.z < -2.12, 'Open sash stays outside the room and light strand');
+    assert.ok(sash.min.y > sill.max.y, 'Open sash clears sill');
+    assert.ok(sash.min.x > -1.1 && sash.max.x < .8, 'Open sash clears side curtains');
+  }
+  const cabinet = bounds('Archive_Top');
+  assert.ok(bowl.min.x >= cabinet.min.x && bowl.max.x <= cabinet.max.x && bowl.min.z >= cabinet.min.z && bowl.max.z <= cabinet.max.z, 'Fishbowl fits the cabinet');
+  assert.ok(Math.abs(bounds('Beachfront_Prop_Bowl_Coaster').min.y-cabinet.max.y)<.003, 'Fishbowl coaster rests on cabinet');
+  for (let i=0;i<3;i++) assert.ok(bounds(`Beachfront_ShoreRock_${i}`).max.z < -3, 'Shared shoreline rocks stay outside room');
   assert.ok(!json.nodes.some(node => node.name.startsWith('Beachfront_Preview_')), 'Blender scenery preview stays out of the live room asset');
   const curtains = [bounds('Beachfront_Curtain_-1'), bounds('Beachfront_Curtain_1')];
   const lightNames = json.nodes.filter(node => /^Beachfront_Window_(Bulb|Lights_Cord)/.test(node.name)).map(node => node.name);

@@ -21,6 +21,16 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
         const local = material.clone(); materials.push(local); return local;
       };
       obj.material = Array.isArray(obj.material) ? obj.material.map(copy) : copy(obj.material);
+      if (/Beachfront_Prop_(Fishbowl|Bowl_Rim|Bowl_Water|Waterline)|Beachfront_Casement_.*_Glass/.test(obj.name)) {
+        obj.castShadow = false;
+        obj.receiveShadow = false;
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        mats.forEach(mat => { mat.depthWrite = false; mat.side = THREE.DoubleSide; });
+      }
+      if (/Beachfront_Prop_Fish_(Tail|Fin)/.test(obj.name)) {
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        mats.forEach(mat => { mat.side = THREE.DoubleSide; });
+      }
       if (obj.name === "Outside_View" || obj.name === "Win_Glass") {
         const material = new THREE.MeshBasicMaterial();
         materials.push(material); obj.material = material;
@@ -43,6 +53,10 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
           mat.transparent = true; mat.opacity = .25; mat.depthWrite = false;
         }
         if (!(mat instanceof THREE.MeshStandardMaterial)) continue;
+        if (obj.name === 'Beachfront_Prop_Lamp_Shade') {
+          mat.emissive.set('#ffe5bb');
+          mat.emissiveIntensity = environment.lampOn ? .3 : 0;
+        }
         if (obj.name === "CRT_Screen") {
           mat.emissive.set(environment.musicOn ? "#3ec8c8" : "#102428");
           mat.emissiveIntensity = environment.musicOn ? 1.4 : .15;
