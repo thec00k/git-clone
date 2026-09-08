@@ -1,4 +1,5 @@
 import { movePageSpread } from '../lib/spreads';
+import {insertPhotoBatch,type ImportPhoto} from '../lib/photoBatch';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CaptionElement,
@@ -202,7 +203,7 @@ export function useScrapbook() {
   );
 
   const addStroke = useCallback(
-    (pageId: string, color: string, points: { x: number; y: number }[]) => {
+    (pageId: string, color: string, points: { x: number; y: number }[], width=1.7) => {
       if (points.length < 2) return;
       const page = pages.find((p) => p.id === pageId);
       if (!page) return;
@@ -212,7 +213,7 @@ export function useScrapbook() {
         id: uid("el"),
         type: "stroke",
         color,
-        width: 1.7,
+        width: clamp(width,.4,4),
         points,
         x: (Math.min(...xs) + Math.max(...xs)) / 2,
         y: (Math.min(...ys) + Math.max(...ys)) / 2,
@@ -327,6 +328,17 @@ export function useScrapbook() {
     setSelectedId(null);
   }, [updateActiveBook, spreadCount, remember]);
 
+  const addPage=useCallback(()=>{
+    const id=uid('page');remember(true);
+    updateActiveBook(b=>({...b,pages:[...b.pages,{id,elements:[]}]}));
+    setSpread(Math.floor(pages.length/2));setActivePageId(id);setSelectedId(null);
+  },[remember,updateActiveBook,pages.length]);
+  const addPhotoBatch=useCallback((targetId:string,photos:ImportPhoto[])=>{
+    if(!bookRef.current)return;
+    const result=insertPhotoBatch(bookRef.current,targetId,photos);remember(true);
+    updateActiveBook(()=>result.book);setSpread(Math.floor(result.index/2));setActivePageId(result.firstPageId);setSelectedId(null);
+  },[remember,updateActiveBook]);
+
   const deleteCurrentSpread = useCallback(() => {
     if (spreadCount <= 1) return;
     const start = currentSpread * 2;
@@ -408,6 +420,8 @@ export function useScrapbook() {
     setFrame,
     arrangePage,
     addSpread,
+    addPage,
+    addPhotoBatch,
     deleteCurrentSpread,
     moveSpread,
     goPrev,

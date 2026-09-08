@@ -8,17 +8,22 @@ export function DeskClutter({
   onSnap,
   ink,
   onPickInk,
+  thickness=1.7,
+  onThickness,
 }: {
   onPrint: () => void;
   onSnap: () => void;
   ink?: string | null;
   onPickInk?: (color: string | null) => void;
+  thickness?: number;
+  onThickness?: (width:number)=>void;
 }) {
   const {state}=useApp();
   const inks={...MARKER_INKS,...(state.roomDecor?.owned.includes('sparkle-markers')?SPARKLE_INKS:{})};
   return (
     <div className="ks-clutter" aria-hidden={false}>
       <div className="ks-clutter-markers" role="group" aria-label="Markers">
+        {ink&&onThickness&&<label className="ks-marker-thickness">Thickness <input aria-label="Marker thickness" type="range" min="0.4" max="4" step="0.1" value={thickness} onChange={e=>onThickness(Number(e.target.value))}/><span aria-hidden="true" style={{display:'block',height:thickness*3,background:ink,borderRadius:8}}/><output>{thickness.toFixed(1)}</output></label>}
         {Object.entries(inks).map(([name, color]) => {
           const selected = ink === color;
           return (

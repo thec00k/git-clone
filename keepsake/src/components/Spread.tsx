@@ -15,6 +15,7 @@ interface Props {
   onTransform: (id: string, patch: Partial<PageElement>) => void;
   onEditText: (id: string, text: string) => void;
   drawColor?: string | null;
+  drawWidth?: number;
   onDrawStroke?: (pageId: string, color: string, points: { x: number; y: number }[]) => void;
 }
 
@@ -32,6 +33,7 @@ export function Spread({
   onTransform,
   onEditText,
   drawColor = null,
+  drawWidth = 1.7,
   onDrawStroke,
 }: Props) {
   const shared = {
@@ -45,6 +47,7 @@ export function Spread({
     onTransform,
     onEditText,
     drawColor,
+    drawWidth,
     onDrawStroke,
   };
   return (

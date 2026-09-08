@@ -17,7 +17,7 @@ export function parseRoomBackup(text:string):AppState{
  ensure(number(s.version)&&object(s.profile)&&string(s.profile.displayName));
  ensure(records(s.books,b=>string(b.id)&&string(b.title)&&string(b.subtitle)&&['cocoa','forest','wine','midnight','ochre'].includes(b.coverStyle as string)&&['private','friends','public'].includes(b.visibility as string)&&number(b.createdAt)&&number(b.updatedAt)&&records(b.pages,p=>string(p.id)&&(p.titlePage===undefined||typeof p.titlePage==='boolean')&&records(p.elements,e=>{
   if(!string(e.id)||!['x','y','w','rotation','z'].every(k=>number(e[k])))return false;
-  if(e.type==='photo')return image(e.src)&&['polaroid','tape','flush'].includes(e.frame as string);
+  if(e.type==='photo')return image(e.src)&&['polaroid','tape','flush'].includes(e.frame as string)&&(e.cropAspect===undefined||(number(e.cropAspect)&&(e.cropAspect as number)>0&&(e.cropAspect as number)<=5));
   if(e.type==='caption')return string(e.text)&&number(e.fontSize)&&string(e.color);
   if(e.type==='sticker')return string(e.glyph);
   return e.type==='stroke'&&string(e.color)&&number(e.width)&&records(e.points,p=>number(p.x)&&number(p.y));

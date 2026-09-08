@@ -6,6 +6,7 @@ import { loadImageFile } from "../../lib/image";
 import { uid } from "../../lib/id";
 import type { PhotoElement } from "../../types/scrapbook";
 import { ViewShell } from "./ViewShell";
+import {FolderUpload} from '../FolderUpload';
 
 type TabKey = "all" | "favorites" | string;
 
@@ -132,6 +133,7 @@ export function Archive() {
           <button className="ks-tool ks-tool--accent" onClick={() => inputRef.current?.click()}>
             <Upload size={16} /> Upload
           </button>
+          <FolderUpload onImported={setTab}/>
         </>
       }
     >

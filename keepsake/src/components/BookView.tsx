@@ -1,3 +1,5 @@
+import {PhotoImportDialog} from './PhotoImportDialog';
+import { MAX_PHOTOS_PER_PAGE } from '../types/scrapbook';
 import {StickerStore} from './StickerStore';
 import { SpreadOverview } from './SpreadOverview';
 import { useEffect, useRef, useState } from "react";
@@ -60,25 +62,13 @@ export function BookView() {
   const [showCover, setShowCover] = useState(sb.book?.title === "New book");
   const [showShop,setShowShop]=useState(false);
   const [drawInk, setDrawInk] = useState<string | null>(null);
-  const addInputRef = useRef<HTMLInputElement>(null);
+  const [showPhotos,setShowPhotos]=useState(false);
+  const [drawWidth,setDrawWidth]=useState(1.7);
   const turningRef = useRef(false);
 
   const targetPageId = sb.activePageId && [sb.leftPage?.id, sb.rightPage?.id].includes(sb.activePageId)
     ? sb.activePageId : sb.leftPage?.id ?? sb.rightPage?.id ?? null;
   const canView = sb.book ? canSee(sb.book.visibility, viewAs) : true;
-
-  async function handleFiles(files: FileList | null) {
-    if (!files || !targetPageId) return;
-    for (const file of Array.from(files)) {
-      try {
-        const { src, aspect } = await loadImageFile(file);
-        const id = addArchivePhoto(src, aspect);
-        sb.addPhoto(targetPageId, src, id);
-      } catch {
-        /* ignore unreadable files */
-      }
-    }
-  }
 
   async function handleReplace(id: string, file: File) {
     try {
@@ -310,7 +300,7 @@ export function BookView() {
                 <button className="ks-tool" aria-label="Undo" title="Undo (Ctrl/⌘ Z)" onClick={sb.undo} disabled={!sb.canUndo}><Undo2 size={17} /> Undo</button>
                 <button className="ks-tool" aria-label="Redo" title="Redo (Ctrl Y / ⌘ Shift Z)" onClick={sb.redo} disabled={!sb.canRedo}><Redo2 size={17} /> Redo</button>
               </div>
-              <button className="ks-tool ks-tool--accent" onClick={() => addInputRef.current?.click()}>
+              <button className="ks-tool ks-tool--accent" onClick={() => setShowPhotos(true)}>
                 <ImagePlus size={18} /> Add photo
               </button>
               <button className="ks-tool" onClick={() => targetPageId && sb.addCaption(targetPageId)}>
@@ -341,22 +331,11 @@ export function BookView() {
       <div className="ks-desk-top" data-desk-top data-draw-ink={drawInk ?? ""}>
         <DeskClutter
           ink={isVisitor ? null : drawInk}
+          thickness={drawWidth} onThickness={setDrawWidth}
           onPickInk={isVisitor ? undefined : setDrawInk}
           onPrint={() => isVisitor ? setShowPrint(true) : setPrinterOpen(true)}
           onSnap={() => {
-            if (!isVisitor) addInputRef.current?.click();
-          }}
-        />
-        <input
-          ref={addInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          hidden
-          aria-label="Upload photographs"
-          onChange={(e) => {
-            handleFiles(e.target.files);
-            e.target.value = "";
+            if (!isVisitor) setShowPhotos(true);
           }}
         />
         <div className="ks-book-stage">
@@ -397,23 +376,33 @@ export function BookView() {
               onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
               onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, { text })}
               drawColor={isVisitor ? null : drawInk}
-              onDrawStroke={isVisitor ? undefined : sb.addStroke}
+              drawWidth={drawWidth}
+              onDrawStroke={isVisitor ? undefined : (id,color,points)=>sb.addStroke(id,color,points,drawWidth)}
             />
           )}
           <button
             type="button"
             className="ks-page-turn ks-page-turn--next"
-            aria-label="Next spread"
-            title="Turn the page"
-            onClick={() => requestTurn("next")}
-            disabled={sb.spread === sb.spreadCount - 1 || !!turn}
+            aria-label={!isVisitor && sb.spread === sb.spreadCount - 1 ? "Add new page" : "Next spread"}
+            title={!isVisitor && sb.spread === sb.spreadCount - 1 ? "Add new page" : "Turn the page"}
+            onClick={() => !isVisitor && sb.spread === sb.spreadCount - 1 ? sb.addPage() : requestTurn("next")}
+            disabled={(isVisitor && sb.spread === sb.spreadCount - 1) || !!turn}
           >
-            <ChevronRight size={22} />
+            {!isVisitor && sb.spread === sb.spreadCount - 1 ? <Plus size={22}/> : <ChevronRight size={22} />}
           </button>
           <p className="ks-page-navigation-hint">{sb.spread === 0 ? "The beginning" : "← Previous"} <span>·</span> {sb.spread === sb.spreadCount - 1 ? "The latest chapter" : "Next →"}</p>
           </div>
         </div>
       </div>
+      {showPhotos && !isVisitor && <PhotoImportDialog onClose={()=>setShowPhotos(false)} onAdd={photos=>{
+        if(!targetPageId)return;
+        const target=sb.pages.find(page=>page.id===targetPageId);
+        if(!target)return;
+        const ready=photos.map(p=>({...p,photoId:p.photoId??addArchivePhoto(p.src,p.aspect)}));
+        if(ready.length===1 && target.elements.filter(e=>e.type==='photo').length<MAX_PHOTOS_PER_PAGE) sb.addPhoto(targetPageId,ready[0].src,ready[0].photoId);
+        else sb.addPhotoBatch(targetPageId,ready);
+        setShowPhotos(false);
+      }}/>}
       {showKeys && <ShortcutsHelp onClose={() => setShowKeys(false)} />}
       {showPrint && sb.book && <PrintView book={sb.book} onClose={() => setShowPrint(false)} />}
       {showNotes && sb.book && (

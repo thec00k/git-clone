@@ -81,4 +81,8 @@ Run from keepsake/: npm run check:acceptance, npm run build, npm run lint. Lint 
 
 ## Latest checkpoint
 
+September 7 scrapbook import and drawing update: the final next-page arrow becomes an Add new page (+) control. Add photo opens a device/cabinet chooser with a 20-photo limit and reorderable preview; batches place four equal square frames per page, preserve existing content, and undo as one operation. Uncropped archive images remain available. Folder upload creates a named cabinet category and reports unreadable files. The blue marker and a conditional thickness slider are available; each stroke preserves its width. A single photo added to a full page is placed on a fresh page.
+
+Validation: automated acceptance checks and production build passed. A fresh headless Edge profile on isolated port 5178 verified 20-photo/five-page layout, square frames, undo/redo, blue stroke color and saved width, cabinet selection, end-page addition, and a renamed folder import containing two images plus one unsupported file. Personal room data was not changed. Mobile folder-picker support remains device dependent.
+
 Door actions are implemented: save-and-close local logout, non-destructive tidy with save result, and an honest friends-room landing screen pending real visits. Beachfront is a playable first slice with the requested pale woods/blue trims, arched window, preserved desk clutter, sunset, moonlit water, rocks and exclusive Coastal Blue CRT preset. Switching and exclusive-color ownership have automated regression coverage; dusk/night and switching both ways were checked in the browser. Further visual and device acceptance remains open.

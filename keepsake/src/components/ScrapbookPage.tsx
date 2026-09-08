@@ -17,6 +17,7 @@ interface Props {
   onTransform: (id: string, patch: Partial<PageElement>) => void;
   onEditText: (id: string, text: string) => void;
   drawColor?: string | null;
+  drawWidth?: number;
   onDrawStroke?: (pageId: string, color: string, points: { x: number; y: number }[]) => void;
 }
 
@@ -33,6 +34,7 @@ export function ScrapbookPage({
   onTransform,
   onEditText,
   drawColor = null,
+  drawWidth = 1.7,
   onDrawStroke,
 }: Props) {
   if (!page) {
@@ -96,6 +98,7 @@ export function ScrapbookPage({
       {drawColor && onDrawStroke && (
         <DrawLayer
           color={drawColor}
+          width={drawWidth}
           onActivate={() => onActivate(page.id)}
           onStroke={(points) => onDrawStroke(page.id, drawColor, points)}
         />
@@ -133,10 +136,12 @@ function PageInk({ strokes }: { strokes: StrokeElement[] }) {
 
 function DrawLayer({
   color,
+  width,
   onActivate,
   onStroke,
 }: {
   color: string;
+  width: number;
   onActivate: () => void;
   onStroke: (points: { x: number; y: number }[]) => void;
 }) {
@@ -184,7 +189,7 @@ function DrawLayer({
             points={live.map((p) => `${p.x},${p.y}`).join(" ")}
             fill="none"
             stroke={color}
-            strokeWidth={1.7}
+            strokeWidth={width}
             strokeLinecap="round"
             strokeLinejoin="round"
           /><InkGlints color={color} points={live}/>

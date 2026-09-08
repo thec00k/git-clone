@@ -33,6 +33,8 @@ export interface PhotoElement extends BaseElement {
   /** reference to an archive photo (so pages reference, not duplicate) */
   photoId?: string;
   frame: PhotoFrame;
+  /** Optional equal-frame crop; the archive retains the original image. */
+  cropAspect?: number;
 }
 
 export interface CaptionElement extends BaseElement {
@@ -61,6 +63,7 @@ export interface StrokeElement extends BaseElement {
 export type PageElement = PhotoElement | CaptionElement | StickerElement | StrokeElement;
 
 export const MARKER_INKS = {
+  blue: "#347dc1",
   terracotta: "#c45c3e",
   ink: "#2c221c",
   moss: "#4a7c59",

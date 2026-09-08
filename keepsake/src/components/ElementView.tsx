@@ -274,6 +274,8 @@ function PhotoInner({ element }: { element: PhotoElement }) {
           display: "block",
           width: "100%",
           height: "auto",
+          aspectRatio: element.cropAspect,
+          objectFit: element.cropAspect ? "cover" : undefined,
           userSelect: "none",
           pointerEvents: "none",
         }}

@@ -26,7 +26,7 @@ export function fitPhotoRows(ratios: number[], obstacles: Rect[] = []): Rect[] |
 export function photoRows(page: Page, archive: ArchivePhoto[]): Page | null {
   const photos = page.elements.filter((e): e is PhotoElement => e.type === "photo");
   const ratios = photos.map(p => {
-    const aspect = archive.find(a => a.id === p.photoId || a.src === p.src)?.aspect ?? 1;
+    const aspect = p.cropAspect ?? archive.find(a => a.id === p.photoId || a.src === p.src)?.aspect ?? 1;
     // Page aspect is 3:4; allow for frame padding, including its deeper lower border.
     return .75 / Math.max(.1, aspect) + (p.frame === "polaroid" ? .22 : .06);
   });
