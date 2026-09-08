@@ -10,7 +10,7 @@
     {
       "id": "coastal-original-work",
       "creator": "Original work authored for Keepsake",
-      "source": "build-beachfront.py; coastal-palette.py; ../../src/components/room3d/BeachfrontScenery.tsx; window-clearance.py; coastal-props.py; scenery-preview.py; open-casements.py",
+      "source": "build-beachfront.py; coastal-palette.py; ../../src/components/room3d/BeachfrontScenery.tsx; window-clearance.py; coastal-props.py; conch-shell.py; scenery-preview.py; open-casements.py",
       "includes": [
         "arched window and plaster arch wall",
         "sailcloth curtains",
@@ -19,7 +19,7 @@
         "coastal palette",
         "ocean layers, clouds, sailboat and shoreline",
         "illustrated style previews",
-        "spiral conch with pink aperture",
+        "reference-inspired knobbed conch with amber aperture",
         "glass fishbowl with water and copper fish",
         "ceramic coastal lamp",
         "modern digital clock casing",

@@ -69,31 +69,8 @@ def lathe(name,profile,loc,m,parent=None,segments=64):
 def torus(name,loc,r,tube,m):
     bpy.ops.mesh.primitive_torus_add(major_radius=r,minor_radius=tube,major_segments=48,minor_segments=8,location=loc);return finish(name,m)
 
-# Conch with a tapered spiral spire, body whorl and flared, hollow pink aperture.
-verts=[];faces=[];nr=100;na=80
-for j in range(nr+1):
-    u=j/nr
-    for i in range(na):
-        a=2*math.pi*i/na
-        growth=.003+.040*math.sin(u*math.pi*.65)**1.4
-        spiral=(.5+.5*math.cos(a-u*math.pi*13))**5
-        flare=max(0,(u-.88)/.12)**2
-        r=growth*(1+.17*spiral)+.007*flare*(.5+.5*math.cos(a))
-        x=-.125+.24*u+.006*flare*math.cos(a)
-        y=r*math.cos(a);z=r*math.sin(a)*1.18
-        tilt=-.12
-        verts.append((.56+x*math.cos(tilt)-y*math.sin(tilt),2.06+x*math.sin(tilt)+y*math.cos(tilt),z))
-bottom=min(v[2] for v in verts)
-verts=[(x,y,z-bottom+1.139) for x,y,z in verts]
-for j in range(nr):
-    for i in range(na):
-        a=j*na+i;b=j*na+(i+1)%na;faces.append((a,b,b+na,a+na))
-faces.append(tuple(reversed(range(na))))
-ob=mesh('Beachfront_Prop_Seashell',verts,faces,shell)
-pink=mat('Coastal | conch aperture','#d9a18c',.3)
-ob.data.materials.append(pink)
-mod=ob.modifiers.new('Nacre shell wall and pink inner lip','SOLIDIFY');mod.thickness=.002;mod.material_offset=1;mod.material_offset_rim=1
-for p in ob.data.polygons:p.use_smooth=True
+# Reference-inspired replaceable conch.
+exec(compile(open(ROOT+'/art/beachfront/conch-shell.py').read(),'conch-shell.py','exec'))
 
 # Bowl sits on a small teak coaster. Its glass has a real open rim and inner wall.
 center=(1.075,1.8,.849)

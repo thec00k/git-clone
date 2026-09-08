@@ -22,11 +22,11 @@ Blender now includes a labeled `Beachfront Scenery Preview (Blender only)` colle
 
 ## Coastal prop pass
 
-`coastal-props.py` authors a larger spiral conch with a pink inner lip, open glass fishbowl with water/pebbles/copper fish on a teak coaster, glazed ceramic lamp with linen shade, and rounded modern digital clock. Run it after `window-clearance.py`, then `open-casements.py`, `scenery-preview.py` and `export-beachfront.py` to reproduce the current room. Clock and lamp retain their existing named interaction anchors; each new model has a separate `Beachfront_Prop_` object name for replacement. The live clock uses a cool white display and still keeps 12-hour time.
+`coastal-props.py` authors a reference-inspired knobbed conch with an amber aperture, open glass fishbowl with water/pebbles/copper fish on a teak coaster, glazed ceramic lamp with linen shade, and rounded modern digital clock. Run it after `window-clearance.py`, then `open-casements.py`, `scenery-preview.py` and `export-beachfront.py` to reproduce the current room. Clock and lamp retain their existing named interaction anchors; each new model has a separate `Beachfront_Prop_` object name for replacement. The live clock uses a cool white display and still keeps 12-hour time.
 
 Three `Beachfront_ShoreRock_` meshes now live in the GLB and Blender source, replacing both sets of stand-in rocks. Erosion, broken contours, fissures and vertex colors are authored once for both views. The sky/water remain live app layers. Glass avoids opaque shadow/depth artifacts in the app; the coastal lamp has gentler warm output. The beach plane now clears the back wall.
 
-This export is 5,975,528 bytes, 124,892 triangles, 76 materials and 309 primitives, within the existing room budget. Geometry checks cover shell/sill contact, bowl/cabinet fit, removal of old plants, rock placement and window-light clearance. Browser review covered standing/seated views, day/dusk/night, clock readability and the lamp toggle.
+This export is 6,524,340 bytes, 135,964 triangles, 77 materials and 309 primitives, within the existing room budget. Geometry checks cover shell/sill contact, bowl/cabinet fit, removal of old plants, rock placement and window-light clearance. Browser review covered standing/seated views, day/dusk/night, clock readability and the lamp toggle.
 
 ## Theme switching
 
@@ -48,3 +48,5 @@ The ocean displays a low sun at dusk and a visible moon with moving reflected st
 
 
 The two independent arched casement leaves are posed open 62 degrees outward toward the ocean, with brass hinges and handles. Their pivots are at the side jambs for later animation. This pass adds the open model; it does not add an open/close control. Export checks verify clearance from the sill, curtains and interior light strand.
+
+The conch is independently reproducible through conch-shell.py (also called by coastal-props.py): fuller body, swept open aperture, raised whorls/knobs, and baked cream/ochre vertex colors based on the user-provided reference. No reference image is redistributed in the app.
