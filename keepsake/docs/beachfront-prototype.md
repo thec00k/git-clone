@@ -12,9 +12,11 @@ This is the first coastal art pass, not final bespoke furniture or exterior poli
 
 Authoritative source: art/beachfront/beachfront.blend. Woodland's source and GLB are unchanged.
 
-To reproduce from Woodland: run build-beachfront.py, let the Blender file change settle, then run coastal-palette.py in a separate Blender call. export-beachfront.py explicitly selects visible assets for a later export. Do not export with an empty selection. All scripts guard or write only the separate Beachfront source paths.
+To reproduce from Woodland: run build-beachfront.py, let the Blender file change settle, then run coastal-palette.py in a separate Blender call, followed by window-clearance.py. export-beachfront.py explicitly selects visible assets for a later export. Do not export with an empty selection. All scripts guard or write only the separate Beachfront source paths.
 
-Run node scripts/check-woodland.mjs --beachfront to validate the same functional anchor, contact, clearance and asset-budget contract as Woodland. The first coastal export is 4,826,888 bytes, 62,548 triangles, 72 materials, 277 primitives and 16 required anchors.
+Run node scripts/check-woodland.mjs --beachfront to validate the same functional anchor, contact, clearance and asset-budget contract as Woodland, plus window light clearance from curtains and ceiling. The gathered-curtain export is 4,961,008 bytes, 71,964 triangles, 71 materials, 280 primitives and 16 required anchors.
+
+The window uses shorter gathered sailcloth side panels on individual rods outside the arch. The light strand follows the outer trim with a clear gap from the fabric; the old straight tieback bars have been removed. A fresh browser load was visually checked at night.
 
 ## Theme switching
 

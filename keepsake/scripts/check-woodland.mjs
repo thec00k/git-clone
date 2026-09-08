@@ -76,4 +76,17 @@ console.log(JSON.stringify({ bytes: bytes.length, triangles, materials: json.mat
 const bowl=bounds('Fan_Bowl');
 for(const name of ['Fan_Chain_0','Fan_Chain_1','Fan_ChainWeight']){const chain=bounds(name);assert.ok(chain.max.x<bowl.min.x || chain.min.x>bowl.max.x,'Pull chain clears the light bowl: '+name);}
 console.log('Ceiling pull chains and weight clear the light bowl.');
+if (theme === 'beachfront') {
+  const curtains = [bounds('Beachfront_Curtain_-1'), bounds('Beachfront_Curtain_1')];
+  const lightNames = json.nodes.filter(node => /^Beachfront_Window_(Bulb|Lights_Cord)/.test(node.name)).map(node => node.name);
+  assert.ok(lightNames.length >= 18, 'Window strand and bulbs exported');
+  for (const name of lightNames) {
+    const light = bounds(name);
+    for (const curtain of curtains) {
+      assert.ok(light.min.x > curtain.max.x + .08 || light.max.x < curtain.min.x - .08, `${name} clears gathered curtain fabric`);
+    }
+    assert.ok(light.max.y < 3.13, `${name} stays below the ceiling`);
+  }
+  console.log('Beachfront window lights clear both curtains and the ceiling.');
+}
 export {json};
