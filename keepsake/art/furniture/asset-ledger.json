@@ -1,6 +1,8 @@
 {
   "stage": "Prototype collection: 22 exported alternatives, browser reviewed in both rooms; originals remain selectable",
   "assets": [
+    {"id":"sketchfab-beanbag","title":"Bean Bag Chair","author":"Twisty_z","provider":"Sketchfab","source":"https://sketchfab.com/3d-models/bean-bag-chair-a79f9f5d8cff4bf9bea23bf72e7b9427","license":"CC-BY-4.0","licenseUrl":"https://creativecommons.org/licenses/by/4.0/","sourceFile":"sources/sketchfab-beanbag.blend","review":"Selected for beanbag-1. Geometry reduced from 289024 triangles to an 18000 triangle budget; original UVs and cloth materials preserved, textures resized to 1k, fitted without stretching. Attribution appears in Settings > Help & profile."},
+    {"id":"sketchfab-lamp","title":"Old vintage desk lamp","author":"Jeff Meunier","provider":"Sketchfab","source":"https://sketchfab.com/3d-models/old-vintage-desk-lamp-0fd07d3289ac4b9cbf59465b937ba9a0","license":"CC-BY-4.0","licenseUrl":"https://creativecommons.org/licenses/by/4.0/","sourceFile":"sources/sketchfab-lamp.blend","review":"Selected for lamp-2. Original 14820 triangles and UVs preserved, textures resized to 1k, fitted without stretching, interactive Light_Anchor added. Attribution appears in Settings > Help & profile."},
     {
       "id": "kenney-desk-chair",
       "title": "Desk Chair",

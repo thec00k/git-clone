@@ -1,6 +1,7 @@
 import {ShopRoomVariants,ShopCreativeExtras} from './ShopCreativeExtras';
 import {FurnitureShop} from './FurnitureShop';
 import {KeepsakePrints} from './KeepsakePrints';
+import {KeepsakeGlyph} from './KeepsakeGlyph';
 import {useNav} from '../store/nav';
 import {RoomShopGoods} from './RoomShopGoods';
 import { useRef, useState } from "react";
@@ -61,7 +62,7 @@ export function StickerStore({ onClose }: { onClose: () => void }) {
                   <p className="font-display text-paper">{pack.title}</p>
                   <p className="text-sm text-paper/55">{pack.blurb}</p>
                   <p className="ks-sticker-pack-glyphs" aria-hidden="true">
-                    {pack.glyphs.join(" ")}
+                    {pack.glyphs.map(g=><KeepsakeGlyph key={g} glyph={g}/>)}
                   </p>
                 </div>
                 {owned ? (
@@ -77,7 +78,7 @@ export function StickerStore({ onClose }: { onClose: () => void }) {
                       else if (result === "short") setNote("Not enough stamps for that pack.");
                     }}
                   >
-                    {pack.price} stamps
+                    {pack.price===0?'Add to tin · included':`${pack.price} stamps`}
                   </button>
                 )}
               </li>

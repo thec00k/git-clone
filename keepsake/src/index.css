@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* One material family across portals, menus and room variants. */
+:root { --ks-ui-panel:#263b31; --ks-ui-paper:#eee5d3; --ks-ui-ink:#344236; --ks-ui-metal:#cbb27d; --ks-motion-short:180ms; --ks-motion-settle:300ms; }
+:root[data-keepsake-theme="beachfront"] { --ks-ui-panel:#29494c; --ks-ui-paper:#f1ece0; --ks-ui-ink:#355354; --ks-ui-metal:#c7b891; }
+
 /*
   Keepsake design system.
   A cozy lamp-lit room: cream plaster, honey oak, terracotta accents,
@@ -2725,3 +2729,25 @@
 @media(max-width:600px){.ks-furniture-grid {grid-template-columns:repeat(2,minmax(0,1fr));}.ks-furniture-preview {flex-direction:column;}.ks-furniture-preview>img {width:65%;}}
 .ks-shelf-preview{width:240px;padding:14px;border-radius:8px;background:#eee4cf;color:#374032;box-shadow:0 8px 24px #0005;text-align:center}.ks-shelf-preview strong{font:1.2rem Georgia,serif}.ks-shelf-preview>div{display:flex;justify-content:center;gap:6px;margin-top:10px}.ks-shelf-preview .ks-tool{background:#435747;color:#f7eedb}
 .ks-print-collection{margin-top:24px;padding-top:20px;border-top:1px solid #b6a78955}.ks-print-collection h3{font:1.3rem Georgia,serif}.ks-print-collection p{font-size:.85rem;opacity:.8;margin:8px 0 16px}.ks-print-collection>div{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ks-print-collection img{aspect-ratio:3/4;max-height:220px;object-fit:contain}
+
+/* Shared stationery and controls; paper texture stays quiet behind memories. */
+.ks-paper-decoration { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.ks-page[data-paper=tide] { background-color:#efeee1; }
+.ks-page[data-paper=field] { background-color:#efe7d3; }
+.ks-paper-picker { display:flex; flex-direction:column; gap:6px; padding:8px; font-size:12px; }
+.ks-paper-picker select { width:100%; padding:8px; color:#354238; background:#f2ead8; border:1px solid #c3b58f; border-radius:5px; }
+.ks-found-letter { position:relative; padding:28px; }
+.ks-found-letter > :not(.ks-paper-decoration) { position:relative; }
+.ks-sticker-pack-glyphs { display:flex; flex-wrap:wrap; align-items:center; gap:.3em; font-size:32px; margin:8px 0; }
+.ks-sticker-pack-glyphs svg { flex:none; }
+.ks-editor-toolbar,.ks-room-controls,.ks-room-menu-panel { background-color:var(--ks-ui-panel); }
+.ks-workbench-cover-panel,.ks-photo-printer-dialog { background-color:var(--ks-ui-paper); }
+.ks-workbench-cover-actions .ks-tool,.ks-photo-printer-dialog .is-primary { background:var(--ks-ui-ink); color:#fff7e6; }
+.ks-editor-toolbar svg,.ks-room-controls svg { color:var(--ks-ui-metal); }
+.ks-furniture-card,.ks-tool,.ks-chip { transition:border-color var(--ks-motion-short),background-color var(--ks-motion-short),box-shadow var(--ks-motion-short); }
+@media(prefers-reduced-motion:reduce) { :root { --ks-motion-short:0ms; --ks-motion-settle:0ms; } }
+.ks-asset-credits { margin-top:20px; font-size:13px; line-height:1.6; }
+.ks-asset-credits p { margin:12px 0; }
+.ks-asset-credits a { text-decoration:underline; text-underline-offset:3px; }
+:root:has(.ks-room3d[data-workbench="editing"]) .ks-achievement-toast { top:78px; bottom:auto; }
+@media(max-width:800px) { :root:has(.ks-room3d[data-workbench="editing"]) .ks-achievement-toast { top:125px; max-width:85vw; } }

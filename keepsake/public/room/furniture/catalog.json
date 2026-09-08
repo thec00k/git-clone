@@ -35,20 +35,6 @@
     "bytes": 874824
   },
   {
-    "id": "lamp-2",
-    "category": "lamp",
-    "title": "Brass task lamp",
-    "asset": "/room/furniture/lamp-2.glb",
-    "bytes": 915692
-  },
-  {
-    "id": "beanbag-1",
-    "category": "beanbag",
-    "title": "Moss canvas pear",
-    "asset": "/room/furniture/beanbag-1.glb",
-    "bytes": 1217632
-  },
-  {
     "id": "beanbag-2",
     "category": "beanbag",
     "title": "Oatmeal floor lounger",
@@ -152,5 +138,19 @@
     "title": "Walnut rounded CRT",
     "asset": "/room/furniture/crt-2.glb",
     "bytes": 2140848
+  },
+  {
+    "id": "lamp-2",
+    "category": "lamp",
+    "title": "Collected banker lamp",
+    "asset": "/room/furniture/lamp-2.glb",
+    "bytes": 2409000
+  },
+  {
+    "id": "beanbag-1",
+    "category": "beanbag",
+    "title": "Slate linen beanbag",
+    "asset": "/room/furniture/beanbag-1.glb",
+    "bytes": 3313220
   }
 ]

@@ -15,8 +15,11 @@ Updated September 8, 2026. This is the authoritative implementation checklist. T
 - [x] Production build, full automated acceptance, and desktop browser workbench tests in both rooms passed. Both graphics levels and failed room-preload recovery were browser checked. These are prototype checks, not final hardware certification.
 - [ ] Finish the unified interface in Figma: its tools were unavailable during this session. Current controls were refined directly in the app.
 - [ ] Use Higgsfield for art/motion reference exploration when its tools are available. Current original prints used the built-in image tool.
-- [ ] Curate Sketchfab alternatives after authenticating its Blender integration; no Sketchfab assets are included in this checkpoint.
-- [ ] Complete the broader stationery/sticker/discovery illustration collection and remaining forest/coastal material, light and water refinement. The first shared interaction and furniture collection are ready for review; the entire seven-part art pass is not complete.
+- [x] Sketchfab connection restored: imported and curated a realistic cloth beanbag and vintage banker lamp, preserved full source assets and UVs, reduced browser cost, added user-visible CC BY 4.0 credits, and retained lamp on/off behavior. Two alternatives plus each original remain available in every category.
+- [x] First coordinated stationery collection: eight original vector stickers, five page-paper choices, matching correspondence margins, print/curl/overview rendering, undo/redo and backup validation. Claim included packs from the drawer; change paper under Pages.
+- [x] Coastal reflection now belongs to the water shader rather than separate flat strips. Shore foam has a second breaking band; sky/water color transitions settle smoothly. Woodland has subtle layered mist. Shared drawer/light motion caps tab-resume deltas and respects reduced motion.
+- [x] Follow-up build and acceptance checks pass; browser checks cover stationery claims, paper changes/undo/redo, export, real-content turns and backup in both rooms. High-quality day/dusk/night screenshots reviewed. Curated furniture browser checks cover both rooms, lamp switching, restoration and failed-download preservation.
+- [ ] Final art-direction sign-off, broader weather/season combinations and real-device performance checks remain. Figma and Higgsfield work is still pending their callable tools. This is a polished prototype checkpoint, not completion of every final asset or the remaining three rooms.
 
 Details and regeneration caveats: [furniture source notes](../art/furniture/README.md). Remaining three room designs follow the shared-system review.
 

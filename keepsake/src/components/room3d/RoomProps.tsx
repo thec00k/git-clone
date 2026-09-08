@@ -1,4 +1,5 @@
 import { PhotoSurface } from './MemoryObjects';
+import {motionFactor,MOTION} from '../../lib/motion';
 import {FurniturePrinter} from './FurniturePrinter';
 import {useActiveRoom} from './useActiveRoom';
 import { useApp } from '../../store/appStore';
@@ -29,7 +30,7 @@ export function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boole
     if (restZ.current == null) restZ.current = drawer.position.z;
     drawer.userData.ksDrawerRestZ=restZ.current;
     const target = restZ.current + (open ? DRAWER_OPEN_Z : 0);
-    drawer.position.z = reduced ? target : THREE.MathUtils.damp(drawer.position.z, target, 8, dt);
+    drawer.position.z = THREE.MathUtils.lerp(drawer.position.z, target, motionFactor(dt,MOTION.drawer,reduced));
   });
   return null;
 }
@@ -69,14 +70,13 @@ export function ArchiveCabinet({
       if (restZ.current == null) restZ.current = drawer.position.z;
     drawer.userData.ksDrawerRestZ=restZ.current;
       const target = restZ.current + (open ? ARCHIVE_DRAWER_OPEN_Z : 0);
-      drawer.position.z = reduced ? target : THREE.MathUtils.damp(drawer.position.z, target, 7, dt);
+      drawer.position.z = THREE.MathUtils.lerp(drawer.position.z, target, motionFactor(dt,MOTION.drawer,reduced));
     }
     if (standInDrawer.current) {
-      standInDrawer.current.position.z = reduced ? (open ? ARCHIVE_DRAWER_OPEN_Z : 0) : THREE.MathUtils.damp(
+      standInDrawer.current.position.z = THREE.MathUtils.lerp(
         standInDrawer.current.position.z,
         open ? ARCHIVE_DRAWER_OPEN_Z : 0,
-        7,
-        dt,
+        motionFactor(dt,MOTION.drawer,reduced),
       );
     }
   });
@@ -375,6 +375,10 @@ export function LampFixture({
   on: boolean;
   onToggle: () => void;
 }) {
+  const {environment}=useApp();
+  const ownBulb=environment.furniture?.[environment.roomTheme??'woodland']?.lamp==='lamp-2';
+  const fixture=useRef<THREE.Group>(null);
+  useFrame(()=>{fixture.current?.position.copy(lampShadePos(scene));});
   const lamp = useMemo(() => scene.getObjectByName(LAMP_OBJECT), [scene]);
   const solid = hasGeometry(lamp);
   const shade = useMemo(() => lampShadePos(scene), [scene]);
@@ -401,7 +405,8 @@ export function LampFixture({
           </mesh>
         </group>
       )}
-      <mesh position={[shade.x, shade.y - 0.01, shade.z + 0.02]}>
+      <group ref={fixture} position={shade.toArray()}>
+      <mesh position={[0,-.01,.02]} visible={!ownBulb}>
         <sphereGeometry args={[0.028, 12, 10]} />
         {on ? (
           <meshBasicMaterial color="#fff1c2" />
@@ -409,7 +414,6 @@ export function LampFixture({
           <meshStandardMaterial color="#c4b089" roughness={0.4} />
         )}
       </mesh>
-      <group position={shade.toArray()}>
         <ClickHit size={[0.22, 0.42, 0.22]} onClick={onToggle} />
         <FacedHtml point={shade} position={[0, 0.16, 0]}>
           <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" aria-label={on ? "Turn desk lamp off" : "Turn desk lamp on"} data-lamp-toggle aria-hidden="true" tabIndex={-1} onClick={onToggle}>

@@ -3,9 +3,9 @@
 Shared anchors use metres. Generated GLBs are independent of either room shell.
 Run Blender 5.1 --background --python this-file. Source attribution is adjacent.
 """
-import bpy, math, json
+import bpy, math, json, sys
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'public' / 'room' / 'furniture'
@@ -80,6 +80,47 @@ def lathe(name,profile,material,center=(0,0,0),segments=64):
 def empty(name,location):
     o=bpy.data.objects.new(name,None);bpy.context.collection.objects.link(o);o.location=location;return o
 
+def curated_mesh(source,target_width,triangles):
+    """Keep original UVs/materials; flatten import wrappers and reduce web cost."""
+    with bpy.data.libraries.load(str(ART/'sources'/source),link=False) as (src,dst):dst.objects=list(src.objects)
+    objects=[o for o in dst.objects if o]
+    for o in objects:bpy.context.collection.objects.link(o)
+    bpy.context.view_layer.update()
+    meshes=[o for o in objects if o.type=='MESH']
+    matrices={o:o.matrix_world.copy() for o in meshes}
+    for o in meshes:
+        o.data=o.data.copy();o.data.transform(matrices[o]);o.parent=None;o.matrix_world=Matrix.Identity(4)
+    for o in objects:
+        if o.type!='MESH':bpy.data.objects.remove(o,do_unlink=True)
+    bpy.context.view_layer.update()
+    corners=[Vector(c) for o in meshes for c in o.bound_box]
+    low=Vector(tuple(min(p[i] for p in corners) for i in range(3)));high=Vector(tuple(max(p[i] for p in corners) for i in range(3)))
+    center=Vector(((low.x+high.x)/2,(low.y+high.y)/2,low.z));scale=target_width/max(high.x-low.x,high.y-low.y)
+    total=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in meshes)
+    for o in meshes:
+        o.data.transform(Matrix.Scale(scale,4)@Matrix.Translation(-center))
+        if total>triangles:
+            bpy.context.view_layer.objects.active=o;o.select_set(True)
+            mod=o.modifiers.new('Web silhouette reduction','DECIMATE');mod.ratio=triangles/total;mod.use_collapse_triangulate=True
+            bpy.ops.object.modifier_apply(modifier=mod.name);o.select_set(False)
+        for p in o.data.polygons:p.use_smooth=True
+    images={n.image for o in meshes for m in o.data.materials if m and m.use_nodes for n in m.node_tree.nodes if n.type=='TEX_IMAGE' and n.image}
+    cache=ROOT/'art'/'.staging'/'furniture-textures';cache.mkdir(parents=True,exist_ok=True)
+    for image in images:
+        if max(image.size)>1024:
+            factor=1024/max(image.size);image.scale(max(1,int(image.size[0]*factor)),max(1,int(image.size[1]*factor)))
+            image.filepath_raw=str(cache/(source.replace('.blend','')+'-'+str(image.as_pointer())+'.png'));image.file_format='PNG';image.save()
+            # A packed source can retain its original encoded bytes after scale/save.
+            # Reload the resized file into a fresh datablock before GLB export.
+            resized=bpy.data.images.load(image.filepath_raw,check_existing=False);resized.colorspace_settings.name=image.colorspace_settings.name;resized.pack()
+            for o in meshes:
+                for m in o.data.materials:
+                    if m and m.use_nodes:
+                        for n in m.node_tree.nodes:
+                            if n.type=='TEX_IMAGE' and n.image==image:n.image=resized
+    print('CURATED_ASSET',source,'original triangles',total,'budget',triangles,flush=True)
+    return meshes
+
 def desk(style):
     wood=oak if style==0 else pale
     box('Tabletop',(0,0,.732),(1.86,.78,.036),wood,.009)
@@ -96,6 +137,9 @@ def desk(style):
     empty('Tabletop_Anchor',(0,0,.75));empty('Drawer_Anchor',(0,-.16,.679))
 
 def lamp(style):
+    if style==1:
+        curated_mesh('sketchfab-lamp.blend',.24,15000)
+        empty('Light_Anchor',(0,-.055,.28));return
     if style==0:
         lathe('Ceramic base',[(0,0),(.075,0),(.08,.02),(.06,.055),(.043,.15),(.028,.18),(0,.18)],blue)
         lathe('Linen shade',[(.105,.17),(.108,.175),(.075,.32),(.071,.32),(.10,.175)],oat)
@@ -108,6 +152,9 @@ def lamp(style):
     empty('Light_Anchor',(0,0,.22))
 
 def beanbag(style):
+    if style==0:
+        curated_mesh('sketchfab-beanbag.blend',.88,18000)
+        empty('Floor_Anchor',(0,0,0));empty('Seat_Anchor',(0,-.05,.24));return
     fabric=moss if style==0 else oat
     rings=[(.012,.025,0),(.055,.32,0),(.16,.43,-.025),(.30,.40,.015),(.45,.31,.09),(.61,.19,.17),(.69,.015,.19)]
     if style==1:rings=[(z*.78,r*1.08,y*.7) for z,r,y in rings]
@@ -250,10 +297,14 @@ def chair(style):
     empty('Seat_Anchor',(0,0,.46));empty('Floor_Anchor',(0,0,0))
 
 BUILDERS={'desk':desk,'chair':chair,'lamp':lamp,'beanbag':beanbag,'rug':rug,'curtains':curtains,'guestbook-stand':side_table,'cabinet':cabinet,'bookshelf':bookshelf,'printer':printer,'crt':crt}
-NAMES={'desk':['Oak trestle','Pale writing desk'],'chair':['Moss swivel chair','Collected school chair'],'lamp':['Sea-glass ceramic','Brass task lamp'],'beanbag':['Moss canvas pear','Oatmeal floor lounger'],'rug':['Braided oval','Sea-glass woven stripes'],'curtains':['Oatmeal gathered linen','Sea-glass fine pleats'],'guestbook-stand':['Round oak side table','Pale tray table'],'cabinet':['Oak archive drawers','Painted correspondence cabinet'],'bookshelf':['Oak library shelf','Slatted ash shelf'],'printer':['Cream pocket printer','Sea-glass pocket printer'],'crt':['Cream rounded CRT','Walnut rounded CRT']}
+NAMES={'desk':['Oak trestle','Pale writing desk'],'chair':['Moss swivel chair','Collected school chair'],'lamp':['Sea-glass ceramic','Collected banker lamp'],'beanbag':['Slate linen beanbag','Oatmeal floor lounger'],'rug':['Braided oval','Sea-glass woven stripes'],'curtains':['Oatmeal gathered linen','Sea-glass fine pleats'],'guestbook-stand':['Round oak side table','Pale tray table'],'cabinet':['Oak archive drawers','Painted correspondence cabinet'],'bookshelf':['Oak library shelf','Slatted ash shelf'],'printer':['Cream pocket printer','Sea-glass pocket printer'],'crt':['Cream rounded CRT','Walnut rounded CRT']}
 manifest=[]
+requested=set(sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else set()
+if requested and (OUT/'catalog.json').exists():manifest=json.loads((OUT/'catalog.json').read_text(encoding='utf-8'))
 for category,builder in BUILDERS.items():
     for style in range(2):
+        identity=f'{category}-{style+1}'
+        if requested and identity not in requested:continue
         bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
         builder(style)
         # Meshes receive a dedicated UV layer for future material replacements.
@@ -271,6 +322,7 @@ for category,builder in BUILDERS.items():
         bpy.ops.wm.save_as_mainfile(filepath=str(ART/(identity+'.blend')),compress=True)
         path=OUT/(identity+'.glb')
         bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',export_animations=False,export_extras=True)
+        manifest=[item for item in manifest if item['id']!=identity]
         manifest.append({'id':identity,'category':category,'title':NAMES[category][style],'asset':f'/room/furniture/{identity}.glb','bytes':path.stat().st_size})
 (OUT/'catalog.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
 print('FURNITURE_VARIANTS_EXPORTED',len(manifest))

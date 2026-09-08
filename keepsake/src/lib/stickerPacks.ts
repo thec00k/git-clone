@@ -20,6 +20,8 @@ export const STICKER_PACKS: StickerPack[] = [
     price: 0,
     glyphs: STICKER_GLYPHS,
   },
+  {id:'keepsake-field',title:'Woodland keepsakes',blurb:'Original paper-cut leaves, a moth and the cup beside your book.',price:0,glyphs:['keepsake:oak-leaf','keepsake:toadstool','keepsake:moth','keepsake:teacup']},
+  {id:'keepsake-tide',title:'Tide-pool keepsakes',blurb:'Original conch, sea glass, sailboat and ocean postmark illustrations.',price:0,glyphs:['keepsake:conch','keepsake:sailboat','keepsake:sea-glass','keepsake:tidal-postmark']},
   {
     id: "garden",
     title: "Garden cuttings",

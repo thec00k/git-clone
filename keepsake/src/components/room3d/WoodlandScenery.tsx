@@ -95,8 +95,20 @@ export function WoodlandScenery({ phase, environment, particles }: {
       <planeGeometry args={[2,2]} /><meshBasicMaterial map={foliage} alphaTest={.4} side={THREE.DoubleSide} />
     </instancedMesh>
     <ForestForeground foliage={foliage} night={night}/>
+    <ForestMist phase={phase} reduced={reduced}/>
     {environment.weather !== "clear" && <WindowWeather kind={environment.weather} count={particles} reduced={reduced} />}
   </group></>;
+}
+
+function ForestMist({phase,reduced}:{phase:Phase;reduced:boolean}){
+ const group=useRef<THREE.Group>(null);
+ const texture=useMemo(()=>{const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d')!;
+   for(let i=0;i<8;i++){const x=32+i*66,y=64+Math.sin(i*2)*12;g.save();g.translate(x,y);g.scale(2.8,1);const gradient=g.createRadialGradient(0,0,0,0,0,34);gradient.addColorStop(0,'rgba(255,255,255,.3)');gradient.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gradient;g.fillRect(-34,-34,68,68);g.restore();}
+   const map=new THREE.CanvasTexture(c);map.colorSpace=THREE.SRGBColorSpace;return map;
+ },[]);
+ useEffect(()=>()=>texture.dispose(),[texture]);
+ useFrame(({clock})=>{if(group.current&&!reduced)group.current.position.x=Math.sin(clock.elapsedTime*.035)*.22;});
+ return <group ref={group} name="forest-mist">{[0,1,2].map(i=><mesh key={i} position={[i%2?-3:2,.5+i*.22,-12-i*4]}><planeGeometry args={[25,2.4]}/><meshBasicMaterial map={texture} color={phase==='night'?'#52717c':phase==='dusk'?'#c4b6a3':'#c1cec0'} opacity={phase==='night'?.22:.3} transparent depthWrite={false}/></mesh>)}</group>;
 }
 
 function ForestForeground({foliage,night}:{foliage:THREE.Texture;night:boolean}){

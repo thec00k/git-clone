@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {KeepsakeGlyph} from './KeepsakeGlyph';
+import {PaperDecoration} from './StationeryArt';
 import {Mail,X,BookOpen} from 'lucide-react';
 import {useApp} from '../store/appStore';
 import {useNav} from '../store/nav';
@@ -51,14 +52,14 @@ function Correspondence({id,onClose}:{id:string;onClose:()=>void}){
   if(letter.reward)elements.push({id:uid('el'),type:'sticker',x:50,y:80,w:15,rotation:-5,z:3,glyph:REWARDS[letter.reward]?.glyph??'✦'});
   update(s=>{
    const next=keepDiscovery(s,id,now);const ds=discoveryState(next);
-   return {...next,discoveries:{...ds,entries:ds.entries.map(e=>e.id===id?{...e,bookId,pageId}:e)},books:next.books.map(b=>b.id===bookId?{...b,updatedAt:now,pages:[...b.pages,...(b.pages.length%2?[{id:uid('page'),elements:[]}]:[]),{id:pageId,elements},{id:uid('page'),elements:[]}]}:b)};
+   return {...next,discoveries:{...ds,entries:ds.entries.map(e=>e.id===id?{...e,bookId,pageId}:e)},books:next.books.map(b=>b.id===bookId?{...b,updatedAt:now,pages:[...b.pages,...(b.pages.length%2?[{id:uid('page'),elements:[]}]:[]),{id:pageId,backgroundStyle:state.environment.roomTheme==='beachfront'?'tide':'field',elements},{id:uid('page'),elements:[]}]}:b)};
   });
   setActiveBook(bookId);setBookPageId(pageId);onClose();go('book');
  }
  return <div className="ks-correspondence-overlay" onClick={onClose}><div ref={panel} className="ks-correspondence" role="dialog" aria-modal="true" aria-label={letter?`A letter from ${letter.author??'the house'}`:'Correspondence'} onClick={e=>e.stopPropagation()}>
   <header><Mail size={20}/><h2>{letter?letter.title:'Correspondence'}</h2><button onClick={onClose} aria-label="Close correspondence"><X size={20}/></button></header>
   {letter?<>
-   <article className="ks-found-letter"><small>{letter.author?`From ${letter.author}`:letter.story??'A little something from the house'}{letter.reward?' · keepsake':''}</small>{letter.reward&&<div className="ks-reward-object" aria-label={letter.title}><KeepsakeGlyph glyph={REWARDS[letter.reward]?.glyph??'✦'}/></div>}<p>{letter.text}</p><cite>— {letter.author??'the house'}</cite></article>
+   <article className="ks-found-letter"><PaperDecoration style={state.environment.roomTheme==='beachfront'?'tide':'field'}/><small>{letter.author?`From ${letter.author}`:letter.story??'A little something from the house'}{letter.reward?' · keepsake':''}</small>{letter.reward&&<div className="ks-reward-object" aria-label={letter.title}><KeepsakeGlyph glyph={REWARDS[letter.reward]?.glyph??'✦'}/></div>}<p>{letter.text}</p><cite>— {letter.author??'the house'}</cite></article>
    <small>Found {new Date(letter.foundAt??letter.appearedAt).toLocaleDateString()} · {PLACES.find(p=>p.id===(letter.guestEntryId&&d.guestNotesOnDesk===false?'guestbook':letter.location))?.label}</small>
    <label className="ks-correspondence-destination">Scrapbook<select aria-label="Letter destination scrapbook" value={bookId} onChange={e=>setBookId(e.target.value)}>{state.books.map(b=><option key={b.id} value={b.id}>{b.title}</option>)}</select></label>
    <footer><button disabled={!bookId} onClick={putInBook}><BookOpen size={16}/> Keep in scrapbook</button><button onClick={()=>{update(s=>keepDiscovery(s,id,Date.now()));setDiscoveryOpen('collection');}}>Save in correspondence</button><button onClick={onClose}>{letter.keptAt?'Close letter':'Leave here'}</button></footer>

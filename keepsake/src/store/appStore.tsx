@@ -503,7 +503,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const buyStickerPack = useCallback((id: string): "ok" | "owned" | "short" => {
     const pack = packById(id);
-    if (!pack || pack.price <= 0) return "owned";
+    if (!pack || pack.price < 0) return "owned";
     let result: "ok" | "owned" | "short" = "short";
     update((p) => {
       if (p.ownedStickerPacks.includes(id)) {

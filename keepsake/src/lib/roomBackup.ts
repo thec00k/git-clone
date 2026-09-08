@@ -1,4 +1,5 @@
 import {ownsRoomTheme} from './roomThemes.ts';
+import {KEEPSAKE_PRINTS,isPaperStyle} from './stationery.ts';
 import {validFurnitureChoices} from './furniture.ts';
 import {CRT_COLORS} from './roomMusic.ts';
 import {ROOM_GOODS,SHOP_GOODS,EXTRA_GOODS} from './roomShop.ts';
@@ -11,7 +12,7 @@ function ensure(ok:unknown):asserts ok{if(!ok)throw new Error('This file is not 
 const string=(v:unknown)=>typeof v==='string';
 const number=(v:unknown)=>typeof v==='number'&&Number.isFinite(v);
 const strings=(v:unknown)=>Array.isArray(v)&&v.every(string);
-const image=(v:unknown)=>string(v)&&(/^(data:image\/(png|jpeg|webp|gif);base64,|\/samples\/)/.test(v as string));
+const image=(v:unknown)=>string(v)&&(/^(data:image\/(png|jpeg|webp|gif);base64,|\/samples\/)/.test(v as string)||KEEPSAKE_PRINTS.some(print=>print.src===v));
 function records(v:unknown,check:(v:RecordValue)=>boolean){return Array.isArray(v)&&v.every(x=>object(x)&&check(x));}
 export function parseRoomBackup(text:string):AppState{
  const file:unknown=JSON.parse(text);ensure(object(file)&&file.format==='keepsake-room'&&file.backupVersion===1&&object(file.state));const s=file.state;
@@ -24,6 +25,7 @@ export function parseRoomBackup(text:string):AppState{
   return e.type==='stroke'&&string(e.color)&&number(e.width)&&records(e.points,p=>number(p.x)&&number(p.y));
  }))));
  const books=s.books as AppState['books'];const ids=books.map(b=>b.id);ensure(new Set(ids).size===ids.length);
+ ensure(books.every(b=>b.pages.every(p=>p.backgroundStyle===undefined||isPaperStyle(p.backgroundStyle))));
  const pageIds=books.flatMap(b=>b.pages.map(p=>p.id));ensure(new Set(pageIds).size===pageIds.length);
  ensure(s.activeBookId===null || ids.includes(s.activeBookId as string));
  ensure(records(s.archive,a=>string(a.id)&&image(a.src)&&number(a.aspect)&&(a.aspect as number)>0&&number(a.createdAt)&&strings(a.categories)&&typeof a.favorite==='boolean'));

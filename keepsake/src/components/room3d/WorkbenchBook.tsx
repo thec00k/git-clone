@@ -15,6 +15,7 @@ import {BookIdentityEditor} from '../BookIdentityEditor';
 import {canSee} from '../../lib/permissions';
 import {PageTurnContext,type PhysicalTurn} from '../../store/pageTurn';
 import {pageTurnWeights,smootherstep} from '../../lib/workbench';
+import {motionFactor,MOTION} from '../../lib/motion';
 let bookAsset: ReturnType<GLTFLoader['loadAsync']>|undefined;
 const loadBook=()=>bookAsset??=(new GLTFLoader()).loadAsync('/room/shared/scrapbook.glb').catch(error=>{bookAsset=undefined;throw error;});
 
@@ -71,7 +72,7 @@ export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
     return()=>{old.visible=wasVisible;};
   },[roomScene]);
   useFrame((_,delta)=>{
-    const t=reduced?1:1-Math.exp(-Math.min(delta,.05)*7);
+    const t=motionFactor(delta,MOTION.furniture,reduced);
     if(hinge){hinge.rotation.z=THREE.MathUtils.lerp(hinge.rotation.z,opened?Math.PI:0,t);hinge.position.y=THREE.MathUtils.lerp(hinge.position.y,opened?.004:.029,t);}
     if(leftPages){leftPages.scale.x=THREE.MathUtils.lerp(leftPages.scale.x,opened?1:.001,t);leftPages.visible=leftPages.scale.x>.002;}
     if(group.current)group.current.position.x=THREE.MathUtils.lerp(group.current.position.x,opened?-.15:-.31,t);

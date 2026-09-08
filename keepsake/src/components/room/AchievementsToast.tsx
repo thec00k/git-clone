@@ -18,7 +18,7 @@ export function AchievementsToast({ ids, onDone }: { ids: string[]; onDone: () =
   if (!latest) return null;
 
   return (
-    <div className="pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
+    <div className="ks-achievement-toast pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
       <div className="ks-panel flex items-center gap-3 px-4 py-3">
         <Sparkles size={18} className="text-accent" />
         <div>

@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {transitionWorkbench,pageTurnWeights} from '../src/lib/workbench.ts';
 import {pointInQuad} from '../src/lib/pageCoordinates.ts';
+import {motionFactor,MOTION} from '../src/lib/motion.ts';
+assert.equal(motionFactor(10,MOTION.drawer),motionFactor(.05,MOTION.drawer),'Returning to the tab caps furniture motion');
+assert.equal(motionFactor(.016,MOTION.drawer,true),1,'Reduced motion settles immediately');
+assert.equal(motionFactor(-1,MOTION.drawer),0);
 
 let state='room';
 for(const [event,expected] of [['inspect','arriving'],['inspect','arriving'],['open','arriving'],['settled','cover'],['open','opening'],['open','opening'],['settled','editing'],['close','closing'],['open','closing'],['settled','cover'],['leave','leaving'],['settled','room']]){

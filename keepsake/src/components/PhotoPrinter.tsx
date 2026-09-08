@@ -9,6 +9,7 @@ import { photoRows } from "../lib/photoRows";
 import type { PhotoElement } from "../types/scrapbook";
 import { playPageTurn } from '../lib/audio';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import {MOTION} from '../lib/motion';
 export function PhotoPrinter({onClose}:{onClose:()=>void}) {
  const {state, activeBook, addArchivePhoto, update, setActiveBook} = useApp();
  const {go,setPendingPrint,setBookPageId} = useNav();
@@ -17,7 +18,7 @@ export function PhotoPrinter({onClose}:{onClose:()=>void}) {
  const [photo,setPhoto]=useState<{src:string;photoId?:string;aspect:number}|null>(null);
  const [printed,setPrinted]=useState(false);
  const [printing,setPrinting]=useState(false); const reduced=useReducedMotion();
- useEffect(()=>{if(!printing || !photo)return;playPageTurn(state.environment.ambienceVolume);const timer=window.setTimeout(()=>{update(s=>({...s,latestPrint:{src:photo.src,photoId:photo.photoId,printedAt:Date.now()}}));setPrinted(true);setPrinting(false);},reduced?100:1800);return()=>window.clearTimeout(timer);},[printing,photo,reduced,update,state.environment.ambienceVolume]);
+ useEffect(()=>{if(!printing || !photo)return;playPageTurn(state.environment.ambienceVolume);const timer=window.setTimeout(()=>{update(s=>({...s,latestPrint:{src:photo.src,photoId:photo.photoId,printedAt:Date.now()}}));setPrinted(true);setPrinting(false);},reduced?0:MOTION.printMs);return()=>window.clearTimeout(timer);},[printing,photo,reduced,update,state.environment.ambienceVolume]);
  const [bookId,setBookId]=useState(activeBook?.id ?? state.books[0]?.id ?? "");
  const [pageId,setPageId]=useState("new");
  const [error,setError]=useState("");

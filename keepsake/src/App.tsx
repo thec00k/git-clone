@@ -15,6 +15,8 @@ import { CrtPlayerSlotProvider } from "./store/spotifyUi";
 import {DoorLanding} from './components/room/DoorLanding';
 import {WorkbenchProvider} from './store/workbench';
 import {roomLayoutFromSearch} from './lib/roomLayout';
+import {useEffect} from 'react';
+import {useApp} from './store/appStore';
 
 function CurrentView() {
   const { view } = useNav();
@@ -37,6 +39,8 @@ function CurrentView() {
 }
 
 export default function App() {
+  const {environment}=useApp();
+  useEffect(()=>{document.documentElement.dataset.keepsakeTheme=environment.roomTheme??'woodland';return()=>{delete document.documentElement.dataset.keepsakeTheme;};},[environment.roomTheme]);
   const { printerOpen, setPrinterOpen, isVisitor, view } = useNav();
   if (view === 'closed' || view === 'friends') return <DoorLanding friends={view === 'friends'}/>;
   return (

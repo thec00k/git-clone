@@ -1,4 +1,5 @@
 import {PhotoImportDialog} from './PhotoImportDialog';
+import {PAPER_STYLES,stickerLabel,type PaperStyle} from '../lib/stationery';
 import { MAX_PHOTOS_PER_PAGE } from '../types/scrapbook';
 import {StickerStore} from './StickerStore';
 import { SpreadOverview } from './SpreadOverview';
@@ -278,7 +279,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
                     <button
                       key={g}
                       className="ks-chip text-lg"
-                      aria-label={`Add sticker ${g==='keepsake:fern-stamp'?'Woodland fern stamp':Object.values(REWARDS).find(r=>r.glyph===g)?.title??g}`}
+                      aria-label={`Add sticker ${stickerLabel(g)??(g==='keepsake:fern-stamp'?'Woodland fern stamp':Object.values(REWARDS).find(r=>r.glyph===g)?.title??g)}`}
                       onClick={() => {
                         if (targetPageId) sb.addSticker(targetPageId, g);
                         setShowStickers(false);
@@ -319,6 +320,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
               <details className="ks-book-pages-menu" onKeyDown={e => { if (e.key === "Escape") { e.currentTarget.open = false; e.currentTarget.querySelector("summary")?.focus(); } }}>
                 <summary>Pages <ChevronRight size={14} /></summary>
                 <div>
+                  <label className="ks-paper-picker">Paper for selected page<select aria-label="Paper for selected page" disabled={!targetPageId||!!turn} value={sb.pages.find(p=>p.id===targetPageId)?.backgroundStyle??'plain'} onChange={e=>targetPageId&&sb.setPagePaper(targetPageId,e.target.value as PaperStyle)}>{Object.entries(PAPER_STYLES).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
                   <button className="ks-tool" onClick={sb.addSpread} disabled={!!turn}><Plus size={16} /> Add a spread</button>
                   <button className="ks-tool" onClick={sb.deleteCurrentSpread} disabled={sb.spreadCount <= 1 || !!turn}><Trash2 size={16} /> Delete this spread</button>
                   <p>Deleted a spread by mistake? Use Undo.</p>

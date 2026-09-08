@@ -1,4 +1,5 @@
 import { movePageSpread } from '../lib/spreads';
+import {isPaperStyle,type PaperStyle} from '../lib/stationery';
 import {insertPhotoBatch,type ImportPhoto} from '../lib/photoBatch';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
@@ -123,6 +124,10 @@ export function useScrapbook() {
   );
 
   const nextZ = (els: PageElement[]) => els.reduce((max, e) => Math.max(max, e.z), 0) + 1;
+  const setPagePaper=useCallback((pageId:string,style:PaperStyle)=>{
+    if(!isPaperStyle(style)||!bookRef.current?.pages.some(p=>p.id===pageId&&p.backgroundStyle!==style))return;
+    remember(true);updateActiveBook(b=>({...b,pages:b.pages.map(p=>p.id===pageId?{...p,backgroundStyle:style}:p)}));
+  },[remember,updateActiveBook]);
 
   const updateElement = useCallback(
     (elementId: string, patch: Partial<PageElement>) => {
@@ -406,6 +411,7 @@ export function useScrapbook() {
     setSelectedId,
     setActivePageId,
     updateElement,
+    setPagePaper,
     addPhoto,
     addCaption,
     addSticker,

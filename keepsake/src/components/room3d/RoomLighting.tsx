@@ -1,4 +1,5 @@
 import { ShelfLighting } from "./ShelfLighting";
+import {motionFactor,MOTION} from '../../lib/motion';
 import { MapPictureLight } from "./MapPictureLight";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -46,7 +47,7 @@ export function RoomLights({
   const lightColor=useMemo(()=>new THREE.Color(night?'#c8d4f0':dusk?'#ffb070':'#ffe6b8'),[night,dusk]);
   const ambientColor=useMemo(()=>new THREE.Color(night?'#8a9bb8':'#fff4e6'),[night]);
   useFrame((_, dt) => {
-    const t=reduced?1:1-Math.exp(-dt*3);
+    const t=motionFactor(dt,MOTION.light,reduced);
     const lights:[[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number]]=[
       [ambientRef.current,night?.16:dusk?.24:.34],[sunRef.current,night?.55:dusk?1.35:2.1],[ceilingRef.current,environment.ceilingOn!==false?(coastal?2.3:3.2):0],[lampRef.current,environment.lampOn?(night?3.8:dusk?2.8:1.6)*(coastal?.12:1):0],[skyRef.current,night?.25:.55]];
     lights.forEach(([light,target])=>{if(light)light.intensity=THREE.MathUtils.lerp(light.intensity,target,t);});
@@ -54,7 +55,7 @@ export function RoomLights({
     const blades =
       scene?.getObjectByName(CEILING_FAN_BLADES) ??
       scene?.getObjectByName(CEILING_FAN_OBJECT)?.children.find((child) => /blade/i.test(child.name));
-    if (blades && !reduced && environment.ceilingOn !== false) blades.rotation.y += dt * 1.35;
+    if (blades && !reduced && environment.ceilingOn !== false) blades.rotation.y += Math.min(dt,.05) * 1.35;
     if (scene && lampRef.current) {
       const p = lampShadePos(scene);
       lampRef.current.position.copy(p);

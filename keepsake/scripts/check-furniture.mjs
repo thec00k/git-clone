@@ -13,6 +13,7 @@ for(const yaw of [0,Math.PI/2,-Math.PI/2,Math.PI]){
   assert.ok(actual.min.distanceTo(target.min)<1e-6&&actual.max.distanceTo(target.max)<1e-6,'Rotated replacement fits the authored support');
 }
 const parent=new THREE.Group();parent.position.set(2,.7,-1);parent.rotation.y=.4;
+const prop=new THREE.Mesh(new THREE.BoxGeometry(.8,.9,.4));const support=new THREE.Box3(new THREE.Vector3(-1,.2,-1),new THREE.Vector3(1,1.2,1));fitFurniture(prop,support,true);const fitted=new THREE.Box3().setFromObject(prop),dimensions=fitted.getSize(new THREE.Vector3());assert.ok(Math.abs(dimensions.x/dimensions.y-.8/.9)<1e-6);assert.ok(Math.abs(fitted.min.y-support.min.y)<1e-6,'Proportional fitting retains ground contact');assert.ok(support.containsBox(fitted));
 const body=new THREE.Mesh(new THREE.BoxGeometry(.6,.8,.4));parent.add(body);
 const memory=new THREE.Mesh(new THREE.BoxGeometry(1,1,1));memory.position.set(3,4,5);body.add(memory);
 const bounds=furnitureBounds([body],parent);assert.ok(bounds.getSize(new THREE.Vector3()).distanceTo(new THREE.Vector3(.6,.8,.4))<1e-6,'Attached memories do not inflate furniture bounds');

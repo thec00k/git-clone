@@ -1,4 +1,5 @@
 import {InkGlints} from './InkGlints';
+import {PaperDecoration} from './StationeryArt';
 import { useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Page, PageElement, StrokeElement } from "../types/scrapbook";
@@ -57,11 +58,13 @@ export function ScrapbookPage({
     <div
       className="ks-page"
       data-active={active}
+      data-paper={page.backgroundStyle??'plain'}
       onPointerDown={() => {
         onActivate(page.id);
         onDeselect();
       }}
     >
+      <PaperDecoration style={page.backgroundStyle}/>
       {page.titlePage && (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-[8%] text-center">
           <p className="ks-caption text-ink-soft" style={{ fontSize: "5cqw" }}>

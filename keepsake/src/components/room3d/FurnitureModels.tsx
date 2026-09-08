@@ -6,6 +6,8 @@ import {FURNITURE_ITEMS,type FurnitureCategory,type FurnitureId} from '../../lib
 import {loadFurniture} from './furnitureAssetCache';
 import {useActiveRoom} from './useActiveRoom';
 import {furnitureBounds,fitFurniture} from '../../lib/furnitureGeometry';
+import {motionFactor,MOTION} from '../../lib/motion';
+import {useReducedMotion} from '../../hooks/useReducedMotion';
 
 const patterns:Partial<Record<FurnitureCategory,RegExp>>={
   desk:/^Desk_(Top|Apron_|Leg_)/,
@@ -28,8 +30,11 @@ export function FurnitureModels({scene}:{scene:THREE.Object3D}){
 }
 
 function FurnitureReplacement({scene,id,category}:{scene:THREE.Object3D;id:FurnitureId;category:FurnitureCategory}){
+  const {environment}=useApp();const reduced=useReducedMotion();
+  const lampMaterials=useRef<{material:THREE.MeshStandardMaterial;intensity:number}[]>([]);
   const screenPair=useRef<{source:THREE.Mesh;target:THREE.Mesh;last:THREE.Material|THREE.Material[]}|null>(null);
-  useFrame(()=>{
+  useFrame((_,dt)=>{
+    for(const {material,intensity} of lampMaterials.current)material.emissiveIntensity=THREE.MathUtils.lerp(material.emissiveIntensity,environment.lampOn?intensity:0,motionFactor(dt,MOTION.light,reduced));
     const pair=screenPair.current;
     if(pair&&pair.source.material!==pair.last){
       const old=pair.target.material;if(!Array.isArray(old))old.dispose();
@@ -68,7 +73,7 @@ function FurnitureReplacement({scene,id,category}:{scene:THREE.Object3D;id:Furni
         const target=furnitureBounds(originals,anchor),model=make();
         if(category==='chair')model.rotation.y=Math.PI;
         if(category==='bookshelf')model.rotation.y=-Math.PI/2;
-        fitFurniture(model,target);
+        fitFurniture(model,target,category==='lamp'||category==='beanbag');
         if(category==='bookshelf')model.traverse(o=>{if(/^Shelf(?:\d|_|$)/.test(o.name)&&o instanceof THREE.Mesh){const y=new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()).y;if(y>target.min.y+.08&&y<target.max.y-.08)o.visible=false;}});
         if(category==='cabinet')model.traverse(o=>{if(/^(Drawer_front|Drawer_pull|Label_frame|Paper_label)/.test(o.name))o.visible=false;});
         if(category==='crt'){
@@ -83,6 +88,7 @@ function FurnitureReplacement({scene,id,category}:{scene:THREE.Object3D;id:Furni
       }
       // A parent can also carry a living book, plant or animation anchor.
       // Hide its own surface, preserving children and their world transforms.
+      if(category==='beanbag'){const oldThrow=scene.getObjectByName('Finish_Folded_Throw');if(oldThrow instanceof THREE.Mesh)originals.push(oldThrow);}
       const hidden=originals.map(o=>({o,material:o.material,shadow:o.castShadow,visible:o.visible}));
       const finishes:{o:THREE.Mesh;original:THREE.Material|THREE.Material[];replacement:THREE.Material|THREE.Material[]}[]=[];
       const finishPattern=category==='desk'?/^Desk_Drawer(?:Front)?$/:category==='cabinet'?/^ks_archive_drawer$/:category==='bookshelf'?/^ks_shelf_board_/:null;
@@ -97,11 +103,12 @@ function FurnitureReplacement({scene,id,category}:{scene:THREE.Object3D;id:Furni
       const invisible=new THREE.MeshBasicMaterial({visible:false});
       originals.forEach(o=>{if(o.name==='CRT_Screen')o.visible=false;else o.material=invisible;o.castShadow=false;});
       anchor.add(root);
+      if(category==='lamp')lampMaterials.current=materials.filter((m):m is THREE.MeshStandardMaterial=>m instanceof THREE.MeshStandardMaterial).map(material=>({material,intensity:material.emissiveIntensity}));
       const report=()=>{const host=document.querySelector('.ks-room3d');if(host instanceof HTMLElement){const ids:string[]=[];scene.traverse(o=>{if(o.name.startsWith('furniture:'))ids.push(o.name.slice(10));});host.dataset.furnitureLoaded=ids.sort().join(',');}};
       report();
       restore=()=>{const pair=screenPair.current;if(pair&&!Array.isArray(pair.target.material))pair.target.material.dispose();screenPair.current=null;anchor.remove(root);hidden.forEach(({o,material,shadow,visible})=>{if(o.material===invisible)o.material=material;o.castShadow=shadow;o.visible=visible;});finishes.forEach(({o,original,replacement})=>{if(o.material===replacement)o.material=original;});invisible.dispose();materials.forEach(m=>m.dispose());geometries.forEach(g=>g.dispose());report();};
     }).catch(error=>{if(live)console.warn(`Could not place ${id}; original retained.`,error);});
-    return()=>{live=false;restore();};
+    return()=>{live=false;lampMaterials.current=[];restore();};
   },[scene,id,category]);
   return null;
 }
