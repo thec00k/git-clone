@@ -1,0 +1,80 @@
+{
+  "stage": "Prototype collection: 22 exported alternatives, browser reviewed in both rooms; originals remain selectable",
+  "assets": [
+    {
+      "id": "kenney-desk-chair",
+      "title": "Desk Chair",
+      "author": "Kenney",
+      "provider": "Poly Pizza",
+      "source": "https://poly.pizza/m/CKSz6PB1vO",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sourceFile": "sources/chairs.blend",
+      "objects": [
+        "chairDesk",
+        "chairDesk_1",
+        "chair"
+      ],
+      "importHeightMetres": 0.9,
+      "review": "Used in chair-1: moss upholstery, charcoal metal, added cushion and piping; fitted to the shared chair anchor."
+    },
+    {
+      "id": "green-chair-01",
+      "title": "Green Chair 01",
+      "provider": "Poly Haven",
+      "source": "https://polyhaven.com/a/GreenChair_01",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "sourceFile": "sources/chairs.blend",
+      "objects": [
+        "GreenChair_01"
+      ],
+      "textureResolution": "1k",
+      "review": "Rejected: distressed upholstery does not suit the room."
+    },
+    {
+      "id": "book-pattern",
+      "title": "Book Pattern",
+      "provider": "Poly Haven",
+      "source": "https://polyhaven.com/a/book_pattern",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "sourceFile": "sources/book-pattern.blend",
+      "textureResolution": "1k"
+    },
+    {
+      "id": "WoodenChair_01",
+      "title": "Wooden Chair 01",
+      "provider": "Poly Haven",
+      "source": "https://polyhaven.com/a/WoodenChair_01",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "sourceFile": "sources/chairs.blend",
+      "textureResolution": "1k",
+      "review": "Rejected: tall Gothic proportions do not suit the desk."
+    },
+    {
+      "id": "SchoolChair_01",
+      "title": "School Chair 01",
+      "author": "Ethan Place",
+      "provider": "Poly Haven",
+      "source": "https://polyhaven.com/a/SchoolChair_01",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "sourceFile": "sources/chairs.blend",
+      "textureResolution": "1k",
+      "review": "Used in chair-2. Original UVs and photographic materials preserved; resized and browser reviewed in Woodland and Beachfront."
+    },
+    {
+      "id": "fabric_pattern_07",
+      "title": "Fabric Pattern 07",
+      "provider": "Poly Haven",
+      "source": "https://polyhaven.com/a/fabric_pattern_07",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "sourceFile": "sources/fabric-pattern-07.blend",
+      "textureResolution": "1k",
+      "review": "Fabric normal maps used on textile variants."
+    }
+  ]
+}

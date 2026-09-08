@@ -1,3 +1,4 @@
+import {pagePixelPoint} from '../lib/pageCoordinates';
 import { useRef } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { clamp } from "../lib/clamp";
@@ -34,7 +35,7 @@ export function useElementGesture(
 
   function pageRect(node: HTMLElement): DOMRect | null {
     const page = node.closest(".ks-page") as HTMLElement | null;
-    return page ? page.getBoundingClientRect() : null;
+    return page ? new DOMRect(0,0,page.offsetWidth,page.offsetHeight) : null;
   }
 
   function begin(node: HTMLElement) {
@@ -63,13 +64,13 @@ export function useElementGesture(
     const target = e.target as HTMLElement;
     if (target.closest("[data-no-drag]")) return;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    pointers.current.set(e.pointerId, pagePixelPoint(e.currentTarget,e.clientX,e.clientY));
     begin(e.currentTarget as HTMLElement);
   };
 
   const onPointerMove = (e: ReactPointerEvent<HTMLElement>) => {
     if (!pointers.current.has(e.pointerId)) return;
-    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    pointers.current.set(e.pointerId, pagePixelPoint(e.currentTarget,e.clientX,e.clientY));
     const s = start.current;
     if (!s) return;
     const pts = [...pointers.current.values()];

@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5178';
+const browser=await chromium.launch({headless:true,...(process.env.TEST_BROWSER?{executablePath:process.env.TEST_BROWSER}:{}),args:['--enable-unsafe-swiftshader']});
+try{for(const [room,motion] of [['woodland','no-preference'],['beachfront','reduce']]){
+ const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:motion});const p=await context.newPage();p.setDefaultTimeout(45000);
+ const errors=[];p.on('pageerror',e=>errors.push(e.message));
+ await context.route('**/asset-fixture.html',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><title>Workbench test</title>'}));
+ await p.goto(base+'/asset-fixture.html');await p.evaluate(async room=>{const {createSeed}=await import('/src/data/seed.ts');const {saveState}=await import('/src/lib/storage.ts');const s=createSeed();s.environment.roomTheme=room;s.environment.entryMusic='off';s.environment.musicOn=false;s.environment.musicProvider='ambient';s.environment.timeMode='day';s.progress.completedTour=true;s.ownedRoomThemes=['woodland','beachfront'];await saveState(s);sessionStorage.setItem('ks-tour-done','1');},room);
+ const button=name=>p.getByRole('button',{name,exact:true});const phase=value=>p.locator(`.ks-room3d[data-workbench="${value}"]`).waitFor();
+ await p.goto(base);await button('Take a seat').click();await phase('cover');
+ await p.getByLabel('Book title',{exact:true}).fill('Workbench test');await button('Open scrapbook').click();await phase('editing');
+ await button('Next spread').click();if(motion==='no-preference')await p.locator('[data-page-animation=physical]').waitFor();await p.getByText('Spread 2 of 2',{exact:true}).waitFor();
+ await button('Previous spread').click();if(motion==='no-preference')await p.locator('[data-page-animation=physical]').waitFor();await p.getByText('Spread 1 of 2',{exact:true}).waitFor();
+ const photo=p.locator('.ks-workbench-pages .ks-el[aria-label=Photograph]').last();await photo.click();const before=await photo.getAttribute('style');const bounds=await photo.boundingBox();await p.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);await p.mouse.down();await p.mouse.move(bounds.x+bounds.width/2+55,bounds.y+bounds.height/2+30,{steps:12});await p.mouse.up();assert.notEqual(await photo.getAttribute('style'),before,'Perspective photo drag changes its position');
+ await button('Undo').click();
+ await button('Draw with the blue marker').click();await p.getByLabel('Marker thickness').focus();await p.keyboard.press('Home');for(let i=0;i<20;i++)await p.keyboard.press('ArrowRight');
+ const right=p.locator('.ks-workbench-pages .ks-page').last();const r=await right.boundingBox();await p.mouse.move(r.x+r.width*.3,r.y+r.height*.8);await p.mouse.down();await p.mouse.move(r.x+r.width*.6,r.y+r.height*.8,{steps:14});await p.mouse.up();await p.waitForTimeout(700);
+ const state=await p.evaluate(async()=>await(await import('/src/lib/storage.ts')).loadState());const book=state.books.find(b=>b.id===state.activeBookId);assert.equal(book.title,'Workbench test');assert.ok(book.pages.some(page=>page.elements.some(e=>e.type==='stroke')),'Ink is saved on the real page');
+ await button('Drawer shop').click();await button('Furniture').click();await p.getByLabel('Furniture category').selectOption('desk');await p.getByRole('button',{name:/Pale writing desk/}).click();await button('Place in room').click();await p.getByRole('status').filter({hasText:'Placed in your room'}).waitFor();await button('Close the drawer').click();
+ await button('Close book').click();await phase('cover');await button('Return to room').click();await phase('room');
+ await p.waitForTimeout(700);await p.reload();await button('Open scrapbook').waitFor();
+ const saved=await p.evaluate(async()=>await(await import('/src/lib/storage.ts')).loadState());assert.equal(saved.environment.furniture[room].desk,'desk-2');
+ await p.locator('.ks-room-menu>summary').click();await button('Bookshelf').click();await p.locator('.ks-room-menu>summary').click();
+ await button('Open scrapbook: Workbench test').click();await button('Read at desk').waitFor();await button('Put back').click();await button('Read at desk').waitFor({state:'hidden'});
+ await button('Open scrapbook: Workbench test').click();await button('Read at desk').click();await phase('cover');assert.equal(await p.getByLabel('Book title',{exact:true}).inputValue(),'Workbench test');
+ await button('Return to room').click();await phase('room');await p.locator('.ks-room-menu>summary').click();await button('Bookshelf').click();await p.locator('.ks-room-menu>summary').click();
+ await button('Create a new scrapbook').click();await button('Create at desk').click();await phase('cover');await p.getByLabel('Book title',{exact:true}).waitFor();
+ const created=await p.evaluate(async count=>{const {loadState}=await import('/src/lib/storage.ts');for(let i=0;i<50;i++){const s=await loadState();if(s.books.length===count)return s;await new Promise(resolve=>setTimeout(resolve,100));}throw new Error('New scrapbook was not saved');},saved.books.length+1);assert.equal(created.books.length,saved.books.length+1);assert.notEqual(created.activeBookId,saved.activeBookId);assert.deepEqual(errors,[]);
+ console.log(`PASS ${room}: chair, cover/title, forward/back turns, photo drag, ink, drawer variant and reload (${motion}).`);await context.close();
+}}finally{await browser.close();}

@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import {usePhysicalPageTurn} from '../store/pageTurn';
+import {snapshotPage} from '../lib/pageSnapshot';
 import type { Page } from "../types/scrapbook";
 import { ScrapbookPage } from "./ScrapbookPage";
 
@@ -56,11 +58,26 @@ export function PageFlip({
   bookSubtitle,
   onDone,
 }: Props) {
+  const physical=usePhysicalPageTurn();
+  const frontRef=useRef<HTMLDivElement>(null),backRef=useRef<HTMLDivElement>(null);
+  const done=useRef(onDone);done.current=onDone;
+  const [ready,setReady]=useState(false);
+  const [fallback,setFallback]=useState(false);
   useEffect(() => {
+    if(physical&&!fallback)return;
     // Fallback in case animationend does not fire.
     const timer = window.setTimeout(onDone, 1000);
     return () => window.clearTimeout(timer);
-  }, [onDone]);
+  }, [onDone,physical,fallback]);
+  useEffect(()=>{
+    if(!physical||!frontRef.current||!backRef.current)return;
+    let live=true;
+    const controller=new AbortController();
+    Promise.all([snapshotPage(frontRef.current.firstElementChild as HTMLElement,controller.signal),snapshotPage(backRef.current.firstElementChild as HTMLElement,controller.signal)])
+      .then(([front,back])=>{if(live){physical.start({direction:dir,front,back,done:()=>done.current()});setReady(true);}})
+      .catch(error=>{if(live){console.warn('Physical page snapshot unavailable:',error);setFallback(true);}});
+    return()=>{live=false;controller.abort();physical.cancel();};
+  },[physical,dir]);
 
   const underL = dir === "next" ? curL : otherL;
   const underR = dir === "next" ? otherR : curR;
@@ -70,12 +87,12 @@ export function PageFlip({
   const shared = { bookTitle, bookSubtitle };
 
   return (
-    <div className="ks-stage">
+    <div className="ks-stage" data-page-animation={physical?(fallback?'fallback':ready?'physical':'preparing'):'flat'}>
       <div className="ks-spread ks-spread--flipping">
         <StaticPage page={underL} {...shared} />
         <StaticPage page={underR} {...shared} />
 
-        <div className={`ks-flip-leaf ${dir}`}>
+        {(!physical||fallback)&&<div className={`ks-flip-leaf ${dir}`}>
           <div
             className={`ks-flip-inner ${dir}`}
             onAnimationEnd={onDone}
@@ -87,7 +104,11 @@ export function PageFlip({
               <StaticPage page={backPage} {...shared} />
             </div>
           </div>
-        </div>
+        </div>}
+        {physical&&!fallback&&<>
+          {!ready&&<div className={`ks-page-waiting ${dir}`}><StaticPage page={frontPage} {...shared}/></div>}
+          <div className="ks-page-capture" aria-hidden="true" inert><div ref={frontRef}><StaticPage page={frontPage} {...shared}/></div><div ref={backRef}><StaticPage page={backPage} {...shared}/></div></div>
+        </>}
       </div>
     </div>
   );

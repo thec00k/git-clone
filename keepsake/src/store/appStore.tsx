@@ -1,4 +1,5 @@
 import {musicOnEntry} from '../lib/roomMusic';
+import {validFurnitureChoices} from '../lib/furniture';
 import {ownsRoomTheme} from '../lib/roomThemes';
 import {
   createContext,
@@ -95,7 +96,7 @@ function deriveArchiveTabs(archive: ArchivePhoto[], tabs?: ArchiveTab[]): Archiv
   return [...have.values()];
 }
 
-const AppContext = createContext<AppContextValue | null>(null);
+export const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState | null>(null);
@@ -365,6 +366,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setEnvironment = useCallback((patch: Partial<Environment>) => update((p) => {
     if (patch.crtColor === 'coastal' && !ownsRoomTheme(p,'beachfront')) return p;
+    if (patch.furniture !== undefined && !validFurnitureChoices(patch.furniture)) return p;
     return {...p, environment: {...p.environment,...patch}};
   }), [update]);
 

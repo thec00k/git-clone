@@ -40,8 +40,11 @@ import { NotesPanel } from "./NotesPanel";
 import { BookIdentityEditor } from "./BookIdentityEditor";
 import { HomeChip } from "./views/ViewShell";
 import { DeskClutter } from "./DeskClutter";
+import type {ComponentType, ReactNode} from 'react';
+import {createPortal} from 'react-dom';
 
-export function BookView() {
+export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:ComponentType<{header?:ReactNode;footer?:ReactNode;children:ReactNode;className?:string}>;onClose?:()=>void;portalTarget?:HTMLElement|null}={}) {
+  const overlay=(content:ReactNode)=>portalTarget?createPortal(content,portalTarget):content;
   const sb = useScrapbook();
   const { addArchivePhoto, renameBook, setBookCover, state } = useApp();
   const stickerGlyphs = [...ownedStickerGlyphs(state.ownedStickerPacks),...(state.roomDecor?.owned.includes('fern-stamp')?['keepsake:fern-stamp']:[]),...new Set(discoveryState(state).entries.filter(e=>e.reward&&e.keptAt).map(e=>REWARDS[e.reward!].glyph))];
@@ -178,12 +181,12 @@ export function BookView() {
   }
 
   return (
-    <RoomFrame
+    <Frame
       className="ks-room--desk-top"
       header={
         <>
           <div className="flex items-center gap-3">
-            <HomeChip />
+            {onClose?<button className="ks-chip" onClick={onClose}><BookMarked size={16}/> Close book</button>:<HomeChip/>}
             <div className="leading-tight">
               <p className="font-display font-semibold text-ink">{sb.book.title}</p>
               <p className="ks-caption text-ink/70" style={{ fontSize: "1.1rem" }}>
@@ -206,7 +209,7 @@ export function BookView() {
                 aria-label="Edit cover and title page"
                 title="Cover & title page"
                 aria-expanded={showCover}
-                onClick={() => { setShowCover((v) => !v); setShowStickers(false); setShowPresets(false); }}
+                onClick={() => { if(onClose)onClose();else setShowCover((v) => !v); setShowStickers(false); setShowPresets(false); }}
               >
                 <BookMarked size={16} /> Cover & title
               </button>
@@ -327,9 +330,9 @@ export function BookView() {
         )
       }
     >
-      {showShop&&!isVisitor&&<StickerStore onClose={()=>setShowShop(false)}/>}
+      {showShop&&!isVisitor&&overlay(<StickerStore onClose={()=>setShowShop(false)}/>)}
       <div className={`ks-desk-top${showNotes?" ks-desk-top--notes":""}`} data-desk-top data-draw-ink={drawInk ?? ""}>
-        <DeskClutter
+        {overlay(<DeskClutter
           ink={isVisitor ? null : drawInk}
           thickness={drawWidth} onThickness={setDrawWidth}
           onPickInk={isVisitor ? undefined : setDrawInk}
@@ -337,10 +340,10 @@ export function BookView() {
           onSnap={() => {
             if (!isVisitor) setShowPhotos(true);
           }}
-        />
+        />)}
         <div className="ks-book-stage">
           <div className="ks-book-canvas">
-          <button
+          {overlay(<button
             type="button"
             className="ks-page-turn ks-page-turn--prev"
             aria-label="Previous spread"
@@ -349,7 +352,7 @@ export function BookView() {
             disabled={sb.spread === 0 || !!turn}
           >
             <ChevronLeft size={22} />
-          </button>
+          </button>)}
           {turn ? (
             <PageFlip
               dir={turn.dir}
@@ -380,7 +383,7 @@ export function BookView() {
               onDrawStroke={isVisitor ? undefined : (id,color,points)=>sb.addStroke(id,color,points,drawWidth)}
             />
           )}
-          <button
+          {overlay(<button
             type="button"
             className="ks-page-turn ks-page-turn--next"
             aria-label={!isVisitor && sb.spread === sb.spreadCount - 1 ? "Add new page" : "Next spread"}
@@ -389,11 +392,11 @@ export function BookView() {
             disabled={(isVisitor && sb.spread === sb.spreadCount - 1) || !!turn}
           >
             {!isVisitor && sb.spread === sb.spreadCount - 1 ? <Plus size={22}/> : <ChevronRight size={22} />}
-          </button>
+          </button>)}
           <p className="ks-page-navigation-hint">{sb.spread === 0 ? "The beginning" : "← Previous"} <span>·</span> {sb.spread === sb.spreadCount - 1 ? "The latest chapter" : "Next →"}</p>
           </div>
         </div>
-      {showNotes && sb.book && (
+      {showNotes && sb.book && overlay(
         <NotesPanel key={`${sb.book.id}:${sb.spread}`}
           bookId={sb.book.id}
           pageIds={[sb.leftPage?.id, sb.rightPage?.id].filter(Boolean) as string[]}
@@ -401,7 +404,7 @@ export function BookView() {
         />
       )}
       </div>
-      {showPhotos && !isVisitor && <PhotoImportDialog onClose={()=>setShowPhotos(false)} onAdd={photos=>{
+      {showPhotos && !isVisitor && overlay(<PhotoImportDialog onClose={()=>setShowPhotos(false)} onAdd={photos=>{
         if(!targetPageId)return;
         const target=sb.pages.find(page=>page.id===targetPageId);
         if(!target)return;
@@ -409,10 +412,10 @@ export function BookView() {
         if(ready.length===1 && target.elements.filter(e=>e.type==='photo').length<MAX_PHOTOS_PER_PAGE) sb.addPhoto(targetPageId,ready[0].src,ready[0].photoId);
         else sb.addPhotoBatch(targetPageId,ready);
         setShowPhotos(false);
-      }}/>}
-      {showKeys && <ShortcutsHelp onClose={() => setShowKeys(false)} />}
-      {showPrint && sb.book && <PrintView book={sb.book} onClose={() => setShowPrint(false)} />}
-    </RoomFrame>
+      }}/>) }
+      {showKeys && overlay(<ShortcutsHelp onClose={() => setShowKeys(false)} />)}
+      {showPrint && sb.book && overlay(<PrintView book={sb.book} onClose={() => setShowPrint(false)} />)}
+    </Frame>
   );
 }
 

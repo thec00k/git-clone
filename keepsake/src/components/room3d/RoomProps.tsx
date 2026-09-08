@@ -1,4 +1,5 @@
 import { PhotoSurface } from './MemoryObjects';
+import {FurniturePrinter} from './FurniturePrinter';
 import {useActiveRoom} from './useActiveRoom';
 import { useApp } from '../../store/appStore';
 import { useNav } from "../../store/nav";
@@ -227,7 +228,7 @@ export function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeM
     return {
       x: c.x - surface.x,
       z: c.z - surface.z,
-      halfW: s.x / 2,
+        halfW: Math.max(s.x / 2, .34),
       halfD: s.z / 2,
     };
   }, [scene, surface.x, surface.z]);
@@ -302,8 +303,10 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
         ))}
       </group>
       <group position={[printerX, 0.023, rowZ - 0.02]} rotation={[0, 0.18, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
+        <FurniturePrinter>
         <RoundedBox args={[0.135,0.046,0.17]} radius={0.012} smoothness={3}><meshStandardMaterial color="#e5dbc7" roughness={0.82}/></RoundedBox>
         <mesh position={[0,0.003,0.086]}><boxGeometry args={[0.103,0.008,0.003]}/><meshStandardMaterial color="#26392f"/></mesh>
+        </FurniturePrinter>
         <mesh position={[0,0.004,0.12]}><boxGeometry args={[0.085,0.0015,0.07]}/><meshStandardMaterial color="#fffef4"/></mesh>
         <group position={[0,0.0057,0.115]} rotation={[-Math.PI/2,0,0]}>{!isVisitor && state.latestPrint ? <PhotoSurface src={state.latestPrint.src} width={.07} height={.046}/> : <mesh><planeGeometry args={[.07,.046]}/><meshStandardMaterial color="#668777"/></mesh>}</group>
         <mesh position={[0.043,0.024,-0.048]}><sphereGeometry args={[0.003,8,6]}/><meshStandardMaterial color="#a6ce97" emissive="#82b76e" emissiveIntensity={0.5}/></mesh>

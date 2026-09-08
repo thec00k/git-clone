@@ -13,12 +13,14 @@ import { PhotoPrinter } from "./components/PhotoPrinter";
 import {DiscoverySystem} from './components/Discoveries';
 import { CrtPlayerSlotProvider } from "./store/spotifyUi";
 import {DoorLanding} from './components/room/DoorLanding';
+import {WorkbenchProvider} from './store/workbench';
+import {roomLayoutFromSearch} from './lib/roomLayout';
 
 function CurrentView() {
   const { view } = useNav();
   switch (view) {
     case "book":
-      return <BookView />;
+      return roomLayoutFromSearch()==='glb'?<Room />:<BookView />;
     case "shelf":
       return <Shelf />;
     case "archive":
@@ -41,7 +43,7 @@ export default function App() {
     <CrtPlayerSlotProvider>
       <AmbientAudio />
       <SpotifyDock /><SoundCloudDock/>
-      <CurrentView />
+      <WorkbenchProvider><CurrentView /></WorkbenchProvider>
       <DiscoverySystem/>
       {printerOpen && !isVisitor && <PhotoPrinter onClose={() => setPrinterOpen(false)} />}
     </CrtPlayerSlotProvider>

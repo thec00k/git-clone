@@ -1,4 +1,5 @@
 import {ownsRoomTheme} from './roomThemes.ts';
+import {validFurnitureChoices} from './furniture.ts';
 import {CRT_COLORS} from './roomMusic.ts';
 import {ROOM_GOODS,SHOP_GOODS,EXTRA_GOODS} from './roomShop.ts';
 import {soundCloudUrl} from './soundcloud.ts';
@@ -39,6 +40,7 @@ export function parseRoomBackup(text:string):AppState{
  ensure(e.crtColor===undefined||Object.hasOwn(CRT_COLORS,e.crtColor as string));
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
  ensure(e.roomTheme===undefined || ['woodland','beachfront'].includes(e.roomTheme as string));
+ ensure(e.furniture===undefined||validFurnitureChoices(e.furniture));
  ensure(e.coastalWindowOpen===undefined || typeof e.coastalWindowOpen==='boolean');
  ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
  ensure(e.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));

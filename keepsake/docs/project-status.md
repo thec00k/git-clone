@@ -4,6 +4,22 @@ Updated September 8, 2026. This is the authoritative implementation checklist. T
 
 ## Product direction
 
+### September 8 interaction and furniture checkpoint
+
+- [x] Shared chair → centered cover/title → open book → real-content page curl → close/return sequence in Woodland and Beachfront. Reduced motion skips the physical transition. Perspective editing retains photo gestures, drawing, undo, page overview and drawer access.
+- [x] Shelf selection pulls out a cover for deliberate Read at desk / Put back choices; a blank book creates a scrapbook through the same desk sequence.
+- [x] Blender-authored binding, cover thickness, layered left/right page blocks and flexible turning leaf; actual outgoing/incoming page content is captured locally for the animation. Capture failure uses the existing fallback rather than blocking navigation.
+- [x] Twenty-two furniture alternatives across eleven categories, including curtains and rugs, plus existing originals. Independent room selections, previews, restoration and backup validation. Editable Blender sources, embedded GLBs, rendered thumbnails and source/license ledger are versioned.
+- [x] Poly Pizza and Poly Haven chair/material sources incorporated; unsuitable imported chairs rejected. Existing photos, books, desk clutter and functioning furniture controls retained.
+- [x] More defined Woodland foliage/foreground branches, softer coastal clouds, two original print illustrations, Woodland frame replacements and file-cabinet print access.
+- [x] Production build, full automated acceptance, and desktop browser workbench tests in both rooms passed. Both graphics levels and failed room-preload recovery were browser checked. These are prototype checks, not final hardware certification.
+- [ ] Finish the unified interface in Figma: its tools were unavailable during this session. Current controls were refined directly in the app.
+- [ ] Use Higgsfield for art/motion reference exploration when its tools are available. Current original prints used the built-in image tool.
+- [ ] Curate Sketchfab alternatives after authenticating its Blender integration; no Sketchfab assets are included in this checkpoint.
+- [ ] Complete the broader stationery/sticker/discovery illustration collection and remaining forest/coastal material, light and water refinement. The first shared interaction and furniture collection are ready for review; the entire seven-part art pass is not complete.
+
+Details and regeneration caveats: [furniture source notes](../art/furniture/README.md). Remaining three room designs follow the shared-system review.
+
 Desktop first, then tablet, then phone. A local Woodland prototype precedes cloud and quiet social features. Photographs first, scrapbook second, room third, social fourth. First-person navigation; no avatars or popularity mechanics.
 
 Art direction: 35% Edith Finch, 25% LittleBigPlanet, 20% Life is Strange, 10% Sly Cooper, 10% inFAMOUS Second Son, interpreted through original assets and consistent handmade materials.

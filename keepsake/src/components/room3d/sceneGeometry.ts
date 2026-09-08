@@ -91,6 +91,8 @@ export function deskLampCorner(desk: DeskMeasure) {
 }
 
 export function lampShadePos(scene: THREE.Object3D) {
+  const replacement=scene.getObjectByName('Light_Anchor');
+  if(replacement)return replacement.getWorldPosition(new THREE.Vector3());
   const lamp = scene.getObjectByName(LAMP_OBJECT);
   if (lamp && hasGeometry(lamp)) {
     const box = new THREE.Box3().setFromObject(lamp);

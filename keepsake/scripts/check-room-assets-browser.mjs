@@ -32,16 +32,16 @@ for(const room of ['woodland','beachfront']) {
     await p.goto(base);await ready();
     assert.ok(requests.includes(base+roomAssets[room].balanced));
     if(output)await p.screenshot({path:path.join(output,`${room}-balanced.png`)});
-    await button('Take a seat').click();
+    await button('Take a seat').click();await p.locator('[data-workbench=cover]').waitFor();
     await settings();await p.getByLabel('Graphics quality').selectOption('high');
     await button('Close room settings').click();
     assert.equal(await p.locator('.ks-room3d').getAttribute('data-seated'),'1','Quality change preserves seated state');
-    await button('Stand up').click();await ready();
+    await button('Return to room').click();await ready();
     assert.ok(requests.includes(base+roomAssets[room].high));
     if(output)await p.screenshot({path:path.join(output,`${room}-high.png`)});
     await button('Drawer shop').click();await p.getByRole('dialog',{name:'The drawer mini shop',exact:true}).waitFor();await button('Close the drawer').click();
-    await button('Open scrapbook').click();await button('Edit cover and title page').waitFor();
-    await button('Return to the desk').click();await ready();
+    await button('Open scrapbook').click();await p.locator('[data-workbench=cover]').waitFor();await button('Open scrapbook').click();await button('Edit cover and title page').waitFor();
+    await button('Close book').click();await p.locator('[data-workbench=cover]').waitFor();await button('Return to room').click();await ready();
     if(room==='woodland') {
       await settings();await p.getByText('Choose a room',{exact:true}).click();
       await button('Preview Beachfront').click();

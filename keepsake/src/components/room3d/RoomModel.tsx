@@ -12,6 +12,9 @@ import { collectHotspotRoots, HotspotAnchor, type HotspotAction } from "./RoomIn
 import { RoomLights } from "./RoomLighting";
 import { DeskDrawer, ArchiveCabinet, DeskAssembly, LampFixture, DeskClock, CeilingSwitch, ChairSit, RoomDoor, DrawerPrompt } from "./RoomProps";
 import { useRoomAsset } from "./useRoomAsset";
+import {WorkbenchBook} from './WorkbenchBook';
+import {useWorkbench} from '../../store/workbench';
+import {FurnitureModels} from './FurnitureModels';
 export function RoomModel({
   phase,
   environment,
@@ -42,6 +45,7 @@ export function RoomModel({
   onToggleCeiling: () => void;
 }) {
   const {isVisitor}=useNav();
+  const {phase:workbenchPhase}=useWorkbench();
   const {setEnvironment}=useApp();
   const coastal=useActiveRoom().id==='beachfront';
   const cloned = useRoomAsset(phase, environment);
@@ -54,6 +58,8 @@ export function RoomModel({
       }} />
       {coastal&&<CoastalInteractions scene={cloned} open={environment.coastalWindowOpen!==false}/>}
       <MemoryObjects scene={cloned} onBook={() => onActivate("book")} />
+      <FurnitureModels scene={cloned}/>
+      <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />
       <ArchiveCabinet
@@ -69,8 +75,8 @@ export function RoomModel({
       <ChairSit scene={cloned} seated={seated} onSit={onSit} />
       <RoomDoor scene={cloned} onOpen={onOpenDoor} />
       <RoomLights phase={phase} environment={environment} scene={cloned} />
-      {!isVisitor && !drawerOpen && <DrawerPrompt scene={cloned} onOpen={onOpenDrawer} />}
-      {roots
+      {!isVisitor && !drawerOpen && workbenchPhase==='room' && <DrawerPrompt scene={cloned} onOpen={onOpenDrawer} />}
+      {workbenchPhase==='room'&&roots
         .filter(({ id }) => id !== "archive" && id !== "shelf")
         .map(({ id, object }) => (
         <HotspotAnchor

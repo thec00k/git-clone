@@ -35,6 +35,7 @@ export type Weather = "clear" | "rain" | "snow";
 export type MusicProvider = "ambient" | "spotify" | "lofi" | "soundcloud";
 
 export interface Environment {
+  furniture?: import('../lib/furniture').RoomFurnitureChoices;
   roomTheme?: "woodland" | "beachfront";
   roomQuality?: "balanced" | "high";
   /** Beachfront casements; old rooms default to open. */

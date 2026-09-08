@@ -1,0 +1,156 @@
+[
+  {
+    "id": "desk-1",
+    "category": "desk",
+    "title": "Oak trestle",
+    "asset": "/room/furniture/desk-1.glb",
+    "bytes": 1143940
+  },
+  {
+    "id": "desk-2",
+    "category": "desk",
+    "title": "Pale writing desk",
+    "asset": "/room/furniture/desk-2.glb",
+    "bytes": 1177596
+  },
+  {
+    "id": "chair-1",
+    "category": "chair",
+    "title": "Moss swivel chair",
+    "asset": "/room/furniture/chair-1.glb",
+    "bytes": 961412
+  },
+  {
+    "id": "chair-2",
+    "category": "chair",
+    "title": "Collected school chair",
+    "asset": "/room/furniture/chair-2.glb",
+    "bytes": 483984
+  },
+  {
+    "id": "lamp-1",
+    "category": "lamp",
+    "title": "Sea-glass ceramic",
+    "asset": "/room/furniture/lamp-1.glb",
+    "bytes": 874824
+  },
+  {
+    "id": "lamp-2",
+    "category": "lamp",
+    "title": "Brass task lamp",
+    "asset": "/room/furniture/lamp-2.glb",
+    "bytes": 915692
+  },
+  {
+    "id": "beanbag-1",
+    "category": "beanbag",
+    "title": "Moss canvas pear",
+    "asset": "/room/furniture/beanbag-1.glb",
+    "bytes": 1217632
+  },
+  {
+    "id": "beanbag-2",
+    "category": "beanbag",
+    "title": "Oatmeal floor lounger",
+    "asset": "/room/furniture/beanbag-2.glb",
+    "bytes": 1216076
+  },
+  {
+    "id": "rug-1",
+    "category": "rug",
+    "title": "Braided oval",
+    "asset": "/room/furniture/rug-1.glb",
+    "bytes": 2546584
+  },
+  {
+    "id": "rug-2",
+    "category": "rug",
+    "title": "Sea-glass woven stripes",
+    "asset": "/room/furniture/rug-2.glb",
+    "bytes": 1153120
+  },
+  {
+    "id": "curtains-1",
+    "category": "curtains",
+    "title": "Oatmeal gathered linen",
+    "asset": "/room/furniture/curtains-1.glb",
+    "bytes": 2027188
+  },
+  {
+    "id": "curtains-2",
+    "category": "curtains",
+    "title": "Sea-glass fine pleats",
+    "asset": "/room/furniture/curtains-2.glb",
+    "bytes": 963956
+  },
+  {
+    "id": "guestbook-stand-1",
+    "category": "guestbook-stand",
+    "title": "Round oak side table",
+    "asset": "/room/furniture/guestbook-stand-1.glb",
+    "bytes": 1107460
+  },
+  {
+    "id": "guestbook-stand-2",
+    "category": "guestbook-stand",
+    "title": "Pale tray table",
+    "asset": "/room/furniture/guestbook-stand-2.glb",
+    "bytes": 1177532
+  },
+  {
+    "id": "cabinet-1",
+    "category": "cabinet",
+    "title": "Oak archive drawers",
+    "asset": "/room/furniture/cabinet-1.glb",
+    "bytes": 1316456
+  },
+  {
+    "id": "cabinet-2",
+    "category": "cabinet",
+    "title": "Painted correspondence cabinet",
+    "asset": "/room/furniture/cabinet-2.glb",
+    "bytes": 1904232
+  },
+  {
+    "id": "bookshelf-1",
+    "category": "bookshelf",
+    "title": "Oak library shelf",
+    "asset": "/room/furniture/bookshelf-1.glb",
+    "bytes": 1177100
+  },
+  {
+    "id": "bookshelf-2",
+    "category": "bookshelf",
+    "title": "Slatted ash shelf",
+    "asset": "/room/furniture/bookshelf-2.glb",
+    "bytes": 1203484
+  },
+  {
+    "id": "printer-1",
+    "category": "printer",
+    "title": "Cream pocket printer",
+    "asset": "/room/furniture/printer-1.glb",
+    "bytes": 1994996
+  },
+  {
+    "id": "printer-2",
+    "category": "printer",
+    "title": "Sea-glass pocket printer",
+    "asset": "/room/furniture/printer-2.glb",
+    "bytes": 2008028
+  },
+  {
+    "id": "crt-1",
+    "category": "crt",
+    "title": "Cream rounded CRT",
+    "asset": "/room/furniture/crt-1.glb",
+    "bytes": 1900492
+  },
+  {
+    "id": "crt-2",
+    "category": "crt",
+    "title": "Walnut rounded CRT",
+    "asset": "/room/furniture/crt-2.glb",
+    "bytes": 2140848
+  }
+]

@@ -21,6 +21,7 @@ import {useRoomRenderProfile} from './useRoomRenderProfile';
 import { WoodlandScenery } from "./WoodlandScenery";
 import { RoomControls } from "./RoomControls";
 import { RoomLoading } from "./RoomLoading";
+import {useWorkbench} from '../../store/workbench';
 export function RoomScene3D({
   roomFace,
   setRoomFace,
@@ -45,6 +46,8 @@ export function RoomScene3D({
   onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
   const activeRoom=useActiveRoom();
+  const {phase:workbenchPhase}=useWorkbench();
+  const atWorkbench=workbenchPhase!=='room';
   const quality=environment.roomQuality??"balanced";
   const {discoveryOpen,isVisitor}=useNav();const [tabVisible,setTabVisible]=useState(!document.hidden);
   useEffect(()=>{const change=()=>setTabVisible(!document.hidden);document.addEventListener('visibilitychange',change);return()=>document.removeEventListener('visibilitychange',change);},[]);
@@ -54,6 +57,7 @@ export function RoomScene3D({
   const lookAt = (face: RoomFace) => { setReading(false);setSeated(false);setShopOpen(false);setRoomFace(face); setViewRevision(v => v + 1); };
   const profile = useRoomRenderProfile(quality);
   const [seated, setSeated] = useState(false);
+  useEffect(()=>{if(workbenchPhase==='leaving')setSeated(false);},[workbenchPhase]);
   const [shopOpen, setShopOpen] = useState(false);
   const [cabinetOpen, setCabinetOpen] = useState(false);
   const archiveTimer = useRef<number | null>(null);
@@ -68,7 +72,8 @@ export function RoomScene3D({
   const sit = useCallback(() => {
     setRoomFace("front");
     setReading(false);setSeated(true);
-  }, [setRoomFace]);
+    onGo('book');
+  }, [setRoomFace,onGo]);
 
   const openCraft=useCallback(()=>{if(isVisitor)return;playRoomSound("drawer",environment.ambienceVolume);setShopOpen(true);},[environment.ambienceVolume,isVisitor]);
   const toggleLamp = useCallback(() => setEnvironment({ lampOn: !environment.lampOn }), [setEnvironment, environment.lampOn]);
@@ -145,6 +150,7 @@ export function RoomScene3D({
     <div
       className="ks-room3d"
       data-room-face={roomFace}
+      data-workbench={workbenchPhase}
       data-seated={seated ? "1" : "0"}
       data-ceiling={environment.ceilingOn !== false ? "1" : "0"}
       data-lamp={environment.lampOn ? "1" : "0"}
@@ -187,10 +193,11 @@ export function RoomScene3D({
         {activeRoom.woodland && <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />}
         {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment}/>}
         </Suspense>
-        <EyeCamera reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
+        <EyeCamera workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>
       </div>
-      {!touring && <RoomControls onLibrary={()=>onGo("shelf")} onReading={()=>{setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment}
+      <div id="ks-workbench-controls" className="ks-workbench-controls"/>
+      {!touring && !atWorkbench && <RoomControls onLibrary={()=>onGo("shelf")} onReading={()=>{setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment}
         onBook={() => onGo("book")} onFiles={openArchive} onSeat={seated ? stand : sit}
         onDoor={onOpenDoor} onMusic={onOpenMusic} onLamp={toggleLamp} onCeiling={toggleCeiling} onLook={face => { stand(); lookAt(face); }} onDrawer={openCraft} />}
       {shopOpen && <StickerStore onClose={() => setShopOpen(false)} />}

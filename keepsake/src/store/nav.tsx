@@ -51,7 +51,7 @@ interface NavContextValue {
   backLabel: string;
 }
 
-const NavContext = createContext<NavContextValue | null>(null);
+export const NavContext = createContext<NavContextValue | null>(null);
 
 export function NavProvider({ children }: { children: ReactNode }) {
   const [discoveryOpen,setDiscoveryOpen]=useState<string|null>(null);

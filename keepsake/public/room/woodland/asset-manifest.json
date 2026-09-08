@@ -5,26 +5,26 @@
   "qualities": {
     "balanced": {
       "file": "woodland.glb",
-      "bytes": 4510220,
-      "sha256": "807d699d956f1d051f9a22e255dc806ceb004d8198e55764b98c483590d19ce4",
-      "triangles": 69788,
-      "materials": 72,
-      "primitives": 256,
-      "images": 28,
+      "bytes": 4852228,
+      "sha256": "e57c12ffe76f8d87e3c60f46358576f10ff15a85dd7426bcf3e159faae1f2d11",
+      "triangles": 66726,
+      "materials": 73,
+      "primitives": 266,
+      "images": 29,
       "maxTextureSize": 512,
-      "estimatedTextureBytes": 34332672,
+      "estimatedTextureBytes": 35381248,
       "normalMappedMaterials": 32
     },
     "high": {
       "file": "woodland.high.glb",
-      "bytes": 7185680,
-      "sha256": "3c50162cd24484588d2d3bbd818ce0e7388e052d053bba8d4c13bddde0894701",
-      "triangles": 69788,
-      "materials": 72,
-      "primitives": 256,
-      "images": 28,
+      "bytes": 8583064,
+      "sha256": "aab9ac116c6aaea9be151fd9c207282df88cf63047852b243ced6fb4288fcd2e",
+      "triangles": 66726,
+      "materials": 73,
+      "primitives": 266,
+      "images": 29,
       "maxTextureSize": 1024,
-      "estimatedTextureBytes": 75464704,
+      "estimatedTextureBytes": 79659008,
       "normalMappedMaterials": 32
     }
   }

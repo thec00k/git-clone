@@ -1,3 +1,4 @@
+import {pagePixelPoint} from '../lib/pageCoordinates';
 import { useRef } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { clamp } from "../lib/clamp";
@@ -27,19 +28,19 @@ export function usePointerDrag(
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     const pos = getPos();
     drag.current = {
-      startX: e.clientX,
-      startY: e.clientY,
+      startX: pagePixelPoint(page,e.clientX,e.clientY).x,
+      startY: pagePixelPoint(page,e.clientX,e.clientY).y,
       ox: pos.x,
       oy: pos.y,
-      rect: page.getBoundingClientRect(),
+      rect: new DOMRect(0,0,page.offsetWidth,page.offsetHeight),
     };
   };
 
   const onPointerMove = (e: ReactPointerEvent<HTMLElement>) => {
     const s = drag.current;
     if (!s) return;
-    const dx = ((e.clientX - s.startX) / s.rect.width) * 100;
-    const dy = ((e.clientY - s.startY) / s.rect.height) * 100;
+    const dx = ((pagePixelPoint(e.currentTarget,e.clientX,e.clientY).x - s.startX) / s.rect.width) * 100;
+    const dy = ((pagePixelPoint(e.currentTarget,e.clientX,e.clientY).y - s.startY) / s.rect.height) * 100;
     onMove(clamp(s.ox + dx, 2, 98), clamp(s.oy + dy, 2, 98));
   };
 

@@ -3,6 +3,7 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { RotateCw } from "lucide-react";
 import type { CaptionElement, PageElement, PhotoElement } from "../types/scrapbook";
 import { clamp } from "../lib/clamp";
+import {pagePixelPoint} from '../lib/pageCoordinates';
 import { usePointerDrag } from "../hooks/usePointerDrag";
 import { useElementGesture } from "../hooks/useElementGesture";
 
@@ -133,16 +134,16 @@ function RotateHandle({ onRotate }: { onRotate: (deg: number) => void }) {
     e.stopPropagation();
     const el = (e.currentTarget as HTMLElement).closest(".ks-el") as HTMLElement | null;
     if (!el) return;
-    const r = el.getBoundingClientRect();
-    center.current = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    center.current = {x:el.offsetLeft,y:el.offsetTop};
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     active.current = true;
   };
 
   const move = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!active.current) return;
-    const dx = e.clientX - center.current.x;
-    const dy = e.clientY - center.current.y;
+    const p=pagePixelPoint(e.currentTarget,e.clientX,e.clientY);
+    const dx = p.x - center.current.x;
+    const dy = p.y - center.current.y;
     let deg = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
     if (e.shiftKey) deg = Math.round(deg / 15) * 15;
     onRotate(deg);
@@ -212,13 +213,13 @@ function ResizeHandle({
     e.stopPropagation();
     const el = (e.currentTarget as HTMLElement).closest(".ks-el") as HTMLElement | null;
     if (!el) return;
-    const r = el.getBoundingClientRect();
-    const cx = r.left + r.width / 2;
-    const cy = r.top + r.height / 2;
+    const cx = el.offsetLeft;
+    const cy = el.offsetTop;
+    const p=pagePixelPoint(el,e.clientX,e.clientY);
     start.current = {
       x: cx,
       y: cy,
-      dist: Math.max(8, Math.hypot(e.clientX - cx, e.clientY - cy)),
+      dist: Math.max(8, Math.hypot(p.x - cx, p.y - cy)),
       w: size,
     };
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -229,7 +230,8 @@ function ResizeHandle({
     if (!active.current) return;
     e.preventDefault();
     e.stopPropagation();
-    const dist = Math.hypot(e.clientX - start.current.x, e.clientY - start.current.y);
+    const p=pagePixelPoint(e.currentTarget,e.clientX,e.clientY);
+    const dist = Math.hypot(p.x - start.current.x, p.y - start.current.y);
     onResize(clamp((start.current.w * dist) / start.current.dist, 8, 92));
   };
 

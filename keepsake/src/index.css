@@ -57,6 +57,7 @@
   }
 
   .ks-skips {
+    pointer-events: none;
     position: absolute;
     left: 0.75rem;
     top: 0.75rem;
@@ -78,6 +79,7 @@
   .ks-skips:focus-within .ks-skip,
   .ks-skip:focus {
     transform: none;
+    pointer-events: auto;
   }
 
   h1,
@@ -2663,3 +2665,63 @@
 .ks-notes-toggle{width:auto!important;padding-inline:12px!important;gap:6px;white-space:nowrap}.ks-notes-toggle.is-on{background:#47634d!important;color:#fff9ec!important;outline:2px solid #aabd8e}
 .ks-desk-top--notes{padding-right:290px}.ks-spread-notes{position:absolute;z-index:6;right:16px;top:18px;bottom:110px;width:260px;overflow:auto;padding:14px;color:#fff5df;background:#3f3228ed;border:1px solid #d3b78866;border-radius:12px}.ks-spread-notes h2{font-size:17px}.ks-spread-notes input{min-width:0}.ks-friend-sticky{padding:16px 12px 12px;background:#f3dfa0;color:#423824;border-radius:2px 2px 14px 2px;overflow-wrap:anywhere;border-top:5px solid #e4c77f}.ks-friend-sticky:nth-child(even){background:#e3e9bc;border-color:#c3cd91}.ks-friend-sticky .text-paper\/50{color:#68572e}.ks-friend-sticky .text-accent{color:#794420}.ks-sticky-page{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#756237}.ks-desk-top--notes .ks-clutter-markers,.ks-desk-top--notes .ks-disposable{right:308px}
 @media(max-width:850px){.ks-desk-top--notes{padding-right:0;padding-bottom:150px}.ks-spread-notes{top:auto;bottom:0;left:12px;right:12px;width:auto;height:140px;padding:10px}.ks-spread-notes ul{display:flex;gap:10px;overflow:auto}.ks-spread-notes li{min-width:200px;max-width:280px}.ks-spread-notes li+li{margin-top:0}.ks-desk-top--notes .ks-clutter-markers{right:12px;bottom:156px}.ks-notes-toggle{padding-inline:8px!important}}
+
+/* The live editor is placed on the same world-space book used by the room. */
+.ks-workbench-controls{position:absolute;inset:0;pointer-events:none;z-index:35}
+.ks-workbench-controls button,.ks-workbench-controls input,.ks-workbench-controls select,.ks-workbench-controls textarea,.ks-workbench-controls summary{pointer-events:auto}
+.ks-workbench-cover-panel{position:absolute;right:22px;top:50%;transform:translateY(-50%);width:min(310px,34vw);max-height:80%;overflow:auto;padding:22px;border-radius:8px;background:#efe4cfee;color:#352e26;box-shadow:0 12px 35px #17181330;pointer-events:auto}
+.ks-workbench-cover-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.ks-workbench-cover-panel .ks-identity-layout{display:block;margin-top:14px}
+.ks-workbench-cover-panel .ks-cover-preview{display:none}
+.ks-workbench-cover-panel label,.ks-workbench-cover-panel .ks-identity-layout p{color:#514838}
+.ks-workbench-cover-panel input{background:#fff9ec;color:#302c25;border:1px solid #b5a78b}
+.ks-workbench-cover-panel .ks-tool{background:#405646;color:#f9f0df}
+.ks-workbench-cover-panel input:focus-visible{outline:2px solid #516e59;outline-offset:2px}
+.ks-workbench-editor-header{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;background:#f0e7d9ed;pointer-events:auto}
+.ks-workbench-editor-footer{position:absolute;bottom:0;left:0;right:0;pointer-events:auto}
+.ks-workbench-pages{width:960px;height:657px;position:relative;color:#332b24}
+.ks-workbench-pages .ks-desk-top{width:960px;height:657px;padding:0!important;background:none!important;overflow:visible}
+.ks-workbench-pages .ks-desk-top:before{display:none}
+.ks-workbench-pages .ks-book-stage{width:960px;height:657px;display:block;padding:0;overflow:visible}
+.ks-workbench-pages .ks-book-canvas{width:960px;height:657px;aspect-ratio:auto;transform:none!important}
+.ks-workbench-pages .ks-desk-clutter{display:none}
+.ks-workbench-pages .ks-mini-printer,.ks-workbench-pages .ks-disposable{display:none}
+.ks-workbench-pages .ks-clutter-markers{bottom:-95px!important;right:0!important}
+.ks-room:has([data-workbench]:not([data-workbench="room"]))>header{display:none}
+.ks-room:has([data-workbench]:not([data-workbench="room"])) .ks-room-listen{display:none}
+@media(prefers-reduced-motion:reduce){.ks-workbench-controls *{animation:none!important;transition:none!important}}
+.ks-page-capture{position:fixed;left:-10000px;top:0;pointer-events:none;width:480px;height:657px}
+.ks-page-capture>div,.ks-page-capture .ks-page{width:480px!important;height:657px!important;flex:none!important}
+.ks-page-waiting{position:absolute;inset:0 auto 0 0;width:50%;height:100%}
+.ks-page-waiting.next{left:50%}
+.ks-page-waiting>.ks-page{width:100%;height:100%}
+.ks-workbench-editor-header .ks-chip:has(svg){width:auto;min-width:36px;padding-inline:12px;white-space:nowrap;gap:6px;flex-shrink:0}
+.ks-workbench-editor-header>div{min-width:0}
+.ks-workbench-controls [role=dialog]{pointer-events:auto}
+.ks-workbench-controls>.ks-page-turn {position:absolute;top:54%;transform:translateY(-50%);width:44px;height:64px;background:#efe5cfeb;color:#394230;box-shadow:0 3px 12px #151b1833;z-index:2;opacity:1;}
+.ks-workbench-controls>.ks-page-turn--prev {left:11%;right:auto;}
+.ks-workbench-controls>.ks-page-turn--next {right:11%;left:auto;}
+.ks-workbench-controls>.ks-page-turn:disabled {opacity:.3;}
+.ks-workbench-controls .ks-mini-printer,.ks-workbench-controls .ks-disposable {display:none;}
+.ks-workbench-controls .ks-clutter-markers {position:absolute;left:auto;right:22px;bottom:145px;top:auto;transform:none;z-index:3;pointer-events:auto;}
+.ks-workbench-controls .ks-spread-notes {pointer-events:auto;z-index:5;top:76px;bottom:160px;}
+@media(max-width:800px){.ks-workbench-cover-panel{top:auto;bottom:14px;left:12px;right:12px;width:auto;max-height:40%;transform:none;padding:16px}.ks-workbench-editor-header{flex-wrap:wrap;padding:8px;gap:6px;font-size:.8rem}.ks-workbench-editor-header>div:last-child{flex-wrap:wrap;gap:4px}.ks-workbench-editor-footer .ks-editor-dock{padding-inline:8px}.ks-workbench-controls .ks-clutter-markers{bottom:160px;right:12px;transform:scale(.8);transform-origin:bottom right}.ks-workbench-controls>.ks-page-turn--prev{left:2%}.ks-workbench-controls>.ks-page-turn--next{right:2%}}
+.ks-furniture-shop {color:var(--color-paper);font-size:.9rem;}
+.ks-furniture-shop>p {margin-bottom:1rem;opacity:.8;}
+.ks-furniture-shop label {display:flex;align-items:center;gap:.75rem;margin:1rem 0;}
+.ks-furniture-shop select {background:#efe5cf;color:#363c32;padding:.5rem .75rem;border:1px solid #a39678;border-radius:.35rem;}
+.ks-furniture-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;}
+.ks-furniture-card {display:flex;flex-direction:column;align-items:center;text-align:center;padding:.6rem;background:#eee4cf;color:#384132;border:2px solid transparent;border-radius:.55rem;gap:.3rem;min-width:0;cursor:pointer;}
+.ks-furniture-card[aria-pressed=true] {border-color:#b4a66d;box-shadow:0 0 0 2px #b4a66d55;}
+.ks-furniture-card:focus-visible {outline:3px solid #e1c68b;outline-offset:3px;}
+.ks-furniture-card img,.ks-furniture-original {width:100%;aspect-ratio:1;object-fit:contain;background:radial-gradient(ellipse,#d7d1be,#eae2d0);border-radius:.3rem;}
+.ks-furniture-original {display:grid;place-items:center;font-family:Georgia,serif;font-style:italic;}
+.ks-furniture-card small {font-size:.72rem;opacity:.75;}
+.ks-furniture-preview {display:flex;align-items:center;gap:1rem;margin-top:1rem;padding:1rem;background:#2f3a30;border:1px solid #8c8162;border-radius:.5rem;}
+.ks-furniture-preview>img {width:40%;max-width:220px;background:#e9dfc9;border-radius:.5rem;}
+.ks-furniture-preview h3 {font:1.25rem Georgia,serif;}
+.ks-furniture-preview p {margin:.5rem 0 1rem;opacity:.8;}
+.ks-furniture-preview button {margin:.25rem;}
+@media(max-width:600px){.ks-furniture-grid {grid-template-columns:repeat(2,minmax(0,1fr));}.ks-furniture-preview {flex-direction:column;}.ks-furniture-preview>img {width:65%;}}
+.ks-shelf-preview{width:240px;padding:14px;border-radius:8px;background:#eee4cf;color:#374032;box-shadow:0 8px 24px #0005;text-align:center}.ks-shelf-preview strong{font:1.2rem Georgia,serif}.ks-shelf-preview>div{display:flex;justify-content:center;gap:6px;margin-top:10px}.ks-shelf-preview .ks-tool{background:#435747;color:#f7eedb}
+.ks-print-collection{margin-top:24px;padding-top:20px;border-top:1px solid #b6a78955}.ks-print-collection h3{font:1.3rem Georgia,serif}.ks-print-collection p{font-size:.85rem;opacity:.8;margin:8px 0 16px}.ks-print-collection>div{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ks-print-collection img{aspect-ratio:3/4;max-height:220px;object-fit:contain}

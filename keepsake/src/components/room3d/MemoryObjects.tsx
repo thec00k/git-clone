@@ -15,9 +15,9 @@ import { COVER_STYLES } from '../../types/scrapbook';
 import { canSee } from '../../lib/permissions';
 
 /** Text stays in the 3D scene, so labels share the room's light and perspective. */
-export function useLettering(text: string, background = '#ede3ca', ink = '#403c2d', vertical = false, handwritten = false) {
+export function useLettering(text: string, background = '#ede3ca', ink = '#403c2d', vertical = false, handwritten = false, portrait=false) {
  const texture = useMemo(() => {
-  const canvas = document.createElement('canvas'); canvas.width = vertical ? 128 : 1024; canvas.height = vertical ? 1024 : 512;
+  const canvas = document.createElement('canvas'); canvas.width = vertical ? 128 : portrait?768:1024; canvas.height = vertical||portrait ? 1024 : 512;
   const c = canvas.getContext('2d')!;
   c.fillStyle = background; c.fillRect(0,0,canvas.width,canvas.height);
   c.fillStyle=ink;c.globalAlpha=.06;for(let i=0;i<1800;i++)c.fillRect((i*73)%canvas.width,(i*139)%canvas.height,1,2);c.globalAlpha=1;
@@ -25,9 +25,14 @@ export function useLettering(text: string, background = '#ede3ca', ink = '#403c2
   c.translate(canvas.width/2,canvas.height/2); if(vertical)c.rotate(-Math.PI/2);
   c.fillStyle=ink; c.textAlign='center'; c.textBaseline='middle';
   c.font=handwritten?'48px "Segoe Script", cursive':vertical?'52px Georgia':'56px Georgia';
-  const lines=text.split('\n'); lines.forEach((line,i)=>c.fillText(line,0,(i-(lines.length-1)/2)*78,vertical?850:900));
+  const lines=text.split('\n').flatMap(line=>{
+    if(!portrait)return [line];
+    const wrapped:string[]=[];let row='';
+    for(const word of line.split(' ')){if(row&&c.measureText(row+' '+word).width>650){wrapped.push(row);row=word;}else row+=(row?' ':'')+word;}
+    wrapped.push(row);return wrapped;
+  });lines.forEach((line,i)=>c.fillText(line,0,(i-(lines.length-1)/2)*78,vertical?850:portrait?650:900));
   const map=new THREE.CanvasTexture(canvas); map.colorSpace=THREE.SRGBColorSpace; map.anisotropy=4; return map;
- },[text,background,ink,vertical,handwritten]);
+ },[text,background,ink,vertical,handwritten,portrait]);
  useEffect(()=>()=>texture.dispose(),[texture]); return texture;
 }
 export function PhotoSurface({src,width,height}:{src:string;width:number;height:number}) {
@@ -49,11 +54,11 @@ export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>vo
  const sheet=scene.getObjectByName('Map_Sheet'); const mapBox=sheet?new THREE.Box3().setFromObject(sheet):null;
  return <group name="personal-memories">
   <DiscoveryObject/><SillDecoration/><RoomPoster/>
-  {!isVisitor&&<ShelfMemory book={{id:"blank-book",title:"Create a scrapbook",subtitle:"A new beginning",coverStyle:"forest",pages:[],visibility:"private",createdAt:0,updatedAt:0} as Scrapbook} index={0} chosen={chosen} onChoose={()=>setChosen("blank-book")} onOpen={()=>{addBook();setBookPageId(null);onBook();}}/>}
+  {!isVisitor&&<ShelfMemory book={{id:"blank-book",title:"Create a scrapbook",subtitle:"A new beginning",coverStyle:"forest",pages:[],visibility:"private",createdAt:0,updatedAt:0} as Scrapbook} index={0} chosen={chosen} onChoose={()=>setChosen("blank-book")} onCancel={()=>setChosen(null)} onOpen={()=>{setChosen(null);addBook();setBookPageId(null);onBook();}}/>}
   <MemoryDisplays scene={scene}/>
   <DeskBook scene={scene}/>
   <CollectedSpines objects={fillers} occupiedRows={Math.ceil((books.length+(isVisitor?0:1))/12)}/>
-  {books.slice(0,isVisitor?48:47).map((book,i)=><ShelfMemory key={book.id} book={book} index={i+(isVisitor?0:1)} chosen={chosen} onChoose={()=>setChosen(book.id)} onOpen={()=>{setActiveBook(book.id);onBook();}}/>)}
+  {books.slice(0,isVisitor?48:47).map((book,i)=><ShelfMemory key={book.id} book={book} index={i+(isVisitor?0:1)} chosen={chosen} onChoose={()=>setChosen(book.id)} onCancel={()=>setChosen(null)} onOpen={()=>{setChosen(null);setActiveBook(book.id);onBook();}}/>)}
   {!isVisitor && mapBox && state.pins.map(pin=>{const width=(mapBox.max.z-mapBox.min.z)*.96;const height=Math.min((mapBox.max.y-mapBox.min.y)*.96,width*620/950);return <group key={pin.id} onClick={e=>{e.stopPropagation();if(e.delta>4)return;const b=state.books.find(b=>b.id===pin.bookId);if(b?.pages.some(p=>p.id===pin.pageId)){setActiveBook(b.id);setBookPageId(pin.pageId!);go('book');}else go('atlas');}} position={[mapBox.max.x+.012,(mapBox.min.y+mapBox.max.y)/2+(50-pin.y)/100*height,(mapBox.min.z+mapBox.max.z)/2+(50-pin.x)/100*width]} rotation={[0,Math.PI/2,0]}>
    {pin.photoSrc && <group position={[0,-.033,0]}><mesh><planeGeometry args={[.11,.105]}/><meshStandardMaterial color="#f1e8d2"/></mesh><group position={[0,.007,.001]}><PhotoSurface src={pin.photoSrc} width={.094} height={.07}/></group></group>}
    <mesh position={[0,.007,.005]}><sphereGeometry args={[.009,8,6]}/><meshStandardMaterial color="#a55339" roughness={.5}/></mesh>
@@ -83,13 +88,13 @@ function MemoryDisplays({scene}:{scene:THREE.Object3D}) {
  return <group position={[-.71,.752,-1.59]} rotation={[-Math.PI/2,0,-.15]}><mesh><planeGeometry args={[.12,.075]}/><meshStandardMaterial map={note} roughness={1}/></mesh></group>;
 }
 
-function ShelfMemory({book,index,chosen,onChoose,onOpen}:{book:Scrapbook;index:number;chosen:string|null;onChoose:()=>void;onOpen:()=>void}){
+function ShelfMemory({book,index,chosen,onChoose,onOpen,onCancel}:{book:Scrapbook;index:number;chosen:string|null;onChoose:()=>void;onOpen:()=>void;onCancel:()=>void}){
  const group=useRef<THREE.Group>(null);const [hover,setHover]=useState(false);const reduced=useReducedMotion();const selected=chosen===book.id;
- const openRef=useRef(onOpen);openRef.current=onOpen;
- useEffect(()=>{if(!selected)return;const timer=window.setTimeout(()=>openRef.current(),reduced?0:780);return()=>window.clearTimeout(timer);},[selected,reduced]);
- const coverMap=useLettering(book.title+'\n'+book.subtitle,COVER_STYLES[book.coverStyle].leather,COVER_STYLES[book.coverStyle].ink);
+ const previewButton=useRef<HTMLButtonElement>(null);
+ useEffect(()=>{if(selected){const timer=window.setTimeout(()=>previewButton.current?.focus(),reduced?0:700);return()=>window.clearTimeout(timer);}},[selected,reduced]);
+ const coverMap=useLettering(book.title+'\n'+book.subtitle,COVER_STYLES[book.coverStyle].leather,COVER_STYLES[book.coverStyle].ink,false,false,true);
  const row=Math.floor(index/12);const z=-.69+(index%12)*.1015;const y=1.39-row*.46;const height=.32+(index%3)*.025;const thick=.066+Math.min(book.pages.length,32)*.0005;const cover=COVER_STYLES[book.coverStyle];
- useFrame((_,dt)=>{if(!group.current)return;const t=reduced?1:1-Math.exp(-dt*9);group.current.position.x=THREE.MathUtils.lerp(group.current.position.x,selected?1.57:2.20,t);group.current.position.y=THREE.MathUtils.lerp(group.current.position.y,selected?y+.11:y,t);group.current.rotation.z=THREE.MathUtils.lerp(group.current.rotation.z,selected?.28:hover?.16:0,t);});
+ useFrame((_,dt)=>{if(!group.current)return;const t=reduced?1:1-Math.exp(-Math.min(dt,.05)*7);group.current.position.x=THREE.MathUtils.lerp(group.current.position.x,selected?1.57:2.20,t);group.current.position.y=THREE.MathUtils.lerp(group.current.position.y,selected?y+.11:y,t);group.current.rotation.y=THREE.MathUtils.lerp(group.current.rotation.y,selected?-Math.PI/2:0,t);group.current.rotation.z=THREE.MathUtils.lerp(group.current.rotation.z,selected?.05:hover?.16:0,t);});
  return <group ref={group} position={[2.20,y,z]} onPointerOver={e=>{e.stopPropagation();if(!chosen)setHover(true);}} onPointerOut={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(e.delta<4&&!chosen)onChoose();}}>
   <mesh position={[0,height/2,0]}><boxGeometry args={[.22,height,thick]}/><meshStandardMaterial color={cover.leather} roughness={.92}/></mesh>
   <mesh position={[0,height/2,thick/2+.0008]}><planeGeometry args={[.216,height*.98]}/><meshStandardMaterial map={coverMap} roughness={.92}/></mesh>
@@ -100,6 +105,7 @@ function ShelfMemory({book,index,chosen,onChoose,onOpen}:{book:Scrapbook;index:n
    <button className="ks-spine-hit" style={{width:thick*400,height:height*400}} aria-label={book.id==='blank-book'?'Create a new scrapbook':`Open scrapbook: ${book.title}`} disabled={!!chosen} onPointerEnter={()=>setHover(true)} onPointerLeave={()=>setHover(false)} onFocus={()=>setHover(true)} onBlur={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(!chosen)onChoose();}}/>
   </Html>
   {hover&&!selected&&<Html position={[-.17,height+.07,0]} center style={{pointerEvents:'none'}}><span className="ks-shelf-book-label">{book.title}</span></Html>}
+  {selected&&<Html position={[0,-.11,0]} center><div className="ks-shelf-preview" role="group" aria-label={`Selected book: ${book.title}`} onKeyDown={e=>{if(e.key==='Escape'){e.stopPropagation();onCancel();}}}><strong>{book.title}</strong><div><button className="ks-tool" onClick={onCancel}>Put back</button><button ref={previewButton} className="ks-tool ks-tool--accent" onClick={onOpen}>{book.id==='blank-book'?'Create at desk':'Read at desk'}</button></div></div></Html>}
  </group>;
 }
 

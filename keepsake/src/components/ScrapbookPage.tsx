@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { Page, PageElement, StrokeElement } from "../types/scrapbook";
 import { ElementView } from "./ElementView";
+import {pagePoint} from '../lib/pageCoordinates';
 
 interface Props {
   page: Page | null;
@@ -82,6 +83,7 @@ export function ScrapbookPage({
         </div>
       )}
 
+      {[[0,0],[100,0],[100,100],[0,100]].map(([left,top],i)=><span key={i} data-page-corner={i} aria-hidden="true" style={{position:'absolute',left:`${left}%`,top:`${top}%`,width:0,height:0,pointerEvents:'none'}}/>)}
       {sorted.map((el) => (
         <ElementView
           key={el.id}
@@ -149,11 +151,7 @@ function DrawLayer({
   const [live, setLive] = useState<{ x: number; y: number }[]>([]);
 
   const point = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    return {
-      x: ((e.clientX - r.left) / r.width) * 100,
-      y: ((e.clientY - r.top) / r.height) * 100,
-    };
+    return pagePoint(e.currentTarget,e.clientX,e.clientY);
   };
 
   return (

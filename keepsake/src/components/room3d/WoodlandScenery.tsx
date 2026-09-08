@@ -11,11 +11,13 @@ export function WoodlandScenery({ phase, environment, particles }: {
 }) {
   const trunks = useRef<THREE.InstancedMesh>(null);
   const crowns = useRef<THREE.InstancedMesh>(null);
+  const branches = useRef<THREE.InstancedMesh>(null);
   const foliage=useMemo(()=>{
-    const c=document.createElement('canvas');c.width=256;c.height=256;const g=c.getContext('2d')!;
+    const c=document.createElement('canvas');c.width=512;c.height=512;const g=c.getContext('2d')!;g.scale(2,2);
     let seed=43;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-    for(let i=0;i<260;i++){const angle=random()*Math.PI*2;const radius=Math.sqrt(random())*(85+Math.sin(angle*3)*16);const x=128+Math.cos(angle)*radius;const y=128+Math.sin(angle)*radius*.85;
-      g.fillStyle=['#e6eadf','#d1d9c7','#f3f5ec'][Math.floor(random()*3)];g.beginPath();g.ellipse(x,y,7+random()*11,4+random()*7,random()*Math.PI,0,Math.PI*2);g.fill();}
+    for(let i=0;i<480;i++){const angle=random()*Math.PI*2;const radius=Math.sqrt(random())*(85+Math.sin(angle*3)*16);const x=128+Math.cos(angle)*radius;const y=128+Math.sin(angle)*radius*.85;
+      g.save();g.translate(x,y);g.rotate(angle+random());const length=5+random()*9,width=2+random()*3;
+      g.fillStyle=['#e6eadf','#c6d1b8','#f3f5ec'][Math.floor(random()*3)];g.beginPath();g.moveTo(-length,0);g.bezierCurveTo(-length/2,-width,length/2,-width,length,0);g.bezierCurveTo(length/2,width,-length/2,width,-length,0);g.fill();g.restore();}
     const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;return texture;
   },[]);
   useEffect(()=>()=>foliage.dispose(),[foliage]);
@@ -31,7 +33,7 @@ export function WoodlandScenery({ phase, environment, particles }: {
   const palette = seasonColors.join(",");
   const initialized=useRef("");
   const initializeTrees = () => {
-    if (!trunks.current || !crowns.current) return;
+    if (!trunks.current || !crowns.current || !branches.current) return;
     const dummy = new THREE.Object3D();
     const colors = palette.split(",");
     for (let i = 0; i < 40; i++) {
@@ -43,6 +45,12 @@ export function WoodlandScenery({ phase, environment, particles }: {
       dummy.scale.set(.09 + (i % 3) * .028, height, .09 + (i % 3) * .028);
       dummy.rotation.set(0, 0, Math.sin(i) * .06);
       dummy.updateMatrix(); trunks.current.setMatrixAt(i, dummy.matrix);
+      for(let arm=0;arm<3;arm++){
+        const direction=arm%2?1:-1;
+        dummy.position.set(x+direction*.31,height*(.48+arm*.1),z+Math.sin(i+arm)*.12);
+        dummy.scale.set(.022,.85+arm*.12,.022);dummy.rotation.set(.2,0,direction*-.8);
+        dummy.updateMatrix();branches.current.setMatrixAt(i*3+arm,dummy.matrix);
+      }
       for (let tier = 0; tier < 5; tier++) {
         dummy.position.set(x + Math.sin(i*3+tier*2.4)*.65, height * .8 + Math.sin(tier*2+i)*.6, z+Math.cos(tier*2.4)*.55);
         dummy.scale.set(1.05+Math.sin(i+tier)*.25, .85+Math.cos(tier)*.25, .9);
@@ -54,6 +62,7 @@ export function WoodlandScenery({ phase, environment, particles }: {
       }
     }
     trunks.current.instanceMatrix.needsUpdate = true;
+    branches.current.instanceMatrix.needsUpdate=true;branches.current.computeBoundingSphere();
     crowns.current.instanceMatrix.needsUpdate = true;
     if (crowns.current.instanceColor) crowns.current.instanceColor.needsUpdate = true;
     trunks.current.computeBoundingSphere(); crowns.current.computeBoundingSphere();
@@ -81,11 +90,19 @@ export function WoodlandScenery({ phase, environment, particles }: {
     <instancedMesh ref={trunks} args={[undefined, undefined, 40]}>
       <cylinderGeometry args={[.6, 1, 1, 7]} /><meshBasicMaterial color={night ? "#1a292c" : "#514a38"} />
     </instancedMesh>
+    <instancedMesh ref={branches} args={[undefined,undefined,120]}><cylinderGeometry args={[.4,1,1,5]}/><meshBasicMaterial color={night?'#1a292c':'#514a38'}/></instancedMesh>
     <instancedMesh ref={crowns} args={[undefined, undefined, 200]}>
       <planeGeometry args={[2,2]} /><meshBasicMaterial map={foliage} alphaTest={.4} side={THREE.DoubleSide} />
     </instancedMesh>
+    <ForestForeground foliage={foliage} night={night}/>
     {environment.weather !== "clear" && <WindowWeather kind={environment.weather} count={particles} reduced={reduced} />}
   </group></>;
+}
+
+function ForestForeground({foliage,night}:{foliage:THREE.Texture;night:boolean}){
+  const branch=useMemo(()=>new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(-3.3,2.7,-4.6),new THREE.Vector3(-2.1,2.9,-4.7),new THREE.Vector3(-1.25,3.25,-4.8),new THREE.Vector3(-.65,3.5,-4.9)]),18,.027,5,false),[]);
+  useEffect(()=>()=>branch.dispose(),[branch]);
+  return <group><mesh geometry={branch}><meshBasicMaterial color={night?'#182a2d':'#484c37'}/></mesh>{[-2.6,-2,-1.5,-1].map((x,i)=><mesh key={x} position={[x,2.98+i*.14,-4.63]} rotation={[0,0,i*.33]}><planeGeometry args={[.65,.43]}/><meshBasicMaterial map={foliage} color={night?'#274539':'#526849'} alphaTest={.4} side={THREE.DoubleSide}/></mesh>)}</group>;
 }
 
 function WindowWeather({ kind, count, reduced }: { kind: "rain" | "snow"; count: number; reduced: boolean }) {
