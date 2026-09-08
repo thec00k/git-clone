@@ -6,8 +6,11 @@
  */
 import type { Scrapbook, Visibility } from "./scrapbook";
 
+export const STICKY_NOTE_MAX = 20;
+
 export interface Profile {
   displayName: string;
+  allowFriendScrapbooks?: boolean;
 }
 
 export interface ArchiveTab {

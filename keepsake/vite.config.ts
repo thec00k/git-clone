@@ -13,6 +13,8 @@ export default defineConfig({
     postcss: { plugins: [] },
   },
   server: {
+    // Recording intermediates include locked executables and large video files.
+    watch: { ignored: ['**/art/demo-work/**'] },
     host: '127.0.0.1',
     port: 5174,
     // Local-only by default. For a trusted tunnel, explicitly add its hostname

@@ -18,8 +18,10 @@ import type {
   MemoryPin,
   PinNote,
   Profile,
+  ViewAs,
 } from "../types/app";
-import { PIN_NOTE_MAX, TIDY_ROOM } from "../types/app";
+import {canLeaveBookNote} from "../lib/permissions";
+import { PIN_NOTE_MAX, TIDY_ROOM, STICKY_NOTE_MAX } from "../types/app";
 import type {
   CoverStyle,
   SaveStatus,
@@ -69,7 +71,7 @@ interface AppContextValue {
   restoreRoom: (state: AppState) => Promise<void>;
 
   addGuestEntry: (author: string, message: string,deskCopy?:boolean) => void;
-  addNote: (bookId: string, pageId: string, author: string, message: string) => void;
+  addNote: (bookId: string, pageId: string, author: string, message: string, viewer?: ViewAs) => void;
   approveNote: (id: string) => void;
   deleteNote: (id: string) => void;
   addPin: (pin: Omit<MemoryPin, "id" | "createdAt">) => void;
@@ -393,14 +395,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const addNote = useCallback(
-    (bookId: string, pageId: string, author: string, message: string) =>
-      update((p) => ({
-        ...p,
-        notes: [
-          { id: uid("note"), bookId, pageId, author, message, approved: false, createdAt: Date.now() },
-          ...p.notes,
-        ],
-      })),
+    (bookId: string, pageId: string, author: string, message: string, viewer: ViewAs = 'public') =>
+      update(p => {
+        const book=p.books.find(b=>b.id===bookId),text=message.trim();
+        if(!book || !canLeaveBookNote(book.visibility,viewer,p.profile.allowFriendScrapbooks===true) || !book.pages.some(page=>page.id===pageId) || !text || Array.from(text).length>STICKY_NOTE_MAX) return p;
+        return {...p,notes:[{id:uid('note'),bookId,pageId,author,message:text,approved:false,createdAt:Date.now()},...p.notes]};
+      }),
     [update],
   );
 

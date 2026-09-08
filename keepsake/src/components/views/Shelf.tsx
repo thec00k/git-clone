@@ -20,7 +20,7 @@ export function Shelf() {
   const { go, viewAs, isVisitor } = useNav();
   const [editing, setEditing] = useState<string | null>(null);
 
-  const books = state.books.filter((b) => canSee(b.visibility, viewAs));
+  const books = state.books.filter((b) => canSee(b.visibility, viewAs, state.profile.allowFriendScrapbooks===true));
 
   return (
     <ViewShell

@@ -1,3 +1,4 @@
+import {useApp} from '../../store/appStore';
 import { useEffect, useRef, useState } from "react";
 import { CHAMBER_HOTSPOTS } from "../../lib/hotspots";
 import type { HotspotId } from "../../lib/hotspots";
@@ -56,9 +57,10 @@ export function RoomChamber({
   onPlaceBook: (id: string, pos: { shelfRow: number; shelfX: number }) => void;
   onNewBook: () => void;
 }) {
+  const {state}=useApp();
   const cover = COVER_STYLES[activeBook?.coverStyle ?? "cocoa"];
   const tourClass = (id: HotspotId) => (tourFocus === id ? " ks-obj--tour" : "");
-  const visibleBooks = books.filter((b) => canSee(b.visibility, viewAs));
+  const visibleBooks = books.filter((b) => canSee(b.visibility, viewAs, state.profile.allowFriendScrapbooks===true));
   const yaw = yawDegrees(roomFace);
   const par = roomFace === "front" && !touring;
   const [flat, setFlat] = useState(true);

@@ -41,7 +41,7 @@ function Spine({title,color,ink,width,height,handwritten=false}:{title:string;co
 }
 export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>void}) {
  const {state,setActiveBook,addBook}=useApp(); const {viewAs,isVisitor,go,setBookPageId}=useNav();
- const books=state.books.filter(b=>canSee(b.visibility,viewAs));
+ const books=state.books.filter(b=>canSee(b.visibility,viewAs,state.profile.allowFriendScrapbooks===true));
  const fillers=useMemo(()=>Array.from({length:45},(_,i)=>scene.getObjectByName(`ks_shelf_book_${i}`)).filter((o):o is THREE.Object3D=>!!o),[scene]);
  const [chosen,setChosen]=useState<string|null>(null);
  useEffect(()=>{fillers.forEach(object=>{const b=new THREE.Box3().setFromObject(object);const row=Math.max(0,Math.min(3,3-Math.round(b.min.y/.46)));object.visible=row>=Math.ceil((books.length+(isVisitor?0:1))/12);});return()=>fillers.forEach(object=>{object.visible=true;});},[fillers,books.length,isVisitor]);
@@ -108,8 +108,8 @@ function CollectedSpines({objects,occupiedRows}:{objects:THREE.Object3D[];occupi
 }
 
 function DeskBook({scene}:{scene:THREE.Object3D}){
- const {activeBook}=useApp();const {isVisitor,viewAs}=useNav();
- const visible=activeBook&&(!isVisitor||canSee(activeBook.visibility,viewAs));
+ const {activeBook,state}=useApp();const {isVisitor,viewAs}=useNav();
+ const visible=activeBook&&(!isVisitor||canSee(activeBook.visibility,viewAs,state.profile.allowFriendScrapbooks===true));
  const cover=activeBook?COVER_STYLES[activeBook.coverStyle]:COVER_STYLES.forest;
  const texture=useLettering(visible?activeBook.title+'\n'+activeBook.subtitle:'Keepsake',cover.leather,cover.ink);
  useEffect(()=>{

@@ -14,7 +14,7 @@ const image=(v:unknown)=>string(v)&&(/^(data:image\/(png|jpeg|webp|gif);base64,|
 function records(v:unknown,check:(v:RecordValue)=>boolean){return Array.isArray(v)&&v.every(x=>object(x)&&check(x));}
 export function parseRoomBackup(text:string):AppState{
  const file:unknown=JSON.parse(text);ensure(object(file)&&file.format==='keepsake-room'&&file.backupVersion===1&&object(file.state));const s=file.state;
- ensure(number(s.version)&&object(s.profile)&&string(s.profile.displayName));
+ ensure(number(s.version)&&object(s.profile)&&string(s.profile.displayName)&&(s.profile.allowFriendScrapbooks===undefined||typeof s.profile.allowFriendScrapbooks==='boolean'));
  ensure(records(s.books,b=>string(b.id)&&string(b.title)&&string(b.subtitle)&&['cocoa','forest','wine','midnight','ochre'].includes(b.coverStyle as string)&&['private','friends','public'].includes(b.visibility as string)&&number(b.createdAt)&&number(b.updatedAt)&&records(b.pages,p=>string(p.id)&&(p.titlePage===undefined||typeof p.titlePage==='boolean')&&records(p.elements,e=>{
   if(!string(e.id)||!['x','y','w','rotation','z'].every(k=>number(e[k])))return false;
   if(e.type==='photo')return image(e.src)&&['polaroid','tape','flush'].includes(e.frame as string)&&(e.cropAspect===undefined||(number(e.cropAspect)&&(e.cropAspect as number)>0&&(e.cropAspect as number)<=5));

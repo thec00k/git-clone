@@ -81,6 +81,14 @@ Run from keepsake/: npm run check:acceptance, npm run build, npm run lint. Lint 
 
 ## Latest checkpoint
 
+September 7 friend sticky-note pass:
+- The scrapbook's Notes on/off button shows an inline rail for the current spread, preserving page navigation and editing while notes are visible.
+- Owners opt in under Room settings > Notes & discoveries. Friends and close friends can then open books marked Friends or Public on the desk, shelf, and linked map pages. Private books stay private.
+- New sticky notes are limited to 20 Unicode code points in both the editor and store, and wait for owner approval. Existing longer notes remain intact. Public visitors cannot post.
+- These remain local role previews; authenticated relationships and server-side authorization belong to the future social backend.
+
+Validation: the full acceptance suite and production build pass. A fresh Edge profile verified the toggle, keyboard page navigation, note preservation, input limit, pending-note visibility, public posting rejection, and owner opt-out. Personal browser data was not altered.
+
 September 7 reliability and settings pass:
 - Development server defaults to loopback and rejects arbitrary Host headers. Trusted tunnel hosts must be explicitly allowlisted; LAN testing requires an explicit host option.
 - IndexedDB v3 migrates inline photographs into a separate deduplicated image store while keeping exported backups portable. Missing images and read errors block startup and offer retry; they never trigger replacement demo data.

@@ -68,7 +68,7 @@ export function BookView() {
 
   const targetPageId = sb.activePageId && [sb.leftPage?.id, sb.rightPage?.id].includes(sb.activePageId)
     ? sb.activePageId : sb.leftPage?.id ?? sb.rightPage?.id ?? null;
-  const canView = sb.book ? canSee(sb.book.visibility, viewAs) : true;
+  const canView = sb.book ? canSee(sb.book.visibility, viewAs, state.profile.allowFriendScrapbooks===true) : true;
 
   async function handleReplace(id: string, file: File) {
     try {
@@ -117,7 +117,7 @@ export function BookView() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
-      if (e.defaultPrevented || showPrint || showNotes || showKeys || printerOpen) return;
+      if (e.defaultPrevented || showPrint || showKeys || printerOpen) return;
       if (t?.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')) return;
       const mod = e.metaKey || e.ctrlKey;
       if (!isVisitor && !turn && mod && e.key.toLowerCase() === "z") {
@@ -214,8 +214,8 @@ export function BookView() {
             <button className="ks-chip" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" onClick={() => setShowKeys(true)}>
               <Keyboard size={16} />
             </button>
-            <button className="ks-chip" aria-label="Notes on this spread" title="Notes on this spread" onClick={() => setShowNotes(true)}>
-              <StickyNote size={16} />
+            <button className={`ks-chip ks-notes-toggle${showNotes?' is-on':''}`} aria-label="Friends' sticky notes" aria-pressed={showNotes} aria-controls={showNotes?'ks-spread-notes':undefined} title={showNotes?'Hide sticky notes':'Show sticky notes'} onClick={() => setShowNotes(v => !v)}>
+              <StickyNote size={16} /> <span>Notes {showNotes?'on':'off'}</span>
             </button>
             <button className="ks-chip" aria-label="Export or print this book" title="Export / print book" onClick={() => setShowPrint(true)}>
               <Printer size={16} />
@@ -328,7 +328,7 @@ export function BookView() {
       }
     >
       {showShop&&!isVisitor&&<StickerStore onClose={()=>setShowShop(false)}/>}
-      <div className="ks-desk-top" data-desk-top data-draw-ink={drawInk ?? ""}>
+      <div className={`ks-desk-top${showNotes?" ks-desk-top--notes":""}`} data-desk-top data-draw-ink={drawInk ?? ""}>
         <DeskClutter
           ink={isVisitor ? null : drawInk}
           thickness={drawWidth} onThickness={setDrawWidth}
@@ -393,6 +393,13 @@ export function BookView() {
           <p className="ks-page-navigation-hint">{sb.spread === 0 ? "The beginning" : "← Previous"} <span>·</span> {sb.spread === sb.spreadCount - 1 ? "The latest chapter" : "Next →"}</p>
           </div>
         </div>
+      {showNotes && sb.book && (
+        <NotesPanel key={`${sb.book.id}:${sb.spread}`}
+          bookId={sb.book.id}
+          pageIds={[sb.leftPage?.id, sb.rightPage?.id].filter(Boolean) as string[]}
+          onClose={() => setShowNotes(false)}
+        />
+      )}
       </div>
       {showPhotos && !isVisitor && <PhotoImportDialog onClose={()=>setShowPhotos(false)} onAdd={photos=>{
         if(!targetPageId)return;
@@ -405,13 +412,6 @@ export function BookView() {
       }}/>}
       {showKeys && <ShortcutsHelp onClose={() => setShowKeys(false)} />}
       {showPrint && sb.book && <PrintView book={sb.book} onClose={() => setShowPrint(false)} />}
-      {showNotes && sb.book && (
-        <NotesPanel
-          bookId={sb.book.id}
-          pageIds={[sb.leftPage?.id, sb.rightPage?.id].filter(Boolean) as string[]}
-          onClose={() => setShowNotes(false)}
-        />
-      )}
     </RoomFrame>
   );
 }
