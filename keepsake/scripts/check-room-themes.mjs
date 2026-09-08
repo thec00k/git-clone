@@ -14,6 +14,10 @@ assert.equal(switchRoomTheme(returned,'beachfront'),returned,'reselecting never 
 assert.equal(switchRoomTheme(state,'invalid'),state);
 for(const change of [s=>s.environment.roomTheme='invalid',s=>s.roomDecor.layouts={beachfront:{sillItem:'unowned'}},s=>s.roomDecor.layouts={woodland:{posterItem:'fox'}}]){const s=structuredClone(state);change(s);assert.throws(()=>parseRoomBackup(serializeRoom(s)));}
 console.log('Room switching preserves memories and currency, restores per-room decor, round-trips backups, and rejects invalid themes/items.');
+const closedWindow={...coast,environment:{...coast.environment,coastalWindowOpen:false}};
+assert.equal(parseRoomBackup(serializeRoom(closedWindow)).environment.coastalWindowOpen,false,'Closed window survives a room backup');
+assert.equal(switchRoomTheme(switchRoomTheme(closedWindow,'woodland'),'beachfront').environment.coastalWindowOpen,false,'Window preference survives switching rooms');
+assert.throws(()=>parseRoomBackup(serializeRoom({...closedWindow,environment:{...closedWindow.environment,coastalWindowOpen:'closed'}})),'Window preference must be boolean');
 
 assert.equal(ownsRoomTheme(state,'beachfront'),false);
 assert.equal(ownsRoomTheme(coast,'beachfront'),true);

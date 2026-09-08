@@ -44,14 +44,24 @@ def plane(label,p,size,mat,flat=False):
 
 night=phase=='night';dusk=phase=='dusk'
 sky=material('sky','#182c43' if night else '#e9ac8d' if dusk else '#abd8df')
-water=material('water','#24485b' if night else '#77a7ac' if dusk else '#4fa5ae')
+nodes=sky.node_tree.nodes;links=sky.node_tree.links
+geo=nodes.new('ShaderNodeNewGeometry');xyz=nodes.new('ShaderNodeSeparateXYZ');links.new(geo.outputs['Position'],xyz.inputs[0])
+mapping=nodes.new('ShaderNodeMapRange');mapping.inputs['From Min'].default_value=2.2;mapping.inputs['From Max'].default_value=8.2;links.new(xyz.outputs['Z'],mapping.inputs['Value'])
+ramp=nodes.new('ShaderNodeValToRGB');ramp.color_ramp.elements.new(.5)
+palette=['#f3aa77','#9b76a5','#355783'] if dusk else ['#293c59','#192c49','#0d1b32'] if night else ['#d2e4df','#93c3d2','#608da9']
+for e,c in zip(ramp.color_ramp.elements,palette):
+    rgb=[int(c[i:i+2],16)/255 for i in (1,3,5)];e.color=(*[v/12.92 if v<=.04045 else ((v+.055)/1.055)**2.4 for v in rgb],1)
+links.new(mapping.outputs['Result'],ramp.inputs[0]);links.new(ramp.outputs['Color'],nodes.get('Emission').inputs['Color'])
+water=material('water','#203a50' if night else '#4e6c87' if dusk else '#356b85')
 sand=material('sand','#6b6c63' if night else '#dfcaa8')
 foam=material('foam','#688c9a' if night else '#b7d5ce')
 rock=material('rock','#6b7d84' if night else '#aaa797')
 cloud=material('cloud','#304256' if night else '#eaf1e7')
 sun=material('sun moon','#eff4e4' if night else '#ffcf83' if dusk else '#fff0ce')
 plane('Sky',(0,6,-30),(65,25),sky)
-plane('Beach',(0,.55,-4.7),(35,5),sand,True)
+beach=plane('Beach',(0,0,-4.7),(35,5),sand,True)
+for v in beach.data.vertices:
+    depth=-(v.co.y*5+4.7);v.co.z=.84+(depth+2.2)*.075
 plane('Ocean',(0,.65,-20),(65,31),water,True)
 plane('Horizon',(0,-.2,-29),(65,4.8),water)
 for i in range(25):

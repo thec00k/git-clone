@@ -10,7 +10,7 @@
     {
       "id": "coastal-original-work",
       "creator": "Original work authored for Keepsake",
-      "source": "build-beachfront.py; coastal-palette.py; ../../src/components/room3d/BeachfrontScenery.tsx; window-clearance.py; coastal-props.py; conch-shell.py; scenery-preview.py; open-casements.py",
+      "source": "build-beachfront.py; coastal-palette.py; ../../src/components/room3d/BeachfrontScenery.tsx; window-clearance.py; coastal-props.py; conch-shell.py; scenery-preview.py; open-casements.py; paint-coastal-art.py; coastal-wall-art.py; ../../src/components/room3d/CoastalWater.tsx",
       "includes": [
         "arched window and plaster arch wall",
         "sailcloth curtains",
@@ -23,7 +23,9 @@
         "glass fishbowl with water and copper fish",
         "ceramic coastal lamp",
         "modern digital clock casing",
-        "eroded shoreline rock meshes with baked vertex colors"
+        "eroded shoreline rock meshes with baked vertex colors",
+        "original sailboat and coral illustrations on textured paper",
+        "procedural dusk gradient, swells, shore foam and wet sand"
       ],
       "externalDownloads": false,
       "sourceFile": "beachfront.blend",

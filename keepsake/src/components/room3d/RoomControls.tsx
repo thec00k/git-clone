@@ -4,6 +4,7 @@ import type { RoomFace } from "../../lib/roomLayout";
 import {type RoomQuality} from "./themes";
 import {useActiveRoom} from "./useActiveRoom";
 import { useNav } from "../../store/nav";
+import {useApp} from '../../store/appStore';
 
 export function RoomControls({ seated, environment, quality, setQuality, onBook, onFiles, onSeat, onLamp, onCeiling, onLook, onDrawer, onMusic, onReading, onLibrary, onDoor }: {
   onDoor: () => void;
@@ -14,6 +15,7 @@ export function RoomControls({ seated, environment, quality, setQuality, onBook,
   onLamp: () => void; onCeiling: () => void; onLook: (face: RoomFace) => void; onDrawer: () => void;
 }) {
   const activeRoom = useActiveRoom();
+  const {setEnvironment}=useApp();
   const { setPrinterOpen, isVisitor,setDiscoveryOpen } = useNav();
   return <>
     <div className="ks-room-name"><span>YOUR QUIET CORNER</span><h2>{activeRoom.title}</h2></div>
@@ -38,6 +40,7 @@ export function RoomControls({ seated, environment, quality, setQuality, onBook,
           {!isVisitor && <button onClick={() => setPrinterOpen(true)}><Printer size={16}/> Print a photo</button>}
           <button onClick={onLibrary}><Library size={16}/> Browse all scrapbooks</button>
           <button onClick={onMusic}><Music2 size={16}/> Music</button>
+          {activeRoom.id==='beachfront'&&<button aria-pressed={environment.coastalWindowOpen!==false} onClick={()=>setEnvironment({coastalWindowOpen:environment.coastalWindowOpen===false})}>{environment.coastalWindowOpen===false?'Open ocean window':'Close ocean window'}</button>}
           <button onClick={onDoor}>Exit through the door</button>
           {!isVisitor&&<button onClick={()=>setDiscoveryOpen('collection')}><BookOpen size={16}/> Correspondence</button>}
           <p>LIGHTING</p>

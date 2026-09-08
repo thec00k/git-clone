@@ -34,6 +34,8 @@ export type MusicProvider = "ambient" | "spotify" | "lofi" | "soundcloud";
 export interface Environment {
   roomTheme?: "woodland" | "beachfront";
   roomQuality?: "balanced" | "high";
+  /** Beachfront casements; old rooms default to open. */
+  coastalWindowOpen?: boolean;
   timeMode: TimeMode;
   season: Season;
   weather: Weather;

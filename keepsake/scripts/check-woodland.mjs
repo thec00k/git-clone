@@ -77,6 +77,10 @@ const bowl=bounds('Fan_Bowl');
 for(const name of ['Fan_Chain_0','Fan_Chain_1','Fan_ChainWeight']){const chain=bounds(name);assert.ok(chain.max.x<bowl.min.x || chain.min.x>bowl.max.x,'Pull chain clears the light bowl: '+name);}
 console.log('Ceiling pull chains and weight clear the light bowl.');
 if (theme === 'beachfront') {
+  const switchBox=bounds('ks_ceiling_switch');
+  assert.ok(switchBox.max.x < bounds('Beachfront_Curtain_-1').min.x-.15,'Ceiling switch has clear space left of curtain');
+  for(const side of ['boat','coral']) assert.ok(bounds(`Beachfront_WallArt_${side}_Print`).min.y>1.5,'Separate coastal wall print exported');
+  assert.ok(!json.nodes.some(n=>n.name.startsWith('Beachfront_Coral_Study')),'Old coral sticks removed');
   assert.ok(!json.nodes.some(node => /^(Accent_Leaf|Accent_Pot|Cabinet_Flowers|Fern_Stems)/.test(node.name)), 'Coastal props replace the original plants');
   const bowl = bounds('Beachfront_Prop_Fishbowl');
   for (const side of ['Left', 'Right']) {

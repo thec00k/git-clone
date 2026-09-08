@@ -26,7 +26,7 @@ Blender now includes a labeled `Beachfront Scenery Preview (Blender only)` colle
 
 Three `Beachfront_ShoreRock_` meshes now live in the GLB and Blender source, replacing both sets of stand-in rocks. Erosion, broken contours, fissures and vertex colors are authored once for both views. The sky/water remain live app layers. Glass avoids opaque shadow/depth artifacts in the app; the coastal lamp has gentler warm output. The beach plane now clears the back wall.
 
-This export is 6,524,340 bytes, 135,964 triangles, 77 materials and 309 primitives, within the existing room budget. Geometry checks cover shell/sill contact, bowl/cabinet fit, removal of old plants, rock placement and window-light clearance. Browser review covered standing/seated views, day/dusk/night, clock readability and the lamp toggle.
+This export is 6,695,452 bytes, 134,608 triangles, 77 materials and 305 primitives, within the existing room budget. Geometry checks cover shell/sill contact, bowl/cabinet fit, removal of old plants, rock placement and window-light clearance. Browser review covered standing/seated views, day/dusk/night, clock readability and the lamp toggle.
 
 ## Theme switching
 
@@ -47,6 +47,14 @@ Coastal Blue is a seventh CRT color exclusive to Beachfront ownership. Choosing 
 The ocean displays a low sun at dusk and a visible moon with moving reflected streaks at night. Three shoreline rocks frame the view. Reduced motion freezes water/reflections, boat movement and precipitation. The same DeskAssembly and inherited desk props remain in both rooms. Browser checks inspected dusk/night and switched Woodland > Beachfront > Woodland > Beachfront; a fresh load retained Beachfront.
 
 
-The two independent arched casement leaves are posed open 62 degrees outward toward the ocean, with brass hinges and handles. Their pivots are at the side jambs for later animation. This pass adds the open model; it does not add an open/close control. Export checks verify clearance from the sill, curtains and interior light strand.
+The two independent arched casement leaves are posed open 62 degrees outward toward the ocean, with brass hinges and handles. Their side-jamb pivots animate between closed and 62 degrees open. Click a pane or use Room > Open/Close ocean window. The setting persists in saves and backups. Export checks verify clearance from the sill, curtains and interior light strand.
 
 The conch is independently reproducible through conch-shell.py (also called by coastal-props.py): fuller body, swept open aperture, raised whorls/knobs, and baked cream/ochre vertex colors based on the user-provided reference. No reference image is redistributed in the app.
+
+## Coastal scenery and interaction refinement
+
+The ceiling-light switch moved to x=-2.16, safely left of the gathered curtain. Separate teak-framed original illustrations replace the merged fern leaves/stems and unfinished coral sticks: sailboat on the left, branching coral on the right. Rebuild the packed print textures with paint-coastal-art.py (Pillow), then run coastal-wall-art.py after the prop/window scripts and before export.
+
+CoastalWater.tsx provides a purple/orange/blue dusk gradient, a matching rippled horizon, shallow/deep water colors, small swells, moving shore foam, glints and a sloping beach with wet sand. The Blender scenery preview mirrors the palette and beach slope; the animated shaders run in the app. Coastal lamp and ceiling intensities are gentler. Fish body, tail, fins and eye move together within the bowl. Reduced-motion preferences freeze water/fish motion and make the window settle immediately. Closing the window reduces outside ambience to 28 percent of the selected volume; reopening restores it.
+
+Validated: automated acceptance suite, Beachfront asset/clearance checks, production build, Blender preview, browser dusk/night and seated views, window opening/closing, lamp toggle, and no browser rendering errors. Backups reject invalid window values and preserve the preference across room switches.

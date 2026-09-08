@@ -39,6 +39,7 @@ export function parseRoomBackup(text:string):AppState{
  ensure(e.crtColor===undefined||Object.hasOwn(CRT_COLORS,e.crtColor as string));
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
  ensure(e.roomTheme===undefined || ['woodland','beachfront'].includes(e.roomTheme as string));
+ ensure(e.coastalWindowOpen===undefined || typeof e.coastalWindowOpen==='boolean');
  ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
  ensure(e.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));
  ensure(['lampOn','ceilingOn','shelfLit','musicOn','pinsLocked'].every(k=>typeof e[k]==='boolean')&&['volume','ambienceVolume'].every(k=>number(e[k])&&(e[k] as number)>=0&&(e[k] as number)<=1));

@@ -1,4 +1,7 @@
 import {useNav} from '../../store/nav';
+import {useApp} from '../../store/appStore';
+import {CoastalInteractions} from './CoastalInteractions';
+import {useActiveRoom} from './useActiveRoom';
 import { MemoryObjects } from './MemoryObjects';
 import { Suspense, useMemo } from "react";
 import { RoomWorldMap } from "./RoomWorldMap";
@@ -39,12 +42,17 @@ export function RoomModel({
   onToggleCeiling: () => void;
 }) {
   const {isVisitor}=useNav();
+  const {setEnvironment}=useApp();
+  const coastal=useActiveRoom().id==='beachfront';
   const cloned = useRoomAsset(phase, environment);
   const roots = useMemo(() => collectHotspotRoots(cloned), [cloned]);
 
   return (
     <group>
-      <primitive object={cloned} />
+      <primitive object={cloned} onClick={(e:import('@react-three/fiber').ThreeEvent<MouseEvent>)=>{
+        if(coastal && e.object.name.startsWith('Beachfront_Casement_') && e.delta<=4){e.stopPropagation();setEnvironment({coastalWindowOpen:environment.coastalWindowOpen===false});}
+      }} />
+      {coastal&&<CoastalInteractions scene={cloned} open={environment.coastalWindowOpen!==false}/>}
       <MemoryObjects scene={cloned} onBook={() => onActivate("book")} />
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />
