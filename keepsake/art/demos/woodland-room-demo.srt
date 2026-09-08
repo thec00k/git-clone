@@ -1,0 +1,162 @@
+1
+00:00:00,450 --> 00:00:01,612
+Welcome to Keepsake.
+
+2
+00:00:01,612 --> 00:00:08,587
+This is the Woodland Writing Room: a quiet place to collect photos, make scrapbooks,
+and revisit small memories.
+
+3
+00:00:08,587 --> 00:00:12,462
+Move between the writing desk, reading corner, and memory wall.
+
+4
+00:00:15,450 --> 00:00:17,817
+Room settings bring the atmosphere together.
+
+5
+00:00:17,817 --> 00:00:23,339
+Choose daylight, dusk, or nighttime, change the season and weather, and control
+individual lights.
+
+6
+00:00:23,339 --> 00:00:28,467
+Balanced and High graphics are saved preferences for the person using the room.
+
+7
+00:00:30,450 --> 00:00:32,861
+Open the book on your desk to begin.
+
+8
+00:00:32,861 --> 00:00:36,476
+Cover and title lets you name the scrapbook and choose its appearance.
+
+9
+00:00:36,476 --> 00:00:41,297
+Turn through your memories with the page arrows, or use the page overview to jump
+ahead.
+
+10
+00:00:45,450 --> 00:00:50,803
+Add photos from your computer or phone, or choose memories already in the filing
+cabinet.
+
+11
+00:00:50,803 --> 00:00:54,372
+A batch can hold twenty photos, arranged four per page.
+
+12
+00:00:54,372 --> 00:00:58,297
+Folder uploads in the cabinet create a category you can name.
+
+13
+00:01:00,450 --> 00:01:03,901
+Add a handwritten touch with the markers, including blue.
+
+14
+00:01:03,901 --> 00:01:08,502
+Adjust the line thickness beside them, then draw directly on the page.
+
+15
+00:01:08,502 --> 00:01:13,487
+Stickers, captions, and the bottom toolbar help you arrange and refine the
+composition.
+
+16
+00:01:15,450 --> 00:01:19,009
+Your saved scrapbooks live on the upper shelf with readable titles.
+
+17
+00:01:19,009 --> 00:01:23,539
+Hover over a spine to tilt the book outward, then select it to open.
+
+18
+00:01:23,539 --> 00:01:27,422
+The blank book starts a new scrapbook, which becomes your desk book.
+
+19
+00:01:30,450 --> 00:01:33,438
+The mini photo printer gives a memory a physical moment.
+
+20
+00:01:33,438 --> 00:01:35,529
+Choose a photograph and watch it emerge.
+
+21
+00:01:35,529 --> 00:01:40,907
+Then send the print to a scrapbook, or take it to the map and choose where it
+belongs.
+
+22
+00:01:45,450 --> 00:01:50,930
+With the owner’s permission, friends can view shared scrapbooks and leave a twenty
+character sticky note.
+
+23
+00:01:50,930 --> 00:01:53,328
+Notes on and off controls their visibility.
+
+24
+00:01:53,328 --> 00:01:54,698
+New notes await approval.
+
+25
+00:01:54,698 --> 00:01:59,150
+This demonstration uses the local friend preview; online visits are still to come.
+
+26
+00:02:00,450 --> 00:02:05,090
+Music settings let you choose a quiet entrance or a configured music selection.
+
+27
+00:02:05,090 --> 00:02:07,946
+Spotify and SoundCloud have their own setup controls.
+
+28
+00:02:07,946 --> 00:02:13,657
+Choose a CRT screen color to match your mood, and adjust music and room sound
+levels.
+
+29
+00:02:15,450 --> 00:02:18,875
+Open the desk drawer to browse the mini shop.
+
+30
+00:02:18,875 --> 00:02:23,822
+Its four categories hold sticker packs, windowsill decorations, room variants, and
+creative extras.
+
+31
+00:02:23,822 --> 00:02:29,150
+The prototype uses collectible stamps, with room and item availability shown before
+you choose.
+
+32
+00:02:30,450 --> 00:02:36,706
+The guestbook collects a quiet hello from a visitor, with an option to request a
+copy on the desk.
+
+33
+00:02:36,706 --> 00:02:39,340
+Little discoveries add occasional notes around the room.
+
+34
+00:02:39,340 --> 00:02:42,632
+Their frequency and desk note preference are yours to control.
+
+35
+00:02:45,450 --> 00:02:47,505
+Your changes save in this browser.
+
+36
+00:02:47,505 --> 00:02:52,300
+Saving and storage shows the current status and lets you download a room backup.
+
+37
+00:02:52,300 --> 00:02:55,382
+Keep one before changing devices or clearing browser data.
+
+38
+00:02:55,382 --> 00:02:59,150
+That is Woodland: a small room that grows with your memories.

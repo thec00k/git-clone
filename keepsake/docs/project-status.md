@@ -81,6 +81,8 @@ Run from keepsake/: npm run check:acceptance, npm run build, npm run lint. Lint 
 
 ## Latest checkpoint
 
+Woodland demo: `art/demos/woodland-room-demo.mp4` is a three-minute, 1920 x 1080 walkthrough with synthetic narration, chapter cards, embedded English subtitles, and 12 chapter markers. The adjacent Markdown transcript and SRT can be used independently. It covers atmosphere, scrapbooks, photo batches, markers, shelf books, printing, friend-note preview, music, shop, guestbook, and backups. Capture uses fresh sample data on an isolated browser origin; online social features are explicitly described as future work. Recording intermediates are excluded from Git and the development file watcher.
+
 September 7 friend sticky-note pass:
 - The scrapbook's Notes on/off button shows an inline rail for the current spread, preserving page navigation and editing while notes are visible.
 - Owners opt in under Room settings > Notes & discoveries. Friends and close friends can then open books marked Friends or Public on the desk, shelf, and linked map pages. Private books stay private.
