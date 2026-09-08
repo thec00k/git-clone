@@ -3,6 +3,7 @@ import {useApp} from '../store/appStore';
 import {useNav} from '../store/nav';
 import {switchRoomTheme,ownsRoomTheme,type RoomThemeId} from '../lib/roomThemes';
 import {roomThemes} from './room3d/themes';
+import {roomAssets} from '../generated/roomAssets';
 const descriptions={woodland:'Moss-painted wood, layered forest views and warm lamplight.',beachfront:'An arched window, pale plaster, sea-glass details and a quiet ocean view.'};
 export function ShopRoomVariants(){
  const {state,environment,flushSave}=useApp();const {isVisitor}=useNav();
@@ -10,7 +11,7 @@ export function ShopRoomVariants(){
  const alive=useRef(true);useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  const current=environment.roomTheme??'woodland';
  const choose=async()=>{if(!preview||isVisitor)return;setLoading(true);setNote('Opening the windows…');
-  try{const {loadRoomAsset}=await import('./room3d/roomAssetCache');await loadRoomAsset(roomThemes[preview].asset);if(!alive.current)return;
+  try{const {loadRoomAsset}=await import('./room3d/roomAssetCache');await loadRoomAsset(roomAssets[preview][environment.roomQuality??'balanced']);if(!alive.current)return;
     const saved=await flushSave(s=>switchRoomTheme(s,preview));
     if(alive.current)setNote(saved?'Your room is ready. Close the drawer to look around.':'The room changed, but saving failed. Please retry before leaving.');
   }catch{if(alive.current)setNote('That room could not load. Your current room is still here. Please try again.');}

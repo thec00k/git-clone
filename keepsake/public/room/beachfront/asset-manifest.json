@@ -1,0 +1,31 @@
+{
+  "pipelineVersion": 1,
+  "blender": "Blender 5.1.2",
+  "source": "art/beachfront/beachfront.blend",
+  "qualities": {
+    "balanced": {
+      "file": "beachfront.glb",
+      "bytes": 5314592,
+      "sha256": "36075d79d1775de2175cc9f01722ce64846a39e66b913941e79a5180bad70117",
+      "triangles": 134608,
+      "materials": 80,
+      "primitives": 305,
+      "images": 28,
+      "maxTextureSize": 512,
+      "estimatedTextureBytes": 34125142,
+      "normalMappedMaterials": 38
+    },
+    "high": {
+      "file": "beachfront.high.glb",
+      "bytes": 8486320,
+      "sha256": "433dd8983deb76e7b2bd1790a9cdb680d9e017d3cf8d5c9dd8070388cb7885cf",
+      "triangles": 134608,
+      "materials": 80,
+      "primitives": 305,
+      "images": 28,
+      "maxTextureSize": 1024,
+      "estimatedTextureBytes": 80882347,
+      "normalMappedMaterials": 38
+    }
+  }
+}

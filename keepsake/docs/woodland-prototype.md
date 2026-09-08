@@ -1,5 +1,7 @@
 # Woodland Writing Room — prototype slice
 
+September 8 update: current Blender 5.1 sources, material-detail exports, compression and graphics budgets are documented in [the asset workflow](blender-asset-workflow.md). Exact current measurements live in `public/room/woodland/asset-manifest.json`. The measurements and manual export notes below describe earlier prototype checkpoints.
+
 Implemented on `codex/keepsake-rebuild` in the React/Vite application under `keepsake/`.
 
 ## What this slice contains

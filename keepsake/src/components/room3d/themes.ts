@@ -33,3 +33,14 @@ export const qualityProfiles = {
   high: { dpr: 1.75, shadows: true, particles: 150 },
 } as const;
 export type RoomQuality = keyof typeof qualityProfiles;
+export type RoomDeviceTier = 'phone' | 'tablet' | 'desktop';
+export function roomDeviceTier(width: number): RoomDeviceTier {
+  return width < 640 ? 'phone' : width < 1100 ? 'tablet' : 'desktop';
+}
+export function roomRenderProfile(quality: RoomQuality, device: RoomDeviceTier) {
+  const base = qualityProfiles[quality];
+  if (device === 'desktop') return base;
+  const high = quality === 'high';
+  return {...base, dpr: device === 'phone' ? (high ? 1.25 : 1) : (high ? 1.5 : 1.1),
+    particles: device === 'phone' ? (high ? 70 : 35) : (high ? 100 : 50)};
+}

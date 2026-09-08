@@ -1,6 +1,6 @@
 # Keepsake — current project checklist
 
-Updated September 7, 2026. This is the authoritative implementation checklist. The prototype notes, worklog PDFs and earlier suggestions are historical records; later entries may supersede earlier ones.
+Updated September 8, 2026. This is the authoritative implementation checklist. The prototype notes, worklog PDFs and earlier suggestions are historical records; later entries may supersede earlier ones.
 
 ## Product direction
 
@@ -80,6 +80,15 @@ The app and Blender source are versioned on codex/keepsake-rebuild. The user con
 Run from keepsake/: npm run check:acceptance, npm run build, npm run lint. Lint currently reports warnings. Browser checks must preserve user data; never reset the personal 5174 origin to install test fixtures.
 
 ## Latest checkpoint
+
+September 8 Blender 5.1 asset pass:
+- Both editable scenes now use Blender 5.1 with packed dependencies. Original wood/linen/plaster surface textures, separate detail UVs and subtle painted-trim normals preserve the room palettes and interaction geometry.
+- `npm run assets:refresh` exports and validates both graphics levels, checks source-save races, retains incoming source snapshots, and publishes stable GLB names with content-versioned URLs. `--check-only` leaves working assets untouched; `--polish` is an optional foundation-material pass. See `docs/blender-asset-workflow.md`.
+- Balanced/High select actual 512px/1024px model textures. Local Draco decoding reduces geometry downloads. Current Woodland exports are 4.30/6.85 MiB; Beachfront 5.07/8.09 MiB. Triangle counts remain 69,788/134,608 respectively. Public asset manifests hold the exact measurements.
+- Phone/tablet/desktop viewport bands cap resolution and particles while preserving the graphics choice. Room-switch preloading uses the selected quality and revision. A loading screen covers the room until its scenery and model are ready.
+- The development watcher excludes Blender authoring files and atomic export copies to avoid Windows EBUSY failures during refresh. Old construction-pass scripts are historical; the Beachfront export helper delegates to the validated pipeline.
+
+Validation includes the full automated acceptance suite, source reopening/re-exporting in Blender 5.1.2, native browser loading of both rooms at both graphics levels, and drawer/scrapbook interactions. Reproducible browser checks are in `scripts/check-room-assets-browser.mjs` (`npm run check:assets:browser`, isolated port 5178, PLAYWRIGHT_MODULE and TEST_BROWSER as for storage checks). Hardware FPS and actual mobile-device acceptance remain open.
 
 Woodland demo: `art/demos/woodland-room-demo.mp4` is a three-minute, 1920 x 1080 walkthrough with synthetic narration, chapter cards, embedded English subtitles, and 12 chapter markers. The adjacent Markdown transcript and SRT can be used independently. It covers atmosphere, scrapbooks, photo batches, markers, shelf books, printing, friend-note preview, music, shop, guestbook, and backups. Capture uses fresh sample data on an isolated browser origin; online social features are explicitly described as future work. Recording intermediates are excluded from Git and the development file watcher.
 

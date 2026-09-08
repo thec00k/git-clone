@@ -1,5 +1,7 @@
 # Beachfront — first playable slice
 
+September 8 update: the current Blender 5.1 sources, material-detail exports and graphics budgets use [the shared asset workflow](blender-asset-workflow.md). Exact current measurements live in `public/room/beachfront/asset-manifest.json`. Older measurements and manual export notes below are historical.
+
 Beachfront is a separate asset in the same application. Select Drawer shop > Room variants > Preview Beachfront > Make this my room. Woodland can be restored through the same menu. The three other environments remain planned.
 
 ## Art direction

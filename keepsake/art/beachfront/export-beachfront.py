@@ -1,8 +1,13 @@
-import bpy
-ROOT = r'C:/Users/iront/Desktop/keepsakeproject/git-clone-main/keepsake'
-assert '/beachfront/' in bpy.data.filepath.replace('\\','/'), 'Only export Beachfront'
-bpy.ops.object.select_all(action='DESELECT')
-for ob in bpy.context.scene.objects:
-    if not ob.get('blender_preview_only') and not ob.name.startswith('Beachfront_Preview_') and not ob.hide_get() and not ob.hide_render and ob.type in ['MESH','EMPTY','CURVE'] and ob.name not in ['Outside_View','Win_Glass','Beanbag_Original_Backup']:ob.select_set(True)
-bpy.ops.wm.save_as_mainfile(filepath=ROOT+'/art/beachfront/beachfront.blend')
-bpy.ops.export_scene.gltf(filepath=ROOT+'/public/room/beachfront/beachfront.glb',export_format='GLB',use_selection=True,export_yup=True,export_apply=True,export_tangents=False,export_image_format='JPEG')
+"""Compatibility entry point; the shared pipeline owns web exports now."""
+import bpy, pathlib, shutil, subprocess
+root = pathlib.Path(__file__).resolve().parents[2]
+if bpy.app.version < (5, 1, 0):
+    raise RuntimeError('Open the source in Blender 5.1 or newer.')
+if pathlib.Path(bpy.data.filepath).resolve() != (root/'art/beachfront/beachfront.blend').resolve():
+    raise RuntimeError('Open the saved Beachfront source before exporting.')
+if bpy.data.is_dirty:
+    raise RuntimeError('Save your Blender edits before refreshing the web asset.')
+node = shutil.which('node')
+if not node:
+    raise RuntimeError('Run npm run assets:refresh -- --room beachfront from the keepsake directory.')
+subprocess.run([node,str(root/'scripts/refresh-room-assets.mjs'),'--room','beachfront'],cwd=root,check=True)

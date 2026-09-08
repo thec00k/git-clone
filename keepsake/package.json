@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "assets:doctor": "node scripts/refresh-room-assets.mjs --doctor",
+    "assets:refresh": "node scripts/refresh-room-assets.mjs",
+    "check:assets:browser": "node scripts/check-room-assets-browser.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",

@@ -1,0 +1,8 @@
+Draco 3D geometry decoder
+
+Unmodified glTF decoder builds copied from Three.js 0.185.4:
+node_modules/three/examples/jsm/libs/draco/gltf/
+
+Upstream project: https://github.com/google/draco
+License: Apache License 2.0 (included in LICENSE).
+Three.js distribution notes are retained in README.md.

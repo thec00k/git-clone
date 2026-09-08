@@ -17,7 +17,7 @@ import { useListen } from "../../store/listen";
 import { EyeCamera } from "./RoomCamera";
 import { RoomModel } from "./RoomModel";
 import type { HotspotAction } from "./RoomInteractions";
-import { qualityProfiles } from "./themes";
+import {useRoomRenderProfile} from './useRoomRenderProfile';
 import { WoodlandScenery } from "./WoodlandScenery";
 import { RoomControls } from "./RoomControls";
 import { RoomLoading } from "./RoomLoading";
@@ -52,7 +52,7 @@ export function RoomScene3D({
   const [reading,setReading]=useState(false);
   useEffect(()=>{if(roomFace!=="front" || touring)setReading(false);},[roomFace,touring]);
   const lookAt = (face: RoomFace) => { setReading(false);setSeated(false);setShopOpen(false);setRoomFace(face); setViewRevision(v => v + 1); };
-  const profile = qualityProfiles[quality];
+  const profile = useRoomRenderProfile(quality);
   const [seated, setSeated] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [cabinetOpen, setCabinetOpen] = useState(false);
@@ -184,9 +184,9 @@ export function RoomScene3D({
             onToggleLamp={toggleLamp}
             onToggleCeiling={toggleCeiling}
           />
-        </Suspense>
         {activeRoom.woodland && <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />}
         {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment}/>}
+        </Suspense>
         <EyeCamera reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>
       </div>
