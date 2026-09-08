@@ -1,122 +1,35 @@
-import { RoomBackup } from '../RoomBackup';
+import {RoomBackup} from '../RoomBackup';
 import {FramePhotoPicker} from '../FramePhotoPicker';
 import {DiscoveryPreferences} from '../Discoveries';
-import { useRef } from "react";
-import { useApp } from "../../store/appStore";
-import { useNav } from "../../store/nav";
-import { useListen } from "../../store/listen";
-import { useFocusTrap } from "../../hooks/useFocusTrap";
-import type { Season, TimeMode, Weather } from "../../types/app";
-
-const TIMES: TimeMode[] = ["auto", "day", "dusk", "night"];
-const SEASONS: Season[] = ["spring", "summer", "autumn", "winter"];
-const WEATHERS: Weather[] = ["clear", "rain", "snow"];
-
-export function EnvironmentPanel({ onClose }: { onClose: () => void }) {
-  const { state, environment, setEnvironment, setProfile } = useApp();
-  const { startTour } = useNav();
-  const { preview, setPreview } = useListen();
-  const panelRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(panelRef, onClose);
-
-  return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div ref={panelRef} className="ks-panel w-full max-w-md p-5 ks-room-settings" role="dialog" aria-modal="true" aria-label="Room settings" onClick={(e) => e.stopPropagation()}>
-        <h2 className="mb-4 font-display text-xl">The room</h2><p className="ks-handnote">Settle in, stay awhile.</p>
-        <RoomBackup/>
-        <FramePhotoPicker/>
-        <DiscoveryPreferences/>
-
-        <label className="mb-4 block" htmlFor="ks-name">
-          <span className="text-sm text-paper/60">Your name</span>
-          <input
-            id="ks-name"
-            name="displayName"
-            className="mt-1 w-full rounded-lg bg-black/25 px-3 py-2 text-paper outline-none"
-            value={state.profile.displayName}
-            onChange={(e) => setProfile({ displayName: e.target.value })}
-          />
-        </label>
-
-        <Segment label="Time" value={environment.timeMode} options={TIMES} onChange={(v) => setEnvironment({ timeMode: v as TimeMode })} />
-        <Segment label="Season" value={environment.season} options={SEASONS} onChange={(v) => setEnvironment({ season: v as Season })} />
-        <Segment label="Weather" value={environment.weather} options={WEATHERS} onChange={(v) => setEnvironment({ weather: v as Weather })} />
-
-        <div className="mt-4 flex items-center justify-between">
-          <span className="text-sm text-paper/60">Shelf lights</span>
-          <button
-            className={`ks-tool ${environment.shelfLit ? "ks-tool--accent" : ""}`}
-            aria-pressed={environment.shelfLit}
-            onClick={() => setEnvironment({ shelfLit: !environment.shelfLit })}
-          >
-            {environment.shelfLit ? "On" : "Off"}
-          </button>
-        </div>
-
-        <div className="mt-3">
-          <label className="text-sm text-paper/60" htmlFor="ks-music-vol">Ambient music volume</label>
-          <input
-            id="ks-music-vol"
-            name="musicVolume"
-            type="range"
-            min={0}
-            max={1}
-            step={0.05}
-            value={environment.volume}
-            onChange={(e) => {
-              const v = Number(e.target.value);
-              setEnvironment({ volume: v });
-            }}
-            className="mt-1 w-full accent-[var(--color-accent)]"
-          />
-        </div>
-
-        <div className="mt-3">
-          <label className="text-sm text-paper/60" htmlFor="ks-amb-vol">Ambience volume</label>
-          <input
-            id="ks-amb-vol"
-            name="ambienceVolume"
-            type="range"
-            min={0}
-            max={1}
-            step={0.05}
-            value={environment.ambienceVolume}
-            onChange={(e) => setEnvironment({ ambienceVolume: Number(e.target.value) })}
-            className="mt-1 w-full accent-[var(--color-accent)]"
-          />
-        </div>
-
-        <div className="mt-5 rounded-lg bg-black/20 px-3 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-paper/80">Let the house speak the room</span>
-            <button
-              className={`ks-tool ${preview ? "ks-tool--accent" : ""}`}
-              aria-pressed={preview}
-              onClick={() => setPreview(!preview)}
-            >
-              {preview ? "On" : "Off"}
-            </button>
-          </div>
-          <p className="mt-2 text-sm text-paper/55">
-            VoiceOver and TalkBack swipe a list of things. The 3D room stays a picture. Turn this on to see that list.
-          </p>
-        </div>
-
-        <button
-          className="ks-tool mt-4 w-full justify-center"
-          onClick={() => {
-            onClose();
-            startTour();
-          }}
-        >
-          Show me around
-        </button>
-        <button className="ks-tool ks-tool--accent mt-2 w-full justify-center" onClick={onClose}>
-          Done
-        </button>
-      </div>
-    </div>
-  );
+import {ShopRoomVariants} from '../ShopRoomVariants';
+import {MusicSettings} from './MusicPanel';
+import {StorageSummary} from '../StorageSummary';
+import {useRef,useState} from 'react';
+import {useApp} from '../../store/appStore';
+import {useNav} from '../../store/nav';
+import {useListen} from '../../store/listen';
+import {useFocusTrap} from '../../hooks/useFocusTrap';
+import {VolumeSlider} from '../VolumeSlider';
+import type {Season,TimeMode,Weather} from '../../types/app';
+const sections = {appearance:'Appearance & graphics',music:'Music & CRT',discoveries:'Notes & discoveries',saving:'Saving & storage',help:'Help & profile'};
+type Section=keyof typeof sections;
+export function EnvironmentPanel({onClose,initialSection='appearance'}:{onClose:()=>void;initialSection?:Section}){
+ const {state,environment,setEnvironment,setProfile,saveStatus,flushSave}=useApp();
+ const {startTour,isVisitor}=useNav();const {preview,setPreview}=useListen();
+ const [section,setSection]=useState<Section>(initialSection);const panel=useRef<HTMLDivElement>(null);useFocusTrap(panel,onClose);
+ return <div className="ks-settings-backdrop" onClick={onClose}><div ref={panel} className="ks-panel ks-settings" role="dialog" aria-modal="true" aria-label="Room settings" onClick={e=>e.stopPropagation()}>
+ <header><div><h2>Room settings</h2><p>Make yourself at home.</p></div><button className="ks-tool" onClick={onClose} aria-label="Close room settings">Done</button></header>
+ <nav aria-label="Settings sections">{Object.entries(sections).map(([id,label])=><button key={id} className="ks-tool" aria-pressed={section===id} onClick={()=>setSection(id as Section)}>{label}</button>)}</nav>
+ <section aria-label={sections[section]}>
+ {section==='appearance'&&<><h3>Light and scenery</h3><Segment label="Time" value={environment.timeMode} options={['auto','day','dusk','night']} onChange={v=>setEnvironment({timeMode:v as TimeMode})}/><Segment label="Season" value={environment.season} options={['spring','summer','autumn','winter']} onChange={v=>setEnvironment({season:v as Season})}/><Segment label="Weather" value={environment.weather} options={['clear','rain','snow']} onChange={v=>setEnvironment({weather:v as Weather})}/>
+ <label className="block my-4">Graphics quality<select aria-label="Graphics quality" value={environment.roomQuality??'balanced'} onChange={e=>setEnvironment({roomQuality:e.target.value as 'balanced'|'high'})}><option value="balanced">Balanced · smoother and lighter</option><option value="high">High · detailed shadows and scenery</option></select></label><p className="text-sm">Balanced uses less power and simpler ocean geometry. High adds real-time shadows, sharper rendering, and more scenery detail. Your choice is saved for both rooms.</p>
+ <div className="flex flex-wrap gap-2 my-4">{(['lampOn','ceilingOn','shelfLit'] as const).map((key,i)=><button key={key} className="ks-tool" aria-pressed={environment[key]!==false} onClick={()=>setEnvironment({[key]:environment[key]===false})}>{['Desk lamp','Ceiling light','Shelf lights'][i]}: {environment[key]!==false?'On':'Off'}</button>)}</div>
+ {!isVisitor&&<><FramePhotoPicker/><details className="my-4"><summary>Choose a room</summary><ShopRoomVariants/></details></>}</>}
+ {section==='music'&&<><MusicSettings/><VolumeSlider id="ks-settings-ambience" label="Room sounds and weather" value={environment.ambienceVolume} onChange={ambienceVolume=>setEnvironment({ambienceVolume})}/></>}
+ {section==='discoveries'&&<><h3>Little things to find</h3><DiscoveryPreferences/></>}
+ {section==='saving'&&<><h3>Your memories</h3><p role="status">{saveStatus==='saved'?'All changes saved on this device.':saveStatus==='error'?'Saving failed. Retry or download a backup before leaving.':'Saving your latest changes…'}</p><button className="ks-tool my-3" onClick={()=>void flushSave()}>Save now</button><StorageSummary/><RoomBackup/><p className="text-sm mt-4">This prototype saves in this browser. Keep a downloaded backup before clearing browser data or changing devices. If another tab saves first, this tab will protect its unsaved changes and ask you to reload.</p></>}
+ {section==='help'&&<><label>Your name<input aria-label="Your name" value={state.profile.displayName} maxLength={80} onChange={e=>setProfile({displayName:e.target.value})}/></label><button className="ks-tool my-4" aria-pressed={preview} onClick={()=>setPreview(!preview)}>Show accessible room navigation: {preview?'On':'Off'}</button><p>Provides a readable list of room objects for keyboard and screen-reader navigation.</p><button className="ks-tool my-4" onClick={()=>{onClose();startTour();}}>Show me around</button></>}
+ </section></div></div>;
 }
 
 function Segment({

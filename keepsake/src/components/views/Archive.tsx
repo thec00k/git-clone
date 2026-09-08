@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BookPlus, Check, Heart, Lock, Pencil, Plus, Search, Upload, X } from "lucide-react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
+import {checkImportCapacity,checkStorageCapacity} from '../../lib/importLimits';
 import { loadImageFile } from "../../lib/image";
 import { uid } from "../../lib/id";
 import type { PhotoElement } from "../../types/scrapbook";
@@ -32,6 +33,10 @@ export function Archive() {
   const [draftName, setDraftName] = useState("");
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
+  const [uploadStatus,setUploadStatus]=useState('');
+  const [uploading,setUploading]=useState(false);
+  const stopUpload=useRef(false);
+  useEffect(()=>()=>{stopUpload.current=true;},[]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const tabs = state.archiveTabs;
@@ -52,16 +57,21 @@ export function Archive() {
   });
 
   async function upload(files: FileList | null) {
-    if (!files) return;
-    const cats = tab !== "all" && tab !== "favorites" ? [tab] : [];
-    for (const f of Array.from(files)) {
-      try {
-        const { src, aspect } = await loadImageFile(f);
-        addArchivePhoto(src, aspect, cats);
-      } catch {
-        /* ignore */
+    if (!files || uploading) return;
+    const list=Array.from(files),cats=tab !== 'all' && tab !== 'favorites' ? [tab] : [];
+    setUploading(true);stopUpload.current=false;let count=0,failed=0;
+    try{
+      await checkImportCapacity(list);
+      for (const file of list) {
+        if(stopUpload.current)break;
+        let photo;try{photo=await loadImageFile(file);}catch{failed++;continue;}
+        if(stopUpload.current)break;
+        await checkStorageCapacity(photo.src.length);addArchivePhoto(photo.src,photo.aspect,cats);count++;
+        setUploadStatus(`Imported ${count} of ${list.length}…`);
       }
-    }
+      setUploadStatus(`${count} imported; ${failed} unreadable. ${stopUpload.current?'Import stopped.':''}`);
+    }catch(error){setUploadStatus(`${count} imported. ${error instanceof Error?error.message:'Import failed.'}`);}
+    setUploading(false);
   }
 
   function placeInBook(src: string, photoId: string) {
@@ -133,7 +143,7 @@ export function Archive() {
           <button className="ks-tool ks-tool--accent" onClick={() => inputRef.current?.click()}>
             <Upload size={16} /> Upload
           </button>
-          <FolderUpload onImported={setTab}/>
+          <FolderUpload onImported={setTab}/>{uploading&&<button className="ks-tool" onClick={()=>{stopUpload.current=true;}}>Stop import</button>}<span role="status">{uploadStatus}</span>
         </>
       }
     >

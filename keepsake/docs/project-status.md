@@ -81,6 +81,17 @@ Run from keepsake/: npm run check:acceptance, npm run build, npm run lint. Lint 
 
 ## Latest checkpoint
 
+September 7 reliability and settings pass:
+- Development server defaults to loopback and rejects arbitrary Host headers. Trusted tunnel hosts must be explicitly allowlisted; LAN testing requires an explicit host option.
+- IndexedDB v3 migrates inline photographs into a separate deduplicated image store while keeping exported backups portable. Missing images and read errors block startup and offer retry; they never trigger replacement demo data.
+- Writes are serialized per tab and checked against an atomic saved revision. A stale tab stops saving and offers an unsaved-room download before reloading. Pending changes flush when hidden; browser exit requests confirmation while unsaved. These improve normal closing behavior, but cannot guarantee writes during forced termination or storage failure.
+- Undo retains immutable book versions instead of deep-copying their image data. Folder imports now cap batches at 100 files / 200 MB, each image at 25 MB / 50 megapixels, check available storage, and support stopping after the current image. Photo chooser retains its 20-photo limit. Already imported photos remain when an import is stopped.
+- Page overview shares the actual ink renderer and honors square photo crops.
+- One Room settings dialog contains Appearance & graphics, Music & CRT, Notes & discoveries, Saving & storage, and Help & profile. Window/CRT interactions open the corresponding section. Both graphics options remain user-facing and saved; Balanced water uses 32 x 48 segments, High uses 96 x 128.
+
+Validation: acceptance checks, import-limit tests, production build, and desktop/390px settings layout checks. Native browser tests live in scripts/check-storage-browser.mjs (npm run check:storage): start an isolated server on 127.0.0.1:5178 and provide Playwright through PLAYWRIGHT_MODULE plus optional TEST_BROWSER executable. Tests use fresh temporary browser profiles; never seed personal review origins. The suite covers old-save migration, image deduplication/hydration, stale-write rejection, failed reads, missing images, settings persistence, import/undo/thumbnail behavior, and recovery UI. Physically tested phone/GPU performance and live provider account testing remain separate acceptance work.
+
+
 September 7 scrapbook import and drawing update: the final next-page arrow becomes an Add new page (+) control. Add photo opens a device/cabinet chooser with a 20-photo limit and reorderable preview; batches place four equal square frames per page, preserve existing content, and undo as one operation. Uncropped archive images remain available. Folder upload creates a named cabinet category and reports unreadable files. The blue marker and a conditional thickness slider are available; each stroke preserves its width. A single photo added to a full page is placed on a fresh page.
 
 Validation: automated acceptance checks and production build passed. A fresh headless Edge profile on isolated port 5178 verified 20-photo/five-page layout, square frames, undo/redo, blue stroke color and saved width, cabinet selection, end-page addition, and a renamed folder import containing two images plus one unsupported file. Personal room data was not changed. Mobile folder-picker support remains device dependent.

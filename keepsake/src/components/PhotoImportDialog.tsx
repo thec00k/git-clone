@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {useApp} from '../store/appStore';
 import {useFocusTrap} from '../hooks/useFocusTrap';
+import {checkImportCapacity,checkStorageCapacity} from '../lib/importLimits';
 import {loadImageFile} from '../lib/image';
 import type {ImportPhoto} from '../lib/photoBatch';
 
@@ -11,8 +12,11 @@ export function PhotoImportDialog({onClose,onAdd}:{onClose:()=>void;onAdd:(photo
  async function files(list:FileList|null){
   if(!list?.length)return;
   if(list.length>20){setMessage('Choose up to 20 photos at a time. Nothing has been imported.');return;}
+  const picked=Array.from(list);setBusy(true);
+  try{await checkImportCapacity(picked);}catch(error){if(alive.current){setBusy(false);setMessage(error instanceof Error?error.message:'Storage is unavailable.');}return;}
   setBusy(true);setMessage('Preparing photos…');const loaded:ImportPhoto[]=[];let failed=0;
-  for(const file of Array.from(list)){if(!alive.current)return;try{loaded.push({...await loadImageFile(file),name:file.name});}catch{failed++;}}
+  for(const file of picked){if(!alive.current)return;try{loaded.push({...await loadImageFile(file),name:file.name});}catch{failed++;}}
+  try{await checkStorageCapacity(loaded.reduce((n,p)=>n+p.src.length,0));}catch(error){if(alive.current){setBusy(false);setMessage(error instanceof Error?error.message:'Storage is unavailable.');}return;}
   if(!alive.current)return;setPhotos(loaded);setBusy(false);setMessage(failed?`${failed} file(s) could not be read. Review the remaining photos below.`:'Check the order below. Your device may return files in filename order.');
  }
  function move(i:number,step:number){setPhotos(old=>{const next=[...old];[next[i],next[i+step]]=[next[i+step],next[i]];return next;});}

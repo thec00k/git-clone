@@ -15,7 +15,7 @@ export function CoastalSky({phase,storm}:{phase:Phase;storm:boolean}){
  return <mesh position={[0,6,-30]} material={material}><planeGeometry args={[65,25]}/></mesh>;
 }
 
-export function CoastalWater({phase,storm}:{phase:Phase;storm:boolean}){
+export function CoastalWater({phase,storm,high=false}:{phase:Phase;storm:boolean;high?:boolean}){
  const reduced=useReducedMotion();
  const material=useMemo(()=>new THREE.ShaderMaterial({uniforms:{time:{value:0},deep:{value:new THREE.Color()},shallow:{value:new THREE.Color()},foam:{value:new THREE.Color()},glint:{value:new THREE.Color()},night:{value:0},swell:{value:1}},vertexShader:`uniform float time,swell;varying vec3 world;void main(){vec4 p=modelMatrix*vec4(position,1.);p.y+=(sin(p.x*1.7+p.z*.85+time*.8)*.012+sin(p.z*2.7-time*1.3)*.008)*swell;world=p.xyz;gl_Position=projectionMatrix*viewMatrix*p;}`,fragmentShader:`
  uniform float time,night,swell;uniform vec3 deep,shallow,foam,glint;varying vec3 world;
@@ -48,7 +48,7 @@ export function CoastalWater({phase,storm}:{phase:Phase;storm:boolean}){
  u.shallow.value.set(phase==='night'?'#385c67':phase==='dusk'?'#809fa5':'#7fbcb8');
  u.foam.value.set(phase==='night'?'#85969e':'#e1e8db');u.glint.value.set(phase==='dusk'?'#ffcf92':'#dae9ee');u.night.value=phase==='day'?0:1;u.swell.value=storm?1.5:1;
  useFrame(({clock})=>{if(!reduced)u.time.value=clock.elapsedTime;});
- return <group><mesh geometry={sand} receiveShadow><meshStandardMaterial vertexColors roughness={.76} color={phase==='night'?'#8295a6':'#ffffff'}/></mesh><mesh position={[0,.65,-20]} rotation={[-Math.PI/2,0,0]} material={material}><planeGeometry args={[65,31,96,128]}/></mesh></group>;
+ return <group><mesh geometry={sand} receiveShadow><meshStandardMaterial vertexColors roughness={.76} color={phase==='night'?'#8295a6':'#ffffff'}/></mesh><mesh position={[0,.65,-20]} rotation={[-Math.PI/2,0,0]} material={material}><planeGeometry args={[65,31,high?96:32,high?128:48]}/></mesh></group>;
 }
 
 export function CoastalHorizon({phase}:{phase:Phase}){

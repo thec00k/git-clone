@@ -12,7 +12,7 @@ import { LeavePanel } from "./LeavePanel";
 import { AchievementsToast } from "./AchievementsToast";
 import { RoomTour } from "./RoomTour";
 import { RoomCurator } from "./RoomCurator";
-import { MusicPanel } from "./MusicPanel";
+
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { PhaseBadge, phaseOf } from "./RoomFurniture";
 import { RoomFlat } from "./RoomFlat";
@@ -43,7 +43,8 @@ export function Room() {
   const { scene } = useListen();
   const [envOpen, setEnvOpen] = useState(false);
   const [achOpen, setAchOpen] = useState(false);
-  const [musicOpen, setMusicOpen] = useState(false);
+  const [settingsSection, setSettingsSection] = useState<'appearance'|'music'>('appearance');
+  const setMusicOpen = (_open: boolean) => { setSettingsSection('music'); setEnvOpen(true); };
   const [doorOpen, setDoorOpen] = useState(false);
   // The scene registers this callback with ListenProvider; keep it stable across context updates.
   const openDoor = useCallback(() => setDoorOpen(true), []);
@@ -172,7 +173,7 @@ export function Room() {
                 touring={touring}
                 tourFocus={tourFocus}
                 layer={layer}
-                onOpenWindow={() => setEnvOpen(true)}
+                onOpenWindow={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
                 onOpenMusic={() => setMusicOpen(true)}
                 onSetEnvironment={setEnvironment}
                 onGo={go}
@@ -198,7 +199,7 @@ export function Room() {
               environment={environment}
               tourFocus={tourFocus}
               touring={touring}
-              onOpenWindow={() => setEnvOpen(true)}
+              onOpenWindow={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
               onOpenMusic={() => setMusicOpen(true)}
               onOpenDoor={openDoor}
               onGo={go}
@@ -212,7 +213,7 @@ export function Room() {
             bookCount={state.books.length}
             tourFocus={tourFocus}
             layer={layer}
-            onOpenWindow={() => setEnvOpen(true)}
+            onOpenWindow={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
             onOpenMusic={() => setMusicOpen(true)}
             onGo={go}
           />
@@ -229,7 +230,7 @@ export function Room() {
             touring={touring}
             tourFocus={tourFocus}
             layer={layer}
-            onOpenWindow={() => setEnvOpen(true)}
+            onOpenWindow={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
             onOpenMusic={() => setMusicOpen(true)}
             onSetEnvironment={setEnvironment}
             onGo={go}
@@ -255,7 +256,7 @@ export function Room() {
               return;
             }
             if (id === "window") {
-              setEnvOpen(true);
+              setSettingsSection('appearance'); setEnvOpen(true);
               return;
             }
             if (id === "shelf") {
@@ -327,7 +328,7 @@ export function Room() {
             title="Room settings"
             aria-label="Room settings"
             aria-expanded={envOpen}
-            onClick={() => setEnvOpen(true)}
+            onClick={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
           >
             <Settings2 size={16} />
           </button>
@@ -339,9 +340,8 @@ export function Room() {
       <RoomCurator visible={layout !== "glb" && (layout === "flat" || roomFace === "front") && !touring} />
       {touring && <RoomTour />}
 
-      {envOpen && <EnvironmentPanel onClose={() => setEnvOpen(false)} />}
+      {envOpen && <EnvironmentPanel initialSection={settingsSection} onClose={() => setEnvOpen(false)} />}
       {doorOpen && <LeavePanel onClose={() => setDoorOpen(false)} />}
-      {musicOpen && <MusicPanel onClose={() => setMusicOpen(false)} />}
       {achOpen && <AchievementsPanel onClose={() => setAchOpen(false)} unlocked={state.achievements} />}
       <AchievementsToast
         ids={newlyUnlocked}

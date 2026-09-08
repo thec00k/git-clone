@@ -47,7 +47,7 @@ export function useScrapbook() {
     const current = bookRef.current;
     if (!current || restoringRef.current) return;
     if (!force && burstRef.current) return;
-    pastRef.current = [...pastRef.current.slice(-39), structuredClone(current)];
+    pastRef.current = [...pastRef.current.slice(-39), current];
     futureRef.current = [];
     burstRef.current = true;
     window.setTimeout(() => {
@@ -60,7 +60,7 @@ export function useScrapbook() {
     const current = bookRef.current;
     const prev = pastRef.current.pop();
     if (!current || !prev) return;
-    futureRef.current.push(structuredClone(current));
+    futureRef.current.push(current);
     restoringRef.current = true;
     updateActiveBook(() => prev);
     restoringRef.current = false;
@@ -72,7 +72,7 @@ export function useScrapbook() {
     const current = bookRef.current;
     const next = futureRef.current.pop();
     if (!current || !next) return;
-    pastRef.current.push(structuredClone(current));
+    pastRef.current.push(current);
     restoringRef.current = true;
     updateActiveBook(() => next);
     restoringRef.current = false;

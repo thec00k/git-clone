@@ -1,16 +1,14 @@
 import { Archive, Armchair, BookOpen, ChevronDown, Lamp, Lightbulb, Music2, Printer, Library, Home, MapPinned, Pencil, Armchair as ReadingChair } from "lucide-react";
 import type { Environment } from "../../types/app";
 import type { RoomFace } from "../../lib/roomLayout";
-import {type RoomQuality} from "./themes";
 import {useActiveRoom} from "./useActiveRoom";
 import { useNav } from "../../store/nav";
 import {useApp} from '../../store/appStore';
 
-export function RoomControls({ seated, environment, quality, setQuality, onBook, onFiles, onSeat, onLamp, onCeiling, onLook, onDrawer, onMusic, onReading, onLibrary, onDoor }: {
+export function RoomControls({ seated, environment, onBook, onFiles, onSeat, onLamp, onCeiling, onLook, onDrawer, onMusic, onReading, onLibrary, onDoor }: {
   onDoor: () => void;
   onReading: () => void; onLibrary: () => void;
-  seated: boolean; environment: Environment; quality: RoomQuality;
-  setQuality: (quality: RoomQuality) => void;
+  seated: boolean; environment: Environment;
   onBook: () => void; onFiles: () => void; onSeat: () => void; onMusic: () => void;
   onLamp: () => void; onCeiling: () => void; onLook: (face: RoomFace) => void; onDrawer: () => void;
 }) {
@@ -46,7 +44,7 @@ export function RoomControls({ seated, environment, quality, setQuality, onBook,
           <p>LIGHTING</p>
           <button aria-pressed={environment.lampOn} onClick={onLamp}><Lamp size={16} /> Desk lamp <span>{environment.lampOn ? "On" : "Off"}</span></button>
           <button aria-pressed={environment.ceilingOn !== false} onClick={onCeiling}><Lightbulb size={16} /> Ceiling light <span>{environment.ceilingOn !== false ? "On" : "Off"}</span></button>
-          <label>Room detail <select aria-label="Room detail" value={quality} onChange={e => setQuality(e.target.value as RoomQuality)}><option value="balanced">Balanced</option><option value="high">High</option></select></label>
+
           <small>WASD to move · drag to look</small>
         </div>
       </details>

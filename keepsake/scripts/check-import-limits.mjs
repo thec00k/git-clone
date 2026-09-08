@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {checkImportCapacity,checkStorageCapacity} from '../src/lib/importLimits.ts';
+import {loadImageFile} from '../src/lib/image.ts';
+let quota=1024*1024*1024,usage=0;
+Object.defineProperty(globalThis,'navigator',{configurable:true,value:{storage:{estimate:async()=>({quota,usage})}}});
+await checkImportCapacity([{size:1024}]);
+await assert.rejects(checkImportCapacity(Array.from({length:101},()=>({size:1}))),/100 files/);
+await assert.rejects(checkImportCapacity([{size:201*1024*1024}]),/200 MB/);
+await assert.rejects(loadImageFile({size:26*1024*1024}),/25 MB/);
+quota=6*1024*1024;usage=2*1024*1024;
+await assert.rejects(checkStorageCapacity(1),/enough browser storage/);
+navigator.storage.estimate=async()=>{throw new Error('Not supported');};await checkStorageCapacity(1000);
+console.log('Import limits: file count, batch bytes, per-image bytes, quota headroom, unavailable estimate passed.');

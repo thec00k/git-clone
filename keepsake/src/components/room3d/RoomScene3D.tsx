@@ -17,7 +17,7 @@ import { useListen } from "../../store/listen";
 import { EyeCamera } from "./RoomCamera";
 import { RoomModel } from "./RoomModel";
 import type { HotspotAction } from "./RoomInteractions";
-import { qualityProfiles, type RoomQuality } from "./themes";
+import { qualityProfiles } from "./themes";
 import { WoodlandScenery } from "./WoodlandScenery";
 import { RoomControls } from "./RoomControls";
 import { RoomLoading } from "./RoomLoading";
@@ -48,7 +48,6 @@ export function RoomScene3D({
   const quality=environment.roomQuality??"balanced";
   const {discoveryOpen,isVisitor}=useNav();const [tabVisible,setTabVisible]=useState(!document.hidden);
   useEffect(()=>{const change=()=>setTabVisible(!document.hidden);document.addEventListener('visibilitychange',change);return()=>document.removeEventListener('visibilitychange',change);},[]);
-  const setQuality=(value:RoomQuality)=>setEnvironment({roomQuality:value});
   const [viewRevision, setViewRevision] = useState(0);
   const [reading,setReading]=useState(false);
   useEffect(()=>{if(roomFace!=="front" || touring)setReading(false);},[roomFace,touring]);
@@ -191,7 +190,7 @@ export function RoomScene3D({
         <EyeCamera reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>
       </div>
-      {!touring && <RoomControls onLibrary={()=>onGo("shelf")} onReading={()=>{setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment} quality={quality} setQuality={setQuality}
+      {!touring && <RoomControls onLibrary={()=>onGo("shelf")} onReading={()=>{setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment}
         onBook={() => onGo("book")} onFiles={openArchive} onSeat={seated ? stand : sit}
         onDoor={onOpenDoor} onMusic={onOpenMusic} onLamp={toggleLamp} onCeiling={toggleCeiling} onLook={face => { stand(); lookAt(face); }} onDrawer={openCraft} />}
       {shopOpen && <StickerStore onClose={() => setShopOpen(false)} />}

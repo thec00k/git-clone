@@ -28,7 +28,8 @@ import type {
 } from "../types/scrapbook";
 import { uid } from "../lib/id";
 import { createSeed } from "../data/seed";
-import { loadState, saveState } from "../lib/storage";
+import { loadState, saveState, SaveConflict } from "../lib/storage";
+import { downloadRoom } from "../lib/roomBackup";
 import { evaluate } from "../lib/achievements";
 import {baseline} from '../lib/discoveries';
 import type { Progress } from "../types/app";
@@ -96,6 +97,11 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState | null>(null);
+  const [loadError, setLoadError] = useState('');
+  const [conflict, setConflict] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const savedRef = useRef<AppState | null>(null);
+  const blockedRef = useRef(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
   const loadedRef = useRef(false);
@@ -150,16 +156,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       setState(musicOnEntry(initial));
       loadedRef.current = true;
-    })();
-    return () => {
-      cancelled = true;
-    };
+    })().catch(error => { if (!cancelled) setLoadError(error instanceof Error ? error.message : 'Your saved room could not be read.'); });
+    return () => { cancelled = true; };
+  }, [retry]);
+
+  const persist = useCallback(async (snapshot: AppState) => {
+    if (blockedRef.current) return false;
+    try {
+      await saveState(snapshot);
+      savedRef.current = snapshot;
+      if (stateRef.current === snapshot) setSaveStatus('saved');
+      return true;
+    } catch (error) {
+      setSaveStatus('error');
+      if (error instanceof SaveConflict) { blockedRef.current = true; setConflict(true); }
+      return false;
+    }
   }, []);
+
+  useEffect(() => {
+    const pending = () => !!stateRef.current && stateRef.current !== savedRef.current;
+    const flush = () => { if (pending() && !blockedRef.current) { window.clearTimeout(saveTimer.current); void persist(stateRef.current!); } };
+    const hide = () => { if (document.hidden) flush(); };
+    const leave = (event: BeforeUnloadEvent) => { if (pending()) { flush(); event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('beforeunload', leave);
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', hide);
+    return () => { window.removeEventListener('beforeunload', leave); window.removeEventListener('pagehide', flush); document.removeEventListener('visibilitychange', hide); };
+  }, [persist]);
 
   // Achievement ledger: grants are derived from state (idempotent), stamped
   // with a completion time; then autosave (debounced).
   useEffect(() => {
-    if (!state || !loadedRef.current) return;
+    if (!state || !loadedRef.current || blockedRef.current) return;
     const satisfied = evaluate(state);
     const merged = [...new Set([...state.achievements, ...satisfied])];
     if (merged.length !== state.achievements.length) {
@@ -176,19 +205,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSaveStatus("saving");
     window.clearTimeout(saveTimer.current);
     saveTimer.current = window.setTimeout(() => {
-      saveState(state)
-        .then(() => setSaveStatus("saved"))
-        .catch(() => setSaveStatus("error"));
+      void persist(state);
     }, 450);
     return () => window.clearTimeout(saveTimer.current);
-  }, [state]);
+  }, [state, persist]);
 
   const restoreRoom = useCallback(async (next: AppState) => {
     next={...next,achievementBaseline:next.achievementBaseline??baseline(next)};
     window.clearTimeout(saveTimer.current);
-    await saveState(next);
+    if (!await persist(next)) throw new Error("The restored room could not be saved.");
     stateRef.current=next;setState(next);setNewlyUnlocked([]);setSaveStatus('saved');
-  }, []);
+  }, [persist]);
   const update = useCallback((fn: (prev: AppState) => AppState) => {
     setState((prev) => (prev ? fn(prev) : prev));
   }, []);
@@ -347,14 +374,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     window.clearTimeout(saveTimer.current);
     setSaveStatus("saving");
     try {
-      await saveState(snap);
-      setSaveStatus("saved");
-      return true;
+      return await persist(snap);
     } catch {
       setSaveStatus("error");
       return false;
     }
-  }, []);
+  }, [persist]);
 
   const tidyRoom = useCallback(
     () => flushSave(p => ({ ...p, environment: { ...p.environment, ...TIDY_ROOM } })),
@@ -504,6 +529,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [state],
   );
 
+  if (loadError) return <div className="ks-save-recovery" role="alert"><h1>Your room could not be opened</h1><p>{loadError}</p><p>Your existing save has not been replaced. Close other Keepsake tabs if necessary, then try again.</p><button className="ks-tool" onClick={() => { setLoadError(''); setRetry(n => n + 1); }}>Retry opening room</button></div>;
   if (!state) {
     return (
       <div className="ks-room flex h-dvh items-center justify-center text-paper/60">
@@ -556,7 +582,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     buyStickerPack,
   };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return <AppContext.Provider value={value}>{conflict ? <div className="ks-save-recovery" role="alert"><h1>This room changed in another tab</h1><p>Saving in this tab has stopped to protect the newer room. Download this tab’s changes before reloading if you want to keep them.</p><button className="ks-tool" onClick={() => downloadRoom(state)}>Download this tab’s room</button><button className="ks-tool" onClick={() => { savedRef.current = stateRef.current; window.location.reload(); }}>Reload latest saved room</button></div> : children}</AppContext.Provider>;
 }
 
 export function useApp(): AppContextValue {

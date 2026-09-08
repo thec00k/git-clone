@@ -115,7 +115,7 @@ export function ScrapbookPage({
   );
 }
 
-function PageInk({ strokes }: { strokes: StrokeElement[] }) {
+export function PageInk({ strokes }: { strokes: StrokeElement[] }) {
   if (!strokes.length) return null;
   return (
     <svg className="ks-page-ink" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">

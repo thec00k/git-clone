@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "check:storage": "node scripts/check-storage-browser.mjs",
     "check:room": "node scripts/check-woodland.mjs",
     "check:acceptance": "node scripts/check-acceptance.mjs",
     "check:editor": "node scripts/check-editor.mjs",
