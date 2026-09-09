@@ -20,7 +20,6 @@ const ARCHIVE_DRAWER_OPEN_Z = 0.34;
 const ARCHIVE_FALLBACK = new THREE.Vector3(1.22, 0, -1.805);
 
 import { useReducedMotion } from "../../hooks/useReducedMotion";
-import {useWorkbench} from '../../store/workbench';
 export function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boolean }) {
   const reduced = useReducedMotion();
   const drawer = useMemo(() => scene.getObjectByName(DESK_DRAWER), [scene]);
@@ -279,21 +278,19 @@ function clampOnTop(n: number, limit: number) {
 
 /** Markers / printer / camera. y = 0 is the oak; sit() is only half-height. */
 export function OakDeskClutter({ book }: { book: BookOnDesk }) {
-  const {phase}=useWorkbench();const reduced=useReducedMotion();const markers=useRef<THREE.Group>(null);
   const {setPrinterOpen,isVisitor}=useNav();
   const {state}=useApp();
   const sit = (half: number) => half;
   const insetX = STAND_IN_TOP_W / 2 - 0.14;
   const insetZ = STAND_IN_TOP_D / 2 - 0.12;
-  const markerX = clampOnTop(book.x + (phase==='editing'||phase==='opening'||phase==='closing'?book.halfW+.07:.29), insetX);
-  const printerX = clampOnTop(book.x - book.halfW - 0.17, insetX);
+  const markerX = clampOnTop(book.x + book.halfW + 0.17, insetX);
+  const printerX = clampOnTop(book.x + .36, insetX);
   const cameraX = clampOnTop(book.x - book.halfW - 0.1, insetX);
   const rowZ = clampOnTop(book.z, insetZ);
-  useFrame((_,dt)=>{if(markers.current)markers.current.position.x=THREE.MathUtils.lerp(markers.current.position.x,markerX,motionFactor(dt,MOTION.furniture,reduced));});
 
   return (
     <group>
-      <group ref={markers} name="Desk_Markers_Assembly" position={[clampOnTop(book.x+.29,insetX), sit(0.008), rowZ]} rotation={[0, 0.35, 0]}>
+      <group name="Desk_Markers_Assembly" position={[markerX, sit(0.008), rowZ + 0.18]} rotation={[0, 0.35, 0]}>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
           { z: 0.018, color: "#2c221c", yaw: 0.04 },
@@ -305,7 +302,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
           </mesh>
         ))}
       </group>
-      <group name="Desk_Printer_Assembly" position={[printerX, 0.023, rowZ + 0.18]} rotation={[0, 0.08, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
+      <group name="Desk_Printer_Assembly" position={[printerX, 0.023, rowZ - 0.055]} rotation={[0, 0.08, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
         <FurniturePrinter>
         <RoundedBox args={[0.135,0.046,0.17]} radius={0.012} smoothness={3}><meshStandardMaterial color="#e5dbc7" roughness={0.82}/></RoundedBox>
         <mesh position={[0,0.003,0.086]}><boxGeometry args={[0.103,0.008,0.003]}/><meshStandardMaterial color="#26392f"/></mesh>
