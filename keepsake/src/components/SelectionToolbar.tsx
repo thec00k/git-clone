@@ -57,16 +57,16 @@ export function SelectionToolbar({
       </button>
       <button
         className="ks-chip"
-        aria-label={isPhoto ? "Smaller" : "Smaller text"}
-        title={isPhoto ? "Smaller" : "Smaller text"}
+        aria-label={isPhoto ? "Smaller" : "Narrower text box"}
+        title={isPhoto ? "Smaller" : "Narrower text box"}
         onClick={() => onScale(id, 1 / 1.12)}
       >
         <Minus size={16} />
       </button>
       <button
         className="ks-chip"
-        aria-label={isPhoto ? "Bigger" : "Bigger text"}
-        title={isPhoto ? "Bigger" : "Bigger text"}
+        aria-label={isPhoto ? "Bigger" : "Wider text box"}
+        title={isPhoto ? "Bigger" : "Wider text box"}
         onClick={() => onScale(id, 1.12)}
       >
         <Plus size={16} />

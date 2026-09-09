@@ -283,8 +283,10 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
   const sit = (half: number) => half;
   const insetX = STAND_IN_TOP_W / 2 - 0.14;
   const insetZ = STAND_IN_TOP_D / 2 - 0.12;
-  const markerX = clampOnTop(book.x + book.halfW + 0.17, insetX);
-  const printerX = clampOnTop(book.x + .36, insetX);
+  const markerX = clampOnTop(book.x - book.halfW - 0.1, insetX);
+  // Sideways in front of the CRT, clear of the open book and desk edge.
+  const printerX = clampOnTop(book.x + book.halfW + .17, insetX);
+  const printerZ = clampOnTop(book.z, insetZ) + .18;
   const cameraX = clampOnTop(book.x - book.halfW - 0.1, insetX);
   const rowZ = clampOnTop(book.z, insetZ);
 
@@ -302,7 +304,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
           </mesh>
         ))}
       </group>
-      <group name="Desk_Printer_Assembly" position={[printerX, 0.023, rowZ - 0.055]} rotation={[0, 0.08, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
+      <group name="Desk_Printer_Assembly" position={[printerX, 0.023, printerZ]} rotation={[0, Math.PI / 2, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
         <FurniturePrinter>
         <RoundedBox args={[0.135,0.046,0.17]} radius={0.012} smoothness={3}><meshStandardMaterial color="#e5dbc7" roughness={0.82}/></RoundedBox>
         <mesh position={[0,0.003,0.086]}><boxGeometry args={[0.103,0.008,0.003]}/><meshStandardMaterial color="#26392f"/></mesh>
@@ -312,7 +314,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
         <mesh position={[0.043,0.024,-0.048]}><sphereGeometry args={[0.003,8,6]}/><meshStandardMaterial color="#a6ce97" emissive="#82b76e" emissiveIntensity={0.5}/></mesh>
         {['#b56c4a','#c7a86b','#6d8a6c'].map((color,i)=><mesh key={color} position={[-0.009+i*0.009,0.0235,-0.058]}><boxGeometry args={[0.008,0.001,0.025]}/><meshStandardMaterial color={color}/></mesh>)}
       </group>
-      <group name="Desk_Camera_Assembly" position={[cameraX, sit(0.025), rowZ]} rotation={[0, 0.32, 0]}>
+      <group name="Desk_Camera_Assembly" position={[cameraX, sit(0.025), rowZ - .07]} rotation={[0, 0.32, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#ad7852" roughness={0.78} />

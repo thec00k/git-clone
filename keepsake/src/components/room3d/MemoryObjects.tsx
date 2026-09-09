@@ -85,7 +85,7 @@ function MemoryDisplays({scene}:{scene:THREE.Object3D}) {
   const texture=new THREE.TextureLoader().load(photo.src,()=>{if(live){texture.flipY=false;material.map=texture;material.needsUpdate=true;object.material=material;}});texture.colorSpace=THREE.SRGBColorSpace;
   return()=>{live=false;object.material=old;texture.dispose();material.dispose();};
  },[scene,photo]);
- return <group position={[-.71,.752,-1.59]} rotation={[-Math.PI/2,0,-.15]}><mesh><planeGeometry args={[.12,.075]}/><meshStandardMaterial map={note} roughness={1}/></mesh></group>;
+ return <group position={[-.86,.752,-1.59]} rotation={[-Math.PI/2,0,-.15]}><mesh><planeGeometry args={[.12,.075]}/><meshStandardMaterial map={note} roughness={1}/></mesh></group>;
 }
 
 function ShelfMemory({book,index,chosen,onChoose,onOpen,onCancel}:{book:Scrapbook;index:number;chosen:string|null;onChoose:()=>void;onOpen:()=>void;onCancel:()=>void}){

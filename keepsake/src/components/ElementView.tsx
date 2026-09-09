@@ -16,7 +16,31 @@ interface Props {
   onEditText: (id: string, text: string) => void;
 }
 
-export function ElementView({ element, selected, onSelect, onMove, onTransform, onEditText }: Props) {
+/** Keep pointer previews local; persist one transform per completed gesture. */
+export function ElementView(props: Props) {
+  const [preview, setPreview] = useState<Partial<PageElement> | null>(null);
+  const pending = useRef<Partial<PageElement> | null>(null);
+  const pointers = useRef(new Set<number>());
+  const transform = (_id: string, patch: Partial<PageElement>) => {
+    pending.current = {...pending.current, ...patch};
+    setPreview(pending.current);
+  };
+  const finish = (e: ReactPointerEvent<HTMLDivElement>) => {
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size) return;
+    if (pending.current) props.onTransform(props.element.id, pending.current);
+    pending.current = null;
+    setPreview(null);
+  };
+  return <div style={{display: 'contents'}}
+    onPointerDownCapture={e => { if (!(e.target as HTMLElement).closest("textarea")) pointers.current.add(e.pointerId); }}
+    onPointerUpCapture={finish} onPointerCancelCapture={finish}>
+    <ElementContent {...props} element={{...props.element, ...preview} as PageElement}
+      onTransform={transform} onMove={(id, x, y) => transform(id, {x, y})}/>
+  </div>;
+}
+
+function ElementContent({ element, selected, onSelect, onMove, onTransform, onEditText }: Props) {
   const positionStyle: CSSProperties = {
     position: "absolute",
     left: `${element.x}%`,
@@ -52,6 +76,7 @@ export function ElementView({ element, selected, onSelect, onMove, onTransform, 
       selected={selected}
       onSelect={onSelect}
       onMove={onMove}
+      onTransform={onTransform}
       onEditText={onEditText}
     />
   );
@@ -292,6 +317,7 @@ function CaptionView({
   selected,
   onSelect,
   onMove,
+  onTransform,
   onEditText,
 }: {
   element: CaptionElement;
@@ -299,6 +325,7 @@ function CaptionView({
   selected: boolean;
   onSelect: (id: string) => void;
   onMove: (id: string, x: number, y: number) => void;
+  onTransform: (id: string, patch: Partial<PageElement>) => void;
   onEditText: (id: string, text: string) => void;
 }) {
   const drag = usePointerDrag(
@@ -330,26 +357,36 @@ function CaptionView({
   };
 
   const handleSelect = (e: ReactPointerEvent<HTMLElement>) => {
+    if ((e.target as HTMLElement).closest("textarea")) return;
+    e.preventDefault();
     e.stopPropagation();
+    setEditing(false);
     onSelect(element.id);
     drag.onPointerDown(e);
   };
 
   return (
     <div
-      style={style}
-      onPointerDown={editing ? undefined : handleSelect}
-      onPointerMove={editing ? undefined : drag.onPointerMove}
-      onPointerUp={editing ? undefined : drag.onPointerUp}
-      onPointerCancel={editing ? undefined : drag.onPointerCancel}
-      onDoubleClick={() => setEditing(true)}
+      className="ks-el"
+      style={{...style, padding: 8, userSelect: "none", cursor: "move"}}
+      onPointerDown={handleSelect}
+      onPointerMove={drag.onPointerMove}
+      onPointerUp={drag.onPointerUp}
+      onPointerCancel={drag.onPointerCancel}
+      onDoubleClick={e => { if (!(e.target as HTMLElement).closest("[data-no-drag]")) setEditing(true); }}
+      onKeyDown={e => { if (e.target === e.currentTarget && e.key === "Enter") { onSelect(element.id); setEditing(true); } }}
       role="button"
       tabIndex={0}
       aria-label={`Caption: ${element.text}`}
     >
+      {selected && <>
+        <RotateHandle onRotate={rotation => onTransform(element.id, {rotation})}/>
+        {(["nw", "ne", "sw", "se"] as const).map(corner => <ResizeHandle key={corner} corner={corner} size={element.w} onResize={w => onTransform(element.id, {w})}/>)}
+      </>}
       {editing ? (
         <textarea
           ref={textareaRef}
+          onPointerDown={e => e.stopPropagation()}
           data-no-drag
           value={element.text}
           maxLength={140}
@@ -358,6 +395,8 @@ function CaptionView({
           rows={2}
           style={{
             ...captionStyle,
+            userSelect: "text",
+            cursor: "text",
             background: "rgba(255,255,255,0.5)",
             border: "1px solid var(--color-accent)",
             borderRadius: 6,
