@@ -15,6 +15,7 @@ import { MAX_PHOTOS_PER_PAGE } from "../types/scrapbook";
 import { uid } from "../lib/id";
 import { clamp } from "../lib/clamp";
 import { computeLayout, type LayoutPreset } from "../lib/layout";
+import { thenNowPage } from '../lib/thenNow';
 import { useApp } from "../store/appStore";
 import { photoRows } from "../lib/photoRows";
 
@@ -303,6 +304,12 @@ export function useScrapbook() {
     (pageId: string, preset: LayoutPreset) => {
       const page = pages.find((p) => p.id === pageId);
       if (!page) return;
+      if (preset === 'then-now') {
+        const comparison = thenNowPage(page);
+        if (!comparison) return false;
+        mutatePageElements(pageId, () => comparison.elements);
+        return true;
+      }
       const photoCount = page.elements.filter((e) => e.type === "photo").length;
       const placements = computeLayout(preset, photoCount);
       if (preset === "grid") {

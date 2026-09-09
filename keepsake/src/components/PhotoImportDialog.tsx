@@ -15,7 +15,7 @@ export function PhotoImportDialog({onClose,onAdd}:{onClose:()=>void;onAdd:(photo
   const picked=Array.from(list);setBusy(true);
   try{await checkImportCapacity(picked);}catch(error){if(alive.current){setBusy(false);setMessage(error instanceof Error?error.message:'Storage is unavailable.');}return;}
   setBusy(true);setMessage('Preparing photos…');const loaded:ImportPhoto[]=[];let failed=0;
-  for(const file of picked){if(!alive.current)return;try{loaded.push({...await loadImageFile(file),name:file.name});}catch{failed++;}}
+  for(const file of picked){if(!alive.current)return;try{loaded.push({...await loadImageFile(file,state.profile.preserveOriginals!==false),name:file.name});}catch{failed++;}}
   try{await checkStorageCapacity(loaded.reduce((n,p)=>n+p.src.length,0));}catch(error){if(alive.current){setBusy(false);setMessage(error instanceof Error?error.message:'Storage is unavailable.');}return;}
   if(!alive.current)return;setPhotos(loaded);setBusy(false);setMessage(failed?`${failed} file(s) could not be read. Review the remaining photos below.`:'Check the order below. Your device may return files in filename order.');
  }
@@ -23,7 +23,7 @@ export function PhotoImportDialog({onClose,onAdd}:{onClose:()=>void;onAdd:(photo
  return <div className="ks-import-backdrop"><div ref={root} className="ks-import-dialog" role="dialog" aria-modal="true" aria-labelledby="photo-import-title">
   <header><h2 id="photo-import-title">Add photos</h2><button onClick={onClose} aria-label="Close photo chooser">×</button></header>
   <div className="ks-import-sources"><button aria-pressed={source==='device'} onClick={()=>{setSource('device');setPhotos([]);setMessage('');}} disabled={busy}>Computer or phone</button><button aria-pressed={source==='cabinet'} onClick={()=>{setSource('cabinet');setPhotos([]);setMessage('');}} disabled={busy}>Filing cabinet</button></div>
-  <p>Select up to 20. Multiple photos use equal square frames, four per page. Originals stay in the cabinet.</p>
+  <p>Select up to 20. Multiple photos use equal square frames, four per page. Uncropped display copies stay in the cabinet. Original files are also preserved when enabled in Saving & storage.</p>
   {source==='device'?<button disabled={busy} onClick={()=>input.current?.click()}>Choose photos from device</button>:<><label>Category <select value={category} onChange={e=>setCategory(e.target.value)}><option value="all">All photographs</option>{state.archiveTabs.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label><div className="ks-import-grid" aria-label="Cabinet photographs">{state.archive.filter(p=>category==='all'||p.categories.includes(category)).map((p,i)=>{const selected=photos.some(a=>a.photoId===p.id);return <button key={p.id} aria-label={`Select cabinet photo ${i+1}`} aria-pressed={selected} disabled={!selected&&photos.length>=20} onClick={()=>setPhotos(old=>selected?old.filter(a=>a.photoId!==p.id):[...old,{src:p.src,aspect:p.aspect,photoId:p.id,name:`Cabinet photo ${i+1}`}])}><img src={p.src} alt="" loading="lazy"/>{selected?'✓ Selected':'Select'}</button>;})}</div>{!state.archive.length&&<p>Your cabinet is empty. Choose photos from your device first.</p>}</>}
   <input ref={input} type="file" accept="image/*" multiple hidden aria-label="Select photos from device" onChange={e=>{void files(e.target.files);e.target.value='';}}/>
   <p role="status">{message}</p>

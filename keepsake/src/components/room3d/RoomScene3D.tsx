@@ -157,7 +157,7 @@ export function RoomScene3D({
       data-archive-open={cabinetOpen ? "1" : "0"}
       aria-label="The scrapbook room"
     >
-      <RoomSound environment={environment}/>
+      <RoomSound environment={environment} face={roomFace} reading={workbenchPhase==='editing'}/>
       <div className="ks-room3d-picture" role="group" aria-label="Interactive room">
       <Canvas key={activeRoom.id}
         frameloop={tabVisible&&!discoveryOpen?'always':'demand'}

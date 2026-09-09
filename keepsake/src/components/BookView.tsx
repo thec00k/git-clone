@@ -30,6 +30,7 @@ import { useNav } from "../store/nav";
 import { loadImageFile } from "../lib/image";
 import { canSee, VIEW_AS_LABEL } from "../lib/permissions";
 import type { LayoutPreset } from "../lib/layout";
+import {MemoryTrails} from './MemoryTrails';
 import { ownedStickerGlyphs } from "../lib/stickerPacks";
 import { RoomFrame } from "./RoomFrame";
 import { Spread } from "./Spread";
@@ -76,8 +77,9 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
 
   async function handleReplace(id: string, file: File) {
     try {
-      const { src } = await loadImageFile(file);
-      sb.updateElement(id, { src });
+      const image = await loadImageFile(file,state.profile.preserveOriginals!==false);
+      const photoId=addArchivePhoto(image.src,image.aspect,[],image.original);
+      sb.updateElement(id, { src:image.src, photoId });
     } catch {
       /* ignore */
     }
@@ -90,7 +92,9 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
     if (!hasPhotos(pid)) pid = [sb.leftPage, sb.rightPage].find((p) => hasPhotos(p?.id))?.id ?? pid;
     if (pid) {
       const ok=sb.arrangePage(pid, preset);
-      setArrangeNote(ok===false ? "Not enough clear space. Move writing or use a fresh page, then try again." : "Photos aligned in two columns. Undo restores your previous arrangement.");
+      setArrangeNote(preset==='then-now'
+        ? ok===false ? 'Then & Now needs a non-title page with exactly two photos and no other decorations or writing.' : 'Then & Now arranged. Edit the captions to add dates or context. Undo restores the previous layout.'
+        : ok===false ? "Not enough clear space. Move writing or use a fresh page, then try again." : "Photos aligned in two columns. Undo restores your previous arrangement.");
     }
     setShowPresets(false);
   };
@@ -270,6 +274,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
               <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-full bg-[rgb(28_22_16/0.92)] px-2 py-1.5 shadow-lg">
                 <span className="px-1 text-sm text-paper/60">Two columns · room for 4–6 photos</span>
                 <button className="ks-tool" onClick={() => applyPreset("grid")}><LayoutGrid size={16} /> Align side by side</button>
+                <button className="ks-tool" onClick={() => applyPreset('then-now')}>Then &amp; Now · 2 photos</button>
               </div>
             )}
             {showStickers && (
@@ -398,6 +403,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
           <p className="ks-page-navigation-hint">{sb.spread === 0 ? "The beginning" : "← Previous"} <span>·</span> {sb.spread === sb.spreadCount - 1 ? "The latest chapter" : "Next →"}</p>
           </div>
         </div>
+      {sb.book && !turn && overlay(<MemoryTrails key={sb.book.id}/>)}
       {showNotes && sb.book && overlay(
         <NotesPanel key={`${sb.book.id}:${sb.spread}`}
           bookId={sb.book.id}
@@ -410,7 +416,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
         if(!targetPageId)return;
         const target=sb.pages.find(page=>page.id===targetPageId);
         if(!target)return;
-        const ready=photos.map(p=>({...p,photoId:p.photoId??addArchivePhoto(p.src,p.aspect)}));
+        const ready=photos.map(p=>({...p,photoId:p.photoId??addArchivePhoto(p.src,p.aspect,[],p.original)}));
         if(ready.length===1 && target.elements.filter(e=>e.type==='photo').length<MAX_PHOTOS_PER_PAGE) sb.addPhoto(targetPageId,ready[0].src,ready[0].photoId);
         else sb.addPhotoBatch(targetPageId,ready);
         setShowPhotos(false);

@@ -4,7 +4,7 @@
  * data already lives in IndexedDB, so a loaded book can be revisited offline.
  * Registered in production only (see main.tsx) to avoid disturbing dev HMR.
  */
-const CACHE = "keepsake-v1";
+const CACHE = "keepsake-v2";
 const CORE = ["/", "/index.html", "/favicon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
@@ -20,14 +20,14 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('keepsake-') && k !== CACHE && k !== 'keepsake-offline-v2').map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-  if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
+  if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin || new URL(req.url).pathname.startsWith('/api/')) return;
 
   // App navigations: network-first, fall back to the cached shell offline.
   if (req.mode === "navigate") {
@@ -38,14 +38,14 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE).then((c) => c.put("/index.html", copy));
           return res;
         })
-        .catch(() => caches.match("/index.html")),
+        .catch(() => caches.match("/index.html",{ignoreVary:true})),
     );
     return;
   }
 
   // Static assets: serve cached, refresh in the background.
   event.respondWith(
-    caches.match(req).then((cached) => {
+    caches.match(req,{ignoreVary:true}).then((cached) => {
       const network = fetch(req)
         .then((res) => {
           if (res && res.status === 200) {

@@ -7,7 +7,10 @@ import { loadImageFile } from "../../lib/image";
 import { uid } from "../../lib/id";
 import type { PhotoElement } from "../../types/scrapbook";
 import { ViewShell } from "./ViewShell";
+import {FoundPhotos} from "../FoundPhotos";
+import {TicketCompanion} from '../TicketCompanion';
 import {FolderUpload} from '../FolderUpload';
+import {downloadOriginal} from '../../lib/originalPhotos';
 
 type TabKey = "all" | "favorites" | string;
 
@@ -64,9 +67,9 @@ export function Archive() {
       await checkImportCapacity(list);
       for (const file of list) {
         if(stopUpload.current)break;
-        let photo;try{photo=await loadImageFile(file);}catch{failed++;continue;}
+        let photo;try{photo=await loadImageFile(file,state.profile.preserveOriginals!==false);}catch{failed++;continue;}
         if(stopUpload.current)break;
-        await checkStorageCapacity(photo.src.length);addArchivePhoto(photo.src,photo.aspect,cats);count++;
+        await checkStorageCapacity(photo.src.length);addArchivePhoto(photo.src,photo.aspect,cats,photo.original);count++;
         setUploadStatus(`Imported ${count} of ${list.length}…`);
       }
       setUploadStatus(`${count} imported; ${failed} unreadable. ${stopUpload.current?'Import stopped.':''}`);
@@ -229,6 +232,7 @@ export function Archive() {
         {filtered.length} photo{filtered.length === 1 ? "" : "s"} · newest first
         {tab !== "all" && tab !== "favorites" ? " · uploads join this tab" : ""}
       </p>
+      <TicketCompanion/><FoundPhotos/>
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         {filtered.map((a) => (
           <div key={a.id} className="ks-panel overflow-hidden">
@@ -254,6 +258,7 @@ export function Archive() {
                 <BookPlus size={14} />
               </button>
             </div>
+            <div className="px-2 pb-2 text-xs">{a.original?<button className="ks-tool" onClick={()=>void downloadOriginal(a.original!).catch(e=>setUploadStatus(e instanceof Error?e.message:"Download failed."))}>Download original</button>:<span>Display copy only</span>}</div>
             {tabs.length > 0 && (
               <div className="flex flex-wrap gap-1 px-2 pb-2">
                 {tabs.map((t) => (

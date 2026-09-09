@@ -9,6 +9,9 @@ import type { Scrapbook, Visibility } from "./scrapbook";
 export const STICKY_NOTE_MAX = 20;
 
 export interface Profile {
+  foundPhotos?: boolean;
+  lastFoundPhotosAt?: number;
+  preserveOriginals?: boolean;
   displayName: string;
   allowFriendScrapbooks?: boolean;
 }
@@ -19,6 +22,9 @@ export interface ArchiveTab {
 }
 
 export interface ArchivePhoto {
+  ticket?: {event:string;venue:string;date:string;style:string;provenance:'commemorative-template'};
+  activity?: {lastMeaningfulAt?:number;dismissed?:boolean};
+  original?: import('../lib/originalPhotos').OriginalPhoto;
   id: string;
   src: string;
   aspect: number;
@@ -35,6 +41,8 @@ export type Weather = "clear" | "rain" | "snow";
 export type MusicProvider = "ambient" | "spotify" | "lofi" | "soundcloud";
 
 export interface Environment {
+  memoryLighting?: boolean;
+  soundGeography?: boolean;
   furniture?: import('../lib/furniture').RoomFurnitureChoices;
   roomTheme?: "woodland" | "beachfront";
   roomQuality?: "balanced" | "high";
@@ -127,6 +135,8 @@ export interface Progress {
 }
 
 export interface AppState {
+  /** Portable backup payload only; never hydrated into the normal room. */
+  originalFiles?: Record<string,string>;
   framePhotoId?: string;
   discoveries?: import('../lib/discoveries').DiscoveryState;
   achievementBaseline?: { elements: string[]; books: string[]; pins: string[]; guests: string[] };

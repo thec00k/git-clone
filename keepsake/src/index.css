@@ -2751,3 +2751,9 @@
 .ks-asset-credits a { text-decoration:underline; text-underline-offset:3px; }
 :root:has(.ks-room3d[data-workbench="editing"]) .ks-achievement-toast { top:78px; bottom:auto; }
 @media(max-width:800px) { :root:has(.ks-room3d[data-workbench="editing"]) .ks-achievement-toast { top:125px; max-width:85vw; } }
+
+/* Shared paper controls for memory tools, also readable outside room settings. */
+.ks-memory-form input:not([type="checkbox"]),.ks-memory-form select{background:#fff8e9;color:#342e24;border:1px solid #a99b80;border-radius:5px;padding:8px;max-width:100%;font:inherit}
+.ks-memory-form summary{cursor:pointer;font-weight:600}
+.ks-memory-form p{font-size:13px;line-height:1.5;margin:8px 0}
+.ks-memory-form button:focus-visible,.ks-memory-form input:focus-visible,.ks-memory-form select:focus-visible{outline:2px solid #c2983c;outline-offset:3px}

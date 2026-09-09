@@ -3,7 +3,7 @@
  * who enjoy craft" (Bible §5). Each preset returns, in order, a placement for
  * every photo on a page: center x/y and width as percentages, plus rotation.
  */
-export type LayoutPreset = "grid" | "column" | "scatter";
+export type LayoutPreset = "grid" | "column" | "scatter" | "then-now";
 
 export interface Placement {
   x: number;

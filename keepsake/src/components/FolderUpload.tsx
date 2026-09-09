@@ -8,7 +8,7 @@ export function FolderUpload({onImported}:{onImported:(category:string)=>void}){
  return <><button className="ks-tool" onClick={()=>input.current?.click()}>Upload folder</button><input ref={input} type="file" multiple {...{webkitdirectory:'',directory:''}} hidden aria-label="Upload a photo folder" onChange={e=>{setFiles(Array.from(e.target.files??[]));e.target.value='';}}/>{!!files.length&&<FolderDialog files={files} onClose={()=>setFiles([])} onImported={onImported}/>}</>;
 }
 function FolderDialog({files,onClose,onImported}:{files:File[];onClose:()=>void;onImported:(id:string)=>void}){
- const {addArchivePhoto,addArchiveTab}=useApp();const root=useRef<HTMLDivElement>(null);const [busy,setBusy]=useState(false);const [status,setStatus]=useState('');
+ const {state,addArchivePhoto,addArchiveTab}=useApp();const root=useRef<HTMLDivElement>(null);const [busy,setBusy]=useState(false);const [status,setStatus]=useState('');
  const stop=useRef(false),alive=useRef(true);useEffect(()=>{alive.current=true;return()=>{alive.current=false;stop.current=true;};},[]);
  const [name,setName]=useState(files[0]?.webkitRelativePath.split('/')[0]||'New category');
  useFocusTrap(root,()=>{if(!busy)onClose();});
@@ -19,10 +19,10 @@ function FolderDialog({files,onClose,onImported}:{files:File[];onClose:()=>void;
    for(let i=0;i<files.length;i++){
     if(stop.current)break;
     setStatus(`Reading ${i+1} of ${files.length}…`);
-    let photo;try{photo=await loadImageFile(files[i]);}catch{failed++;continue;}
+    let photo;try{photo=await loadImageFile(files[i],state.profile.preserveOriginals!==false);}catch{failed++;continue;}
     if(stop.current)break;
     await checkStorageCapacity(photo.src.length);
-    if(!category)category=addArchiveTab(name.trim());addArchivePhoto(photo.src,photo.aspect,[category]);count++;
+    if(!category)category=addArchiveTab(name.trim());addArchivePhoto(photo.src,photo.aspect,[category],photo.original);count++;
    }
   }catch(error){reason=error instanceof Error?error.message:'Import could not finish.';}
   if(!alive.current)return;

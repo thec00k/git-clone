@@ -1,8 +1,14 @@
 # Keepsake — current project checklist
 
-Updated September 8, 2026. This is the authoritative implementation checklist. The prototype notes, worklog PDFs and earlier suggestions are historical records; later entries may supersede earlier ones.
+Updated September 9, 2026. This is the authoritative implementation checklist. The prototype notes, worklog PDFs and earlier suggestions are historical records; later entries may supersede earlier ones.
 
 ## Product direction
+
+### September 9 photo preservation and memory features
+
+New imports keep original bytes by default, with a display-only choice under Saving & storage. Originals have separate IndexedDB storage, archive downloads, and integrity-checked portable backups. Existing reduced photographs cannot regain detail without re-importing. JSON backup size remains capped at 250 MB; large-library streaming export is still needed.
+
+Initial Then & Now layout, optional book mood lighting, exterior sound zones, conservative Found Photos, manual book trails, commemorative ticket templates and production offline preparation are implemented. These are scoped local prototypes, not the full cloud/AI versions of Bible v4. Exact scope, validation and remaining work: [v4 decisions](v4-decisions.md).
 
 ### September 8 furniture fit follow-up
 

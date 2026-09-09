@@ -125,11 +125,12 @@ export function playRoomSound(kind:'wood'|'drawer', volume:number){
  osc.connect(gain).connect(c.destination);osc.start();osc.stop(now+.4);osc.onended=()=>{osc.disconnect();gain.disconnect();};
  if(kind==='drawer')playPageTurn(volume*.25);
 }
-export function startWeather(weather:string,volume:number):()=>void{
- if(volume<=0)return()=>{};
+export type WeatherSound=(()=>void)&{setVolume:(volume:number)=>void};
+export function startWeather(weather:string,volume:number):WeatherSound{
  const c=getCtx();void c.resume();const buffer=c.createBuffer(1,c.sampleRate*4,c.sampleRate);const data=buffer.getChannelData(0);let brown=0;
  for(let i=0;i<data.length;i++){brown=(brown+(Math.random()*2-1)*.025)/1.025;data[i]=weather==='rain'?(Math.random()*2-1)*.45+brown:weather==='surf'?brown*(.55+.45*Math.cos(i/data.length*Math.PI*2)):brown;}
  const source=c.createBufferSource();source.buffer=buffer;source.loop=true;const filter=c.createBiquadFilter();filter.type='lowpass';filter.frequency.value=weather==='rain'?2400:500;
  const gain=c.createGain();gain.gain.value=0;gain.gain.setTargetAtTime(volume*(weather==='rain'?.085:.045),c.currentTime,.8);source.connect(filter).connect(gain).connect(c.destination);source.start();
- return()=>{source.stop();source.disconnect();filter.disconnect();gain.disconnect();};
+ const stop=()=>{source.stop();source.disconnect();filter.disconnect();gain.disconnect();};
+ return Object.assign(stop,{setVolume:(next:number)=>gain.gain.setTargetAtTime(Math.max(0,next)*(weather==='rain'?.085:.045),c.currentTime,.8)});
 }

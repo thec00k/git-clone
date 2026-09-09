@@ -10,6 +10,9 @@ import type { Environment } from "../../types/app";
 import { worldPos, lampShadePos, deskLampCorner, STAND_IN_DESK } from "./sceneGeometry";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import {useActiveRoom} from './useActiveRoom';
+import {useApp} from '../../store/appStore';
+import {useWorkbench} from '../../store/workbench';
+import {MEMORY_MOODS} from '../../lib/memoryAtmosphere';
 const CEILING_FALLBACK = new THREE.Vector3(0, 3.02, 0);
 const WINDOW_SUN_FALLBACK = new THREE.Vector3(-0.15, 2.28, -2.63);
 
@@ -24,6 +27,8 @@ export function RoomLights({
   scene?: THREE.Object3D;
 }) {
   const reduced = useReducedMotion();
+  const {activeBook}=useApp();const {phase:bookPhase}=useWorkbench();
+  const memoryMood=environment.memoryLighting&&bookPhase==='editing'?activeBook?.memoryMood:undefined;
   const coastal = useActiveRoom().id === 'beachfront';
   const night = phase === "night";
   const dusk = phase === "dusk";
@@ -44,7 +49,11 @@ export function RoomLights({
   const lampRef = useRef<THREE.PointLight>(null);
 
 
-  const lightColor=useMemo(()=>new THREE.Color(night?'#c8d4f0':dusk?'#ffb070':'#ffe6b8'),[night,dusk]);
+  const lightColor=useMemo(()=>{
+    const color=new THREE.Color(night?'#c8d4f0':dusk?'#ffb070':'#ffe6b8');
+    if(memoryMood&&memoryMood!=='neutral'&&MEMORY_MOODS[memoryMood])color.lerp(new THREE.Color(MEMORY_MOODS[memoryMood].light),.22);
+    return color;
+  },[night,dusk,memoryMood]);
   const ambientColor=useMemo(()=>new THREE.Color(night?'#8a9bb8':'#fff4e6'),[night]);
   useFrame((_, dt) => {
     const t=motionFactor(dt,MOTION.light,reduced);

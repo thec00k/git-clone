@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {thenNowPage} from '../src/lib/thenNow.ts';
+const photo=id=>({id,type:'photo',src:'/samples/1.jpg',photoId:id,x:50,y:50,w:50,rotation:12,z:1,frame:'polaroid'});
+const page={id:'page',elements:[photo('a'),photo('b')]};
+const before=JSON.stringify(page), result=thenNowPage(page);
+assert.equal(JSON.stringify(page),before,'Original page is unchanged for undo');
+assert.deepEqual(result.elements.slice(0,2).map(p=>p.photoId),['a','b']);
+assert.deepEqual(result.elements.slice(2).map(p=>p.text),['Then','Now']);
+result.elements[2].text='Then — 1998';
+assert.equal(thenNowPage(result).elements[2].text,'Then — 1998');
+assert.equal(thenNowPage({...page,titlePage:true}),null);
+assert.equal(thenNowPage({...page,elements:[photo('a')]}),null);
+assert.equal(thenNowPage({...page,elements:[...page.elements,{id:'writing',type:'caption',text:'Keep this'}]}),null);
+console.log('PASS Then & Now preserves sources, custom captions and existing content; rejects incompatible pages.');

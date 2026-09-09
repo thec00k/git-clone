@@ -77,6 +77,8 @@ export interface Page {
 }
 
 export interface Scrapbook {
+  memoryLinks?: string[];
+  memoryMood?: import('../lib/memoryAtmosphere').MemoryMood;
   id: string;
   title: string;
   subtitle: string;

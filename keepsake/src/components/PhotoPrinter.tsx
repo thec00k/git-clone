@@ -25,7 +25,7 @@ export function PhotoPrinter({onClose}:{onClose:()=>void}) {
  const book=state.books.find(b=>b.id===bookId);
  async function upload(file?:File) {
   if(!file)return;
-  try { const image=await loadImageFile(file);const id=addArchivePhoto(image.src,image.aspect);setPhoto({src:image.src,aspect:image.aspect,photoId:id});setPrinted(false);setError(""); }
+  try { const image=await loadImageFile(file,state.profile.preserveOriginals!==false);const id=addArchivePhoto(image.src,image.aspect,[],image.original);setPhoto({src:image.src,aspect:image.aspect,photoId:id});setPrinted(false);setError(""); }
   catch {setError("That photo could not be opened. Try another image.");}
  }
  function placeInBook() {

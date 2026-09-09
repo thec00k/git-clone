@@ -1,6 +1,6 @@
 import type {Scrapbook,Page,PhotoElement} from '../types/scrapbook';
 import {uid} from './id.ts';
-export type ImportPhoto={src:string;aspect:number;photoId?:string;name?:string};
+export type ImportPhoto={src:string;aspect:number;photoId?:string;name?:string;original?:import("./originalPhotos").OriginalPhoto};
 /** A batch is one editor operation. Existing content is never moved or overwritten. */
 export function insertPhotoBatch(book:Scrapbook,targetId:string,photos:ImportPhoto[]){
  if(!photos.length||photos.length>20)throw new Error('Choose between 1 and 20 photos.');

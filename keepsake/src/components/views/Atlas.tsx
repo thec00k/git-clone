@@ -12,7 +12,7 @@ import type { MemoryPin, PinNote, ViewAs } from "../../types/app";
 import { PIN_NOTE_MAX } from "../../types/app";
 
 export function Atlas() {
-  const { state, environment, setEnvironment, addPin, updatePin, removePin, addPinNote, updatePinNote, deletePinNote, recordProgress } =
+  const { state, environment, setEnvironment, addArchivePhoto, addPin, updatePin, removePin, addPinNote, updatePinNote, deletePinNote, recordProgress } =
     useApp();
   const { isVisitor, viewAs, setViewAs, pendingPrint, setPendingPrint } = useNav();
   const [draft, setDraft] = useState<{ x: number; y: number } | null>(pendingPrint ? { x: 50, y: 50 } : null);
@@ -89,8 +89,9 @@ export function Atlas() {
     const file = files?.[0];
     if (!file) return;
     try {
-      const { src } = await loadImageFile(file);
-      setPhotoSrc(src);
+      const image = await loadImageFile(file,state.profile.preserveOriginals!==false);
+      addArchivePhoto(image.src,image.aspect,[],image.original);
+      setPhotoSrc(image.src);
     } catch {
       /* ignore */
     }

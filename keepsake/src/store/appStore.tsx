@@ -32,6 +32,8 @@ import type {
 import { uid } from "../lib/id";
 import { createSeed } from "../data/seed";
 import { loadState, saveState, SaveConflict } from "../lib/storage";
+import {recordPhotoActivity} from "../lib/photoActivity";
+import {restoreOriginalFiles} from "../lib/originalPhotos";
 import { downloadRoom } from "../lib/roomBackup";
 import { evaluate } from "../lib/achievements";
 import {baseline} from '../lib/discoveries';
@@ -59,7 +61,7 @@ interface AppContextValue {
   setBookPlaylist: (id: string, uri: string | undefined) => void;
   setBookShelf: (id: string, pos: { shelfRow: number; shelfX: number }) => void;
 
-  addArchivePhoto: (src: string, aspect: number, categories?: string[]) => string;
+  addArchivePhoto: (src: string, aspect: number, categories?: string[], original?: import("../lib/originalPhotos").OriginalPhoto) => string;
   toggleFavorite: (id: string) => void;
   setCategories: (id: string, categories: string[]) => void;
   addArchiveTab: (name: string) => string;
@@ -214,25 +216,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [state, persist]);
 
   const restoreRoom = useCallback(async (next: AppState) => {
+    next=await restoreOriginalFiles(next);
     next={...next,achievementBaseline:next.achievementBaseline??baseline(next)};
     window.clearTimeout(saveTimer.current);
     if (!await persist(next)) throw new Error("The restored room could not be saved.");
     stateRef.current=next;setState(next);setNewlyUnlocked([]);setSaveStatus('saved');
   }, [persist]);
   const update = useCallback((fn: (prev: AppState) => AppState) => {
-    setState((prev) => (prev ? fn(prev) : prev));
+    setState((prev) => (prev ? recordPhotoActivity(prev,fn(prev)) : prev));
   }, []);
 
   const updateActiveBook = useCallback(
     (fn: (b: Scrapbook) => Scrapbook) => {
       setState((prev) => {
         if (!prev || !prev.activeBookId) return prev;
-        return {
+        return recordPhotoActivity(prev,{
           ...prev,
           books: prev.books.map((b) =>
             b.id === prev.activeBookId ? { ...fn(b), updatedAt: Date.now() } : b,
           ),
-        };
+        });
       });
     },
     [],
@@ -315,11 +318,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const addArchivePhoto = useCallback(
-    (src: string, aspect: number, categories: string[] = []) => {
+    (src: string, aspect: number, categories: string[] = [], original?: import("../lib/originalPhotos").OriginalPhoto) => {
       const id = uid("ph");
       update((p) => ({
         ...p,
-        archive: [{ id, src, aspect, createdAt: Date.now(), categories, favorite: false }, ...p.archive],
+        archive: [{ id, src, aspect, activity:{}, ...(original?{original}:{}), createdAt: Date.now(), categories, favorite: false }, ...p.archive],
       }));
       return id;
     },
@@ -584,7 +587,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     buyStickerPack,
   };
 
-  return <AppContext.Provider value={value}>{conflict ? <div className="ks-save-recovery" role="alert"><h1>This room changed in another tab</h1><p>Saving in this tab has stopped to protect the newer room. Download this tab’s changes before reloading if you want to keep them.</p><button className="ks-tool" onClick={() => downloadRoom(state)}>Download this tab’s room</button><button className="ks-tool" onClick={() => { savedRef.current = stateRef.current; window.location.reload(); }}>Reload latest saved room</button></div> : children}</AppContext.Provider>;
+  return <AppContext.Provider value={value}>{conflict ? <div className="ks-save-recovery" role="alert"><h1>This room changed in another tab</h1><p>Saving in this tab has stopped to protect the newer room. Download this tab’s changes before reloading if you want to keep them.</p><button className="ks-tool" onClick={() => void downloadRoom(state).catch(error=>window.alert(error instanceof Error?error.message:"Backup failed."))}>Download this tab’s room</button><button className="ks-tool" onClick={() => { savedRef.current = stateRef.current; window.location.reload(); }}>Reload latest saved room</button></div> : children}</AppContext.Provider>;
 }
 
 export function useApp(): AppContextValue {

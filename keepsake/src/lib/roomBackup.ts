@@ -1,4 +1,6 @@
 import {ownsRoomTheme} from './roomThemes.ts';
+import {withOriginalFiles} from './originalPhotos.ts';
+import {MEMORY_MOODS} from './memoryAtmosphere.ts';
 import {KEEPSAKE_PRINTS,isPaperStyle} from './stationery.ts';
 import {validFurnitureChoices} from './furniture.ts';
 import {CRT_COLORS} from './roomMusic.ts';
@@ -25,10 +27,22 @@ export function parseRoomBackup(text:string):AppState{
   return e.type==='stroke'&&string(e.color)&&number(e.width)&&records(e.points,p=>number(p.x)&&number(p.y));
  }))));
  const books=s.books as AppState['books'];const ids=books.map(b=>b.id);ensure(new Set(ids).size===ids.length);
+ ensure(books.every(b=>b.memoryMood===undefined||Object.hasOwn(MEMORY_MOODS,b.memoryMood)));
+ ensure(books.every(b=>b.memoryLinks===undefined||strings(b.memoryLinks)&&b.memoryLinks.length<=5&&new Set(b.memoryLinks).size===b.memoryLinks.length));
+ ensure(s.profile.foundPhotos===undefined||typeof s.profile.foundPhotos==='boolean');
+ ensure(s.profile.lastFoundPhotosAt===undefined||number(s.profile.lastFoundPhotosAt));
+ ensure(s.profile.preserveOriginals===undefined||typeof s.profile.preserveOriginals==='boolean');
  ensure(books.every(b=>b.pages.every(p=>p.backgroundStyle===undefined||isPaperStyle(p.backgroundStyle))));
  const pageIds=books.flatMap(b=>b.pages.map(p=>p.id));ensure(new Set(pageIds).size===pageIds.length);
  ensure(s.activeBookId===null || ids.includes(s.activeBookId as string));
  ensure(records(s.archive,a=>string(a.id)&&image(a.src)&&number(a.aspect)&&(a.aspect as number)>0&&number(a.createdAt)&&strings(a.categories)&&typeof a.favorite==='boolean'));
+ ensure(s.originalFiles===undefined||object(s.originalFiles));
+ ensure((s.archive as RecordValue[]).every(p=>p.ticket===undefined||object(p.ticket)&&['event','venue','date','style'].every(k=>string((p.ticket as RecordValue)[k]))&&p.ticket.provenance==='commemorative-template'));
+ ensure((s.archive as RecordValue[]).every(p=>p.activity===undefined||object(p.activity)&&(p.activity.lastMeaningfulAt===undefined||number(p.activity.lastMeaningfulAt))&&(p.activity.dismissed===undefined||typeof p.activity.dismissed==='boolean')));
+ for(const photo of s.archive as RecordValue[]){if(photo.original===undefined)continue;const o=photo.original;
+  ensure(object(o)&&string(o.key)&&/^[a-f0-9]{64}$/.test(o.key as string)&&string(o.name)&&string(o.type)&&number(o.size)&&(o.size as number)>0&&(o.size as number)<=25*1024*1024);
+  ensure(object(s.originalFiles)&&string(s.originalFiles[o.key as string])&&/^data:[^,]*;base64,[A-Za-z0-9+/]*={0,2}$/.test(s.originalFiles[o.key as string] as string));
+ }
  ensure(records(s.archiveTabs,a=>string(a.id)&&string(a.name)));
  ensure(records(s.pins,p=>string(p.id)&&string(p.label)&&string(p.caption)&&number(p.createdAt)&&number(p.x)&&number(p.y)&&(p.x as number)>=0&&(p.x as number)<=100&&(p.y as number)>=0&&(p.y as number)<=100&&(p.photoSrc===undefined||image(p.photoSrc))));
  ensure(records(s.guestbook,g=>string(g.id)&&string(g.author)&&string(g.message)&&number(g.createdAt)&&(g.deskCopy===undefined||typeof g.deskCopy==='boolean')));
@@ -41,6 +55,7 @@ export function parseRoomBackup(text:string):AppState{
  ensure(e.entryMusic===undefined||['off','mellow','spotify','soundcloud'].includes(e.entryMusic as string));
  ensure(e.crtColor===undefined||Object.hasOwn(CRT_COLORS,e.crtColor as string));
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
+ ensure(['memoryLighting','soundGeography'].every(k=>e[k]===undefined||typeof e[k]==='boolean'));
  ensure(e.roomTheme===undefined || ['woodland','beachfront'].includes(e.roomTheme as string));
  ensure(e.furniture===undefined||validFurnitureChoices(e.furniture));
  ensure(e.coastalWindowOpen===undefined || typeof e.coastalWindowOpen==='boolean');
@@ -70,8 +85,10 @@ export function parseRoomBackup(text:string):AppState{
  ensure(s.progress.printedToBook===undefined||typeof s.progress.printedToBook==='boolean');
  return s as unknown as AppState;
 }
-export function serializeRoom(state:AppState){return JSON.stringify({format:'keepsake-room',backupVersion:1,savedAt:new Date().toISOString(),state});}
-export function downloadRoom(state:AppState){
- const url=URL.createObjectURL(new Blob([serializeRoom(state)],{type:'application/json'}));
+export function serializeRoom(state:AppState){if(state.archive.some(p=>p.original&&!state.originalFiles?.[p.original.key]))throw new Error('Load preserved originals before serializing this backup.');return JSON.stringify({format:'keepsake-room',backupVersion:1,savedAt:new Date().toISOString(),state});}
+export async function downloadRoom(state:AppState){
+ const text=serializeRoom(await withOriginalFiles(state));
+ if(new Blob([text]).size>250*1024*1024)throw new Error('This room exceeds the current 250 MB backup limit. Download original files individually; large-library backup support is still needed.');
+ const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));
  const a=document.createElement('a');a.href=url;a.download=`keepsake-room-${new Date().toISOString().replace(/[:.]/g,'-')}.json`;a.click();window.setTimeout(()=>URL.revokeObjectURL(url),10000);
 }
