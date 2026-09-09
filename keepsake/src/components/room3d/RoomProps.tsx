@@ -284,9 +284,9 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
   const insetX = STAND_IN_TOP_W / 2 - 0.14;
   const insetZ = STAND_IN_TOP_D / 2 - 0.12;
   const markerX = clampOnTop(book.x - book.halfW - 0.1, insetX);
-  // Sideways in front of the CRT, clear of the open book and desk edge.
-  const printerX = clampOnTop(book.x + book.halfW + .17, insetX);
-  const printerZ = clampOnTop(book.z, insetZ) + .18;
+  // Face the user, with clearance behind the printer for the CRT.
+  const printerX = clampOnTop(book.x + book.halfW + .13, insetX);
+  const printerZ = clampOnTop(book.z, insetZ) + .20;
   const cameraX = clampOnTop(book.x - book.halfW - 0.1, insetX);
   const rowZ = clampOnTop(book.z, insetZ);
 
@@ -304,7 +304,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
           </mesh>
         ))}
       </group>
-      <group name="Desk_Printer_Assembly" position={[printerX, 0.023, printerZ]} rotation={[0, Math.PI / 2, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
+      <group name="Desk_Printer_Assembly" position={[printerX, 0.023, printerZ]} rotation={[0, 0, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
         <FurniturePrinter>
         <RoundedBox args={[0.135,0.046,0.17]} radius={0.012} smoothness={3}><meshStandardMaterial color="#e5dbc7" roughness={0.82}/></RoundedBox>
         <mesh position={[0,0.003,0.086]}><boxGeometry args={[0.103,0.008,0.003]}/><meshStandardMaterial color="#26392f"/></mesh>
