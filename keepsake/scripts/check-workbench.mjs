@@ -1,11 +1,21 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {transitionWorkbench,pageTurnWeights} from '../src/lib/workbench.ts';
+import {transitionWorkbench,pageTurnWeights,leftStackPose} from '../src/lib/workbench.ts';
+import * as THREE from 'three';
 import {pointInQuad} from '../src/lib/pageCoordinates.ts';
 import {motionFactor,MOTION} from '../src/lib/motion.ts';
 assert.equal(motionFactor(10,MOTION.drawer),motionFactor(.05,MOTION.drawer),'Returning to the tab caps furniture motion');
 assert.equal(motionFactor(.016,MOTION.drawer,true),1,'Reduced motion settles immediately');
 assert.equal(motionFactor(-1,MOTION.drawer),0);
+for(let i=0;i<=200;i++){
+  const angle=i/200*Math.PI,hingeY=.029-.025*i/200,pose=leftStackPose(angle,hingeY);
+  const coverInverse=new THREE.Matrix4().makeTranslation(0,hingeY,0).multiply(new THREE.Matrix4().makeRotationZ(angle)).invert();
+  const stack=new THREE.Matrix4().makeTranslation(pose.x,pose.y,0).multiply(new THREE.Matrix4().makeRotationZ(pose.rotation));
+  for(const x of [-.32,0])for(const y of [.008,.024]){
+    const p=new THREE.Vector3(x,y,0).applyMatrix4(stack).applyMatrix4(coverInverse);
+    assert.ok(p.y<=-.004+1e-7,'Left pages remain inside the cover throughout opening and closing');
+  }
+}
 
 let state='room';
 for(const [event,expected] of [['inspect','arriving'],['inspect','arriving'],['open','arriving'],['settled','cover'],['open','opening'],['open','opening'],['settled','editing'],['close','closing'],['open','closing'],['settled','cover'],['leave','leaving'],['settled','room']]){

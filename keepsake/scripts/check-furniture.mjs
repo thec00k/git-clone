@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import * as THREE from 'three';
 import {furnitureBounds,fitFurniture} from '../src/lib/furnitureGeometry.ts';
 import {FURNITURE_ITEMS,validFurnitureChoices} from '../src/lib/furniture.ts';
-assert.equal(FURNITURE_ITEMS.length,22);
+assert.equal(FURNITURE_ITEMS.length,25);
 assert.ok(validFurnitureChoices({woodland:{desk:'desk-1'},beachfront:{desk:'desk-2'}}));
 for(const invalid of [{woodland:{desk:'chair-1'}},{woodland:{desk:'../../../x'}},{unknown:{desk:'desk-1'}},[],null])assert.equal(validFurnitureChoices(invalid),false);
 for(const yaw of [0,Math.PI/2,-Math.PI/2,Math.PI]){
@@ -25,4 +25,4 @@ for(const item of FURNITURE_ITEMS){
   assert.ok((gltf.images??[]).every(image=>image.bufferView!==undefined),'Textures are portable and embedded');
   assert.ok(fs.existsSync(new URL('../public'+item.thumbnail,import.meta.url)),`${item.id} has a review thumbnail`);
 }
-console.log('PASS furniture allowlist, 22 portable variants, rotated fitting and preserved attached memories.');
+console.log('PASS furniture allowlist, 25 portable variants, rotated fitting and preserved attached memories.');

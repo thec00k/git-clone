@@ -47,7 +47,7 @@ for room in ['woodland','beachfront']:
             vs=[vertices[i] for i in face.vertices]
             x=sum(v.x for v in vs)/len(vs)
             name=None
-            if all(v.z>=.001 and v.z<.045 for v in vs):name='Rug'
+            if any(s in obj.name for s in ['terracotta','oatmeal_linen']) and all(v.z>=.001 and v.z<.045 for v in vs):name='Rug'
             elif any(s in obj.name for s in ['linen','brass']) and all(v.z>1.04 and v.y>1.88 for v in vs) and (x<-1.11 or x>.81):name='Curtain_L' if x<0 else 'Curtain_R'
             if name:sets.setdefault(name,set()).add(face.index)
         if not sets:continue

@@ -60,7 +60,7 @@ def ellipsoid(name,loc,size,material,segments=40):
     return o
 
 def tube(name,points,radius,material):
-    c=bpy.data.curves.new(name,'CURVE');c.dimensions='3D';c.resolution_u=2;c.bevel_depth=radius;c.bevel_resolution=3
+    c=bpy.data.curves.new(name,'CURVE');c.dimensions='3D';c.resolution_u=2;c.bevel_depth=radius;c.bevel_resolution=3;c.use_fill_caps=True
     s=c.splines.new('POLY');s.points.add(len(points)-1)
     for p,co in zip(s.points,points):p.co=(*co,1)
     o=bpy.data.objects.new(name,c);bpy.context.collection.objects.link(o);o.data.materials.append(material);return o
@@ -122,6 +122,8 @@ def curated_mesh(source,target_width,triangles):
     return meshes
 
 def desk(style):
+    if style==2:
+        sculpted_desk();return
     wood=oak if style==0 else pale
     box('Tabletop',(0,0,.732),(1.86,.78,.036),wood,.009)
     box('Rear apron',(0,.31,.64),(1.75,.042,.15),wood)
@@ -137,6 +139,8 @@ def desk(style):
     empty('Tabletop_Anchor',(0,0,.75));empty('Drawer_Anchor',(0,-.16,.679))
 
 def lamp(style):
+    if style==2:
+        sculpted_lamp();return
     if style==1:
         curated_mesh('sketchfab-lamp.blend',.24,15000)
         empty('Light_Anchor',(0,-.055,.28));return
@@ -273,11 +277,13 @@ def crt(style):
     box('Screen bezel',(0,-.143,.19),(.323,.025,.243),ink,.024)
     box('Screen surface',(0,-.158,.19),(.285,.008,.208),moss,.018)
     for x in (-.13,.13):box('Foot',(x,.02,.017),(.06,.19,.034),ink,.008)
-    for x in (.105,.14):ellipsoid('Control knob',(x,-.148,.047),(.011,.008,.011),brass,24)
+    for x in (.105,.14):ellipsoid('Control knob',(x,-.133,.047),(.011,.008,.011),brass,24)
     for i in range(9):box('Top vent',(-.11+i*.027,.04,.337),(.012,.11,.002),ink,.001)
     empty('Screen_Anchor',(0,-.163,.19))
 
 def chair(style):
+    if style==2:
+        sculpted_chair();return
     names=['chairDesk','chairDesk_1','chair'] if style==0 else ['SchoolChair_01']
     with bpy.data.libraries.load(str(ART/'sources'/'chairs.blend'),link=False) as (src,dst):dst.objects=names
     objects=[o for o in dst.objects if o]
@@ -296,13 +302,120 @@ def chair(style):
         tube('Cushion piping',[(.201*math.cos(i*math.tau/96),-.015+.184*math.sin(i*math.tau/96),.448) for i in range(97)],.002,oat)
     empty('Seat_Anchor',(0,0,.46));empty('Floor_Anchor',(0,0,0))
 
+def rounded_slab(name,center,width,depth,height,material,radius=.12):
+    # Rounded rectangle prism with real thickness and a softly rolled perimeter.
+    points=[]
+    for cx,cy,start in [(width/2-radius,depth/2-radius,0),(-width/2+radius,depth/2-radius,90),(-width/2+radius,-depth/2+radius,180),(width/2-radius,-depth/2+radius,270)]:
+        for i in range(13):
+            a=math.radians(start+i*90/12);points.append((cx+radius*math.cos(a),cy+radius*math.sin(a)))
+    verts=[(x+center[0],y+center[1],center[2]+z) for z in (-height/2,height/2) for x,y in points];n=len(points)
+    faces=[tuple(reversed(range(n))),tuple(range(n,n*2))]+[(i,(i+1)%n,(i+1)%n+n,i+n) for i in range(n)]
+    me=bpy.data.meshes.new(name);me.from_pydata(verts,[],faces);me.materials.append(material)
+    o=bpy.data.objects.new(name,me);bpy.context.collection.objects.link(o)
+    bevel=o.modifiers.new('Hand softened lip','BEVEL');bevel.width=.007;bevel.segments=3
+    o.modifiers.new('Weighted normals','WEIGHTED_NORMAL');return o
+
+def sculpted_desk():
+    global oak
+    original_oak=oak
+    oak=oak.copy();oak.name='Ribbon walnut'
+    # Portable baked grain: glTF cannot carry Blender's shader Mix node.
+    import numpy as np
+    yy,xx=np.mgrid[0:512,0:512]/512
+    warp=yy+.035*np.sin(xx*9)+.012*np.sin(xx*23+yy*7)
+    grain=.80+.12*np.sin(warp*105)+.035*np.sin(warp*510+xx*13)
+    pixels=np.ones((512,512,4),dtype=np.float32)
+    pixels[:,:,:3]=grain[:,:,None]*np.array([.48,.255,.115])[None,None,:]
+    image=bpy.data.images.new('Bentwood walnut grain',width=512,height=512)
+    image.pixels.foreach_set(pixels.ravel());image.update();image.pack()
+    tex=oak.node_tree.nodes.new('ShaderNodeTexImage');tex.image=image
+    oak.node_tree.links.new(tex.outputs['Color'],oak.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
+    rounded_slab('Sculpted capsule desktop',(0,0,.725),1.85,.72,.05,oak,.29)
+    # Left pod leaves a generous central knee opening and the shared shop drawer.
+    for i in range(3):
+        z=.1475+i*.215
+        rounded_slab('Rounded storage pod',(-.65,.01,z),.40,.56,.207,oak,.16)
+        # Crescent finger pull, recessed into the front edge.
+        tube('Inset finger pull',[(-.73,-.274,z+.055),(-.70,-.280,z+.040),(-.65,-.282,z+.034),(-.60,-.280,z+.040),(-.57,-.274,z+.055)],.005,ink)
+    # Two open bentwood pockets at the right, made as continuous laminated loops.
+    rounded_slab('Storage pod top cap',(-.65,.01,.693),.40,.56,.028,oak,.16)
+    for z in [.235,.55]:
+        path=[]
+        for cx,cz,start in [(.79,z+.045,0),(.61,z+.045,90),(.61,z-.045,180),(.79,z-.045,270)]:
+            for i in range(17):
+                a=math.radians(start+i*90/16);path.append((cx+.09*math.cos(a),cz+.09*math.sin(a)))
+        verts=[]
+        for depth in [-.27,.27]:
+            for x,h in path:verts.append((x,depth,h))
+        n=len(path);faces=[(i,(i+1)%n,(i+1)%n+n,i+n) for i in range(n)]
+        me=bpy.data.meshes.new('Bentwood pocket');me.from_pydata(verts,[],faces);me.materials.append(oak)
+        o=bpy.data.objects.new('Bentwood open shelf',me);bpy.context.collection.objects.link(o)
+        m=o.modifiers.new('Laminated thickness','SOLIDIFY');m.thickness=.026
+        m=o.modifiers.new('Rounded lamination','BEVEL');m.width=.008;m.segments=3
+        for p in me.polygons:p.use_smooth=True
+    # Curved rear support: stays behind the seated user's legs.
+    pts=[]
+    for i in range(65):
+        t=i/64;x=-.65+1.30*t;z=.065+.63*(3*t*t-2*t*t*t)
+        pts.append((x,.22,z))
+    verts=[(x,y+dy,z+dz) for dy,dz in [(-.09,-.025),(.09,-.025),(.09,.025),(-.09,.025)] for x,y,z in pts];n=len(pts)
+    faces=[]
+    for side in range(4):
+        for i in range(n-1):faces.append((side*n+i,side*n+i+1,((side+1)%4)*n+i+1,((side+1)%4)*n+i))
+    faces.extend([(0,n,2*n,3*n),(n-1,2*n-1,3*n-1,4*n-1)])
+    me=bpy.data.meshes.new('Flowing rear brace');me.from_pydata(verts,[],faces);me.materials.append(oak)
+    o=bpy.data.objects.new('S curve bentwood support',me);bpy.context.collection.objects.link(o)
+    m=o.modifiers.new('Soft brace edges','BEVEL');m.width=.012;m.segments=3
+    for p in me.polygons:p.use_smooth=True
+    empty('Tabletop_Anchor',(0,0,.75));empty('Drawer_Anchor',(0,-.16,.679))
+    oak=original_oak
+
+def sculpted_chair():
+    leather=mat('Honey upholstery',(.52,.32,.12),.68)
+    # A curved back with shoulder taper, lumbar shaping and continuous side arms.
+    verts=[];faces=[];nx,ny=32,32
+    for j in range(ny+1):
+        t=j/ny;half=.205-.025*t+.014*math.sin(t*math.pi)
+        for i in range(nx+1):
+            u=i/nx*2-1;verts.append((u*half,.15+.055*t-.05*u*u-.027*math.sin(t*math.pi),.43+.48*t+.012*(1-u*u)))
+    for j in range(ny):
+        for i in range(nx):
+            a=j*(nx+1)+i;faces.append((a,a+1,a+nx+2,a+nx+1))
+    me=bpy.data.meshes.new('Contoured upholstered shell');me.from_pydata(verts,[],faces);me.materials.append(leather)
+    o=bpy.data.objects.new('Honey chair back',me);bpy.context.collection.objects.link(o)
+    m=o.modifiers.new('Upholstery thickness','SOLIDIFY');m.thickness=.025
+    m=o.modifiers.new('Soft upholstery edge','BEVEL');m.width=.01;m.segments=3
+    for p in me.polygons:p.use_smooth=True
+    ellipsoid('Shaped seat cushion',(0,-.025,.437),(.225,.225,.045),leather)
+    for side in [-1,1]:
+        tube('Swept padded arm',[(side*(.195+.025*math.sin(t*math.pi)),.15-.30*t,.53+.055*t) for t in [i/32 for i in range(33)]],.022,leather)
+    tube('Upholstery perimeter seam',[(.216*math.cos(i*math.tau/96),-.025+.215*math.sin(i*math.tau/96),.445) for i in range(97)],.0015,oat)
+    tube('Swivel column',[(0,0,.10),(0,0,.405)],.024,brass)
+    for i in range(5):
+        a=i*math.tau/5
+        tube('Five star wood foot',[(0,0,.13),(.13*math.cos(a),.13*math.sin(a),.09),(.28*math.cos(a),.28*math.sin(a),.026)],.018,oak)
+        ellipsoid('Felt glide',(.28*math.cos(a),.28*math.sin(a),.012),(.027,.025,.012),ink,20)
+    empty('Seat_Anchor',(0,-.02,.47));empty('Floor_Anchor',(0,0,0))
+
+def sculpted_lamp():
+    metal=mat('Graphite enamel',(.045,.052,.06),.28,.65)
+    lathe('Weighted articulated base',[(0,0),(.075,0),(.084,.009),(.080,.018),(0,.023)],metal)
+    tube('Lower adjustable arm',[(0,0,.02),(.015,.02,.18)],.0065,brass)
+    tube('Upper adjustable arm',[(.015,.02,.18),(-.035,-.025,.31)],.0065,brass)
+    for p in [(0,0,.028),(.015,.02,.18),(-.035,-.025,.31)]:ellipsoid('Adjustment joint',p,(.011,.012,.011),metal,24)
+    lathe('Flared graphite shade',[(.071,.227),(.073,.231),(.040,.276),(.020,.293),(.018,.312),(.012,.312),(.014,.290),(.035,.272),(.065,.231)],metal,center=(-.035,-.025,0))
+    glow=mat('Warm lamp diffuser',(1,.78,.47));bs=glow.node_tree.nodes.get('Principled BSDF');bs.inputs['Emission Color'].default_value=(1,.57,.25,1);bs.inputs['Emission Strength'].default_value=1.5
+    lathe('Recessed amber diffuser',[(0,.233),(.059,.233),(.060,.236),(0,.236)],glow,center=(-.035,-.025,0))
+    empty('Light_Anchor',(-.035,-.025,.225))
+
 BUILDERS={'desk':desk,'chair':chair,'lamp':lamp,'beanbag':beanbag,'rug':rug,'curtains':curtains,'guestbook-stand':side_table,'cabinet':cabinet,'bookshelf':bookshelf,'printer':printer,'crt':crt}
 NAMES={'desk':['Oak trestle','Pale writing desk'],'chair':['Moss swivel chair','Collected school chair'],'lamp':['Sea-glass ceramic','Collected banker lamp'],'beanbag':['Slate linen beanbag','Oatmeal floor lounger'],'rug':['Braided oval','Sea-glass woven stripes'],'curtains':['Oatmeal gathered linen','Sea-glass fine pleats'],'guestbook-stand':['Round oak side table','Pale tray table'],'cabinet':['Oak archive drawers','Painted correspondence cabinet'],'bookshelf':['Oak library shelf','Slatted ash shelf'],'printer':['Cream pocket printer','Sea-glass pocket printer'],'crt':['Cream rounded CRT','Walnut rounded CRT']}
 manifest=[]
+NAMES['desk'].append('Sculpted bentwood desk');NAMES['chair'].append('Honey shell swivel chair');NAMES['lamp'].append('Graphite articulated lamp')
 requested=set(sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else set()
 if requested and (OUT/'catalog.json').exists():manifest=json.loads((OUT/'catalog.json').read_text(encoding='utf-8'))
 for category,builder in BUILDERS.items():
-    for style in range(2):
+    for style in range(len(NAMES[category])):
         identity=f'{category}-{style+1}'
         if requested and identity not in requested:continue
         bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)

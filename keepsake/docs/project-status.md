@@ -4,6 +4,14 @@ Updated September 8, 2026. This is the authoritative implementation checklist. T
 
 ## Product direction
 
+### September 8 furniture fit follow-up
+
+The user's visual review found issues missed by the earlier load/control checks. The current pass corrects rug bounds that included room trim, CRT knob contact, guestbook support height, closed cabinet headers, chair orientation, printer/camera placement, and concealed shelf lighting. The left page block now follows the inside of the cover rather than growing sideways through it. Spine selection uses a fixed 3D target plus yellow outline and brighter lettering; keyboard access remains available.
+
+A third desk/chair/lamp set is inspired by the supplied reference: a rounded bentwood desk, honey upholstered swivel chair, and articulated graphite lamp. These are original prototype models, not a scan or exact reproduction of the reference. The original rug uses muted moss/oatmeal colors. The collection now contains 25 alternatives, with each room's originals still available.
+
+Acceptance protocol: [Furniture quality checks](furniture-quality-checks.md). The cursor shop idea is recorded there for later; it has not been implemented. Validation passed: production build and full automated acceptance; both rooms with furniture combinations 1 and 3 in day/night and ceiling-light states; four neighboring spine pointer selections; normal and reduced-motion workbench editing, drawer access and reload. The saved Blender book source also passed all 32 sampled cover/page-clearance frames. Earlier combination-2 clearance checks passed. Final hardware performance certification remains outstanding.
+
 ### September 8 interaction and furniture checkpoint
 
 - [x] Shared chair → centered cover/title → open book → real-content page curl → close/return sequence in Woodland and Beachfront. Reduced motion skips the physical transition. Perspective editing retains photo gestures, drawing, undo, page overview and drawer access.

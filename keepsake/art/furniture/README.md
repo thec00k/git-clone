@@ -1,6 +1,8 @@
 # Keepsake furniture collection
 
-September 8, 2026 prototype checkpoint. Drawer shop → Furniture offers two new alternatives in each of eleven categories, plus the existing room original: desk, chair, lamp, beanbag, rug, curtains, guestbook stand, cabinet, bookshelf, printer and CRT. Choices are stored independently for Woodland and Beachfront and included in room backups.
+September 8, 2026 prototype checkpoint. Drawer shop → Furniture offers 25 alternatives: three desks, chairs and lamps, and two in each remaining category, plus each room original. Choices are stored independently for Woodland and Beachfront and included in room backups. The third desk/chair/lamp set is original geometry inspired by the user's curved wood desk reference.
+
+Follow [the furniture quality checklist](../../docs/furniture-quality-checks.md) before releasing an asset. Whole-object fitting alone is insufficient: use actual tabletop contact, preserve floor textile thickness, check facing direction and closed drawers, and inspect combinations at night. The September 8 user review exposed failures in the prior load-and-toggle-only coverage.
 
 ## Sources and licensing
 

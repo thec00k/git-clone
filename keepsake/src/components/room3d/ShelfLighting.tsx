@@ -12,7 +12,8 @@ export function ShelfLighting({scene,on}:{scene?:THREE.Object3D;on:boolean}) {
   });
  },[scene]);
  return <>{strips.map(s=><group key={s.name}>
-  <mesh position={[s.x,s.y,s.z]}><boxGeometry args={[.018,.009,s.length]}/><meshStandardMaterial color={on?"#fff0c8":"#c4bfa7"} emissive="#ffe1a0" emissiveIntensity={on?2:0} roughness={.5}/></mesh>
-  {on&&<rectAreaLight position={[s.x,s.y-.008,s.z]} rotation={[-Math.PI/2,0,Math.PI/2]} width={s.length} height={.035} color="#ffe1ad" intensity={7}/>}
+  <mesh position={[s.x,s.y,s.z]}><boxGeometry args={[.018,.009,s.length]}/><meshStandardMaterial color="#70634c" roughness={.8}/></mesh>
+  {on&&<><rectAreaLight position={[s.x,s.y-.008,s.z]} rotation={[-Math.PI/2,0,Math.PI/2]} width={s.length} height={.035} color="#ffe1ad" intensity={11}/>
+  <rectAreaLight position={[s.x-.46,s.y-.13,s.z]} rotation={[0,-Math.PI/2,Math.PI/2]} width={s.length} height={.22} color="#ffe1ad" intensity={4}/></>}
  </group>)}</>;
 }

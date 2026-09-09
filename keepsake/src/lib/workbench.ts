@@ -27,6 +27,11 @@ export function smootherstep(progress: number) {
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
+/** Left stack stays on the inner face of the moving cover, in metres. */
+export function leftStackPose(angle:number,hingeY:number){
+  return {rotation:angle-Math.PI,x:-Math.sin(angle)*.004,y:hingeY+Math.cos(angle)*.004};
+}
+
 /** Four authored Blender targets describe a complete physical page turn. */
 export function pageTurnWeights(progress: number): [number, number, number, number] {
   const p = Math.max(0, Math.min(1, progress)) * 4;

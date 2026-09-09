@@ -61,9 +61,6 @@ box('Book_Right_Block', (0.16, 0, 0.016), (0.320, 0.438, 0.016), paper, 0.001)
 left=bpy.data.objects.new('Book_Left_Pages',None);bpy.context.collection.objects.link(left)
 box('Book_Left_Block',(-.16,0,.016),(.320,.438,.016),paper,.001,left)
 for i in range(8):box('Book_Left_Edge_%02d'%i,(-.16,0,.009+i*.0018),(.3205,.4385,.0003),edge,.0001,left)
-left.scale.x=.001;left.keyframe_insert(data_path='scale',frame=1)
-left.scale.x=1;left.keyframe_insert(data_path='scale',frame=32)
-left.animation_data.action.name='OpenPages'
 box('Book_Spine', (-0.008, 0, 0.020), (0.014, 0.452, 0.038), linen, 0.006)
 for i in range(8):
     box('Book_Edge_Layer_%02d' % i, (0.16, 0, 0.009 + i * 0.0018),
@@ -124,10 +121,18 @@ for step in range(1, 5):
         v.co = (px-offset*math.sin(tangent), y, .02612+pz+offset*math.cos(tangent))
     key.value = 0
 
-hinge.rotation_euler[1] = 0
-hinge.keyframe_insert(data_path='rotation_euler', frame=1)
-hinge.rotation_euler[1] = -math.pi
-hinge.keyframe_insert(data_path='rotation_euler', frame=32)
+for frame in range(1,33):
+    t=(frame-1)/31;angle=math.pi*(t*t*t*(t*(t*6-15)+10))
+    hinge.rotation_euler[1]=-angle
+    hinge.location.z=.029-.025*angle/math.pi
+    hinge.keyframe_insert(data_path='rotation_euler',frame=frame)
+    hinge.keyframe_insert(data_path='location',frame=frame)
+    # The page block rides the inside face; it cannot pass through the cover.
+    left.rotation_euler[1]=math.pi-angle
+    left.location=(-math.sin(angle)*.004,0,hinge.location.z+math.cos(angle)*.004)
+    left.keyframe_insert(data_path='rotation_euler',frame=frame)
+    left.keyframe_insert(data_path='location',frame=frame)
+left.animation_data.action.name='OpenPages'
 if hinge.animation_data and hinge.animation_data.action:
     hinge.animation_data.action.name = 'OpenBook'
 bpy.context.scene.frame_set(1)

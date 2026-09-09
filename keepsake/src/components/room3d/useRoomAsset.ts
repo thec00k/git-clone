@@ -31,12 +31,18 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
         const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
         mats.forEach(mat => { mat.side = THREE.DoubleSide; });
       }
+      if(obj.name==='Semantic_Rug_terracotta'){
+        const mats=Array.isArray(obj.material)?obj.material:[obj.material];
+        mats.forEach(mat=>{if(mat instanceof THREE.MeshStandardMaterial)mat.color.set(activeRoom.id==='beachfront'?'#b5b49b':'#909577');});
+      }
       if (obj.name === "Outside_View" || obj.name === "Win_Glass") {
         const material = new THREE.MeshBasicMaterial();
         materials.push(material); obj.material = material;
         if (activeRoom.id !== "classic") obj.visible = false;
       }
     });
+    const beanbag=cloned.getObjectByName('Beanbag');
+    if(beanbag){const box=new THREE.Box3().setFromObject(beanbag);const delta=new THREE.Vector3(-2.38-box.min.x,0,2.005-box.max.z);beanbag.position.add(delta);}
     return { cloned, materials };
   }, [scene, activeRoom.id]);
   useEffect(() => () => materials.forEach(material => material.dispose()), [materials]);

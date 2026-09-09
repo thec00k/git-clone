@@ -126,20 +126,6 @@
     "bytes": 2008028
   },
   {
-    "id": "crt-1",
-    "category": "crt",
-    "title": "Cream rounded CRT",
-    "asset": "/room/furniture/crt-1.glb",
-    "bytes": 1900492
-  },
-  {
-    "id": "crt-2",
-    "category": "crt",
-    "title": "Walnut rounded CRT",
-    "asset": "/room/furniture/crt-2.glb",
-    "bytes": 2140848
-  },
-  {
     "id": "lamp-2",
     "category": "lamp",
     "title": "Collected banker lamp",
@@ -152,5 +138,40 @@
     "title": "Slate linen beanbag",
     "asset": "/room/furniture/beanbag-1.glb",
     "bytes": 3313220
+  },
+  {
+    "id": "crt-1",
+    "category": "crt",
+    "title": "Cream rounded CRT",
+    "asset": "/room/furniture/crt-1.glb",
+    "bytes": 1900488
+  },
+  {
+    "id": "crt-2",
+    "category": "crt",
+    "title": "Walnut rounded CRT",
+    "asset": "/room/furniture/crt-2.glb",
+    "bytes": 2140848
+  },
+  {
+    "id": "chair-3",
+    "category": "chair",
+    "title": "Honey shell swivel chair",
+    "asset": "/room/furniture/chair-3.glb",
+    "bytes": 2207408
+  },
+  {
+    "id": "lamp-3",
+    "category": "lamp",
+    "title": "Graphite articulated lamp",
+    "asset": "/room/furniture/lamp-3.glb",
+    "bytes": 157216
+  },
+  {
+    "id": "desk-3",
+    "category": "desk",
+    "title": "Sculpted bentwood desk",
+    "asset": "/room/furniture/desk-3.glb",
+    "bytes": 1152496
   }
 ]

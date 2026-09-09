@@ -20,6 +20,7 @@ const ARCHIVE_DRAWER_OPEN_Z = 0.34;
 const ARCHIVE_FALLBACK = new THREE.Vector3(1.22, 0, -1.805);
 
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import {useWorkbench} from '../../store/workbench';
 export function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boolean }) {
   const reduced = useReducedMotion();
   const drawer = useMemo(() => scene.getObjectByName(DESK_DRAWER), [scene]);
@@ -278,19 +279,21 @@ function clampOnTop(n: number, limit: number) {
 
 /** Markers / printer / camera. y = 0 is the oak; sit() is only half-height. */
 export function OakDeskClutter({ book }: { book: BookOnDesk }) {
+  const {phase}=useWorkbench();const reduced=useReducedMotion();const markers=useRef<THREE.Group>(null);
   const {setPrinterOpen,isVisitor}=useNav();
   const {state}=useApp();
   const sit = (half: number) => half;
   const insetX = STAND_IN_TOP_W / 2 - 0.14;
   const insetZ = STAND_IN_TOP_D / 2 - 0.12;
-  const markerX = clampOnTop(book.x + book.halfW + 0.07, insetX);
-  const printerX = clampOnTop(book.x + book.halfW + 0.26, insetX);
+  const markerX = clampOnTop(book.x + (phase==='editing'||phase==='opening'||phase==='closing'?book.halfW+.07:.29), insetX);
+  const printerX = clampOnTop(book.x - book.halfW - 0.17, insetX);
   const cameraX = clampOnTop(book.x - book.halfW - 0.1, insetX);
   const rowZ = clampOnTop(book.z, insetZ);
+  useFrame((_,dt)=>{if(markers.current)markers.current.position.x=THREE.MathUtils.lerp(markers.current.position.x,markerX,motionFactor(dt,MOTION.furniture,reduced));});
 
   return (
     <group>
-      <group position={[markerX, sit(0.008), rowZ]} rotation={[0, 0.35, 0]}>
+      <group ref={markers} name="Desk_Markers_Assembly" position={[clampOnTop(book.x+.29,insetX), sit(0.008), rowZ]} rotation={[0, 0.35, 0]}>
         {[
           { z: 0, color: "#c45c3e", yaw: -0.08 },
           { z: 0.018, color: "#2c221c", yaw: 0.04 },
@@ -302,7 +305,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
           </mesh>
         ))}
       </group>
-      <group position={[printerX, 0.023, rowZ - 0.02]} rotation={[0, 0.18, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
+      <group name="Desk_Printer_Assembly" position={[printerX, 0.023, rowZ + 0.18]} rotation={[0, 0.08, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
         <FurniturePrinter>
         <RoundedBox args={[0.135,0.046,0.17]} radius={0.012} smoothness={3}><meshStandardMaterial color="#e5dbc7" roughness={0.82}/></RoundedBox>
         <mesh position={[0,0.003,0.086]}><boxGeometry args={[0.103,0.008,0.003]}/><meshStandardMaterial color="#26392f"/></mesh>
@@ -312,7 +315,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
         <mesh position={[0.043,0.024,-0.048]}><sphereGeometry args={[0.003,8,6]}/><meshStandardMaterial color="#a6ce97" emissive="#82b76e" emissiveIntensity={0.5}/></mesh>
         {['#b56c4a','#c7a86b','#6d8a6c'].map((color,i)=><mesh key={color} position={[-0.009+i*0.009,0.0235,-0.058]}><boxGeometry args={[0.008,0.001,0.025]}/><meshStandardMaterial color={color}/></mesh>)}
       </group>
-      <group position={[cameraX, sit(0.025), rowZ]} rotation={[0, 0.32, 0]}>
+      <group name="Desk_Camera_Assembly" position={[cameraX, sit(0.025), rowZ]} rotation={[0, 0.32, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#ad7852" roughness={0.78} />
@@ -376,7 +379,8 @@ export function LampFixture({
   onToggle: () => void;
 }) {
   const {environment}=useApp();
-  const ownBulb=environment.furniture?.[environment.roomTheme??'woodland']?.lamp==='lamp-2';
+  const lampChoice=environment.furniture?.[environment.roomTheme??'woodland']?.lamp;
+  const ownBulb=lampChoice==='lamp-2'||lampChoice==='lamp-3';
   const fixture=useRef<THREE.Group>(null);
   useFrame(()=>{fixture.current?.position.copy(lampShadePos(scene));});
   const lamp = useMemo(() => scene.getObjectByName(LAMP_OBJECT), [scene]);

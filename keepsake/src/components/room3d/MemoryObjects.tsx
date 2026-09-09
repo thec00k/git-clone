@@ -40,9 +40,9 @@ export function PhotoSurface({src,width,height}:{src:string;width:number;height:
  useEffect(()=>{let live=true;setTexture(null);const map=new THREE.TextureLoader().load(src,()=>{if(live)setTexture(map);});map.colorSpace=THREE.SRGBColorSpace;return()=>{live=false;map.dispose();};},[src]);
  return <mesh><planeGeometry args={[width,height]}/><meshStandardMaterial map={texture} color="#fff6e6" roughness={.85}/></mesh>;
 }
-function Spine({title,color,ink,width,height,handwritten=false}:{title:string;color:string;ink:string;width:number;height:number;handwritten?:boolean}) {
+function Spine({title,color,ink,width,height,handwritten=false,highlight=false}:{title:string;color:string;ink:string;width:number;height:number;handwritten?:boolean;highlight?:boolean}) {
  const map=useLettering(title,color,ink,true,handwritten);
- return <mesh><planeGeometry args={[width,height]}/><meshStandardMaterial map={map} roughness={.92}/></mesh>;
+ return <mesh><planeGeometry args={[width,height]}/><meshStandardMaterial map={map} emissiveMap={map} emissive="#ffffff" emissiveIntensity={highlight?.55:0} roughness={.92}/></mesh>;
 }
 export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>void}) {
  const {state,setActiveBook,addBook}=useApp(); const {viewAs,isVisitor,go,setBookPageId}=useNav();
@@ -94,19 +94,27 @@ function ShelfMemory({book,index,chosen,onChoose,onOpen,onCancel}:{book:Scrapboo
  useEffect(()=>{if(selected){const timer=window.setTimeout(()=>previewButton.current?.focus(),reduced?0:700);return()=>window.clearTimeout(timer);}},[selected,reduced]);
  const coverMap=useLettering(book.title+'\n'+book.subtitle,COVER_STYLES[book.coverStyle].leather,COVER_STYLES[book.coverStyle].ink,false,false,true);
  const row=Math.floor(index/12);const z=-.69+(index%12)*.1015;const y=1.39-row*.46;const height=.32+(index%3)*.025;const thick=.066+Math.min(book.pages.length,32)*.0005;const cover=COVER_STYLES[book.coverStyle];
- useFrame((_,dt)=>{if(!group.current)return;const t=reduced?1:1-Math.exp(-Math.min(dt,.05)*7);group.current.position.x=THREE.MathUtils.lerp(group.current.position.x,selected?1.57:2.20,t);group.current.position.y=THREE.MathUtils.lerp(group.current.position.y,selected?y+.11:y,t);group.current.rotation.y=THREE.MathUtils.lerp(group.current.rotation.y,selected?-Math.PI/2:0,t);group.current.rotation.z=THREE.MathUtils.lerp(group.current.rotation.z,selected?.05:hover?.16:0,t);});
- return <group ref={group} position={[2.20,y,z]} onPointerOver={e=>{e.stopPropagation();if(!chosen)setHover(true);}} onPointerOut={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(e.delta<4&&!chosen)onChoose();}}>
-  <mesh position={[0,height/2,0]}><boxGeometry args={[.22,height,thick]}/><meshStandardMaterial color={cover.leather} roughness={.92}/></mesh>
-  <mesh position={[0,height/2,thick/2+.0008]}><planeGeometry args={[.216,height*.98]}/><meshStandardMaterial map={coverMap} roughness={.92}/></mesh>
+ const outline=useMemo(()=>{const box=new THREE.BoxGeometry(.224,height+.004,thick+.004);const edges=new THREE.EdgesGeometry(box);box.dispose();return edges;},[height,thick]);
+ useEffect(()=>()=>outline.dispose(),[outline]);
+ useEffect(()=>{if(hover&&!chosen){document.body.style.cursor='pointer';return()=>{document.body.style.cursor='';};}},[hover,chosen]);
+ useFrame((_,dt)=>{if(!group.current)return;const t=reduced?1:1-Math.exp(-Math.min(dt,.05)*7);group.current.position.x=THREE.MathUtils.lerp(group.current.position.x,selected?-.63:0,t);group.current.position.y=THREE.MathUtils.lerp(group.current.position.y,selected?.11:0,t);group.current.rotation.y=THREE.MathUtils.lerp(group.current.rotation.y,selected?-Math.PI/2:0,t);group.current.rotation.z=THREE.MathUtils.lerp(group.current.rotation.z,selected?.05:hover?.16:0,t);});
+ return <group position={[2.20,y,z]} onPointerOver={e=>{e.stopPropagation();if(!chosen)setHover(true);}} onPointerOut={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(e.delta<4&&!chosen)onChoose();}}>
+  {!chosen&&<mesh name={`Shelf_spine_hit_${book.id}`} userData={{bookTitle:book.title}} position={[-.116,height/2,0]}>
+   <boxGeometry args={[.018,height+.006,thick+.012]}/><meshBasicMaterial transparent opacity={0} depthWrite={false}/>
+  </mesh>}
+  <group ref={group}>
+  <mesh name={`Shelf_book_hit_${book.id}`} position={[0,height/2,0]}><boxGeometry args={[.22,height,thick]}/><meshStandardMaterial color={cover.leather} emissive={cover.leather} emissiveIntensity={hover||selected?.65:0} roughness={.92}/></mesh>
+  {(hover||selected)&&<lineSegments position={[0,height/2,0]} geometry={outline} raycast={()=>{}}><lineBasicMaterial color="#ffdc68" toneMapped={false}/></lineSegments>}
+  <mesh position={[0,height/2,thick/2+.0008]}><planeGeometry args={[.216,height*.98]}/><meshStandardMaterial map={coverMap} emissiveMap={coverMap} emissive="#ffffff" emissiveIntensity={hover||selected?.4:0} roughness={.92}/></mesh>
   <mesh position={[.006,height+.0005,0]}><boxGeometry args={[.20,.002,thick*.78]}/><meshStandardMaterial color="#d9ccb3" roughness={1}/></mesh>
-  <group position={[-.112,height/2,0]} rotation={[0,-Math.PI/2,0]}><Spine title={book.title} color={cover.leather} ink={cover.ink} width={thick*.96} height={height*.98}/></group>
+  <group position={[-.112,height/2,0]} rotation={[0,-Math.PI/2,0]}><Spine title={book.title} color={cover.leather} ink={cover.ink} width={thick*.96} height={height*.98} highlight={hover||selected}/></group>
   {[.035,height-.035].map(v=><mesh key={v} position={[-.113,v,0]}><boxGeometry args={[.002,.003,thick*.88]}/><meshStandardMaterial color={cover.ink} roughness={.65}/></mesh>)}
-  <Html transform distanceFactor={1} position={[-.115,height/2,0]} rotation={[0,-Math.PI/2,0]} style={{backfaceVisibility:'hidden'}}>
-   <button className="ks-spine-hit" style={{width:thick*400,height:height*400}} aria-label={book.id==='blank-book'?'Create a new scrapbook':`Open scrapbook: ${book.title}`} disabled={!!chosen} onPointerEnter={()=>setHover(true)} onPointerLeave={()=>setHover(false)} onFocus={()=>setHover(true)} onBlur={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(!chosen)onChoose();}}/>
+  <Html transform pointerEvents="none" distanceFactor={1} position={[-.115,height/2,0]} rotation={[0,-Math.PI/2,0]} style={{backfaceVisibility:'hidden',pointerEvents:'none'}}>
+   <button className="ks-spine-hit" style={{width:thick*400,height:height*400,pointerEvents:'none'}} aria-label={book.id==='blank-book'?'Create a new scrapbook':`Open scrapbook: ${book.title}`} disabled={!!chosen} onFocus={()=>setHover(true)} onBlur={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(!chosen)onChoose();}}/>
   </Html>
   {hover&&!selected&&<Html position={[-.17,height+.07,0]} center style={{pointerEvents:'none'}}><span className="ks-shelf-book-label">{book.title}</span></Html>}
   {selected&&<Html position={[0,-.11,0]} center><div className="ks-shelf-preview" role="group" aria-label={`Selected book: ${book.title}`} onKeyDown={e=>{if(e.key==='Escape'){e.stopPropagation();onCancel();}}}><strong>{book.title}</strong><div><button className="ks-tool" onClick={onCancel}>Put back</button><button ref={previewButton} className="ks-tool ks-tool--accent" onClick={onOpen}>{book.id==='blank-book'?'Create at desk':'Read at desk'}</button></div></div></Html>}
- </group>;
+ </group></group>;
 }
 
 function CollectedSpines({objects,occupiedRows}:{objects:THREE.Object3D[];occupiedRows:number}){

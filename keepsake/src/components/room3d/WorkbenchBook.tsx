@@ -14,7 +14,7 @@ import {BookView} from '../BookView';
 import {BookIdentityEditor} from '../BookIdentityEditor';
 import {canSee} from '../../lib/permissions';
 import {PageTurnContext,type PhysicalTurn} from '../../store/pageTurn';
-import {pageTurnWeights,smootherstep} from '../../lib/workbench';
+import {pageTurnWeights,smootherstep,leftStackPose} from '../../lib/workbench';
 import {motionFactor,MOTION} from '../../lib/motion';
 let bookAsset: ReturnType<GLTFLoader['loadAsync']>|undefined;
 const loadBook=()=>bookAsset??=(new GLTFLoader()).loadAsync('/room/shared/scrapbook.glb').catch(error=>{bookAsset=undefined;throw error;});
@@ -74,7 +74,16 @@ export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
   useFrame((_,delta)=>{
     const t=motionFactor(delta,MOTION.furniture,reduced);
     if(hinge){hinge.rotation.z=THREE.MathUtils.lerp(hinge.rotation.z,opened?Math.PI:0,t);hinge.position.y=THREE.MathUtils.lerp(hinge.position.y,opened?.004:.029,t);}
-    if(leftPages){leftPages.scale.x=THREE.MathUtils.lerp(leftPages.scale.x,opened?1:.001,t);leftPages.visible=leftPages.scale.x>.002;}
+    if(leftPages&&hinge){
+      // The left stack rides the inside of the cover instead of expanding
+      // horizontally through it. At rest its top matches the editor surface.
+      const angle=hinge.rotation.z;
+      const pose=leftStackPose(angle,hinge.position.y);
+      leftPages.rotation.z=pose.rotation;
+      leftPages.position.set(pose.x,pose.y,0);
+      leftPages.scale.x=1;
+      leftPages.visible=angle>.025;
+    }
     if(group.current)group.current.position.x=THREE.MathUtils.lerp(group.current.position.x,opened?-.15:-.31,t);
     if(chair){
       const active=phase!=='room'&&phase!=='leaving';
