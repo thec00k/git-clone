@@ -2,6 +2,14 @@
    
 </div> -->
 <h1 class="m-0 ml-1">SvelteKit Template</h1>
+<p>
+    The 3D scene lives on
+    <a href="/scene">/scene</a>:
+    a 0.2&nbsp;m wooden cube named
+    <code>ks_test</code>
+    at the origin, plus a 5×5 UV sphere named
+    <code>ks_sphere</code>.
+</p>
 <ul>
     <li>
         TypeScript
