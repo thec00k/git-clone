@@ -10,8 +10,8 @@ The brief's Figma token, sleeve, photo-state and directional-shadow studies rema
 
 - Authored Blender 5.1 source: `art/furniture/display-case.blend`; repeatable builder: `art/pipeline/build-display-case.py`.
 - Independent browser asset: `public/room/furniture/display-case.glb`. It is composed into both rooms by `ArtifactDisplayCase.tsx`, rather than baked into the room shell.
-- Approximately 0.98 m wide, 0.52 m deep and 2.11 m tall. Position [2.04, 0, 1.38], facing into the room. The shelf ends at z=0.60; the case starts at z=0.89, leaving 0.29 m between them. Rear edge x=2.30 clears the wall trim. No room enlargement or furniture scaling was necessary.
-- Four empty levels, separate front/side glass, divided double doors, glass shelves, softened painted framing, oak backing and brass fittings. Doors are presently static.
+- Curved case placed in the door-side right corner at [1.92, 0, 1.53], rotated -135 degrees into the room. Its exported world bounds clear both wall trims. The 0.88 m wide and 2.11 m tall cabinet has a true 90-degree curved rear, curved shelves and narrow angled side windows. The bookshelf is shifted 22 cm toward the window wall; its personal books, picking targets and lighting move with it. No room enlargement or furniture scaling was necessary.
+- Four empty levels, separate front/side glass, divided double doors, shaped glass shelves, warm ivory painted framing and curved backing, and brass fittings. Doors are presently static.
 - Opaque parts are batched by material for export; glass panes remain separate for transparent sorting. The editable Blender source keeps individual parts.
 - Room > Display case focuses the camera. Room > Lighting > Display case persists an independent on/off setting; LEDs follow the CRT palette, including the owned Beachfront coastal color.
 - The walking boundary prevents entering the cabinet. LEDs remain available with the ceiling light off. Browser glass uses inexpensive transparency rather than multi-layer refraction.
@@ -35,3 +35,5 @@ Photograph a card invokes the device's image capture/file chooser. This is not p
 - `node scripts/check-card-binders.mjs` covers embedded GLB validation and backup round-trip/rejection.
 - `node scripts/check-card-binders-browser.mjs` covers real file import, pagination, front/back, customization, rearrangement, undo, backup and reload, using an isolated browser profile.
 - `tests/card-binders.html` is a development-only component verification entry; it uses the normal room store and does not reset data.
+
+The revised asset is also appended to the open Blender room. A separate `art/reviews/beachfront-corner-case-review.blend` preserves the in-room assembly without overwriting the previously unsaved source scene.

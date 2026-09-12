@@ -43,33 +43,48 @@ def box(name, p, size, mat, bevel=.004):
         o.modifiers.new('Weighted normals','WEIGHTED_NORMAL')
     return o
 
-for x in [-.425,.425]:
-    for z in [-.205,.205]:
-        box('Case_Foot', (x,.043,z),(.09,.086,.09),wood,.008)
-for y in [.115,1.095,2.075]:
-    box('Case_Crossrail',(0,y,0),(.98,.065,.52),frame,.009)
-box('Case_Back',(0,1.095,-.245),(.89,1.90,.023),wood)
-for x in [-.465,.465]:
-    for z in [-.235,.235]:
-        box('Case_Stile',(x,1.095,z),(.05,1.90,.05),frame)
-    box('Case_SideGlass',(x,1.095,0),(.006,1.86,.416),glass,.001)
-for y in [.145,.625,1.125,1.605]:
-    box('Case_Shelf',(0,y,0),(.88,.012,.43),glass,.002)
-    box('Case_ShelfFront',(0,y,.22),(.89,.025,.025),frame)
-    for x in [-.435,.435]:
-        for z in [-.18,.18]:
-            box('Case_ShelfSupport',(x,y-.015,z),(.024,.02,.027),brass,.003)
+# Quarter-circle rear, with two glazed chamfers and a broad flat double front.
+# In plan the rear sweeps exactly 90 degrees; no rectangular backing remains.
+import math
+R=.44/math.sin(math.pi/4)
+arc=[(R*math.sin(-math.pi/4+i*math.pi/64),R/math.sqrt(2)-R*math.cos(-math.pi/4+i*math.pi/64)) for i in range(33)]
+outline=arc+[(.39,.20),(-.39,.20)]
+def prism(name,points,y,height,mat):
+    n=len(points);v=[(x,-z,h) for h in [y-height/2,y+height/2] for x,z in points]
+    faces=[tuple(range(n-1,-1,-1)),tuple(range(n,2*n))]+[(i,(i+1)%n,(i+1)%n+n,i+n) for i in range(n)]
+    faces=[tuple(reversed(f)) for f in faces]
+    mesh=bpy.data.meshes.new(name);mesh.from_pydata(v,[],faces);mesh.update()
+    o=bpy.data.objects.new(name,mesh);bpy.context.collection.objects.link(o);o.data.materials.append(mat)
+    bevel=o.modifiers.new('Hand-finished edges','BEVEL');bevel.width=.003;bevel.segments=3
+    o.modifiers.new('Weighted normals','WEIGHTED_NORMAL');return o
+# Thin concentric arc creates a genuinely rounded rear wall.
+inner=[(x*.966,z*.966+.009) for x,z in reversed(arc)]
+prism('Case_QuarterCircle_Back',arc+inner,1.095,1.90,frame)
+for y in [.115,1.095,2.075]:prism('Case_Shaped_Crossrail',outline,y,.065,frame)
+for x,z in [(-.36,.14),(.36,.14),(-.36,-.02),(.36,-.02)]:box('Case_Foot',(x,.043,z),(.085,.086,.075),wood,.008)
+for x,z in [(-.44,0),(.44,0),(-.39,.20),(.39,.20)]:box('Case_Vertical_Frame',(x,1.095,z),(.042,1.90,.042),frame)
+for side in [-1,1]:
+    # Tall side windows follow the chamfer, as in the supplied photographs.
+    o=box('Case_AngledSideGlass',(side*.415,1.095,.10),(.006,1.86,.18),glass,.001)
+    o.rotation_euler.z=side*math.atan(.25)
+for y in [.155,.625,1.125,1.605]:
+    prism('Case_QuarterCircle_GlassShelf',[(x*.91,z*.91) for x,z in outline],y,.012,glass)
+    box('Case_ShelfFront',(0,y,.186),(.735,.024,.024),frame)
+    for side in [-1,1]:box('Case_ShelfSupport',(side*.37,y-.014,.13),(.025,.02,.032),brass)
 for y in [.6125,1.5875]:
     for side in [-1,1]:
-        box('Case_DoorGlass',(side*.221,y,.244),(.434,.897,.005),glass,.001)
-        box('Case_Handle',(side*.027,y,.268),(.018,.095,.019),brass,.007)
-        for dy in [-.405,.405]:
-            box('Case_Hinge',(side*.425,y+dy,.25),(.035,.022,.016),brass,.003)
-for y in [.60,1.08,1.58,2.04]:
-    box('Case_LEDChannel',(0,y,.115),(.83,.018,.028),brass,.003)
-    box('Case_LEDDiffuser',(0,y-.011,.115),(.80,.004,.018),led,.001)
-box('Case_SwitchPlate',(.467,1.10,.266),(.04,.065,.012),brass,.006)
-
+        box('Case_DoorGlass',(side*.183,y,.205),(.356,.897,.006),glass,.001)
+        box('Case_Handle',(side*.022,y,.224),(.022,.038,.017),brass,.004)
+        for dy in [-.405,.405]:box('Case_Hinge',(side*.353,y+dy,.215),(.035,.025,.014),brass,.003)
+for y in [.605,1.08,1.585,2.04]:
+    box('Case_LEDChannel',(0,y,.13),(.70,.018,.028),frame,.003)
+    box('Case_LEDDiffuser',(0,y-.011,.13),(.68,.004,.018),led,.001)
+box('Case_SwitchPlate',(.389,1.10,.226),(.039,.064,.011),brass,.005)
+# Source viewport ready for inspection, with material colors visible.
+for area in bpy.context.screen.areas if bpy.context.screen else []:
+    if area.type=='VIEW_3D':
+        area.spaces.active.shading.type='MATERIAL'
+        area.spaces.active.region_3d.view_distance=3.5
 OUT.mkdir(parents=True,exist_ok=True); ART.mkdir(parents=True,exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(ART/'display-case.blend'))
 # Keep editable source parts; batch only opaque export geometry by material.

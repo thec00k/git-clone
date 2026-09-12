@@ -1,4 +1,5 @@
 import {RoomPoster} from './RoomPoster';
+import {BOOKSHELF_WINDOW_SHIFT} from './furnitureLayout';
 import {SillDecoration} from './SillDecoration';
 import {CRT_COLORS} from '../../lib/roomMusic';
 import { useCrtPlayerSlot } from '../../store/spotifyUi';
@@ -98,7 +99,7 @@ function ShelfMemory({book,index,chosen,onChoose,onOpen,onCancel}:{book:Scrapboo
  useEffect(()=>()=>outline.dispose(),[outline]);
  useEffect(()=>{if(hover&&!chosen){document.body.style.cursor='pointer';return()=>{document.body.style.cursor='';};}},[hover,chosen]);
  useFrame((_,dt)=>{if(!group.current)return;const t=reduced?1:1-Math.exp(-Math.min(dt,.05)*7);group.current.position.x=THREE.MathUtils.lerp(group.current.position.x,selected?-.63:0,t);group.current.position.y=THREE.MathUtils.lerp(group.current.position.y,selected?.11:0,t);group.current.rotation.y=THREE.MathUtils.lerp(group.current.rotation.y,selected?-Math.PI/2:0,t);group.current.rotation.z=THREE.MathUtils.lerp(group.current.rotation.z,selected?.05:hover?.16:0,t);});
- return <group position={[2.20,y,z]} onPointerOver={e=>{e.stopPropagation();if(!chosen)setHover(true);}} onPointerOut={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(e.delta<4&&!chosen)onChoose();}}>
+ return <group position={[2.20,y,z+BOOKSHELF_WINDOW_SHIFT]} onPointerOver={e=>{e.stopPropagation();if(!chosen)setHover(true);}} onPointerOut={()=>setHover(false)} onClick={e=>{e.stopPropagation();if(e.delta<4&&!chosen)onChoose();}}>
   {!chosen&&<mesh name={`Shelf_spine_hit_${book.id}`} userData={{bookTitle:book.title}} position={[-.116,height/2,0]}>
    <boxGeometry args={[.018,height+.006,thick+.012]}/><meshBasicMaterial transparent opacity={0} depthWrite={false}/>
   </mesh>}

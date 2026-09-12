@@ -54,7 +54,7 @@ function clampInRoom(pos: THREE.Vector3, ROOM_WALK: {minX:number;maxX:number;min
   pos.x = THREE.MathUtils.clamp(pos.x, ROOM_WALK.minX, ROOM_WALK.maxX);
   pos.z = THREE.MathUtils.clamp(pos.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
   // Keep the viewer's body clear of the cabinet, including its handles.
-  if (pos.z > .73 && pos.x > 1.56) pos.x = 1.56;
+  if (pos.z > .88 && pos.x > 1.30) pos.x = 1.30;
 }
 
 /** Eye-height look: yaw/pitch only. The camera never leaves standing height. */

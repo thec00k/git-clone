@@ -5,6 +5,7 @@ import { LAMP_BULB } from "../../lib/roomHotspots";
 import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
 import {useActiveRoom} from "./useActiveRoom";
+import {BOOKSHELF_WINDOW_SHIFT} from './furnitureLayout';
 
 /** Clone materials once. The GLTF cache retains ownership of geometry/textures. */
 export function useRoomAsset(phase: Phase, environment: Environment) {
@@ -41,6 +42,9 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
         if (activeRoom.id !== "classic") obj.visible = false;
       }
     });
+    const shelf=cloned.getObjectByName('ks_shelf');
+    if(shelf) shelf.position.z += BOOKSHELF_WINDOW_SHIFT;
+    cloned.updateMatrixWorld(true);
     const beanbag=cloned.getObjectByName('Beanbag');
     if(beanbag){const box=new THREE.Box3().setFromObject(beanbag);const delta=new THREE.Vector3(-2.38-box.min.x,0,2.005-box.max.z);beanbag.position.add(delta);}
     return { cloned, materials };
