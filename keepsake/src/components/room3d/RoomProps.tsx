@@ -1,3 +1,4 @@
+import {useWorkbench} from '../../store/workbench';
 import { PhotoSurface } from './MemoryObjects';
 import {motionFactor,MOTION} from '../../lib/motion';
 import {FurniturePrinter} from './FurniturePrinter';
@@ -280,6 +281,24 @@ function clampOnTop(n: number, limit: number) {
 export function OakDeskClutter({ book }: { book: BookOnDesk }) {
   const {setPrinterOpen,isVisitor}=useNav();
   const {state}=useApp();
+  const {phase}=useWorkbench();const reduced=useReducedMotion();
+  const cameraRef=useRef<THREE.Group>(null),printerRef=useRef<THREE.Group>(null);
+  const travel=useRef(0);const parentPosition=useMemo(()=>new THREE.Vector3(),[]);
+  useFrame((_,dt)=>{
+    // Clear the book during arrival, before the cover can open. Stay parked
+    // through closing; return only after the user leaves the workbench.
+    const target=phase==='room'?0:1;
+    travel.current=reduced?target:THREE.MathUtils.clamp(travel.current+(target?1:-1)*Math.min(dt,.05)/.9,0,1);
+    const p=travel.current,smooth=(n:number)=>{n=THREE.MathUtils.clamp(n,0,1);return n*n*(3-2*n);};
+    printerRef.current?.parent?.getWorldPosition(parentPosition);
+    if(printerRef.current){
+      // Go around the front of the CRT, never through its housing.
+      const x=THREE.MathUtils.lerp(.18,.46,smooth((p-.45)/.55));
+      const z=-1.73+.26*smooth(p/.45);
+      printerRef.current.position.x=x-parentPosition.x;printerRef.current.position.z=z-parentPosition.z;
+    }
+    if(cameraRef.current){cameraRef.current.position.x=THREE.MathUtils.lerp(-.53,-.65,smooth(p*3))-parentPosition.x;cameraRef.current.position.z=-1.83-parentPosition.z;}
+  });
   const sit = (half: number) => half;
   const insetX = STAND_IN_TOP_W / 2 - 0.14;
   const insetZ = STAND_IN_TOP_D / 2 - 0.12;
@@ -304,7 +323,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
           </mesh>
         ))}
       </group>
-      <group name="Desk_Printer_Assembly" position={[printerX, 0.023, printerZ]} rotation={[0, 0, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
+      <group ref={printerRef} name="Desk_Printer_Assembly" position={[printerX, 0.023, printerZ]} rotation={[0, 0, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
         <FurniturePrinter>
         <RoundedBox args={[0.135,0.046,0.17]} radius={0.012} smoothness={3}><meshStandardMaterial color="#e5dbc7" roughness={0.82}/></RoundedBox>
         <mesh position={[0,0.003,0.086]}><boxGeometry args={[0.103,0.008,0.003]}/><meshStandardMaterial color="#26392f"/></mesh>
@@ -314,7 +333,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
         <mesh position={[0.043,0.024,-0.048]}><sphereGeometry args={[0.003,8,6]}/><meshStandardMaterial color="#a6ce97" emissive="#82b76e" emissiveIntensity={0.5}/></mesh>
         {['#b56c4a','#c7a86b','#6d8a6c'].map((color,i)=><mesh key={color} position={[-0.009+i*0.009,0.0235,-0.058]}><boxGeometry args={[0.008,0.001,0.025]}/><meshStandardMaterial color={color}/></mesh>)}
       </group>
-      <group name="Desk_Camera_Assembly" position={[cameraX, sit(0.025), rowZ - .07]} rotation={[0, 0.32, 0]}>
+      <group ref={cameraRef} name="Desk_Camera_Assembly" position={[cameraX, sit(0.025), rowZ - .07]} rotation={[0, 0.32, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#ad7852" roughness={0.78} />
