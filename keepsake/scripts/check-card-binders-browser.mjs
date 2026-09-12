@@ -1,0 +1,32 @@
+import {createRequire} from 'node:module';
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {cardFixture} from './check-card-binders.mjs';
+const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5176';
+const browser=await chromium.launch({headless:true,executablePath:process.env.TEST_BROWSER,args:['--enable-unsafe-swiftshader']});
+let activePage;const errors=[];
+try {
+ const context=await browser.newContext({viewport:{width:1000,height:850},reducedMotion:'reduce'});const p=await context.newPage();p.setDefaultTimeout(60000);
+ activePage=p;p.on('pageerror',e=>errors.push(e.message));
+ await p.route('**/binder-fixture.html',r=>r.fulfill({contentType:'text/html',body:'<!doctype html>'}));await p.goto(base+'/binder-fixture.html');
+ await p.evaluate(async()=>{const {createSeed}=await import('/src/data/seed.ts');const{saveState}=await import('/src/lib/storage.ts');const s=createSeed();s.environment.entryMusic='off';s.environment.musicOn=false;s.environment.musicProvider='ambient';s.progress.completedTour=true;await saveState(s);sessionStorage.setItem('ks-tour-done','1');});
+ await p.goto(base+'/tests/card-binders.html');
+ await p.getByRole('button',{name:'New card binder',exact:true}).click();await p.getByLabel('Binder title',{exact:true}).fill('Summer cards');await p.getByLabel('Cover color',{exact:true}).selectOption('#35596b');await p.getByRole('button',{name:'Open binder',exact:true}).click();await p.locator('.ks-binder-add>summary').click();
+ const image=fs.readFileSync(new URL('../public/samples/coast.jpg',import.meta.url));const files=Array.from({length:19},(_,i)=>({name:`Coast ${i+1}.jpg`,mimeType:'image/jpeg',buffer:image}));
+ await p.getByLabel('Upload card photos',{exact:true}).setInputFiles(files);await p.getByRole('status').filter({hasText:'19 images added'}).waitFor();
+ assert.equal(await p.getByRole('button',{name:/Inspect card/}).count(),18);await p.getByRole('button',{name:'Next binder spread',exact:true}).click();assert.equal(await p.getByRole('button',{name:/Inspect card/}).count(),1);
+ await p.getByRole('button',{name:'Inspect card 19: Coast 19',exact:true}).click();await p.getByLabel('Card title',{exact:true}).fill('Last light');await p.getByLabel('Card finish',{exact:true}).selectOption('foil');await p.getByLabel('Move to position',{exact:true}).selectOption('0');
+ await p.getByLabel('Upload card back',{exact:true}).setInputFiles({name:'back.jpg',mimeType:'image/jpeg',buffer:image});await p.getByRole('status').filter({hasText:'1 image added'}).waitFor();await p.getByRole('button',{name:'Show card back',exact:true}).click();await p.getByAltText('Last light back',{exact:true}).waitFor();
+ await p.getByRole('button',{name:'Remove from binder',exact:true}).click();await p.getByRole('button',{name:'Undo card removal',exact:true}).click();
+ await p.getByLabel('Import scanned card GLB',{exact:true}).setInputFiles({name:'Test scan.glb',mimeType:'model/gltf-binary',buffer:cardFixture()});await p.getByRole('status').filter({hasText:'Scan added'}).waitFor();
+ await p.getByRole('button',{name:'Next binder spread',exact:true}).click();await p.getByRole('button',{name:'Inspect card 20: Test scan',exact:true}).click();await p.locator('.ks-binder-scan canvas').waitFor();await p.waitForTimeout(1500);assert.equal(await p.getByRole('alert').count(),0);await p.getByRole('button',{name:'Return to binder',exact:true}).click();await p.getByRole('button',{name:'Previous binder spread',exact:true}).click();await p.locator('.ks-binder-add>summary').click();
+ await p.screenshot({path:new URL('../art/demo-work/display-case/card-binder.png',import.meta.url).pathname.replace(/^\//,'')});
+ await p.waitForTimeout(500);
+ const result=await p.evaluate(async()=>{const{loadState}=await import('/src/lib/storage.ts');const{serializeRoom,parseRoomBackup}=await import('/src/lib/roomBackup.ts');const{withOriginalFiles}=await import('/src/lib/originalPhotos.ts');const s=await loadState();return parseRoomBackup(serializeRoom(await withOriginalFiles(s))).cardBinders;});
+ assert.equal(result[0].cards.length,20,'Binder survives validated room backup');
+ const saved=await p.evaluate(async()=>await(await import('/src/lib/storage.ts')).loadState());assert.equal(saved.cardBinders[0].cards.length,20);assert.equal(saved.cardBinders[0].cards[0].title,'Last light');assert.equal(saved.cardBinders[0].cards[0].finish,'foil');assert.ok(saved.cardBinders[0].cards[0].backSrc);
+ await p.reload();await p.getByRole('button',{name:'View cover',exact:true}).click();assert.equal(await p.getByLabel('Binder title',{exact:true}).inputValue(),'Summer cards');await p.getByRole('button',{name:'Open binder',exact:true}).click();
+ await p.setViewportSize({width:390,height:844});await p.screenshot({path:new URL('../art/demo-work/display-case/card-binder-mobile.png',import.meta.url).pathname.replace(/^\//,'')});assert.deepEqual(errors,[]);
+ console.log('PASS binder: 19-image pagination, card front/back, foil, reorder, removal undo, persistence and mobile layout.');
+} catch(error){console.log('Browser errors:',errors);if(activePage){console.log((await activePage.locator('body').innerText()).slice(0,3500));await activePage.screenshot({path:new URL('../art/demo-work/display-case/binder-error.png',import.meta.url).pathname.replace(/^\//,'')});}throw error;} finally {await browser.close();}

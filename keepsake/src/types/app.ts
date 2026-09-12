@@ -41,6 +41,8 @@ export type Weather = "clear" | "rain" | "snow";
 export type MusicProvider = "ambient" | "spotify" | "lofi" | "soundcloud";
 
 export interface Environment {
+  /** Optional artifact-case LEDs follow the CRT palette; old saves default on. */
+  displayCaseLit?: boolean;
   memoryLighting?: boolean;
   soundGeography?: boolean;
   furniture?: import('../lib/furniture').RoomFurnitureChoices;
@@ -135,6 +137,7 @@ export interface Progress {
 }
 
 export interface AppState {
+  cardBinders?: import('../lib/cardBinders').CardBinder[];
   /** Portable backup payload only; never hydrated into the normal room. */
   originalFiles?: Record<string,string>;
   framePhotoId?: string;

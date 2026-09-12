@@ -3,7 +3,7 @@ import {BeachfrontScenery} from "./BeachfrontScenery";
 import { RoomSound } from './RoomSound';
 import {RoomPerformance} from './RoomPerformance';
 import { playRoomSound } from '../../lib/audio';
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import type { HotspotId } from "../../lib/hotspots";
@@ -22,6 +22,7 @@ import { WoodlandScenery } from "./WoodlandScenery";
 import { RoomControls } from "./RoomControls";
 import { RoomLoading } from "./RoomLoading";
 import {useWorkbench} from '../../store/workbench';
+const CardBinders=lazy(()=>import('../CardBinders').then(m=>({default:m.CardBinders})));
 export function RoomScene3D({
   roomFace,
   setRoomFace,
@@ -53,10 +54,13 @@ export function RoomScene3D({
   useEffect(()=>{const change=()=>setTabVisible(!document.hidden);document.addEventListener('visibilitychange',change);return()=>document.removeEventListener('visibilitychange',change);},[]);
   const [viewRevision, setViewRevision] = useState(0);
   const [reading,setReading]=useState(false);
+  const [displayCase,setDisplayCase]=useState(false);
+  const [binderOpen,setBinderOpen]=useState(false);
   useEffect(()=>{if(roomFace!=="front" || touring)setReading(false);},[roomFace,touring]);
-  const lookAt = (face: RoomFace) => { setReading(false);setSeated(false);setShopOpen(false);setRoomFace(face); setViewRevision(v => v + 1); };
+  const lookAt = (face: RoomFace) => { setDisplayCase(false);setReading(false);setSeated(false);setShopOpen(false);setRoomFace(face); setViewRevision(v => v + 1); };
   const profile = useRoomRenderProfile(quality);
   const [seated, setSeated] = useState(false);
+  useEffect(()=>{if(atWorkbench || touring || seated)setDisplayCase(false);},[atWorkbench,touring,seated]);
   useEffect(()=>{if(workbenchPhase==='leaving')setSeated(false);},[workbenchPhase]);
   const [shopOpen, setShopOpen] = useState(false);
   const [cabinetOpen, setCabinetOpen] = useState(false);
@@ -160,7 +164,7 @@ export function RoomScene3D({
       <RoomSound environment={environment} face={roomFace} reading={workbenchPhase==='editing'}/>
       <div className="ks-room3d-picture" role="group" aria-label="Interactive room">
       <Canvas key={activeRoom.id}
-        frameloop={tabVisible&&!discoveryOpen?'always':'demand'}
+        frameloop={tabVisible&&!discoveryOpen&&!binderOpen?'always':'demand'}
         camera={{ fov: seated ? 38 : activeRoom.fov, near: 0.08, far: 40, position: activeRoom.views.front.position }}
         dpr={[1, profile.dpr]}
         shadows={profile.shadows}
@@ -193,11 +197,12 @@ export function RoomScene3D({
         {activeRoom.woodland && <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />}
         {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment}/>}
         </Suspense>
-        <EyeCamera workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
+        <EyeCamera displayCase={displayCase} workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>
       </div>
       <div id="ks-workbench-controls" className="ks-workbench-controls"/>
-      {!touring && !atWorkbench && <RoomControls onLibrary={()=>onGo("shelf")} onReading={()=>{setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment}
+      {binderOpen&&!isVisitor&&<Suspense fallback={<p>Opening binders…</p>}><CardBinders onClose={()=>setBinderOpen(false)}/></Suspense>}
+      {!touring && !atWorkbench && <RoomControls onCardBinders={()=>setBinderOpen(true)} onDisplayCase={()=>{setRoomFace('right');setSeated(false);setReading(false);setDisplayCase(true);setViewRevision(v=>v+1);}} onLibrary={()=>onGo("shelf")} onReading={()=>{setDisplayCase(false);setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment}
         onBook={() => onGo("book")} onFiles={openArchive} onSeat={seated ? stand : sit}
         onDoor={onOpenDoor} onMusic={onOpenMusic} onLamp={toggleLamp} onCeiling={toggleCeiling} onLook={face => { stand(); lookAt(face); }} onDrawer={openCraft} />}
       {shopOpen && <StickerStore onClose={() => setShopOpen(false)} />}

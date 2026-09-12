@@ -15,6 +15,7 @@ import { useRoomAsset } from "./useRoomAsset";
 import {WorkbenchBook} from './WorkbenchBook';
 import {useWorkbench} from '../../store/workbench';
 import {FurnitureModels} from './FurnitureModels';
+import {ArtifactDisplayCase} from './ArtifactDisplayCase';
 export function RoomModel({
   phase,
   environment,
@@ -59,6 +60,7 @@ export function RoomModel({
       {coastal&&<CoastalInteractions scene={cloned} open={environment.coastalWindowOpen!==false}/>}
       <MemoryObjects scene={cloned} onBook={() => onActivate("book")} />
       <FurnitureModels scene={cloned}/>
+      <Suspense fallback={null}><ArtifactDisplayCase/></Suspense>
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />

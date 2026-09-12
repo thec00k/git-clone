@@ -3,6 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { RoomFace } from "../../lib/roomLayout";
 import {useActiveRoom} from "./useActiveRoom";
+import {DISPLAY_CASE_VIEW} from './ArtifactDisplayCase';
 const EYE_Y = 1.32;
 const WORKBENCH_VIEW={position:new THREE.Vector3(-.15,1.55,-1.12),target:new THREE.Vector3(-.15,.78,-1.72)};
 
@@ -52,10 +53,12 @@ function lookDir(yaw: number, pitch: number) {
 function clampInRoom(pos: THREE.Vector3, ROOM_WALK: {minX:number;maxX:number;minZ:number;maxZ:number}) {
   pos.x = THREE.MathUtils.clamp(pos.x, ROOM_WALK.minX, ROOM_WALK.maxX);
   pos.z = THREE.MathUtils.clamp(pos.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
+  // Keep the viewer's body clear of the cabinet, including its handles.
+  if (pos.z > .73 && pos.x > 1.56) pos.x = 1.56;
 }
 
 /** Eye-height look: yaw/pitch only. The camera never leaves standing height. */
-export function EyeCamera({ face, seated, touring, viewRevision, reading = false, workbench = false }: { face: RoomFace; seated: boolean; touring: boolean; viewRevision: number; reading?: boolean; workbench?:boolean }) {
+export function EyeCamera({ face, seated, touring, viewRevision, reading = false, workbench = false, displayCase = false }: { face: RoomFace; seated: boolean; touring: boolean; viewRevision: number; reading?: boolean; workbench?:boolean; displayCase?:boolean }) {
   const activeRoom = useActiveRoom();
   const ROOM_WALK = activeRoom.walkBounds;
   const FACE_VIEW = useMemo(() => Object.fromEntries(Object.entries(activeRoom.views).map(([face,v]) => [face,{position:new THREE.Vector3(...v.position),target:new THREE.Vector3(...v.target)}])) as Record<RoomFace,{position:THREE.Vector3;target:THREE.Vector3}>, [activeRoom]);
@@ -74,7 +77,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
   useEffect(() => { touringRef.current = touring||workbench; seatedRef.current = seated||workbench; }, [touring, seated,workbench]);
   const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const overhead = wantsDeskOverhead();
-  const view = workbench ? WORKBENCH_VIEW : reading && !touring ? READING_VIEW : overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face];
+  const view = workbench ? WORKBENCH_VIEW : displayCase && !touring ? DISPLAY_CASE_VIEW : reading && !touring ? READING_VIEW : overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face];
 
   useEffect(() => {
     userMoved.current = false;

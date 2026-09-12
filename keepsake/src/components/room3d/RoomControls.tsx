@@ -5,7 +5,9 @@ import {useActiveRoom} from "./useActiveRoom";
 import { useNav } from "../../store/nav";
 import {useApp} from '../../store/appStore';
 
-export function RoomControls({ seated, environment, onBook, onFiles, onSeat, onLamp, onCeiling, onLook, onDrawer, onMusic, onReading, onLibrary, onDoor }: {
+export function RoomControls({ seated, environment, onBook, onFiles, onSeat, onLamp, onCeiling, onLook, onDrawer, onMusic, onReading, onLibrary, onDoor, onDisplayCase, onCardBinders }: {
+  onCardBinders: () => void;
+  onDisplayCase: () => void;
   onDoor: () => void;
   onReading: () => void; onLibrary: () => void;
   seated: boolean; environment: Environment;
@@ -34,14 +36,18 @@ export function RoomControls({ seated, environment, onBook, onFiles, onSeat, onL
             <button onClick={() => onLook("left")}><MapPinned size={15}/> Memory wall</button>
             <button onClick={() => onLook("front")}><Pencil size={15}/> Writing desk</button>
             <button onClick={() => onLook("right")}><Library size={15}/> Bookshelf</button>
+            <button onClick={onDisplayCase}><Archive size={15}/> Display case</button>
           </div>
           {!isVisitor && <button onClick={() => setPrinterOpen(true)}><Printer size={16}/> Print a photo</button>}
           <button onClick={onLibrary}><Library size={16}/> Browse all scrapbooks</button>
+          {!isVisitor && <button onClick={onCardBinders}><BookOpen size={16}/> Card binders</button>}
           <button onClick={onMusic}><Music2 size={16}/> Music</button>
           {activeRoom.id==='beachfront'&&<button aria-pressed={environment.coastalWindowOpen!==false} onClick={()=>setEnvironment({coastalWindowOpen:environment.coastalWindowOpen===false})}>{environment.coastalWindowOpen===false?'Open ocean window':'Close ocean window'}</button>}
           <button onClick={onDoor}>Exit through the door</button>
           {!isVisitor&&<button onClick={()=>setDiscoveryOpen('collection')}><BookOpen size={16}/> Correspondence</button>}
           <p>LIGHTING</p>
+          {!isVisitor && <button aria-pressed={environment.displayCaseLit !== false} onClick={() => setEnvironment({displayCaseLit: environment.displayCaseLit === false})}><Lightbulb size={16}/> Display case <span>{environment.displayCaseLit !== false ? 'On' : 'Off'}</span></button>}
+          <small>Display case LEDs follow your CRT color.</small>
           <button aria-pressed={environment.lampOn} onClick={onLamp}><Lamp size={16} /> Desk lamp <span>{environment.lampOn ? "On" : "Off"}</span></button>
           <button aria-pressed={environment.ceilingOn !== false} onClick={onCeiling}><Lightbulb size={16} /> Ceiling light <span>{environment.ceilingOn !== false ? "On" : "Off"}</span></button>
 
