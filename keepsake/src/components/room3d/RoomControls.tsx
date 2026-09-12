@@ -1,4 +1,4 @@
-import {TimeCapsule} from '../TimeCapsule';
+
 import {useEffect,useRef,useState} from 'react';
 import {Archive,Armchair,BookOpen,ChevronDown,Lamp,Lightbulb,Music2,Printer,Library,Home,MapPinned,Settings2, X} from 'lucide-react';
 import type {Environment} from '../../types/app';
@@ -10,15 +10,15 @@ import {useWorkbench} from '../../store/workbench';
 export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,onCeiling,onLook,onDrawer,onMusic,onReading,onLibrary,onDoor,onDisplayCase,onCardBinders,onSettings}:{
  seated:boolean;environment:Environment;onBook:()=>void;onFiles:()=>void;onSeat:()=>void;onLamp:()=>void;onCeiling:()=>void;onLook:(face:RoomFace)=>void;onDrawer:()=>void;onMusic:()=>void;onReading:()=>void;onLibrary:()=>void;onDoor:()=>void;onDisplayCase:()=>void;onCardBinders:()=>void;onSettings:()=>void;
 }) {
- const [capsuleOpen,setCapsuleOpen]=useState(false);
+
  const room=useActiveRoom();const {setEnvironment}=useApp();const {binderId}=useWorkbench();
- const {setPrinterOpen,isVisitor}=useNav();
+ const {setPrinterOpen,isVisitor,setDiscoveryOpen}=useNav();
  const menu=useRef<HTMLDetailsElement>(null);const [section,setSection]=useState('Places');
  const close=()=>{if(menu.current){menu.current.open=false;menu.current.querySelector('summary')?.focus();}};
  useEffect(()=>{const outside=(e:PointerEvent)=>{if(menu.current?.open&&!menu.current.contains(e.target as Node))menu.current.open=false;};document.addEventListener('pointerdown',outside);return()=>document.removeEventListener('pointerdown',outside);},[]);
  const action=(fn:()=>void)=>()=>{close();fn();};
  return <>
-  {capsuleOpen&&!isVisitor&&<TimeCapsule onClose={()=>setCapsuleOpen(false)}/>}
+
   <div className="ks-room-name"><span>YOUR QUIET CORNER</span><h2>{room.title}</h2></div>
   <nav className="ks-room-controls" aria-label="Room actions">
    <button className="ks-room-primary" onClick={onBook}><BookOpen size={17}/>{binderId?'Open binder':'Open scrapbook'}</button>
@@ -41,7 +41,7 @@ export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,on
       </>}
       {section==='Collections'&&<>
        <button onClick={action(onLibrary)}><Library size={16}/>Browse all scrapbooks</button>
-       {!isVisitor&&<><button onClick={action(onCardBinders)}><BookOpen size={16}/>Card binders</button><button onClick={action(()=>setCapsuleOpen(true))}>Time capsule</button><button onClick={action(()=>setPrinterOpen(true))}><Printer size={16}/>Print a photo</button></>}
+       {!isVisitor&&<><button onClick={action(onCardBinders)}><BookOpen size={16}/>Card binders</button><button onClick={action(()=>setDiscoveryOpen('capsule'))}>Time capsule</button><button onClick={action(()=>setPrinterOpen(true))}><Printer size={16}/>Print a photo</button></>}
       </>}
       {section==='Atmosphere'&&<>
        <button aria-pressed={environment.lampOn} onClick={onLamp}><Lamp size={16}/>Desk lamp <span>{environment.lampOn?'On':'Off'}</span></button>
@@ -59,3 +59,4 @@ export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,on
   </nav>
  </>;
 }
+

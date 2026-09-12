@@ -1,3 +1,4 @@
+import {TimeCapsule} from './TimeCapsule';
 import {useEffect,useRef,useState} from 'react';
 import {KeepsakeGlyph} from './KeepsakeGlyph';
 import {PaperDecoration} from './StationeryArt';
@@ -30,6 +31,7 @@ export function DiscoverySystem(){
   return()=>{clearTimeout(delay);clearInterval(interval);};
  },[isVisitor,touring,view,printerOpen,discoveryOpen,update,state.progress.completedTour]);
  if(isVisitor||!discoveryOpen)return null;
+ if(discoveryOpen==='capsule')return <TimeCapsule onClose={()=>setDiscoveryOpen(null)}/>;
  return <Correspondence key={discoveryOpen} id={discoveryOpen} onClose={()=>setDiscoveryOpen(null)}/>;
 }
 
@@ -72,3 +74,4 @@ function Correspondence({id,onClose}:{id:string;onClose:()=>void}){
   </>}
  </div></div>;
 }
+

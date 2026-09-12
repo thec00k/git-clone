@@ -1,3 +1,4 @@
+import {TimeCapsuleChest} from './TimeCapsuleChest';
 import {useNav} from '../../store/nav';
 import {useApp} from '../../store/appStore';
 import {CoastalInteractions} from './CoastalInteractions';
@@ -61,7 +62,7 @@ export function RoomModel({
       {coastal&&<CoastalInteractions scene={cloned} open={environment.coastalWindowOpen!==false}/>}
       <MemoryObjects scene={cloned} onBook={() => onActivate("book")} />
       <FurnitureModels scene={cloned}/>
-      <Suspense fallback={null}><ArtifactDisplayCase/></Suspense>
+      <Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
       <ChairFloorContact scene={cloned}/>
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
@@ -95,3 +96,4 @@ export function RoomModel({
     </group>
   );
 }
+
