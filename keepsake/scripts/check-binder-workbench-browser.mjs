@@ -1,0 +1,21 @@
+import {createRequire} from 'node:module';import assert from 'node:assert/strict';import fs from 'node:fs';
+const require=createRequire(import.meta.url);const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const browser=await chromium.launch({headless:true,executablePath:process.env.TEST_BROWSER,args:['--enable-unsafe-swiftshader']});
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5176';
+try{for(const room of (process.env.QA_ROOM?[process.env.QA_ROOM]:['woodland','beachfront'])){
+ const c=await browser.newContext({viewport:{width:1200,height:900},reducedMotion:process.env.QA_MOTION||'reduce'});const p=await c.newPage();await p.routeWebSocket('**',()=>{});p.setDefaultTimeout(90000);const errors=[];p.on('pageerror',e=>errors.push(e.message));
+ await p.route('**/setup.html',r=>r.fulfill({contentType:'text/html',body:'<!doctype html>'}));await p.goto(base+'/setup.html');
+ await p.evaluate(async room=>{const {createSeed}=await import('/src/data/seed.ts');const {saveState}=await import('/src/lib/storage.ts');const s=createSeed();Object.assign(s.environment,{roomTheme:room,entryMusic:'off',musicOn:false,timeMode:'day'});s.progress.completedTour=true;await saveState(s);sessionStorage.setItem('ks-tour-done','1');},room);
+ await p.goto(base);const b=name=>p.getByRole('button',{name,exact:true});const phase=name=>p.locator(`.ks-room3d[data-workbench=${name}]`).waitFor();
+ await b('Take a seat').waitFor();await p.locator('.ks-room-menu>summary').press('Enter');await b('Atmosphere').press('Enter');await b('Music and sound').waitFor();await b('Places').press('Enter');await b('Bookshelf').press('Enter');
+ await b('Create a new book').focus();await p.keyboard.press('Enter');await b('Card binder').press('Enter');await phase('cover');console.log(room+' cover ready');await p.getByLabel('Binder title',{exact:true}).fill('Collected cards');await b('Open binder').press('Enter');await phase('editing');await p.getByRole('region',{name:'Binder page 1',exact:true}).waitFor();
+ await p.getByText('Add cards',{exact:true}).press('Enter');const svg='<svg xmlns="http://www.w3.org/2000/svg" width="63" height="88"><rect width="63" height="88" fill="#657e61"/></svg>';
+ // Use real PNG so the same image import path as a user is exercised.
+ const png=await p.evaluate(()=>{const a=document.createElement('canvas');a.width=63;a.height=88;a.getContext('2d').fillRect(0,0,63,88);return a.toDataURL().split(',')[1];});
+ await p.getByLabel('Upload card photos',{exact:true}).setInputFiles(Array.from({length:20},(_,i)=>({name:`card-${i}.png`,mimeType:'image/png',buffer:Buffer.from(png,'base64')})));
+ await p.getByText(/20 images added/).waitFor({state:'attached'}).catch(async e=>{console.log('IMPORT STATE',await p.locator('[role=status]').allTextContents());await p.screenshot({path:'art/demo-work/binder-integration/failure.png'});throw e;});console.log(room+' cards imported');await p.getByText('Add cards',{exact:true}).press('Enter');await b('Next binder spread').press('Enter');if(process.env.QA_MOTION==='no-preference')await p.locator('[data-binder-turn=physical]').waitFor({state:'attached'});await p.getByText('Spread 2 of 2 · 20 cards',{exact:true}).waitFor();await b('Previous binder spread').press('Enter');await p.getByText('Spread 1 of 2 · 20 cards',{exact:true}).waitFor();
+ fs.mkdirSync('art/demo-work/binder-integration',{recursive:true});await p.screenshot({path:`art/demo-work/binder-integration/${room}.png`});
+ await b('View cover').press('Enter');await phase('cover');assert.equal(await p.getByLabel('Binder title',{exact:true}).inputValue(),'Collected cards');await b('Return to room').press('Enter');await phase('room');
+ await p.locator('.ks-room-menu>summary').press('Enter');await b('Bookshelf').press('Enter');await b('Open card binder: Collected cards').focus();await p.keyboard.press('Enter');await b('Read at desk').press('Enter');await phase('cover');
+ assert.deepEqual(errors,[]);console.log('PASS '+room+': grouped menu, new binder from shelf, cover, 20 images, paging, close and reopen.');await c.close();
+}}finally{await browser.close();}

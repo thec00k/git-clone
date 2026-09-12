@@ -22,11 +22,11 @@ try{for(const [room,motion] of [['woodland','no-preference'],['beachfront','redu
  await button('Close book').click();await phase('cover');await button('Return to room').click();await phase('room');
  await p.waitForTimeout(700);await p.reload();await button('Open scrapbook').waitFor();
  const saved=await p.evaluate(async()=>await(await import('/src/lib/storage.ts')).loadState());assert.equal(saved.environment.furniture[room].desk,'desk-2');
- await p.locator('.ks-room-menu>summary').click();await button('Bookshelf').click();await p.locator('.ks-room-menu>summary').click();
+ await p.locator('.ks-room-menu>summary').press('Enter');await button('Bookshelf').press('Enter');
  await button('Open scrapbook: Workbench test').focus();await p.keyboard.press('Enter');await button('Read at desk').waitFor();await button('Put back').click();await button('Read at desk').waitFor({state:'hidden'});
  await button('Open scrapbook: Workbench test').focus();await p.keyboard.press('Enter');await button('Read at desk').click();await phase('cover');assert.equal(await p.getByLabel('Book title',{exact:true}).inputValue(),'Workbench test');
- await button('Return to room').click();await phase('room');await p.locator('.ks-room-menu>summary').click();await button('Bookshelf').click();await p.locator('.ks-room-menu>summary').click();
- await button('Create a new scrapbook').focus();await p.keyboard.press('Enter');await button('Create at desk').click();await phase('cover');await p.getByLabel('Book title',{exact:true}).waitFor();
+ await button('Return to room').click();await phase('room');await p.locator('.ks-room-menu>summary').press('Enter');await button('Bookshelf').press('Enter');
+ await button('Create a new book').focus();await p.keyboard.press('Enter');await button('Scrapbook').click();await phase('cover');await p.getByLabel('Book title',{exact:true}).waitFor();
  const created=await p.evaluate(async count=>{const {loadState}=await import('/src/lib/storage.ts');for(let i=0;i<50;i++){const s=await loadState();if(s.books.length===count)return s;await new Promise(resolve=>setTimeout(resolve,100));}throw new Error('New scrapbook was not saved');},saved.books.length+1);assert.equal(created.books.length,saved.books.length+1);assert.notEqual(created.activeBookId,saved.activeBookId);assert.deepEqual(errors,[]);
  console.log(`PASS ${room}: chair, cover/title, forward/back turns, photo drag, ink, drawer variant and reload (${motion}).`);await context.close();
 }}finally{await browser.close();}

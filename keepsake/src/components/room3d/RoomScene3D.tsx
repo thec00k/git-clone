@@ -47,7 +47,7 @@ export function RoomScene3D({
   onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
   const activeRoom=useActiveRoom();
-  const {phase:workbenchPhase}=useWorkbench();
+  const {phase:workbenchPhase,openBinder}=useWorkbench();
   const atWorkbench=workbenchPhase!=='room';
   const quality=environment.roomQuality??"balanced";
   const {discoveryOpen,isVisitor}=useNav();const [tabVisible,setTabVisible]=useState(!document.hidden);
@@ -201,8 +201,8 @@ export function RoomScene3D({
       </Canvas>
       </div>
       <div id="ks-workbench-controls" className="ks-workbench-controls"/>
-      {binderOpen&&!isVisitor&&<Suspense fallback={<p>Opening binders…</p>}><CardBinders onClose={()=>setBinderOpen(false)}/></Suspense>}
-      {!touring && !atWorkbench && <RoomControls onCardBinders={()=>setBinderOpen(true)} onDisplayCase={()=>{setRoomFace('right');setSeated(false);setReading(false);setDisplayCase(true);setViewRevision(v=>v+1);}} onLibrary={()=>onGo("shelf")} onReading={()=>{setDisplayCase(false);setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment}
+      {binderOpen&&!isVisitor&&<Suspense fallback={<p>Opening binders…</p>}><CardBinders onPick={id=>{setBinderOpen(false);openBinder(id);}} onClose={()=>setBinderOpen(false)}/></Suspense>}
+      {!touring && !atWorkbench && <RoomControls onSettings={onOpenWindow} onCardBinders={()=>setBinderOpen(true)} onDisplayCase={()=>{setRoomFace('right');setSeated(false);setReading(false);setDisplayCase(true);setViewRevision(v=>v+1);}} onLibrary={()=>onGo("shelf")} onReading={()=>{setDisplayCase(false);setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment}
         onBook={() => onGo("book")} onFiles={openArchive} onSeat={seated ? stand : sit}
         onDoor={onOpenDoor} onMusic={onOpenMusic} onLamp={toggleLamp} onCeiling={toggleCeiling} onLook={face => { stand(); lookAt(face); }} onDrawer={openCraft} />}
       {shopOpen && <StickerStore onClose={() => setShopOpen(false)} />}

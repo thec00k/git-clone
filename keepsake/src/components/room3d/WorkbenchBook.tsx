@@ -11,6 +11,8 @@ import {useReducedMotion} from '../../hooks/useReducedMotion';
 import {useLettering} from './MemoryObjects';
 import {COVER_STYLES} from '../../types/scrapbook';
 import {BookView} from '../BookView';
+import {CardBinders} from '../CardBinders';
+import {BINDER_COLORS} from '../../lib/cardBinders';
 import {BookIdentityEditor} from '../BookIdentityEditor';
 import {canSee} from '../../lib/permissions';
 import {PageTurnContext,type PhysicalTurn} from '../../store/pageTurn';
@@ -32,9 +34,11 @@ function EditorSurface({header,footer,children}:{header?:ReactNode;footer?:React
 
 export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
   const asset=use(loadBook());
-  const {activeBook,state,renameBook,setBookCover}=useApp();
+  const {activeBook,state,renameBook,setBookCover,update}=useApp();
   const {viewAs,isVisitor}=useNav();
-  const {phase,send}=useWorkbench();
+  const {phase,send,binderId}=useWorkbench();
+  const binder=!isVisitor?state.cardBinders?.find(b=>b.id===binderId):undefined;
+  const changeBinder=(patch:{title?:string;color?:string})=>update(s=>({...s,cardBinders:s.cardBinders?.map(b=>b.id===binder?.id?{...b,...patch}:b)}));
   const reduced=useReducedMotion();
   const [turn,setTurn]=useState<PhysicalTurn|null>(null);
   const turnApi=useMemo(()=>({start:(next:PhysicalTurn)=>setTurn(next),cancel:()=>setTurn(null)}),[]);
@@ -51,9 +55,9 @@ export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
     return {model,materials};
   },[asset]);
   useEffect(()=>()=>materials.forEach(m=>m.dispose()),[materials]);
-  const visible=activeBook&&canSee(activeBook.visibility,viewAs,state.profile.allowFriendScrapbooks===true);
-  const palette=COVER_STYLES[activeBook?.coverStyle??'forest'];
-  const coverMap=useLettering(visible?activeBook.title+'\n'+activeBook.subtitle:'Keepsake',palette.leather,palette.ink,false,false,true);
+  const visible=!!binder||activeBook&&canSee(activeBook.visibility,viewAs,state.profile.allowFriendScrapbooks===true);
+  const palette=binder?{leather:binder.color,ink:'#f2e7cf'}:COVER_STYLES[activeBook?.coverStyle??'forest'];
+  const coverMap=useLettering(binder?binder.title+'\nCard collection':visible&&activeBook?activeBook.title+'\n'+activeBook.subtitle:'Keepsake',palette.leather,palette.ink,false,false,true);
   useEffect(()=>{materials.forEach(m=>{if(m instanceof THREE.MeshStandardMaterial&&m.name==='Book_Linen')m.color.set(palette.leather);});},[materials,palette]);
   const hinge=model.getObjectByName('Book_Cover_Hinge');
   const leftPages=model.getObjectByName('Book_Left_Pages');
@@ -87,7 +91,8 @@ export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
     if(group.current)group.current.position.x=THREE.MathUtils.lerp(group.current.position.x,opened?-.15:-.31,t);
     if(chair){
       const active=phase!=='room'&&phase!=='leaving';
-      chair.object.position.lerp(active?new THREE.Vector3(-.15,chair.position.y,-.78):chair.position,t);
+      const resting=chair.position.clone();resting.y+=Number(chair.object.userData.floorLift??0);
+      chair.object.position.lerp(active?new THREE.Vector3(-.15,resting.y,-.78):resting,t);
       chair.object.quaternion.slerp(active?new THREE.Quaternion():chair.rotation,t);
     }
     if(turn&&leaf&&!turnFinished.current){
@@ -104,14 +109,14 @@ export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
     <primitive object={model}/>
     {/* The lettering follows the authored hinge, including its cover opening. */}
     {hinge&&<CoverLettering hinge={hinge} texture={coverMap} normal={coverNormal?.normalMap??undefined}/>}
-    {phase==='editing'&&visible&&<PageTurnContext.Provider value={turnApi}><BookView frame={EditorSurface} portalTarget={host} onClose={()=>send('close')}/></PageTurnContext.Provider>}
+    {phase==='editing'&&visible&&<PageTurnContext.Provider value={turnApi}>{binder?<CardBinders key={binder.id} initialId={binder.id} frame={EditorSurface} onClose={()=>send('close')}/>:<BookView frame={EditorSurface} portalTarget={host} onClose={()=>send('close')}/>}</PageTurnContext.Provider>}
     <Html><Bridge>{host&&(phase==='cover'||phase==='arriving'||phase==='opening'||phase==='closing'||phase==='leaving')&&createPortal(
       <section className="ks-workbench-cover-panel" aria-label="Scrapbook cover" aria-busy={phase!=='cover'}>
         {phase==='cover'?<>
           <p className="ks-caption">A moment at your desk</p>
-          {visible&&!isVisitor?<BookIdentityEditor title={activeBook.title} subtitle={activeBook.subtitle} coverStyle={activeBook.coverStyle}
-            onTitle={title=>renameBook(activeBook.id,title,activeBook.subtitle)} onSubtitle={subtitle=>renameBook(activeBook.id,activeBook.title,subtitle)} onCover={cover=>setBookCover(activeBook.id,cover)}/>:<p>{visible?activeBook.title:'This scrapbook is private.'}</p>}
-          <div className="ks-workbench-cover-actions"><button className="ks-tool" onClick={()=>send('leave')}>Return to room</button><button className="ks-tool ks-tool--accent" disabled={!visible} onClick={()=>send('open')}>Open scrapbook</button></div>
+          {binder?<><label>Binder title<input className="ks-input" aria-label="Binder title" maxLength={80} value={binder.title} onChange={e=>changeBinder({title:e.target.value})}/></label><label>Cover color<select aria-label="Binder cover color" value={binder.color} onChange={e=>changeBinder({color:e.target.value})}>{BINDER_COLORS.map((c,i)=><option key={c} value={c}>{['Moss','Ocean','Plum','Cognac','Charcoal'][i]}</option>)}</select></label></>:visible&&activeBook&&!isVisitor?<BookIdentityEditor title={activeBook.title} subtitle={activeBook.subtitle} coverStyle={activeBook.coverStyle}
+            onTitle={title=>renameBook(activeBook.id,title,activeBook.subtitle)} onSubtitle={subtitle=>renameBook(activeBook.id,activeBook.title,subtitle)} onCover={cover=>setBookCover(activeBook.id,cover)}/>:<p>{visible&&activeBook?activeBook.title:'This scrapbook is private.'}</p>}
+          <div className="ks-workbench-cover-actions"><button className="ks-tool" onClick={()=>send('leave')}>Return to room</button><button className="ks-tool ks-tool--accent" disabled={!visible} onClick={()=>send('open')}>{binder?'Open binder':'Open scrapbook'}</button></div>
         </>:<p role="status">{phase==='arriving'?'Taking a seat…':phase==='opening'?'Opening your scrapbook…':phase==='closing'?'Closing your scrapbook…':'Returning to the room…'}</p>}
       </section>,host)}</Bridge></Html>
   </group>;

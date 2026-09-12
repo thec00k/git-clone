@@ -1,3 +1,5 @@
+import {useWorkbench} from '../../store/workbench';
+import {newCardBinder} from '../../lib/cardBinders';
 import { RoomBackup } from '../RoomBackup';
 import { useState } from "react";
 import { Eye, Globe, Lock, Plus, Trash2, Users } from "lucide-react";
@@ -16,8 +18,10 @@ const VIS: { key: Visibility; icon: typeof Lock; label: string }[] = [
 ];
 
 export function Shelf() {
-  const { state, setActiveBook, addBook, renameBook, deleteBook, setBookCover, setBookVisibility } = useApp();
+  const { state, update, setActiveBook, addBook, renameBook, deleteBook, setBookCover, setBookVisibility } = useApp();
   const { go, viewAs, isVisitor } = useNav();
+  const {setBinderId,openBinder}=useWorkbench();
+  const [choosing,setChoosing]=useState(false);
   const [editing, setEditing] = useState<string | null>(null);
 
   const books = state.books.filter((b) => canSee(b.visibility, viewAs, state.profile.allowFriendScrapbooks===true));
@@ -28,13 +32,14 @@ export function Shelf() {
       subtitle={isVisitor ? "books shared with you" : "your library"}
       actions={
         !isVisitor && (
-          <button className="ks-tool ks-tool--accent" onClick={() => { addBook(); }}>
+          <button className="ks-tool ks-tool--accent" onClick={() => setChoosing(v=>!v)}>
             <Plus size={16} /> New book
           </button>
         )
       }
     >
       {!isVisitor && <RoomBackup/>}
+      {choosing&&!isVisitor&&<div className="ks-panel p-4" role="group" aria-label="Choose new book type"><p>What would you like to make?</p><button className="ks-tool" onClick={()=>{setBinderId(null);addBook();setChoosing(false);go('book');}}>Scrapbook</button><button className="ks-tool" disabled={(state.cardBinders?.length??0)>=12} onClick={()=>{const b=newCardBinder();update(s=>({...s,cardBinders:[...(s.cardBinders??[]),b]}));setChoosing(false);openBinder(b.id);}}>Card binder</button></div>}
       {books.length === 0 && (
         <p className="mt-10 text-center text-paper/60">No books to show here.</p>
       )}
@@ -47,7 +52,7 @@ export function Shelf() {
               <button
                 className="block w-full text-left"
                 onClick={() => {
-                  setActiveBook(b.id);
+                  setBinderId(null);setActiveBook(b.id);
                   go("book");
                 }}
               >

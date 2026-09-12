@@ -16,6 +16,7 @@ import {WorkbenchBook} from './WorkbenchBook';
 import {useWorkbench} from '../../store/workbench';
 import {FurnitureModels} from './FurnitureModels';
 import {ArtifactDisplayCase} from './ArtifactDisplayCase';
+import {ChairFloorContact} from './ChairFloorContact';
 export function RoomModel({
   phase,
   environment,
@@ -62,6 +63,7 @@ export function RoomModel({
       <FurnitureModels scene={cloned}/>
       <Suspense fallback={null}><ArtifactDisplayCase/></Suspense>
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
+      <ChairFloorContact scene={cloned}/>
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />
       <ArchiveCabinet

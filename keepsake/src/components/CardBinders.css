@@ -17,3 +17,20 @@
 @keyframes ks-sleeve-settle{from{opacity:.65;transform:perspective(1000px) rotateY(-5deg)}to{opacity:1;transform:none}}
 @media(max-width:650px){.ks-binder-backdrop{padding:8px}.ks-binder-dialog{padding:14px}.ks-card-spread{grid-template-columns:1fr;padding:12px;gap:16px}.ks-binder-rings{display:none}.ks-pocket-page{gap:7px;padding:8px}.ks-binder-dialog input{max-width:100%}}
 @media(prefers-reduced-motion:reduce){.ks-pocket-page{animation:none}.ks-inspected-card{transition:none;transform:none!important}}
+.ks-binder-controls{padding:12px 18px;border:0;border-radius:0;box-shadow:none;max-width:none;background:var(--ks-ui-paper);color:var(--ks-ui-ink)}
+.ks-binder-controls h2{font-size:18px}.ks-binder-controls header,.ks-binder-controls nav,.ks-binder-controls .ks-binder-tools{margin-bottom:6px}
+.ks-workbench-editor-header:has(.ks-binder-controls){padding:0;display:block;max-height:35vh;overflow:auto}
+.ks-workbench-editor-footer .ks-binder-controls{max-height:32vh;overflow:auto}
+.ks-workbench-pages .ks-binder-page-area,.ks-workbench-pages .ks-card-spread{width:960px;height:657px;padding:0;gap:0;border-radius:0}
+.ks-workbench-pages .ks-pocket-page{height:657px;border-radius:0;animation:none;gap:10px;padding:12px;grid-template-rows:repeat(3,minmax(0,1fr))}
+.ks-workbench-pages .ks-card-pocket,.ks-binder-capture-page .ks-card-pocket{min-height:0;aspect-ratio:auto}
+.ks-workbench-pages .ks-card-pocket{cursor:pointer;padding:5px;color:#fff;border:1px solid #eee6;border-radius:3px;background:#fff1;overflow:hidden}
+.ks-binder-capture-page{width:480px;height:657px;grid-template-rows:repeat(3,minmax(0,1fr))}
+.ks-binder-turn-waiting{position:absolute;top:0;width:50%;height:100%;background:var(--binder-color);display:grid;place-items:center;color:#fff}
+.ks-shelf-preview>div{flex-wrap:wrap}.ks-shelf-preview{min-width:280px}
+.ks-workbench-editor-header .ks-binder-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ks-workbench-editor-header .ks-binder-controls>header{flex:1;margin:0;min-width:180px}
+.ks-workbench-editor-header .ks-binder-add{margin:0}.ks-workbench-editor-header .ks-binder-add[open]{flex-basis:100%;order:5}
+.ks-workbench-editor-header .ks-binder-help{margin:6px 0;font-size:12px}
+.ks-workbench-editor-footer .ks-binder-controls>small{display:none}
+.ks-workbench-pages .ks-card-pocket img{min-height:0;max-height:100%}

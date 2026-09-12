@@ -322,7 +322,7 @@ export function Room() {
           ))}
         </div>
 
-        {!touring && (
+        {!touring && layout !== 'glb' && (
           <button
             className="absolute bottom-3 right-3 z-30 ks-chip"
             title="Room settings"

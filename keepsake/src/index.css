@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /* One material family across portals, menus and room variants. */
-:root { --ks-ui-panel:#263b31; --ks-ui-paper:#eee5d3; --ks-ui-ink:#344236; --ks-ui-metal:#cbb27d; --ks-motion-short:180ms; --ks-motion-settle:300ms; }
-:root[data-keepsake-theme="beachfront"] { --ks-ui-panel:#29494c; --ks-ui-paper:#f1ece0; --ks-ui-ink:#355354; --ks-ui-metal:#c7b891; }
+:root { --ks-ui-panel:#263D32; --ks-ui-paper:#F2E7CF; --ks-ui-ink:#263D32; --ks-ui-metal:#BFA06A; --ks-motion-short:180ms; --ks-motion-settle:300ms; }
+:root[data-keepsake-theme="beachfront"] { --ks-ui-panel:#315B68; --ks-ui-paper:#F5EFE2; --ks-ui-ink:#234852; --ks-ui-metal:#A8C9C5; }
 
 /*
   Keepsake design system.
@@ -2757,3 +2757,19 @@
 .ks-memory-form summary{cursor:pointer;font-weight:600}
 .ks-memory-form p{font-size:13px;line-height:1.5;margin:8px 0}
 .ks-memory-form button:focus-visible,.ks-memory-form input:focus-visible,.ks-memory-form select:focus-visible{outline:2px solid #c2983c;outline-offset:3px}
+/* One compact menu, with the same layout and distinct materials in each room. */
+.ks-room-menu-organized{width:min(360px,calc(100vw - 24px));padding:16px;color:var(--ks-ui-paper)}
+.ks-room-menu-organized header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ks-room-menu-organized header strong{font-size:18px}.ks-room-menu-organized small{display:block;color:var(--ks-ui-paper);opacity:.8;line-height:1.5}
+.ks-room-sections{display:flex;gap:4px;background:#0002;padding:4px;border-radius:8px;margin-bottom:10px}
+.ks-room-sections button{flex:1;justify-content:center;padding:9px 6px!important;font-size:12px!important}
+.ks-room-sections button[aria-pressed=true]{background:var(--ks-ui-paper);color:var(--ks-ui-ink);border-radius:5px}
+.ks-room-section{min-height:235px;display:flex;flex-direction:column;gap:3px}
+.ks-room-section button{width:100%;min-height:40px;text-align:left}.ks-room-section button span{margin-left:auto;font-size:12px;color:var(--ks-ui-metal)}
+.ks-room-menu-organized footer{border-top:1px solid #ffffff25;padding-top:12px;margin-top:10px}
+.ks-room-menu-organized footer button{width:100%}.ks-room-menu-organized button:focus-visible{outline:2px solid var(--ks-ui-metal);outline-offset:2px}
+
+:root[data-keepsake-theme="cyberpunk"]{--ks-ui-panel:#292039;--ks-ui-paper:#F1E9F7;--ks-ui-ink:#292039;--ks-ui-metal:#F2A6C6}
+:root[data-keepsake-theme="snowy-mountain"]{--ks-ui-panel:#354B60;--ks-ui-paper:#F2F4F5;--ks-ui-ink:#354B60;--ks-ui-metal:#B5CFE8}
+:root[data-keepsake-theme="stormy-lighthouse"]{--ks-ui-panel:#273E48;--ks-ui-paper:#F0E4CC;--ks-ui-ink:#273E48;--ks-ui-metal:#E3B06A}
+.ks-room-section button,.ks-room-menu-organized footer button{justify-content:flex-start}
