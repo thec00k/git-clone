@@ -62,7 +62,9 @@ export function ArchiveCabinet({
   }, [cabinet]);
 
   const labelAt = useMemo(
-    () => new THREE.Vector3(origin.x, origin.y + 0.92, origin.z + 0.28),
+    // Align the small interaction dot with the drawer pull instead of floating
+    // above the cabinet lid.
+    () => new THREE.Vector3(origin.x, origin.y + 0.50, origin.z + 0.28),
     [origin],
   );
 
@@ -303,10 +305,13 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
   const insetX = STAND_IN_TOP_W / 2 - 0.14;
   const insetZ = STAND_IN_TOP_D / 2 - 0.12;
   const markerX = clampOnTop(book.x - book.halfW - 0.1, insetX);
-  // Face the user, with clearance behind the printer for the CRT.
-  const printerX = clampOnTop(book.x + book.halfW + .13, insetX);
+  // Tuck the printer just left of the CRT and beyond the open book's right
+  // page. The previous placement grazed the scrapbook as its cover unfolded.
+  const printerX = clampOnTop(book.x + book.halfW + .24, insetX);
   const printerZ = clampOnTop(book.z, insetZ) + .20;
-  const cameraX = clampOnTop(book.x - book.halfW - 0.1, insetX);
+  // Nudge the camera back and toward the book so it reads as a deliberate
+  // desk arrangement without entering the open-page footprint.
+  const cameraX = clampOnTop(book.x - book.halfW - 0.02, insetX);
   const rowZ = clampOnTop(book.z, insetZ);
 
   return (
@@ -333,7 +338,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
         <mesh position={[0.043,0.024,-0.048]}><sphereGeometry args={[0.003,8,6]}/><meshStandardMaterial color="#a6ce97" emissive="#82b76e" emissiveIntensity={0.5}/></mesh>
         {['#b56c4a','#c7a86b','#6d8a6c'].map((color,i)=><mesh key={color} position={[-0.009+i*0.009,0.0235,-0.058]}><boxGeometry args={[0.008,0.001,0.025]}/><meshStandardMaterial color={color}/></mesh>)}
       </group>
-      <group ref={cameraRef} name="Desk_Camera_Assembly" position={[cameraX, sit(0.025), rowZ - .07]} rotation={[0, 0.32, 0]}>
+      <group ref={cameraRef} name="Desk_Camera_Assembly" position={[cameraX, sit(0.025), rowZ - .13]} rotation={[0, 0.32, 0]}>
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#ad7852" roughness={0.78} />

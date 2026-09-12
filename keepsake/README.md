@@ -45,7 +45,7 @@ After Blender edits, export the Woodland asset to its own path and run npm run c
 
 ## Provider configuration
 
-Copy .env.example only when configuring Spotify. Use VITE_SPOTIFY_CLIENT_ID, never a client secret in browser code. Personal credentials and .env files are ignored by Git. Full SoundCloud account linking needs a server-side exchange and is not implemented.
+Copy `.env.example` to `.env.local` when configuring optional providers. Use `VITE_SPOTIFY_CLIENT_ID`, never a client secret in browser code. To browse NFTs after a read-only Phantom or Backpack connection, set `VITE_SOLANA_DAS_RPC_URL` to a Solana DAS-compatible `getAssetsByOwner` endpoint. Helius endpoints work; browser-exposed keys should be domain-restricted, while a production build should use a same-origin server proxy. Personal credentials and `.env` files are ignored by Git. Full SoundCloud account linking needs a server-side exchange and is not implemented.
 
 ## Acceptance limits
 

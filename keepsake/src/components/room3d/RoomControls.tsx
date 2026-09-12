@@ -7,11 +7,12 @@ import {useActiveRoom} from './useActiveRoom';
 import {useNav} from '../../store/nav';
 import {useApp} from '../../store/appStore';
 import {useWorkbench} from '../../store/workbench';
+function ChestIcon({size=16}:{size?:number}) {return <svg aria-hidden="true" focusable="false" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10V8.5A4.5 4.5 0 0 1 8.5 4h7A4.5 4.5 0 0 1 20 8.5V10"/><path d="M3 10h18v10H3z"/><path d="M3 14h7m4 0h7"/><path d="M10 12h4v5h-4z"/></svg>}
 export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,onCeiling,onLook,onDrawer,onMusic,onReading,onLibrary,onDoor,onDisplayCase,onCardBinders,onSettings}:{
  seated:boolean;environment:Environment;onBook:()=>void;onFiles:()=>void;onSeat:()=>void;onLamp:()=>void;onCeiling:()=>void;onLook:(face:RoomFace)=>void;onDrawer:()=>void;onMusic:()=>void;onReading:()=>void;onLibrary:()=>void;onDoor:()=>void;onDisplayCase:()=>void;onCardBinders:()=>void;onSettings:()=>void;
 }) {
 
- const room=useActiveRoom();const {setEnvironment}=useApp();const {binderId}=useWorkbench();
+ const room=useActiveRoom();const {setEnvironment,activeBook}=useApp();const {binderId}=useWorkbench();
  const {setPrinterOpen,isVisitor,setDiscoveryOpen}=useNav();
  const menu=useRef<HTMLDetailsElement>(null);const [section,setSection]=useState('Places');
  const close=()=>{if(menu.current){menu.current.open=false;menu.current.querySelector('summary')?.focus();}};
@@ -21,7 +22,7 @@ export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,on
 
   <div className="ks-room-name"><span>YOUR QUIET CORNER</span><h2>{room.title}</h2></div>
   <nav className="ks-room-controls" aria-label="Room actions">
-   <button className="ks-room-primary" onClick={onBook}><BookOpen size={17}/>{binderId?'Open binder':'Open scrapbook'}</button>
+   <button className="ks-room-primary" onClick={binderId||activeBook?onBook:onLibrary}><BookOpen size={17}/>{binderId?'Open binder':activeBook?'Open scrapbook':'Choose a book'}</button>
    <button onClick={onFiles}><Archive size={17}/>Files</button>
    <button onClick={onSeat}><Armchair size={17}/>{seated?'Stand up':'Take a seat'}</button>
    {!isVisitor&&<button onClick={onDrawer}>Drawer shop</button>}
@@ -41,7 +42,7 @@ export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,on
       </>}
       {section==='Collections'&&<>
        <button onClick={action(onLibrary)}><Library size={16}/>Browse all scrapbooks</button>
-       {!isVisitor&&<><button onClick={action(onCardBinders)}><BookOpen size={16}/>Card binders</button><button onClick={action(()=>setDiscoveryOpen('capsule'))}>Time capsule</button><button onClick={action(()=>setPrinterOpen(true))}><Printer size={16}/>Print a photo</button></>}
+       {!isVisitor&&<><button onClick={action(onCardBinders)}><BookOpen size={16}/>Card binders</button><button onClick={action(()=>setDiscoveryOpen('capsule'))}><ChestIcon/>Time capsule</button><button onClick={action(()=>setPrinterOpen(true))}><Printer size={16}/>Print a photo</button></>}
       </>}
       {section==='Atmosphere'&&<>
        <button aria-pressed={environment.lampOn} onClick={onLamp}><Lamp size={16}/>Desk lamp <span>{environment.lampOn?'On':'Off'}</span></button>

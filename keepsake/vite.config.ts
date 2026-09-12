@@ -9,6 +9,10 @@ const spotifyClientId =
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Keep React's hook dispatcher singular in development. Several 3D helpers
+  // import React through their own entry points; without deduping, Vite can
+  // optimize a second copy and the app renders as a blank page.
+  resolve: { dedupe: ['react', 'react-dom'] },
   css: {
     postcss: { plugins: [] },
   },

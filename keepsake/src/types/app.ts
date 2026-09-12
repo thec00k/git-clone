@@ -69,7 +69,7 @@ export interface Environment {
   pinsLocked: boolean;
 }
 
-/** Lights, weather, and hour the door's "tidy up" restores. Books and photos stay. */
+/** Lights, weather, and hour the door's "tidy up" restores. Memories and decorations stay. */
 export const TIDY_ROOM: Pick<
   Environment,
   "timeMode" | "season" | "weather" | "lampOn" | "ceilingOn" | "shelfLit" | "pinsLocked"
@@ -138,7 +138,10 @@ export interface Progress {
 
 export interface AppState {
   timeCapsules?: import("../components/TimeCapsule").Capsule[];
+  displayCaseScans?: Array<{id:string;title:string;modelSrc:string;shelf:number;slot:number}>;
   cardBinders?: import('../lib/cardBinders').CardBinder[];
+  /** The card binder currently left on the writing desk. Omitted when a scrapbook or nothing is there. */
+  deskBinderId?: string;
   /** Portable backup payload only; never hydrated into the normal room. */
   originalFiles?: Record<string,string>;
   framePhotoId?: string;

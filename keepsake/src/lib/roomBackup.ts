@@ -19,17 +19,19 @@ const image=(v:unknown)=>string(v)&&(/^(data:image\/(png|jpeg|webp|gif);base64,|
 function records(v:unknown,check:(v:RecordValue)=>boolean){return Array.isArray(v)&&v.every(x=>object(x)&&check(x));}
 export function parseRoomBackup(text:string):AppState{
  const file:unknown=JSON.parse(text);ensure(object(file)&&file.format==='keepsake-room'&&file.backupVersion===1&&object(file.state));const s=file.state;
- if(s.cardBinders!==undefined){
+  if(s.cardBinders!==undefined){
   ensure(Array.isArray(s.cardBinders)&&s.cardBinders.length<=12);
-  ensure(records(s.cardBinders,b=>string(b.id)&&string(b.title)&&(b.title as string).length<=80&&BINDER_COLORS.includes(b.color as string)&&(b.coverSrc===undefined||image(b.coverSrc))&&Array.isArray(b.cards)&&b.cards.length<=MAX_BINDER_CARDS&&records(b.cards,c=>string(c.id)&&string(c.title)&&(c.title as string).length<=100&&['image','imported-scan'].includes(c.source as string)&&['paper','foil'].includes(c.finish as string)&&(c.src===undefined||image(c.src))&&(c.backSrc===undefined||image(c.backSrc))&&(c.source==='image'?image(c.src):string(c.modelSrc)))));
+  ensure(records(s.cardBinders,b=>string(b.id)&&string(b.title)&&(b.title as string).length<=80&&BINDER_COLORS.includes(b.color as string)&&(b.coverSrc===undefined||image(b.coverSrc))&&Array.isArray(b.cards)&&b.cards.length<=MAX_BINDER_CARDS&&records(b.cards,c=>string(c.id)&&string(c.title)&&(c.title as string).length<=100&&['image','imported-scan'].includes(c.source as string)&&['paper','foil'].includes(c.finish as string)&&(c.position===undefined||(Number.isInteger(c.position)&&(c.position as number)>=0&&(c.position as number)<MAX_BINDER_CARDS))&&(c.src===undefined||image(c.src))&&(c.backSrc===undefined||image(c.backSrc))&&(c.source==='image'?image(c.src):string(c.modelSrc)))));
   for(const binder of s.cardBinders as unknown as import('./cardBinders').CardBinder[]){
    ensure(new Set(binder.cards.map(c=>c.id)).size===binder.cards.length);
+   const positions=binder.cards.flatMap(c=>c.position===undefined?[]:[c.position]);ensure(new Set(positions).size===positions.length);
    ensure(binder.cards.filter(c=>c.modelSrc).length<=9);
    for(const card of binder.cards)if(card.modelSrc){
     ensure(card.modelSrc.length<7*1024*1024&&/^data:model\/gltf-binary;base64,[A-Za-z0-9+/]*={0,2}$/.test(card.modelSrc));
     const binary=atob(card.modelSrc.split(',')[1]);const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));validateCardGlb(bytes.buffer);
    }
   }
+ ensure(s.deskBinderId===undefined||string(s.deskBinderId)&&(s.cardBinders as {id:string}[]|undefined)?.some(b=>b.id===s.deskBinderId));
   ensure(new Set((s.cardBinders as {id:string}[]).map(b=>b.id)).size===s.cardBinders.length);
  }
  if(s.timeCapsules!==undefined){ensure(Array.isArray(s.timeCapsules)&&s.timeCapsules.length<=50&&records(s.timeCapsules,c=>string(c.id)&&string(c.title)&&(c.title as string).length<=80&&number(c.createdAt)&&number(c.opensAt)&&(c.opensAt as number)>(c.createdAt as number)&&(c.openedAt===undefined||number(c.openedAt)&&(c.openedAt as number)>=(c.opensAt as number))&&Array.isArray(c.photos)&&c.photos.length>0&&c.photos.length<=20&&records(c.photos,p=>image(p.src))));ensure(new Set((s.timeCapsules as {id:string}[]).map(c=>c.id)).size===s.timeCapsules.length);}
@@ -71,6 +73,7 @@ export function parseRoomBackup(text:string):AppState{
  ensure(e.crtColor===undefined||Object.hasOwn(CRT_COLORS,e.crtColor as string));
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
  ensure(['memoryLighting','soundGeography','displayCaseLit'].every(k=>e[k]===undefined||typeof e[k]==='boolean'));
+ ensure(s.displayCaseScans===undefined||records(s.displayCaseScans,x=>string(x.id)&&string(x.title)&&string(x.modelSrc)&&number(x.shelf)&&(x.shelf as number)>=0&&(x.shelf as number)<4&&number(x.slot)&&(x.slot as number)>=0&&(x.slot as number)<4));
  ensure(e.roomTheme===undefined || ['woodland','beachfront'].includes(e.roomTheme as string));
  ensure(e.furniture===undefined||validFurnitureChoices(e.furniture));
  ensure(e.coastalWindowOpen===undefined || typeof e.coastalWindowOpen==='boolean');

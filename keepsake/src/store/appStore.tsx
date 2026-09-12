@@ -242,13 +242,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const setProfile = useCallback((patch: Partial<Profile>) => update((p) => ({ ...p, profile: { ...p.profile, ...patch } })), [update]);
-  const setActiveBook = useCallback((id: string) => update((p) => ({ ...p, activeBookId: id })), [update]);
+  const setActiveBook = useCallback((id: string) => update((p) => ({ ...p, activeBookId: id, deskBinderId: undefined })), [update]);
 
   const addBook = useCallback(() => {
     const id = uid("book");
     update((p) => ({
       ...p,
       activeBookId: id,
+      deskBinderId: undefined,
       books: [
         ...p.books,
         {
@@ -389,7 +390,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [persist]);
 
   const tidyRoom = useCallback(
-    () => flushSave(p => ({ ...p, environment: { ...p.environment, ...TIDY_ROOM } })),
+    () => flushSave(p => ({ ...p, activeBookId: null, deskBinderId: undefined, environment: { ...p.environment, ...TIDY_ROOM } })),
     [flushSave],
   );
 

@@ -2772,4 +2772,5 @@
 :root[data-keepsake-theme="cyberpunk"]{--ks-ui-panel:#292039;--ks-ui-paper:#F1E9F7;--ks-ui-ink:#292039;--ks-ui-metal:#F2A6C6}
 :root[data-keepsake-theme="snowy-mountain"]{--ks-ui-panel:#354B60;--ks-ui-paper:#F2F4F5;--ks-ui-ink:#354B60;--ks-ui-metal:#B5CFE8}
 :root[data-keepsake-theme="stormy-lighthouse"]{--ks-ui-panel:#273E48;--ks-ui-paper:#F0E4CC;--ks-ui-ink:#273E48;--ks-ui-metal:#E3B06A}
+.ks-case-add{width:16px;height:16px;padding:0;border-radius:50%;border:1px solid #dbc778;background:#18251dcc;color:#f5e7b6;font:700 13px/12px Georgia,serif;cursor:pointer}.ks-case-add:hover,.ks-case-add:focus-visible{background:#46664f;outline:2px solid #e2c46e}.ks-case-status{color:#f3e7c6;font:12px Georgia,serif;text-shadow:0 1px 2px #000}
 .ks-room-section button,.ks-room-menu-organized footer button{justify-content:flex-start}

@@ -49,9 +49,9 @@ function Spine({title,color,ink,width,height,handwritten=false,highlight=false}:
 }
 export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>void}) {
  const {state,setActiveBook,addBook,update}=useApp(); const {viewAs,isVisitor,go,setBookPageId}=useNav();
- const {openBinder,setBinderId}=useWorkbench();
- const binders=isVisitor?[]:state.cardBinders??[];
- const books=[...binders.map(b=>({id:b.id,title:b.title,subtitle:'Card binder',coverStyle:'forest',pages:[],visibility:'private',createdAt:0,updatedAt:0} as Scrapbook)),...state.books.filter(b=>canSee(b.visibility,viewAs,state.profile.allowFriendScrapbooks===true))];
+ const {openBinder,setBinderId,binderId}=useWorkbench();
+ const binders=(isVisitor?[]:state.cardBinders??[]).filter(b=>b.id!==binderId);
+ const books=[...binders.map(b=>({id:b.id,title:b.title,subtitle:'Card binder',coverStyle:'forest',pages:[],visibility:'private',createdAt:0,updatedAt:0} as Scrapbook)),...state.books.filter(b=>canSee(b.visibility,viewAs,state.profile.allowFriendScrapbooks===true)&&(isVisitor||b.id!==state.activeBookId))];
  const fillers=useMemo(()=>Array.from({length:45},(_,i)=>scene.getObjectByName(`ks_shelf_book_${i}`)).filter((o):o is THREE.Object3D=>!!o),[scene]);
  const [chosen,setChosen]=useState<string|null>(null);
  useEffect(()=>{fillers.forEach(object=>{const b=new THREE.Box3().setFromObject(object);const row=Math.max(0,Math.min(3,3-Math.round(b.min.y/.46)));object.visible=row>=Math.ceil((books.length+(isVisitor?0:1))/12);});return()=>fillers.forEach(object=>{object.visible=true;});},[fillers,books.length,isVisitor]);

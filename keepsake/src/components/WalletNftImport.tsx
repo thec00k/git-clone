@@ -1,0 +1,20 @@
+import {useState} from 'react';
+import {connectWallet,hasSolanaDasEndpoint,loadWalletNfts,saveSolanaDasEndpoint,type WalletKind,type WalletNft} from '../lib/solanaWalletNfts';
+
+export function WalletNftImport({disabled,remaining,onImport}:{disabled:boolean;remaining:number;onImport:(assets:WalletNft[])=>Promise<void>}) {
+ const [wallet,setWallet]=useState<WalletKind|null>(null),[address,setAddress]=useState(''),[assets,setAssets]=useState<WalletNft[]>([]),[selected,setSelected]=useState<Set<string>>(new Set()),[busy,setBusy]=useState(false),[error,setError]=useState(''),[configured,setConfigured]=useState(hasSolanaDasEndpoint),[endpoint,setEndpoint]=useState('');
+ const connect=async(kind:WalletKind)=>{setBusy(true);setError('');try{const owner=await connectWallet(kind);setWallet(kind);setAddress(owner);const found=await loadWalletNfts(owner);setAssets(found);setSelected(new Set());if(!found.length)setError('No image-based Solana NFTs were found in this wallet.');}catch(e){setError(e instanceof Error?e.message:'Could not connect to this wallet.');}finally{setBusy(false);}};
+ const toggle=(id:string)=>setSelected(current=>{const next=new Set(current);if(next.has(id))next.delete(id);else if(next.size<Math.min(20,remaining))next.add(id);return next;});
+ const chosen=assets.filter(asset=>selected.has(asset.id));
+ return <section className="ks-wallet-import" aria-label="Import NFTs from a wallet">
+  <div className="ks-wallet-heading"><div><strong>Import from a Solana wallet</strong><small>Read-only connection · Keepsake never requests a signature or transaction</small></div>{address&&<button type="button" onClick={()=>{setWallet(null);setAddress('');setAssets([]);setSelected(new Set());setError('');}}>Choose another wallet</button>}</div>
+  {!configured&&<form className="ks-wallet-setup" onSubmit={e=>{e.preventDefault();try{saveSolanaDasEndpoint(endpoint);setConfigured(true);setEndpoint('');setError('');}catch(err){setError(err instanceof Error?err.message:'Could not save the endpoint.');}}}><label>Helius endpoint<input type="password" autoComplete="off" value={endpoint} onChange={e=>setEndpoint(e.target.value)} placeholder="Paste endpoint URL" aria-label="Helius endpoint URL"/></label><button type="submit" disabled={!endpoint.trim()}>Save endpoint</button><small>Stored only in this browser. The key is hidden after saving.</small></form>}
+  {!address?<div className="ks-wallet-choices"><button disabled={disabled||busy||!configured} type="button" onClick={()=>void connect('phantom')}>Connect Phantom</button><button disabled={disabled||busy||!configured} type="button" onClick={()=>void connect('backpack')}>Connect Backpack</button></div>:<>
+   <p className="ks-wallet-address"><span>{wallet==='phantom'?'Phantom':'Backpack'}</span> {address.slice(0,5)}…{address.slice(-5)} · {assets.length} NFT{assets.length===1?'':'s'}</p>
+   {assets.length>0&&<><div className="ks-wallet-selectbar"><button type="button" disabled={disabled||busy} onClick={()=>setSelected(new Set(assets.slice(0,Math.min(20,remaining)).map(a=>a.id)))}>Select up to {Math.min(20,remaining)}</button><span>{selected.size} selected</span></div>
+   <div className="ks-wallet-grid">{assets.map(asset=><button type="button" key={asset.id} aria-pressed={selected.has(asset.id)} disabled={disabled||busy} onClick={()=>toggle(asset.id)}><img src={asset.image} alt="" loading="lazy" referrerPolicy="no-referrer"/><span>{asset.title}</span><i aria-hidden="true">{selected.has(asset.id)?'✓':'+'}</i></button>)}</div>
+   <button className="ks-wallet-confirm" type="button" disabled={disabled||busy||!chosen.length} onClick={()=>{setBusy(true);setError('');void onImport(chosen).then(()=>{setAssets(current=>current.filter(a=>!selected.has(a.id)));setSelected(new Set());}).catch(e=>setError(e instanceof Error?e.message:'Could not import these NFTs.')).finally(()=>setBusy(false));}}>Add {chosen.length||''} selected NFT{chosen.length===1?'':'s'} to binder</button></>}
+  </>}
+  {busy&&<p role="status">Loading wallet collection…</p>}{error&&<p className="ks-wallet-error" role="alert">{error}</p>}
+ </section>;
+}

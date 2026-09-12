@@ -44,6 +44,8 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
     });
     const shelf=cloned.getObjectByName('ks_shelf');
     if(shelf) shelf.position.z += BOOKSHELF_WINDOW_SHIFT;
+    const clock=cloned.getObjectByName('ks_clock');
+    if(clock) clock.position.x -= .06;
     cloned.updateMatrixWorld(true);
     const beanbag=cloned.getObjectByName('Beanbag');
     if(beanbag){const box=new THREE.Box3().setFromObject(beanbag);const delta=new THREE.Vector3(-2.38-box.min.x,0,2.005-box.max.z);beanbag.position.add(delta);}

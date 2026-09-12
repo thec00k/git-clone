@@ -6,6 +6,8 @@ import { COVER_STYLES } from "../../types/scrapbook";
 import type { Scrapbook } from "../../types/scrapbook";
 import type { Environment } from "../../types/app";
 import { Cabinet, CRT, MiniShelf, SKY, SEASON_TINT, WALL_PAINT, WeatherFx, type Phase } from "./RoomFurniture";
+import {useApp} from "../../store/appStore";
+import {useWorkbench} from "../../store/workbench";
 
 export function RoomFlat({
   phase,
@@ -157,6 +159,12 @@ export function DeskLayer({
     crt?: CSSProperties;
   };
 }) {
+  const {state}=useApp();
+  const {binderId}=useWorkbench();
+  const binder=state.cardBinders?.find(item=>item.id===binderId);
+  const deskTitle=binder?.title??activeBook?.title;
+  const deskSubtitle=binder?'Card collection':activeBook?.subtitle;
+  const deskCover=binder?{leather:binder.color,ink:'#f2e7cf'}:cover;
   const archive = hotspots?.archive ?? HOTSPOTS.archive;
   const book = hotspots?.book ?? HOTSPOTS.book;
   const guestbook = hotspots?.guestbook ?? HOTSPOTS.guestbook;
@@ -177,33 +185,33 @@ export function DeskLayer({
         <Cabinet />
         <span className="ks-obj-label">the archive</span>
       </button>
-      <button
+      {deskTitle&&<button
         className={`ks-obj${tourClass("book")}`}
         data-tour="book"
         style={book}
         onClick={() => onGo("book")}
         aria-hidden="true"
         tabIndex={-1}
-        aria-label={`Open ${activeBook?.title ?? "book"}`}
+        aria-label={`Open ${binder?'card binder':'scrapbook'}: ${deskTitle}`}
       >
         <div
           className="flex h-full w-full flex-col items-center justify-center rounded-md p-3 text-center"
           style={{
             background: `linear-gradient(90deg, rgb(0 0 0 /.35), transparent 14%), url('/textures/leather.jpg') center/cover`,
-            backgroundColor: cover.leather,
-            color: cover.ink,
+            backgroundColor: deskCover.leather,
+            color: deskCover.ink,
             boxShadow: "6px 12px 30px rgb(0 0 0 /.5)",
           }}
         >
           <span className="text-[0.6rem] uppercase tracking-[0.2em] opacity-70">a book of</span>
-          <span className="font-display text-lg font-semibold leading-tight">{activeBook?.title ?? "Keepsake"}</span>
+          <span className="font-display text-lg font-semibold leading-tight">{deskTitle}</span>
           <span className="ks-caption" style={{ fontSize: "1rem" }}>
-            {activeBook?.subtitle ?? ""}
+            {deskSubtitle ?? ""}
           </span>
           <BookOpen size={16} className="mt-1 opacity-70" />
         </div>
         <span className="ks-obj-label">open the book</span>
-      </button>
+      </button>}
       <button
         className={`ks-obj${tourClass("guestbook")}`}
         data-tour="guestbook"

@@ -99,7 +99,10 @@ function FurnitureReplacement({scene,id,category}:{scene:THREE.Object3D;id:Furni
         if(category==='bookshelf')model.traverse(o=>{if(/^Shelf(?:\d|_|$)/.test(o.name)&&o instanceof THREE.Mesh){const y=new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()).y;if(y>target.min.y+.08&&y<target.max.y-.08)o.visible=false;}});
         if(category==='cabinet')model.traverse(o=>{if(/^(Drawer_front|Drawer_pull|Label_frame|Paper_label)/.test(o.name))o.visible=false;});
         if(category==='crt'){
-          const source=scene.getObjectByName('CRT_Screen'),screen=model.getObjectByName('Screen_surface');
+          // Blender exports the authored node with a space. Accept the older
+          // underscore spelling too so both CRT assets receive the live radio
+          // texture instead of showing their baked white placeholder screen.
+          const source=scene.getObjectByName('CRT_Screen'),screen=model.getObjectByName('Screen surface')??model.getObjectByName('Screen_surface');
           if(source instanceof THREE.Mesh&&screen instanceof THREE.Mesh){
             const sourceMat=Array.isArray(source.material)?source.material[0]:source.material;screen.material=sourceMat.clone();materials.push(screen.material);
             const geometry=new THREE.PlaneGeometry(.285,.208);const uv=geometry.attributes.uv;for(let i=0;i<uv.count;i++)uv.setY(i,1-uv.getY(i));screen.geometry=geometry;geometries.push(geometry);

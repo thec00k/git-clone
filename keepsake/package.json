@@ -21,7 +21,8 @@
     "check:memories": "node scripts/check-memory-features.mjs",
     "check:discoveries": "node scripts/check-discoveries.mjs && node scripts/check-discovery-geometry.mjs",
     "check:workbench": "node scripts/check-workbench.mjs && node scripts/check-furniture.mjs",
-    "check:workbench:browser": "node scripts/check-workbench-browser.mjs"
+    "check:workbench:browser": "node scripts/check-workbench-browser.mjs",
+    "scanner:receive": "node scripts/scanner-receiver.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

@@ -105,7 +105,7 @@ export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
   });
   const Bridge=useContextBridge(AppContext,NavContext,WorkbenchContext);
   const host=document.getElementById('ks-workbench-controls');
-  return <group ref={group} position={[-.31,.756,-1.72]}>
+  return <group ref={group} position={[-.31,.756,-1.72]} visible={!!binder||!!activeBook}>
     <primitive object={model}/>
     {/* The lettering follows the authored hinge, including its cover opening. */}
     {hinge&&<CoverLettering hinge={hinge} texture={coverMap} normal={coverNormal?.normalMap??undefined}/>}

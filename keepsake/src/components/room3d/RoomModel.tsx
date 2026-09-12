@@ -48,8 +48,9 @@ export function RoomModel({
   onToggleCeiling: () => void;
 }) {
   const {isVisitor}=useNav();
-  const {phase:workbenchPhase}=useWorkbench();
-  const {setEnvironment}=useApp();
+  const {phase:workbenchPhase,binderId}=useWorkbench();
+  const {setEnvironment,activeBook}=useApp();
+  const hasDeskBook=!!binderId||!!activeBook;
   const coastal=useActiveRoom().id==='beachfront';
   const cloned = useRoomAsset(phase, environment);
   const roots = useMemo(() => collectHotspotRoots(cloned), [cloned]);
@@ -82,7 +83,7 @@ export function RoomModel({
       <RoomLights phase={phase} environment={environment} scene={cloned} />
       {!isVisitor && !drawerOpen && workbenchPhase==='room' && <DrawerPrompt scene={cloned} onOpen={onOpenDrawer} />}
       {workbenchPhase==='room'&&roots
-        .filter(({ id }) => id !== "archive" && id !== "shelf")
+        .filter(({ id }) => id !== "archive" && id !== "shelf" && (id!=="book"||hasDeskBook))
         .map(({ id, object }) => (
         <HotspotAnchor
           key={id}
