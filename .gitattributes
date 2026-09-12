@@ -1,0 +1,4 @@
+# Preserve byte offsets and binary asset data across Windows/cloud checkouts.
+*.pdf binary
+*.blend binary
+*.glb binary
