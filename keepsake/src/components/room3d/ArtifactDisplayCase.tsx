@@ -7,12 +7,12 @@ import {CRT_COLORS} from '../../lib/roomMusic';
 RectAreaLightUniformsLib.init();
 
 /** Shared placement: clear of shelf end, wall trim, and the central walking aisle. */
-export const DISPLAY_CASE_POSITION: [number, number, number] = [1.92, 0, 1.53];
-export const DISPLAY_CASE_VIEW = {position: new THREE.Vector3(-.35,1.38,-.65), target: new THREE.Vector3(1.92,1.07,1.53)};
+export const DISPLAY_CASE_POSITION: [number, number, number] = [2.03, 0, 1.65];
+export const DISPLAY_CASE_VIEW = {position: new THREE.Vector3(-.35,1.38,-.65), target: new THREE.Vector3(2.03,1.07,1.65)};
 
 export function ArtifactDisplayCase() {
   const {environment} = useApp();
-  const {scene} = useGLTF('/room/furniture/display-case.glb?v=corner-2');
+  const {scene} = useGLTF('/room/furniture/display-case.glb?v=right-angle-3');
   const tint = CRT_COLORS[environment.crtColor ?? 'green'].ink;
   const on = environment.displayCaseLit !== false;
   const coastal = environment.roomTheme === 'beachfront';

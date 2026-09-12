@@ -20,11 +20,11 @@ try {
   },room);
   await page.goto(base);await page.getByRole('button',{name:'Take a seat',exact:true}).waitFor();
   await page.locator('.ks-room-menu>summary').press('Enter');
-  await page.getByRole('button',{name:'Display case',exact:true}).click();
+  await page.getByRole('button',{name:'Display case',exact:true}).press('Enter');
   await page.locator('.ks-room-menu>summary').press('Enter');await page.waitForTimeout(4000);
   await page.screenshot({path:new URL(room+'-night.png',out).pathname.replace(/^\//,'')});
   await page.locator('.ks-room-menu>summary').press('Enter');
-  await page.getByRole('button',{name:'Display case On',exact:true}).click();
+  await page.getByRole('button',{name:'Display case On',exact:true}).press('Enter');
   await page.waitForTimeout(400);await page.reload();
   await page.getByRole('button',{name:'Take a seat',exact:true}).waitFor();await page.locator('.ks-room-menu>summary').press('Enter');
   await page.getByRole('button',{name:'Display case Off',exact:true}).waitFor();
@@ -32,3 +32,4 @@ try {
   await context.close();
  }
 } finally {await browser.close();}
+

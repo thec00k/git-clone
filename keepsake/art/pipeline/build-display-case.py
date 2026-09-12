@@ -43,12 +43,11 @@ def box(name, p, size, mat, bevel=.004):
         o.modifiers.new('Weighted normals','WEIGHTED_NORMAL')
     return o
 
-# Quarter-circle rear, with two glazed chamfers and a broad flat double front.
-# In plan the rear sweeps exactly 90 degrees; no rectangular backing remains.
+# Right-angle rear, with two glazed chamfers and a broad flat double front.
+# In plan the two flat rear panels meet at exactly 90 degrees.
 import math
-R=.44/math.sin(math.pi/4)
-arc=[(R*math.sin(-math.pi/4+i*math.pi/64),R/math.sqrt(2)-R*math.cos(-math.pi/4+i*math.pi/64)) for i in range(33)]
-outline=arc+[(.39,.20),(-.39,.20)]
+rear=[(-.44,0),(0,-.44),(.44,0)]
+outline=rear+[(.39,.20),(-.39,.20)]
 def prism(name,points,y,height,mat):
     n=len(points);v=[(x,-z,h) for h in [y-height/2,y+height/2] for x,z in points]
     faces=[tuple(range(n-1,-1,-1)),tuple(range(n,2*n))]+[(i,(i+1)%n,(i+1)%n+n,i+n) for i in range(n)]
@@ -57,9 +56,9 @@ def prism(name,points,y,height,mat):
     o=bpy.data.objects.new(name,mesh);bpy.context.collection.objects.link(o);o.data.materials.append(mat)
     bevel=o.modifiers.new('Hand-finished edges','BEVEL');bevel.width=.003;bevel.segments=3
     o.modifiers.new('Weighted normals','WEIGHTED_NORMAL');return o
-# Thin concentric arc creates a genuinely rounded rear wall.
-inner=[(x*.966,z*.966+.009) for x,z in reversed(arc)]
-prism('Case_QuarterCircle_Back',arc+inner,1.095,1.90,frame)
+# Mitered L-shaped backing: both outside planes lie flush along the room walls.
+inner=[(.424,.016),(0,-.408),(-.424,.016)]
+prism('Case_RightAngle_Back',rear+inner,1.095,1.90,frame)
 for y in [.115,1.095,2.075]:prism('Case_Shaped_Crossrail',outline,y,.065,frame)
 for x,z in [(-.36,.14),(.36,.14),(-.36,-.02),(.36,-.02)]:box('Case_Foot',(x,.043,z),(.085,.086,.075),wood,.008)
 for x,z in [(-.44,0),(.44,0),(-.39,.20),(.39,.20)]:box('Case_Vertical_Frame',(x,1.095,z),(.042,1.90,.042),frame)
@@ -68,7 +67,7 @@ for side in [-1,1]:
     o=box('Case_AngledSideGlass',(side*.415,1.095,.10),(.006,1.86,.18),glass,.001)
     o.rotation_euler.z=side*math.atan(.25)
 for y in [.155,.625,1.125,1.605]:
-    prism('Case_QuarterCircle_GlassShelf',[(x*.91,z*.91) for x,z in outline],y,.012,glass)
+    prism('Case_Corner_GlassShelf',[(x*.91,z*.91) for x,z in outline],y,.012,glass)
     box('Case_ShelfFront',(0,y,.186),(.735,.024,.024),frame)
     for side in [-1,1]:box('Case_ShelfSupport',(side*.37,y-.014,.13),(.025,.02,.032),brass)
 for y in [.6125,1.5875]:
@@ -100,3 +99,5 @@ for mat in [frame,wood,brass,led]:
     bpy.ops.object.join();bpy.context.object.name=mat.name
 bpy.ops.export_scene.gltf(filepath=str(OUT/'display-case.glb'),export_format='GLB',export_yup=True,export_apply=True)
 print('Empty display case saved and exported')
+
+
