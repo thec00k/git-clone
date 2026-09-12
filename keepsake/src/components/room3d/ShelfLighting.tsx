@@ -1,7 +1,5 @@
 import { useMemo } from "react";
 import * as THREE from "three";
-import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
-RectAreaLightUniformsLib.init();
 export function ShelfLighting({scene,on}:{scene?:THREE.Object3D;on:boolean}) {
  const strips=useMemo(()=>{
   if(!scene)return [];
@@ -13,7 +11,8 @@ export function ShelfLighting({scene,on}:{scene?:THREE.Object3D;on:boolean}) {
  },[scene]);
  return <>{strips.map(s=><group key={s.name}>
   <mesh position={[s.x,s.y,s.z]}><boxGeometry args={[.018,.009,s.length]}/><meshStandardMaterial color="#70634c" roughness={.8}/></mesh>
-  {on&&<><rectAreaLight position={[s.x,s.y-.008,s.z]} rotation={[-Math.PI/2,0,Math.PI/2]} width={s.length} height={.035} color="#ffe1ad" intensity={11}/>
-  <rectAreaLight position={[s.x-.46,s.y-.13,s.z]} rotation={[0,-Math.PI/2,Math.PI/2]} width={s.length} height={.22} color="#ffe1ad" intensity={4}/></>}
+  {/* Bounded washes cannot reach the floor, including with Balanced shadows off. */}
+  {on&&[-.32,0,.32].map(offset=><pointLight key={offset} position={[s.x-.27,s.y-.025,s.z+offset*s.length]} color="#ffe1ad" intensity={.65} distance={.39} decay={1}/>)}
  </group>)}</>;
 }
+

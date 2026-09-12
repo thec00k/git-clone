@@ -1,0 +1,7 @@
+import assert from 'node:assert/strict';
+import {parseRoomBackup,serializeRoom} from '../src/lib/roomBackup.ts';
+const state={version:1,profile:{displayName:'Test'},books:[{id:'book',title:'A memory',subtitle:'',coverStyle:'forest',visibility:'private',createdAt:1,updatedAt:1,pages:[{id:'p1',elements:[]}]}],activeBookId:'book',archive:[],archiveTabs:[],pins:[],guestbook:[],notes:[],pinNotes:[],achievements:[],achievementsSeen:[],ownedStickerPacks:['everyday'],stamps:12,achievementsAt:{},receipts:{},progress:{visitedAtNight:false,previewedAsVisitor:false,completedTour:false},environment:{timeMode:'day',season:'autumn',weather:'clear',musicProvider:'ambient',lampOn:true,ceilingOn:true,shelfLit:true,musicOn:false,pinsLocked:false,volume:.5,ambienceVolume:.4,roomQuality:'high'},roomDecor:{owned:['fox','bird','poster-night'],sillItem:'fox',posterItem:'poster-night'}};
+state.timeCapsules=[{id:'future',title:'Later',createdAt:100,opensAt:200,photos:[{src:'data:image/png;base64,aGVsbG8='}]}];
+assert.deepEqual(parseRoomBackup(serializeRoom(state)).timeCapsules,state.timeCapsules);
+for(const patch of [{opensAt:0},{photos:[]},{openedAt:150},{photos:[{src:'javascript:alert(1)'}]}])assert.throws(()=>parseRoomBackup(serializeRoom({...state,timeCapsules:[{...state.timeCapsules[0],...patch}]})));
+console.log('PASS capsule backup round-trip; reject invalid dates, early opening and unsafe photos');

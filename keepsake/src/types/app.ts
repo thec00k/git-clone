@@ -137,6 +137,7 @@ export interface Progress {
 }
 
 export interface AppState {
+  timeCapsules?: import("../components/TimeCapsule").Capsule[];
   cardBinders?: import('../lib/cardBinders').CardBinder[];
   /** Portable backup payload only; never hydrated into the normal room. */
   originalFiles?: Record<string,string>;

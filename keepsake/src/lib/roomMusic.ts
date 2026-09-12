@@ -10,3 +10,6 @@ export function musicOnEntry(s:AppState):AppState{
  return {...s,environment:{...e,musicProvider:preference,musicOn:available}};
 }
 
+
+/** Saturated LED hues paired with the CRT, rather than its pale text ink. */
+export const CRT_LIGHT_COLORS={blue:"#268bff",green:"#35ed78",purple:"#a855ff",pink:"#ff59d8",orange:"#ff951f",red:"#ff303e",coastal:"#40ceff"} as const;

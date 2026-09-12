@@ -32,6 +32,7 @@ export function parseRoomBackup(text:string):AppState{
   }
   ensure(new Set((s.cardBinders as {id:string}[]).map(b=>b.id)).size===s.cardBinders.length);
  }
+ if(s.timeCapsules!==undefined){ensure(Array.isArray(s.timeCapsules)&&s.timeCapsules.length<=50&&records(s.timeCapsules,c=>string(c.id)&&string(c.title)&&(c.title as string).length<=80&&number(c.createdAt)&&number(c.opensAt)&&(c.opensAt as number)>(c.createdAt as number)&&(c.openedAt===undefined||number(c.openedAt)&&(c.openedAt as number)>=(c.opensAt as number))&&Array.isArray(c.photos)&&c.photos.length>0&&c.photos.length<=20&&records(c.photos,p=>image(p.src))));ensure(new Set((s.timeCapsules as {id:string}[]).map(c=>c.id)).size===s.timeCapsules.length);}
  ensure(number(s.version)&&object(s.profile)&&string(s.profile.displayName)&&(s.profile.allowFriendScrapbooks===undefined||typeof s.profile.allowFriendScrapbooks==='boolean'));
  ensure(records(s.books,b=>string(b.id)&&string(b.title)&&string(b.subtitle)&&['cocoa','forest','wine','midnight','ochre'].includes(b.coverStyle as string)&&['private','friends','public'].includes(b.visibility as string)&&number(b.createdAt)&&number(b.updatedAt)&&records(b.pages,p=>string(p.id)&&(p.titlePage===undefined||typeof p.titlePage==='boolean')&&records(p.elements,e=>{
   if(!string(e.id)||!['x','y','w','rotation','z'].every(k=>number(e[k])))return false;

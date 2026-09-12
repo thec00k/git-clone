@@ -3,7 +3,7 @@ import {useGLTF} from '@react-three/drei';
 import * as THREE from 'three';
 import {RectAreaLightUniformsLib} from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import {useApp} from '../../store/appStore';
-import {CRT_COLORS} from '../../lib/roomMusic';
+import {CRT_LIGHT_COLORS} from '../../lib/roomMusic';
 RectAreaLightUniformsLib.init();
 
 /** Shared placement: clear of shelf end, wall trim, and the central walking aisle. */
@@ -13,7 +13,7 @@ export const DISPLAY_CASE_VIEW = {position: new THREE.Vector3(-.35,1.38,-.65), t
 export function ArtifactDisplayCase() {
   const {environment} = useApp();
   const {scene} = useGLTF('/room/furniture/display-case.glb?v=right-angle-3');
-  const tint = CRT_COLORS[environment.crtColor ?? 'green'].ink;
+  const tint = CRT_LIGHT_COLORS[environment.crtColor ?? 'green'];
   const on = environment.displayCaseLit !== false;
   const coastal = environment.roomTheme === 'beachfront';
   const model = useMemo(() => {
@@ -34,7 +34,7 @@ export function ArtifactDisplayCase() {
   useEffect(() => {
     model.materials.forEach(m => {
       if (!(m instanceof THREE.MeshStandardMaterial)) return;
-      if (m.name === 'Case_LED') {m.color.set(on ? tint : '#d5d0c0');m.emissive.set(tint);m.emissiveIntensity = on ? 1.8 : 0;}
+      if (m.name === 'Case_LED') {m.color.set(on ? tint : '#d5d0c0');m.emissive.set(tint);m.emissiveIntensity = on ? .85 : 0;}
       if (m.name === 'Case_PaintedTimber') {m.color.set(coastal ? '#eee9db' : '#d1c8af');m.emissive.copy(m.color);m.emissiveIntensity=.10;}
       if (m.name === 'Case_Oak') m.color.set(coastal ? '#ae916a' : '#796047');
       if (m instanceof THREE.MeshPhysicalMaterial && m.name === 'Case_Glass') {
@@ -48,6 +48,6 @@ export function ArtifactDisplayCase() {
   }, [model, tint, on, coastal]);
   return <group name="Keepsake_ArtifactDisplayCase" position={DISPLAY_CASE_POSITION} rotation={[0,-3*Math.PI/4,0]}>
     <primitive object={model.copy}/>
-    {on && [.60,1.08,1.58,2.04].map(y => <rectAreaLight key={y} color={tint} intensity={5} width={.65} height={.18} position={[0,y-.018,.04]} rotation={[-Math.PI/2,0,0]}/>)}
+    {on && [.60,1.08,1.58,2.04].map(y => <rectAreaLight key={y} color={tint} intensity={3.5} width={.65} height={.18} position={[0,y-.018,.04]} rotation={[-Math.PI/2,0,0]}/>)}
   </group>;
 }
