@@ -1,7 +1,10 @@
+import {RoomThemeSticker} from './RoomThemeSticker';
+import {ROOM_STICKER_LABELS} from '../lib/roomStickerLabels';
 import {isPaperStyle} from '../lib/stationery';
 
 /** Original vector illustrations: cream cut edges, muted pigment and ink contours. */
 export function IllustratedSticker({glyph}:{glyph:string}){
+ if(Object.hasOwn(ROOM_STICKER_LABELS,glyph))return <RoomThemeSticker glyph={glyph}/>;
  const ink='#75694e',paper='#f5ecd7',green='#6c805b',blue='#769f9a',gold='#c5a15b';
  return <svg viewBox="0 0 100 100" width="1em" height="1em" aria-hidden="true" style={{display:'inline-block',verticalAlign:'middle'}}>
   <g stroke={paper} strokeWidth="9" strokeLinejoin="round" strokeLinecap="round">

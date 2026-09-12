@@ -20,8 +20,11 @@ export const STICKER_PACKS: StickerPack[] = [
     price: 0,
     glyphs: STICKER_GLYPHS,
   },
-  {id:'keepsake-field',title:'Woodland keepsakes',blurb:'Original paper-cut leaves, a moth and the cup beside your book.',price:0,glyphs:['keepsake:oak-leaf','keepsake:toadstool','keepsake:moth','keepsake:teacup']},
-  {id:'keepsake-tide',title:'Tide-pool keepsakes',blurb:'Original conch, sea glass, sailboat and ocean postmark illustrations.',price:0,glyphs:['keepsake:conch','keepsake:sailboat','keepsake:sea-glass','keepsake:tidal-postmark']},
+  {id:'keepsake-field',title:'Woodland keepsakes',blurb:'Original paper-cut leaves, a moth and the cup beside your book.',price:0,glyphs:['keepsake:oak-leaf','keepsake:toadstool','keepsake:moth','keepsake:teacup','keepsake:acorn']},
+  {id:'keepsake-tide',title:'Tide-pool keepsakes',blurb:'Original conch, sea glass, sailboat and ocean postmark illustrations.',price:0,glyphs:['keepsake:conch','keepsake:sailboat','keepsake:sea-glass','keepsake:tidal-postmark','keepsake:beach-umbrella']},
+  {id:'keepsake-city',title:'City afterglow keepsakes',blurb:'A neon cat, mixtape, ramen, rainy window and pocket arcade.',price:0,glyphs:['keepsake:neon-cat','keepsake:city-cassette','keepsake:ramen','keepsake:city-window','keepsake:arcade']},
+  {id:'keepsake-snow',title:'Snowy mountain keepsakes',blurb:'A cabin, wool mittens, alpine peaks, pinecone and warm cocoa.',price:0,glyphs:['keepsake:snow-cabin','keepsake:mittens','keepsake:mountain','keepsake:pinecone','keepsake:cocoa']},
+  {id:'keepsake-storm',title:'Lighthouse keepsakes',blurb:'A lighthouse, lantern, compass, passing storm and bottled message.',price:0,glyphs:['keepsake:lighthouse','keepsake:storm-lantern','keepsake:compass','keepsake:storm-cloud','keepsake:message-bottle']},
   {
     id: "garden",
     title: "Garden cuttings",
