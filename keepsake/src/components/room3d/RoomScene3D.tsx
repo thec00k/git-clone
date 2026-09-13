@@ -19,6 +19,7 @@ import { RoomModel } from "./RoomModel";
 import type { HotspotAction } from "./RoomInteractions";
 import {useRoomRenderProfile} from './useRoomRenderProfile';
 import { WoodlandScenery } from "./WoodlandScenery";
+import { OutdoorWeather } from "./OutdoorWeather";
 import { RoomControls } from "./RoomControls";
 import { RoomLoading } from "./RoomLoading";
 import {useWorkbench} from '../../store/workbench';
@@ -195,7 +196,8 @@ export function RoomScene3D({
             onToggleCeiling={toggleCeiling}
           />
         {activeRoom.woodland && <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />}
-        {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment}/>}
+        {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment} particles={profile.particles}/>}
+        {activeRoom.id === "cyberpunk" && environment.weather !== "clear" && <OutdoorWeather kind={environment.weather} count={profile.particles} room="cyberpunk"/>}
         </Suspense>
         <EyeCamera displayCase={displayCase} workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>

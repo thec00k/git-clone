@@ -28,6 +28,8 @@ assert.throws(()=>parseRoomBackup(serializeRoom({...state,environment:{...state.
 
 const neon=switchRoomTheme(forest,'cyberpunk');
 assert.equal(neon.environment.roomTheme,'cyberpunk');
+const snowyNeon={...neon,environment:{...neon.environment,weather:'snow'}};
+assert.equal(switchRoomTheme(switchRoomTheme(snowyNeon,'woodland'),'cyberpunk').environment.weather,'snow','Window weather follows the user across every room');
 const neonDecor={...neon,roomDecor:{...neon.roomDecor,owned:[...neon.roomDecor.owned,'holo-cat'],sillItem:'holo-cat'},environment:{...neon.environment,crtColor:'pink'}};
 const neonRestored=switchRoomTheme(parseRoomBackup(serializeRoom(switchRoomTheme(neonDecor,'woodland'))),'cyberpunk');
 assert.equal(neonRestored.roomDecor.sillItem,'holo-cat');

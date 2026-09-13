@@ -2,6 +2,8 @@
 
 Implemented September 12, 2026.
 
+Rain and snow now use the shared outdoor precipitation layer used by Woodland and Beachfront. The existing Clear, Rain and Snow choices in Window / Room settings control the Neon City view too; its precipitation uses a cool cyan-white palette and remains outside the rounded window.
+
 ## Changes and files
 
 - `src/components/room3d/RoomCamera.tsx`: walking 1.55 → 2.35 m/s; drag sensitivity 0.0034/0.0028 → 0.0044/0.0036 radians per pixel; wheel step 0.0022 → 0.0032. Diagonal input is normalized. Existing room boundaries, eye height, book/focus transitions and modal guards remain in place.

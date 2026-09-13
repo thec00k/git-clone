@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import type { Environment } from "../../types/app";
 import type { Phase } from "../room/RoomFurniture";
+import { OutdoorWeather } from "./OutdoorWeather";
 
 /** Instanced scenery stays outside the physical window, with real parallax. */
 export function WoodlandScenery({ phase, environment, particles }: {
@@ -96,7 +97,7 @@ export function WoodlandScenery({ phase, environment, particles }: {
     </instancedMesh>
     <ForestForeground foliage={foliage} night={night}/>
     <ForestMist phase={phase} reduced={reduced}/>
-    {environment.weather !== "clear" && <WindowWeather kind={environment.weather} count={particles} reduced={reduced} />}
+    {environment.weather !== "clear" && <OutdoorWeather kind={environment.weather} count={particles} room="woodland" />}
   </group></>;
 }
 
@@ -115,26 +116,5 @@ function ForestForeground({foliage,night}:{foliage:THREE.Texture;night:boolean})
   const branch=useMemo(()=>new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(-3.3,2.7,-4.6),new THREE.Vector3(-2.1,2.9,-4.7),new THREE.Vector3(-1.25,3.25,-4.8),new THREE.Vector3(-.65,3.5,-4.9)]),18,.027,5,false),[]);
   useEffect(()=>()=>branch.dispose(),[branch]);
   return <group><mesh geometry={branch}><meshBasicMaterial color={night?'#182a2d':'#484c37'}/></mesh>{[-2.6,-2,-1.5,-1].map((x,i)=><mesh key={x} position={[x,2.98+i*.14,-4.63]} rotation={[0,0,i*.33]}><planeGeometry args={[.65,.43]}/><meshBasicMaterial map={foliage} color={night?'#274539':'#526849'} alphaTest={.4} side={THREE.DoubleSide}/></mesh>)}</group>;
-}
-
-function WindowWeather({ kind, count, reduced }: { kind: "rain" | "snow"; count: number; reduced: boolean }) {
-  const mesh = useRef<THREE.InstancedMesh>(null);
-  const drops = useMemo(() => Array.from({ length: count }, (_, i) => ({
-    x: Math.sin(i * 127.1) * 4, y: ((i * .618) % 1) * 6, z: -2.6 - ((i * .317) % 1) * 4,
-  })), [count]);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-  useFrame(({ clock }, dt) => {
-    if (!mesh.current) return;
-    drops.forEach((drop, i) => {
-      if (!reduced) drop.y = (drop.y - Math.min(dt, .05) * (kind === "rain" ? 3.2 : .42) + 6) % 6;
-      dummy.position.set(drop.x + (kind === "snow" && !reduced ? Math.sin(clock.elapsedTime * .3 + i) * .15 : 0), drop.y, drop.z);
-      dummy.scale.setScalar(1); dummy.updateMatrix(); mesh.current!.setMatrixAt(i, dummy.matrix);
-    });
-    mesh.current.instanceMatrix.needsUpdate = true;
-  });
-  return <instancedMesh ref={mesh} args={[undefined, undefined, count]} frustumCulled={false}>
-    <boxGeometry args={kind === "rain" ? [.008, .16, .008] : [.028, .028, .028]} />
-    <meshBasicMaterial color={kind === "rain" ? "#c5d8d7" : "#eee9d8"} transparent opacity={kind === "rain" ? .42 : .8} depthWrite={false} />
-  </instancedMesh>;
 }
 

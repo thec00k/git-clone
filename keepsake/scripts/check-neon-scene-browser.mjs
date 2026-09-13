@@ -12,6 +12,16 @@ try {
  await p.screenshot({path:'art/demo-work/neon-front.png'});
  const button=name=>p.getByRole('button',{name,exact:true});
  const sceneRead=async(fn,arg)=>p.evaluate(async({source,arg})=>{const url=performance.getEntriesByType('resource').find(e=>e.name.includes('/@react-three_fiber.js')).name;const {_roots}=await import(url);const state=[..._roots.values()][0].store.getState();return new Function('s','arg',source)(state,arg);},{source:fn,arg});
+ await p.locator('.ks-room-menu>summary').click();await p.getByRole('tab',{name:'Atmosphere',exact:true}).click();await button('Room settings').click();
+ const weather=p.getByRole('group',{name:'Weather'});
+ await weather.getByRole('button',{name:'Rain',exact:true}).click();await p.waitForTimeout(300);
+ assert.equal(await sceneRead("return !!s.scene.getObjectByName('Outdoor_Weather_cyberpunk_rain')"),true,'Rain appears beyond the Neon City window');
+ await p.screenshot({path:'art/demo-work/neon-window-rain.png'});
+ await weather.getByRole('button',{name:'Snow',exact:true}).click();await p.waitForTimeout(300);
+ assert.equal(await sceneRead("return !!s.scene.getObjectByName('Outdoor_Weather_cyberpunk_snow')"),true,'Snow appears beyond the Neon City window');
+ await weather.getByRole('button',{name:'Clear',exact:true}).click();await p.waitForTimeout(200);
+ assert.equal(await sceneRead("return !!s.scene.getObjectByName('Outdoor_Weather_cyberpunk_rain')||!!s.scene.getObjectByName('Outdoor_Weather_cyberpunk_snow')"),false,'Clear removes Neon City precipitation');
+ await button('Done').click();
  assert.equal(await sceneRead("return s.scene.children.some(o=>/curtain/i.test(o.name))"),false);
  await sceneRead("window.dispatchEvent(new CustomEvent('ks-frame-view',{detail:{position:[.45,1.8,-.5],target:[-.15,1.875,-2.1]}}));");await p.waitForTimeout(1200);await p.screenshot({path:'art/demo-work/neon-rounded-window.png'});
  await sceneRead("window.dispatchEvent(new CustomEvent('ks-frame-view',{detail:{position:[0,1.4,.8],target:[-.3,3.05,.5]}}));");await p.waitForTimeout(1200);await p.screenshot({path:'art/demo-work/neon-infinity-mirror.png'});
