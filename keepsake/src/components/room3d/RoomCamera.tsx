@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { RoomFace } from "../../lib/roomLayout";
@@ -20,9 +20,9 @@ function wantsDeskOverhead() {
 }
 
 
-const WALK_SPEED = 1.55;
-const LOOK_YAW = 0.0034;
-const LOOK_PITCH = 0.0028;
+const WALK_SPEED = 2.35;
+const LOOK_YAW = 0.0044;
+const LOOK_PITCH = 0.0036;
 const PITCH_MIN = -0.72;
 const PITCH_MAX = 0.55;
 
@@ -45,9 +45,9 @@ function lookFromView(pos: THREE.Vector3, target: THREE.Vector3) {
   };
 }
 
-function lookDir(yaw: number, pitch: number) {
+function lookDir(yaw: number, pitch: number, target = new THREE.Vector3()) {
   const cp = Math.cos(pitch);
-  return new THREE.Vector3(Math.sin(yaw) * cp, Math.sin(pitch), -Math.cos(yaw) * cp);
+  return target.set(Math.sin(yaw) * cp, Math.sin(pitch), -Math.cos(yaw) * cp);
 }
 
 function clampInRoom(pos: THREE.Vector3, ROOM_WALK: {minX:number;maxX:number;minZ:number;maxZ:number}) {
@@ -60,24 +60,30 @@ function clampInRoom(pos: THREE.Vector3, ROOM_WALK: {minX:number;maxX:number;min
 /** Eye-height look: yaw/pitch only. The camera never leaves standing height. */
 export function EyeCamera({ face, seated, touring, viewRevision, reading = false, workbench = false, displayCase = false }: { face: RoomFace; seated: boolean; touring: boolean; viewRevision: number; reading?: boolean; workbench?:boolean; displayCase?:boolean }) {
   const activeRoom = useActiveRoom();
+  const [photoView,setPhotoView]=useState<{position:THREE.Vector3;target:THREE.Vector3}|null>(null);
+  useEffect(()=>{const change=(e:Event)=>{const d=(e as CustomEvent).detail;setPhotoView(d?{position:new THREE.Vector3(...d.position),target:new THREE.Vector3(...d.target)}:null);};window.addEventListener('ks-frame-view',change);return()=>window.removeEventListener('ks-frame-view',change);},[]);
   const ROOM_WALK = activeRoom.walkBounds;
   const FACE_VIEW = useMemo(() => Object.fromEntries(Object.entries(activeRoom.views).map(([face,v]) => [face,{position:new THREE.Vector3(...v.position),target:new THREE.Vector3(...v.target)}])) as Record<RoomFace,{position:THREE.Vector3;target:THREE.Vector3}>, [activeRoom]);
   const SEATED_VIEW = useMemo(() => ({position:new THREE.Vector3(...activeRoom.seated.position),target:new THREE.Vector3(...activeRoom.seated.target)}),[activeRoom]);
   const { camera, gl } = useThree();
   const aim=useMemo(()=>({matrix:new THREE.Matrix4(),quaternion:new THREE.Quaternion()}),[]);
+  const scratch=useMemo(()=>({forward:new THREE.Vector3(),right:new THREE.Vector3(),target:new THREE.Vector3()}),[]);
+  const diagnosticElapsed=useRef(0);
   const keys = useRef({ f: 0, r: 0 });
+  const objectControls = useRef(false);
   const yaw = useRef(0);
   const pitch = useRef(0);
   const dragging = useRef(false);
   const userMoved = useRef(false);
+  useEffect(()=>{const change=(e:Event)=>{objectControls.current=!!(e as CustomEvent).detail;keys.current={f:0,r:0};dragging.current=false;};window.addEventListener('ks-object-controls',change);return()=>window.removeEventListener('ks-object-controls',change);},[]);
   const touringRef = useRef(touring);
 
   const seatedRef = useRef(seated);
 
-  useEffect(() => { touringRef.current = touring||workbench; seatedRef.current = seated||workbench; }, [touring, seated,workbench]);
+  useEffect(() => { touringRef.current = touring||workbench||!!photoView; seatedRef.current = seated||workbench; }, [touring, seated,workbench,photoView]);
   const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const overhead = wantsDeskOverhead();
-  const view = workbench ? WORKBENCH_VIEW : displayCase && !touring ? DISPLAY_CASE_VIEW : reading && !touring ? READING_VIEW : overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face];
+  const view = photoView ?? (workbench ? WORKBENCH_VIEW : displayCase && !touring ? DISPLAY_CASE_VIEW : reading && !touring ? READING_VIEW : overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face]);
 
   useEffect(() => {
     userMoved.current = false;
@@ -90,14 +96,18 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
     const el = gl.domElement;
     const blockMenu = (e: Event) => e.preventDefault();
     const down = (e: PointerEvent) => {
-      if (touringRef.current) return;
+      if (touringRef.current||objectControls.current) return;
       if ((e.target as HTMLElement | null)?.closest?.("button, a, input, textarea, [role='dialog']")) return;
       dragging.current = true;
+      // Begin a drag from the visible pose, including midway through a transition.
+      camera.getWorldDirection(scratch.forward);
+      yaw.current = Math.atan2(scratch.forward.x, -scratch.forward.z);
+      pitch.current = Math.asin(THREE.MathUtils.clamp(scratch.forward.y,-1,1));
       userMoved.current = true;
       el.setPointerCapture(e.pointerId);
     };
     const move = (e: PointerEvent) => {
-      if (!dragging.current || touringRef.current) return;
+      if (!dragging.current || touringRef.current||objectControls.current) return;
       // Mouse right looks right; mouse up looks up. Screen Y grows downward.
       yaw.current += e.movementX * LOOK_YAW;
       pitch.current = THREE.MathUtils.clamp(pitch.current - e.movementY * LOOK_PITCH, PITCH_MIN, PITCH_MAX);
@@ -107,11 +117,11 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
       if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
     };
     const wheel = (e: WheelEvent) => {
-      if (touringRef.current || seatedRef.current) return;
+      if (touringRef.current || seatedRef.current||objectControls.current) return;
       e.preventDefault();
       userMoved.current = true;
       const dir = lookDir(yaw.current, 0);
-      camera.position.addScaledVector(dir, -e.deltaY * 0.0022);
+      camera.position.addScaledVector(dir, -e.deltaY * 0.0032);
       clampInRoom(camera.position, ROOM_WALK);
       camera.position.y = EYE_Y;
     };
@@ -119,19 +129,21 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
     el.addEventListener("pointerdown", down);
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
     el.addEventListener("wheel", wheel, { passive: false });
     return () => {
       el.removeEventListener("contextmenu", blockMenu);
       el.removeEventListener("pointerdown", down);
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
       el.removeEventListener("wheel", wheel);
     };
-  }, [camera, gl, ROOM_WALK]);
+  }, [camera, gl, ROOM_WALK, scratch]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (touringRef.current || seated || document.querySelector('[aria-modal="true"]')) return;
+      if (touringRef.current || objectControls.current || seated || document.querySelector('[aria-modal="true"]')) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.target instanceof HTMLElement && e.target.closest("input, textarea, select, [contenteditable='true'], [aria-modal='true']")) {
         return;
@@ -163,6 +175,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
   }, [seated]);
 
   useFrame((_, dt) => {
+    if(objectControls.current)return;
     if (document.querySelector('[aria-modal="true"]')) { keys.current = { f: 0, r: 0 }; dragging.current = false; return; }
     dt = Math.min(dt, .05);
     if (touring || !userMoved.current) {
@@ -170,7 +183,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
       camera.position.lerp(view.position, t);
       if (overhead) {
         camera.position.copy(view.position);
-      } else if (!seated&&!workbench) {
+      } else if (!seated&&!workbench&&!photoView) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }
@@ -179,10 +192,11 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
       camera.quaternion.slerp(aim.quaternion,t);
     } else {
       if (!seated && (keys.current.f || keys.current.r)) {
-        const forward = lookDir(yaw.current, 0);
-        const right = new THREE.Vector3(-forward.z, 0, forward.x);
-        camera.position.addScaledVector(forward, keys.current.f * WALK_SPEED * dt);
-        camera.position.addScaledVector(right, keys.current.r * WALK_SPEED * dt);
+        const forward = lookDir(yaw.current, 0, scratch.forward);
+        const right = scratch.right.set(-forward.z, 0, forward.x);
+        const distance = WALK_SPEED * dt / Math.max(1, Math.hypot(keys.current.f, keys.current.r));
+        camera.position.addScaledVector(forward, keys.current.f * distance);
+        camera.position.addScaledVector(right, keys.current.r * distance);
       }
       if (seated) {
         camera.position.copy(SEATED_VIEW.position);
@@ -190,13 +204,18 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }
-      camera.lookAt(camera.position.clone().add(lookDir(yaw.current, pitch.current)));
+      camera.lookAt(scratch.target.copy(camera.position).add(lookDir(yaw.current, pitch.current,scratch.forward)));
     }
 
     if(camera instanceof THREE.PerspectiveCamera){
       const bookFov=Math.max(42,THREE.MathUtils.radToDeg(2*Math.atan(.42/Math.max(.35,camera.aspect))));
-      camera.fov=THREE.MathUtils.lerp(camera.fov,workbench?bookFov:seated?38:activeRoom.fov,reduced?1:1-Math.exp(-dt*7));camera.updateProjectionMatrix();
+      const targetFov=workbench?bookFov:seated?38:activeRoom.fov;
+      const nextFov=Math.abs(camera.fov-targetFov)<.001?targetFov:THREE.MathUtils.lerp(camera.fov,targetFov,reduced?1:1-Math.exp(-dt*7));
+      if(camera.fov!==nextFov){camera.fov=nextFov;camera.updateProjectionMatrix();}
     }
+    diagnosticElapsed.current+=dt;
+    if(diagnosticElapsed.current<.1)return;
+    diagnosticElapsed.current=0;
     const host = gl.domElement.closest(".ks-room3d");
     if (host instanceof HTMLElement) {
       host.dataset.cam = `${camera.position.x.toFixed(3)},${camera.position.y.toFixed(3)},${camera.position.z.toFixed(3)}`;

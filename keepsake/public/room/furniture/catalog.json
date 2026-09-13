@@ -154,13 +154,6 @@
     "bytes": 2140848
   },
   {
-    "id": "chair-3",
-    "category": "chair",
-    "title": "Honey shell swivel chair",
-    "asset": "/room/furniture/chair-3.glb",
-    "bytes": 2207408
-  },
-  {
     "id": "lamp-3",
     "category": "lamp",
     "title": "Graphite articulated lamp",
@@ -173,5 +166,12 @@
     "title": "Sculpted bentwood desk",
     "asset": "/room/furniture/desk-3.glb",
     "bytes": 1152496
+  },
+  {
+    "id": "chair-3",
+    "category": "chair",
+    "title": "Honey shell swivel chair",
+    "asset": "/room/furniture/chair-3.glb",
+    "bytes": 2292700
   }
 ]

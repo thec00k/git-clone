@@ -375,7 +375,7 @@ def sculpted_chair():
     # A curved back with shoulder taper, lumbar shaping and continuous side arms.
     verts=[];faces=[];nx,ny=32,32
     for j in range(ny+1):
-        t=j/ny;half=.205-.025*t+.014*math.sin(t*math.pi)
+        t=j/ny;half=.213-.013*t+.008*math.sin(t*math.pi)
         for i in range(nx+1):
             u=i/nx*2-1;verts.append((u*half,.15+.055*t-.05*u*u-.027*math.sin(t*math.pi),.43+.48*t+.012*(1-u*u)))
     for j in range(ny):
@@ -383,12 +383,12 @@ def sculpted_chair():
             a=j*(nx+1)+i;faces.append((a,a+1,a+nx+2,a+nx+1))
     me=bpy.data.meshes.new('Contoured upholstered shell');me.from_pydata(verts,[],faces);me.materials.append(leather)
     o=bpy.data.objects.new('Honey chair back',me);bpy.context.collection.objects.link(o)
-    m=o.modifiers.new('Upholstery thickness','SOLIDIFY');m.thickness=.025
-    m=o.modifiers.new('Soft upholstery edge','BEVEL');m.width=.01;m.segments=3
+    m=o.modifiers.new('Upholstery thickness','SOLIDIFY');m.thickness=.065;m.offset=0;m.use_even_offset=True
+    m=o.modifiers.new('Soft upholstery edge','BEVEL');m.width=.015;m.segments=3
     for p in me.polygons:p.use_smooth=True
-    ellipsoid('Shaped seat cushion',(0,-.025,.437),(.225,.225,.045),leather)
+    ellipsoid('Shaped seat cushion',(0,-.025,.437),(.225,.225,.050),leather)
     for side in [-1,1]:
-        tube('Swept padded arm',[(side*(.195+.025*math.sin(t*math.pi)),.15-.30*t,.53+.055*t) for t in [i/32 for i in range(33)]],.022,leather)
+        tube('Swept padded arm',[(side*(.200+.015*math.sin(t*math.pi)),.15-.30*t,.53+.055*t) for t in [i/32 for i in range(33)]],.028,leather)
     tube('Upholstery perimeter seam',[(.216*math.cos(i*math.tau/96),-.025+.215*math.sin(i*math.tau/96),.445) for i in range(97)],.0015,oat)
     tube('Swivel column',[(0,0,.10),(0,0,.405)],.024,brass)
     for i in range(5):
@@ -434,7 +434,7 @@ for category,builder in BUILDERS.items():
         identity=f'{category}-{style+1}'
         bpy.ops.wm.save_as_mainfile(filepath=str(ART/(identity+'.blend')),compress=True)
         path=OUT/(identity+'.glb')
-        bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',export_animations=False,export_extras=True)
+        bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',export_animations=False,export_extras=True,export_apply=identity=='chair-3')
         manifest=[item for item in manifest if item['id']!=identity]
         manifest.append({'id':identity,'category':category,'title':NAMES[category][style],'asset':f'/room/furniture/{identity}.glb','bytes':path.stat().st_size})
 (OUT/'catalog.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')

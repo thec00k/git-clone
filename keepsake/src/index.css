@@ -2216,6 +2216,82 @@
     overflow: hidden;
   }
 
+  .ks-atlas-holo-frame {
+    position: relative;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, var(--ks-holo) 72%, #fff 28%);
+    border-radius: 9px;
+    background: linear-gradient(145deg, #171426, #080b17 55%, #21172b);
+    box-shadow: inset 0 0 0 3px #050711, inset 0 0 22px color-mix(in srgb, var(--ks-holo) 18%, transparent), 0 0 24px color-mix(in srgb, var(--ks-holo) 28%, transparent), 0 18px 40px #0009;
+  }
+
+  .ks-atlas-holo-frame::before,
+  .ks-atlas-holo-frame::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    left: 18%;
+    right: 18%;
+    height: 3px;
+    background: var(--ks-holo);
+    box-shadow: 0 0 8px var(--ks-holo), 0 0 18px var(--ks-holo);
+    opacity: 0.8;
+  }
+
+  .ks-atlas-holo-frame::before { top: 5px; }
+  .ks-atlas-holo-frame::after { bottom: 5px; }
+
+  .ks-atlas-holo-map {
+    position: relative;
+    isolation: isolate;
+    border: 1px solid color-mix(in srgb, var(--ks-holo) 46%, transparent);
+    border-radius: 4px;
+    background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--ks-holo-bg) 70%, #07101f), #050711 76%);
+    box-shadow: inset 0 0 55px #000b, 0 0 18px color-mix(in srgb, var(--ks-holo) 24%, transparent);
+  }
+
+  .ks-holo-map-source { opacity: 0.08; filter: none; }
+  .ks-holo-landmass {
+    z-index: 2;
+    background: var(--ks-holo);
+    -webkit-mask: url('/maps/world.svg') center/cover no-repeat;
+    mask: url('/maps/world.svg') center/cover no-repeat;
+    filter: drop-shadow(0 0 4px var(--ks-holo));
+    opacity: 0.76;
+    animation: ks-holo-flicker 4.6s steps(1,end) infinite;
+  }
+  .ks-holo-grid {
+    z-index: 1;
+    background-image: linear-gradient(color-mix(in srgb, var(--ks-holo) 13%, transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb, var(--ks-holo) 13%, transparent) 1px,transparent 1px);
+    background-size: 5.5% 8.5%;
+    opacity: .72;
+  }
+  .ks-holo-scan {
+    z-index: 4;
+    top: -4%;
+    height: 5%;
+    background: linear-gradient(180deg,transparent,color-mix(in srgb,var(--ks-holo) 10%,transparent),var(--ks-holo),transparent);
+    box-shadow: 0 0 12px color-mix(in srgb,var(--ks-holo) 70%,transparent);
+    opacity: .5;
+    animation: ks-holo-scan 4.2s linear infinite;
+  }
+  .ks-holo-vignette { z-index: 5; box-shadow: inset 0 0 45px #02030bd9; }
+  .ks-atlas--hologram { --color-accent: var(--ks-holo); }
+  .ks-atlas--hologram .ks-atlas-editor {
+    border: 1px solid color-mix(in srgb,var(--ks-holo) 42%,transparent);
+    background: linear-gradient(155deg,color-mix(in srgb,var(--ks-holo-bg) 78%,#080a16),#090814e8);
+    box-shadow: inset 0 0 26px color-mix(in srgb,var(--ks-holo) 9%,transparent),0 0 18px #0007;
+  }
+  .ks-atlas--hologram [data-pin-id] > svg { color: var(--ks-holo) !important; fill: var(--ks-holo) !important; filter: drop-shadow(0 0 5px var(--ks-holo)); }
+  .ks-atlas--hologram [data-pin-id] > span { color: var(--ks-holo-ink); text-shadow: 0 0 7px var(--ks-holo); }
+  .ks-atlas--hologram [data-pin-photo] { border-color: var(--ks-holo); box-shadow: 0 0 10px color-mix(in srgb,var(--ks-holo) 65%,transparent); }
+
+  @keyframes ks-holo-scan { to { transform: translateY(2100%); } }
+  @keyframes ks-holo-flicker { 0%,91%,94%,100%{opacity:.76}92%{opacity:.38}93%{opacity:.9} }
+
   .ks-atlas-editor {
     display: flex;
     flex: 1 1 0;
@@ -2378,6 +2454,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ks-holo-landmass,.ks-holo-scan { animation: none; }
+  .ks-holo-scan { top: 48%; opacity: .24; }
   .ks-yaw {
     transition: none;
   }
@@ -2459,6 +2537,9 @@
 .ks-room-name span { font-size:9px; letter-spacing:.2em; }
 .ks-room-name h2 { font:22px/1.2 var(--font-display,Georgia,serif); margin:4px 0; }
 .ks-room-controls { position:absolute; bottom:22px; left:50%; transform:translateX(-50%); z-index:25; display:flex; align-items:center; gap:4px; width:max-content; max-width:calc(100% - 120px); padding:7px; border:1px solid #bba78360; border-radius:12px; background:#20362df5; box-shadow:0 12px 28px #14251b40; color:#eee4cf; }
+.ks-snake-controls { width:min(310px,calc(100vw - 24px)); padding:10px; text-align:center; color:#eee4cf; border:1px solid #71dbea80; border-radius:10px; background:#142638f2; box-shadow:0 10px 28px #05091699,0 0 18px #49f5dd24; }
+.ks-snake-controls>div { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; }
+.ks-snake-controls .ks-tool { min-height:38px; }
 .ks-room-controls button, .ks-room-controls summary { display:flex; align-items:center; justify-content:center; gap:7px; border:0; border-radius:6px; padding:10px 12px; background:transparent; color:inherit; font-size:12px; cursor:pointer; min-height:40px; }
 .ks-room-controls .ks-room-primary { background:#decca7; color:#26382d; }
 .ks-room-controls button:hover, .ks-room-controls summary:hover { background:#5c705b; color:#fff5df; }

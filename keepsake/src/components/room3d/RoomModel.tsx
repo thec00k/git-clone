@@ -1,4 +1,7 @@
 import {TimeCapsuleChest} from './TimeCapsuleChest';
+import {CabinetPhoto} from './CabinetPhoto';
+import {NeonAtmosphere} from './NeonAtmosphere';
+import {NeonExtras} from './NeonExtras';
 import {useNav} from '../../store/nav';
 import {useApp} from '../../store/appStore';
 import {CoastalInteractions} from './CoastalInteractions';
@@ -18,6 +21,7 @@ import {useWorkbench} from '../../store/workbench';
 import {FurnitureModels} from './FurnitureModels';
 import {ArtifactDisplayCase} from './ArtifactDisplayCase';
 import {ChairFloorContact} from './ChairFloorContact';
+import {PropRefinements} from './PropRefinements';
 export function RoomModel({
   phase,
   environment,
@@ -52,17 +56,21 @@ export function RoomModel({
   const {setEnvironment,activeBook}=useApp();
   const hasDeskBook=!!binderId||!!activeBook;
   const coastal=useActiveRoom().id==='beachfront';
+  const neon=useActiveRoom().id==='cyberpunk';
   const cloned = useRoomAsset(phase, environment);
   const roots = useMemo(() => collectHotspotRoots(cloned), [cloned]);
 
   return (
     <group>
-      <primitive object={cloned} onClick={(e:import('@react-three/fiber').ThreeEvent<MouseEvent>)=>{
+      <primitive object={cloned} onClick={coastal ? (e:import('@react-three/fiber').ThreeEvent<MouseEvent>)=>{
         if(coastal && e.object.name.startsWith('Beachfront_Casement_') && e.delta<=4){e.stopPropagation();setEnvironment({coastalWindowOpen:environment.coastalWindowOpen===false});}
-      }} />
+      } : undefined} />
       {coastal&&<CoastalInteractions scene={cloned} open={environment.coastalWindowOpen!==false}/>}
       <MemoryObjects scene={cloned} onBook={() => onActivate("book")} />
+      <CabinetPhoto scene={cloned}/>
+      {neon&&<><NeonAtmosphere scene={cloned}/><NeonExtras/></>}
       <FurnitureModels scene={cloned}/>
+      <PropRefinements scene={cloned}/>
       <Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
       <ChairFloorContact scene={cloned}/>
@@ -92,6 +100,7 @@ export function RoomModel({
           active={tourFocus === id}
           onActivate={() => onActivate(id)}
           prompt={seated && !drawerOpen && id === "book" ? "Open the scrapbook" : undefined}
+          ariaLabel={neon && id === "map" ? "Holographic world map" : undefined}
         />
       ))}
     </group>

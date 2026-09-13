@@ -1,0 +1,12 @@
+{
+  "objects": 343,
+  "meshes": 319,
+  "triangles": 176596,
+  "missing": [],
+  "invalid_transforms": [],
+  "static_batches": 6,
+  "lamp_supported": true,
+  "fan_support_clearance": true,
+  "window_desk_clearance": true,
+  "window_sill_clearance": true
+}

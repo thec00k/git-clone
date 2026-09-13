@@ -51,7 +51,7 @@ export function StickerStore({ onClose }: { onClose: () => void }) {
             {note}
           </p>
         )}
-        <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Shop categories">{[['stickers','Sticker packs'],['furniture','Furniture'],['sill','Windowsill'],['variants','Room variants'],['extras','Creative extras']].map(([id,label])=><button key={id} className="ks-tool" aria-pressed={tab===id} onClick={()=>setTab(id)}>{label}</button>)}</div>
+        <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Shop categories">{[['stickers','Stickers'],['furniture','Furniture'],['sill','Windowsill'],['variants','Rooms'],['extras','Extras']].map(([id,label])=><button key={id} className="ks-tool" aria-pressed={tab===id} onClick={()=>setTab(id)}>{label}</button>)}</div>
         {tab==='furniture'?<FurnitureShop/>:tab==='sill'?<RoomShopGoods/>:tab==='variants'?<ShopRoomVariants/>:tab==='extras'?<><ShopCreativeExtras/><KeepsakePrints/></>:<ul className="ks-sticker-shop-list">
           {STICKER_PACKS.filter((p) => p.id !== EVERYDAY_PACK_ID).map((pack) => {
             const owned = state.ownedStickerPacks.includes(pack.id);

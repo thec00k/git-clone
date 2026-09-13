@@ -1,5 +1,6 @@
+import {UiSwitch} from '../UiSwitch';
 
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useId,useRef,useState} from 'react';
 import {Archive,Armchair,BookOpen,ChevronDown,Lamp,Lightbulb,Music2,Printer,Library,Home,MapPinned,Settings2, X} from 'lucide-react';
 import type {Environment} from '../../types/app';
 import type {RoomFace} from '../../lib/roomLayout';
@@ -15,6 +16,7 @@ export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,on
  const room=useActiveRoom();const {setEnvironment,activeBook}=useApp();const {binderId}=useWorkbench();
  const {setPrinterOpen,isVisitor,setDiscoveryOpen}=useNav();
  const menu=useRef<HTMLDetailsElement>(null);const [section,setSection]=useState('Places');
+ const tabId=useId();const sections=['Places','Collections','Atmosphere'];
  const close=()=>{if(menu.current){menu.current.open=false;menu.current.querySelector('summary')?.focus();}};
  useEffect(()=>{const outside=(e:PointerEvent)=>{if(menu.current?.open&&!menu.current.contains(e.target as Node))menu.current.open=false;};document.addEventListener('pointerdown',outside);return()=>document.removeEventListener('pointerdown',outside);},[]);
  const action=(fn:()=>void)=>()=>{close();fn();};
@@ -30,8 +32,8 @@ export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,on
     <summary>Room <ChevronDown size={15}/></summary>
     <div className="ks-room-menu-panel ks-room-menu-organized">
      <header><div><strong>Your room</strong><small>{room.title}</small></div><button onClick={close} aria-label="Close room menu"><X size={17}/></button></header>
-     <div className="ks-room-sections" aria-label="Room menu sections">{['Places','Collections','Atmosphere'].map(s=><button key={s} aria-pressed={section===s} onClick={()=>setSection(s)}>{s}</button>)}</div>
-     <section aria-label={section} className="ks-room-section">
+     <div className="ks-room-sections" role="tablist" aria-label="Room menu sections">{sections.map((s,i)=><button key={s} role="tab" id={`${tabId}-${s}`} aria-controls={`${tabId}-panel`} aria-selected={section===s} tabIndex={section===s?0:-1} onClick={()=>setSection(s)} onKeyDown={e=>{const next=e.key==='ArrowRight'?(i+1)%3:e.key==='ArrowLeft'?(i+2)%3:e.key==='Home'?0:e.key==='End'?2:null;if(next!==null){e.preventDefault();setSection(sections[next]);document.getElementById(`${tabId}-${sections[next]}`)?.focus();}}}>{s}</button>)}</div>
+     <section id={`${tabId}-panel`} role="tabpanel" aria-labelledby={`${tabId}-${section}`} className="ks-room-section">
       {section==='Places'&&<>
        <button onClick={action(()=>onLook('front'))}><Home size={16}/>Writing desk</button>
        <button onClick={action(()=>onLook('right'))}><Library size={16}/>Bookshelf</button>
@@ -45,11 +47,12 @@ export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,on
        {!isVisitor&&<><button onClick={action(onCardBinders)}><BookOpen size={16}/>Card binders</button><button onClick={action(()=>setDiscoveryOpen('capsule'))}><ChestIcon/>Time capsule</button><button onClick={action(()=>setPrinterOpen(true))}><Printer size={16}/>Print a photo</button></>}
       </>}
       {section==='Atmosphere'&&<>
-       <button aria-pressed={environment.lampOn} onClick={onLamp}><Lamp size={16}/>Desk lamp <span>{environment.lampOn?'On':'Off'}</span></button>
-       <button aria-pressed={environment.ceilingOn!==false} onClick={onCeiling}><Lightbulb size={16}/>Ceiling light <span>{environment.ceilingOn!==false?'On':'Off'}</span></button>
-       <button aria-pressed={environment.shelfLit} onClick={()=>setEnvironment({shelfLit:!environment.shelfLit})}><Library size={16}/>Bookshelf lights <span>{environment.shelfLit?'On':'Off'}</span></button>
-       {!isVisitor&&<button aria-pressed={environment.displayCaseLit!==false} onClick={()=>setEnvironment({displayCaseLit:environment.displayCaseLit===false})}><Lightbulb size={16}/>Display case <span>{environment.displayCaseLit!==false?'On':'Off'}</span></button>}
-       <small>Case lights follow the CRT color.</small>
+       {room.id==='cyberpunk'&&<><label className="flex items-center justify-between gap-3 py-2">Infinity mirror<select aria-label="Infinity mirror" value={environment.cloudPalette??'multicolor'} onChange={e=>setEnvironment({cloudPalette:e.target.value as Environment['cloudPalette']})}><option value="multicolor">Multicolor</option><option value="crt">Match CRT</option><option value="off">Off</option></select></label><label className="flex items-center justify-between gap-3 py-2">Time capsule<select aria-label="Time capsule finish" value={environment.capsuleFinish??'metal'} onChange={e=>setEnvironment({capsuleFinish:e.target.value as Environment['capsuleFinish']})}><option value="metal">Metallic</option><option value="wood">Attic wood</option></select></label></>}
+       <UiSwitch checked={environment.lampOn} onChange={onLamp}><Lamp size={16}/>{room.id==="cyberpunk"?"Lava lamp":"Desk lamp"}</UiSwitch>
+       <UiSwitch checked={environment.ceilingOn!==false} onChange={onCeiling}><Lightbulb size={16}/>Ceiling light</UiSwitch>
+       <UiSwitch checked={environment.shelfLit} onChange={()=>setEnvironment({shelfLit:!environment.shelfLit})}><Library size={16}/>Bookshelf lights</UiSwitch>
+       {!isVisitor&&<UiSwitch checked={environment.displayCaseLit!==false} onChange={()=>setEnvironment({displayCaseLit:environment.displayCaseLit===false})}><Lightbulb size={16}/>Display case</UiSwitch>}
+       <small>{room.id==="cyberpunk"?"Map and case lights follow the CRT color.":"Case lights follow the CRT color."}</small>
        {room.id==='beachfront'&&<button aria-pressed={environment.coastalWindowOpen!==false} onClick={()=>setEnvironment({coastalWindowOpen:environment.coastalWindowOpen===false})}>Ocean window <span>{environment.coastalWindowOpen!==false?'Open':'Closed'}</span></button>}
        <button onClick={action(onMusic)}><Music2 size={16}/>Music and sound</button>
       </>}
@@ -60,4 +63,3 @@ export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,on
   </nav>
  </>;
 }
-

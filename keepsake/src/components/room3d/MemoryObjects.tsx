@@ -3,7 +3,7 @@ import {newCardBinder} from '../../lib/cardBinders';
 import {RoomPoster} from './RoomPoster';
 import {BOOKSHELF_WINDOW_SHIFT} from './furnitureLayout';
 import {SillDecoration} from './SillDecoration';
-import {CRT_COLORS} from '../../lib/roomMusic';
+import {CRT_COLORS,CRT_LIGHT_COLORS} from '../../lib/roomMusic';
 import { useCrtPlayerSlot } from '../../store/spotifyUi';
 import {DiscoveryObject} from './DiscoveryObject';
 import { useEffect, useMemo, useState, useRef } from 'react';
@@ -49,6 +49,7 @@ function Spine({title,color,ink,width,height,handwritten=false,highlight=false}:
 }
 export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>void}) {
  const {state,setActiveBook,addBook,update}=useApp(); const {viewAs,isVisitor,go,setBookPageId}=useNav();
+ const neonMap=state.environment.roomTheme==='cyberpunk',mapLight=CRT_LIGHT_COLORS[state.environment.crtColor??'blue'];
  const {openBinder,setBinderId,binderId}=useWorkbench();
  const binders=(isVisitor?[]:state.cardBinders??[]).filter(b=>b.id!==binderId);
  const books=[...binders.map(b=>({id:b.id,title:b.title,subtitle:'Card binder',coverStyle:'forest',pages:[],visibility:'private',createdAt:0,updatedAt:0} as Scrapbook)),...state.books.filter(b=>canSee(b.visibility,viewAs,state.profile.allowFriendScrapbooks===true)&&(isVisitor||b.id!==state.activeBookId))];
@@ -66,15 +67,14 @@ export function MemoryObjects({scene,onBook}:{scene:THREE.Object3D;onBook:()=>vo
   {books.slice(0,isVisitor?48:47).map((book,i)=><ShelfMemory key={book.id} book={book} color={binders.find(b=>b.id===book.id)?.color} index={i+(isVisitor?0:1)} chosen={chosen} onChoose={()=>setChosen(book.id)} onCancel={()=>setChosen(null)} onOpen={()=>{setChosen(null);if(binders.some(b=>b.id===book.id)){openBinder(book.id);return;}setBinderId(null);setActiveBook(book.id);onBook();}}/>)}
   {!isVisitor && mapBox && state.pins.map(pin=>{const width=(mapBox.max.z-mapBox.min.z)*.96;const height=Math.min((mapBox.max.y-mapBox.min.y)*.96,width*620/950);return <group key={pin.id} onClick={e=>{e.stopPropagation();if(e.delta>4)return;const b=state.books.find(b=>b.id===pin.bookId);if(b?.pages.some(p=>p.id===pin.pageId)){setBinderId(null);setActiveBook(b.id);setBookPageId(pin.pageId!);go('book');}else go('atlas');}} position={[mapBox.max.x+.012,(mapBox.min.y+mapBox.max.y)/2+(50-pin.y)/100*height,(mapBox.min.z+mapBox.max.z)/2+(50-pin.x)/100*width]} rotation={[0,Math.PI/2,0]}>
    {pin.photoSrc && <group position={[0,-.033,0]}><mesh><planeGeometry args={[.11,.105]}/><meshStandardMaterial color="#f1e8d2"/></mesh><group position={[0,.007,.001]}><PhotoSurface src={pin.photoSrc} width={.094} height={.07}/></group></group>}
-   <mesh position={[0,.007,.005]}><sphereGeometry args={[.009,8,6]}/><meshStandardMaterial color="#a55339" roughness={.5}/></mesh>
+   {neonMap?<><mesh position={[0,.007,.006]}><ringGeometry args={[.005,.011,20]}/><meshBasicMaterial color={mapLight} transparent opacity={.92} toneMapped={false}/></mesh><pointLight position={[.025,.007,.01]} color={mapLight} intensity={.08} distance={.24}/></>:<mesh position={[0,.007,.005]}><sphereGeometry args={[.009,8,6]}/><meshStandardMaterial color="#a55339" roughness={.5}/></mesh>}
   </group>;})}
  </group>;
 }
 
 function MemoryDisplays({scene}:{scene:THREE.Object3D}) {
- const {state,activeBook,environment}=useApp(); const {isVisitor}=useNav();
+ const {activeBook,environment}=useApp();
  const {nowPlaying}=useCrtPlayerSlot();
- const photo=isVisitor?undefined:(state.archive.find(a=>a.id===state.framePhotoId)??state.archive.find(a=>a.favorite)??state.archive[0]);
  const tint=CRT_COLORS[environment.crtColor??'green'];
  const screen=useLettering(environment.musicProvider!=='ambient'?(nowPlaying?`${nowPlaying.paused?'PAUSED':'NOW PLAYING'}\n${nowPlaying.title}\n${nowPlaying.artist}`:`KEEPSAKE RADIO\n${environment.musicProvider==='lofi'?'Mellow Skies':environment.musicProvider==='soundcloud'?'SoundCloud':'Spotify'} · player below`):environment.musicOn?'KEEPSAKE RADIO\nWoodland ambient · playing':'KEEPSAKE RADIO\nA quiet moment', tint.background,tint.ink);
  screen.flipY=false;
@@ -84,12 +84,7 @@ function MemoryDisplays({scene}:{scene:THREE.Object3D}) {
   const old=object.material;const material=new THREE.MeshStandardMaterial({map:screen,emissiveMap:screen,emissive:'#ffffff',emissiveIntensity:.75,roughness:.6,toneMapped:false});object.material=material;
   return()=>{object.material=old;material.dispose();};
  },[scene,screen,activeBook?.playlistUri]);
- useEffect(()=>{
-  const object=scene.getObjectByName('ks_archive_frame_mat');if(!(object instanceof THREE.Mesh)||!photo)return;
-  let live=true;const old=object.material;const material=new THREE.MeshStandardMaterial({roughness:.85});
-  const texture=new THREE.TextureLoader().load(photo.src,()=>{if(live){texture.flipY=false;material.map=texture;material.needsUpdate=true;object.material=material;}});texture.colorSpace=THREE.SRGBColorSpace;
-  return()=>{live=false;object.material=old;texture.dispose();material.dispose();};
- },[scene,photo]);
+
  return <group position={[-.86,.752,-1.59]} rotation={[-Math.PI/2,0,-.15]}><mesh><planeGeometry args={[.12,.075]}/><meshStandardMaterial map={note} roughness={1}/></mesh></group>;
 }
 

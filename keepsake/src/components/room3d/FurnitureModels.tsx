@@ -25,7 +25,7 @@ const anchors:Partial<Record<FurnitureCategory,string>>={chair:'ks_chair',beanba
 
 export function FurnitureModels({scene}:{scene:THREE.Object3D}){
   const {environment}=useApp();const room=useActiveRoom().id;
-  const choices=room==='woodland'||room==='beachfront'?environment.furniture?.[room]:undefined;
+  const choices=room==='woodland'||room==='beachfront'||room==='cyberpunk'?environment.furniture?.[room]:undefined;
   return <>{FURNITURE_ITEMS.filter(item=>choices?.[item.category]===item.id&&item.category!=='printer').map(item=><FurnitureReplacement key={item.category} scene={scene} id={item.id} category={item.category}/>)}</>;
 }
 

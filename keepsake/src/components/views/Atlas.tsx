@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {PinPageLink} from '../PinPageLink';
-import type { PointerEvent as ReactPointerEvent, RefObject } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent, RefObject } from "react";
 import { ImagePlus, Lock, MapPin, Pencil, Trash2, Unlock, X } from "lucide-react";
 import { useApp } from "../../store/appStore";
 import { useNav } from "../../store/nav";
@@ -10,6 +10,7 @@ import { canLeavePinNote, VIEW_AS_LABEL } from "../../lib/permissions";
 import { ViewShell } from "./ViewShell";
 import type { MemoryPin, PinNote, ViewAs } from "../../types/app";
 import { PIN_NOTE_MAX } from "../../types/app";
+import {CRT_COLORS,CRT_LIGHT_COLORS} from "../../lib/roomMusic";
 
 export function Atlas() {
   const { state, environment, setEnvironment, addArchivePhoto, addPin, updatePin, removePin, addPinNote, updatePinNote, deletePinNote, recordProgress } =
@@ -31,6 +32,8 @@ export function Atlas() {
   const canNote = canLeavePinNote(viewAs);
   const author = VIEW_AS_LABEL[viewAs];
   const peekNotes = peeking ? (state.pinNotes ?? []).filter((n) => n.pinId === peeking.id) : [];
+  const neon=environment.roomTheme==='cyberpunk',crt=environment.crtColor??'blue';
+  const atlasStyle=neon?{'--ks-holo':CRT_LIGHT_COLORS[crt],'--ks-holo-bg':CRT_COLORS[crt].background,'--ks-holo-ink':CRT_COLORS[crt].ink} as CSSProperties:undefined;
 
   const beginNew = (x: number, y: number) => {
     if (isVisitor) return;
@@ -118,7 +121,7 @@ export function Atlas() {
   return (
     <ViewShell
       title="The map"
-      subtitle="a corkboard of the world"
+      subtitle={neon?'a living hologram of the world':'a corkboard of the world'}
       fill
       scroll={false}
       actions={
@@ -158,22 +161,22 @@ export function Atlas() {
         </div>
       }
     >
-      <div className="ks-atlas">
+      <div className={`ks-atlas${neon?' ks-atlas--hologram':''}`} style={atlasStyle}>
         {pendingPrint && <div className="ks-print-map-hint" role="status">Your photo is ready to pin. Click a place on the map, add a name, then save the pin. <button onClick={closeForm}>Cancel print</button></div>}
         <div className="ks-atlas-board">
-          <div className="ks-cork ks-atlas-cork">
+          <div className={neon?'ks-atlas-holo-frame':'ks-cork ks-atlas-cork'}>
             <div
               ref={mapRef}
-              className="ks-cork-map ks-atlas-map"
+              className={`${neon?'ks-atlas-holo-map':'ks-cork-map'} ks-atlas-map`}
               style={{ cursor: isVisitor || locked || peeking ? "default" : "crosshair" }}
               onClick={onMapClick}
               data-atlas-map
             >
-              <img src="/maps/world.svg" alt="World map" className="ks-world-map pointer-events-none absolute inset-0 h-full w-full object-cover" />
-              <div
+              {neon?<><img src="/maps/world.svg" alt="Holographic world map" className="ks-world-map ks-holo-map-source pointer-events-none absolute inset-0 h-full w-full object-cover"/><div className="ks-holo-landmass pointer-events-none absolute inset-0"/><div className="ks-holo-grid pointer-events-none absolute inset-0"/><div className="ks-holo-scan pointer-events-none absolute inset-x-0"/><div className="ks-holo-vignette pointer-events-none absolute inset-0"/></>:<img src="/maps/world.svg" alt="World map" className="ks-world-map pointer-events-none absolute inset-0 h-full w-full object-cover" />}
+              {!neon&&<div
                 className="pointer-events-none absolute inset-0"
                 style={{ backgroundImage: "url('/textures/grain.png')", opacity: 0.12 }}
-              />
+              />}
               {state.pins.map((p) => (
                 <MapPinMarker
                   key={p.id}

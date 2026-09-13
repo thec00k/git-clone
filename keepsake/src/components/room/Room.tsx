@@ -16,6 +16,7 @@ import { RoomCurator } from "./RoomCurator";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { PhaseBadge, phaseOf } from "./RoomFurniture";
 import { RoomFlat } from "./RoomFlat";
+import {useActiveRoom} from '../room3d/useActiveRoom';
 import { RoomChamber } from "./RoomChamber";
 const RoomScene3D = lazy(() => import("../room3d/RoomScene3D").then(module => ({ default: module.RoomScene3D })));
 import { WebGLGuard } from "../room3d/WebGLGuard";
@@ -51,6 +52,15 @@ export function Room() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const [par, setPar] = useState({ x: 0, y: 0 });
   const layout = useMemo(() => roomLayoutFromSearch(), []);
+  const roomAsset = useActiveRoom().asset;
+  useEffect(() => {
+    if (layout !== 'glb') return;
+    // Start the selected room download while the 3D JavaScript is loading.
+    const preload=document.createElement('link');
+    preload.rel='preload';preload.as='fetch';preload.crossOrigin='anonymous';preload.href=roomAsset;
+    document.head.appendChild(preload);
+    return () => preload.remove();
+  }, [layout,roomAsset]);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);

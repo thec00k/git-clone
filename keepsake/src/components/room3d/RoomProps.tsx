@@ -61,12 +61,11 @@ export function ArchiveCabinet({
     return p;
   }, [cabinet]);
 
-  const labelAt = useMemo(
-    // Align the small interaction dot with the drawer pull instead of floating
-    // above the cabinet lid.
-    () => new THREE.Vector3(origin.x, origin.y + 0.50, origin.z + 0.28),
-    [origin],
-  );
+  const labelAt = useMemo(() => {
+    const handle = scene.getObjectByName('Archive_Handle');
+    if (handle) return new THREE.Box3().setFromObject(handle).getCenter(new THREE.Vector3());
+    return new THREE.Vector3(origin.x, origin.y + 0.48, origin.z + 0.238);
+  }, [scene, origin]);
 
   useFrame((_, dt) => {
     if (drawer) {
@@ -133,8 +132,9 @@ export function ArchiveCabinet({
           </group>
         </group>
       )}
-      <group position={[origin.x, origin.y + 0.5, origin.z + 0.18]}>
-        <ClickHit size={[0.66, 0.96, 0.7]} onClick={onOpen} />
+      <group position={labelAt.toArray()}>
+        {/* A small grip target, clear of the cabinet top and framed photo. */}
+        <ClickHit size={[0.22, 0.12, 0.10]} onClick={onOpen} />
       </group>
       <group position={labelAt.toArray()}>
         <FacedHtml point={labelAt}>
@@ -403,7 +403,7 @@ export function LampFixture({
 }) {
   const {environment}=useApp();
   const lampChoice=environment.furniture?.[environment.roomTheme??'woodland']?.lamp;
-  const ownBulb=lampChoice==='lamp-2'||lampChoice==='lamp-3';
+  const ownBulb=environment.roomTheme==='cyberpunk'||lampChoice==='lamp-2'||lampChoice==='lamp-3';
   const fixture=useRef<THREE.Group>(null);
   useFrame(()=>{fixture.current?.position.copy(lampShadePos(scene));});
   const lamp = useMemo(() => scene.getObjectByName(LAMP_OBJECT), [scene]);
@@ -607,7 +607,7 @@ export function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seat
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       {!seated && (
-        <FacedHtml point={center} position={[0, 0.28, 0]}>
+        <FacedHtml point={center} position={[0, 0.04, 0]}>
           <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" aria-label="Take a seat" data-sit-down aria-hidden="true" tabIndex={-1} onClick={onSit}>
             Sit down
           </button>

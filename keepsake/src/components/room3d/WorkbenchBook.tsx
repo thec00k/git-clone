@@ -1,4 +1,4 @@
-import {use, useEffect, useMemo, useRef, useState, type ReactNode} from 'react';
+import {lazy, Suspense, use, useEffect, useMemo, useRef, useState, type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
 import {Html,useContextBridge} from '@react-three/drei';
 import {useFrame} from '@react-three/fiber';
@@ -11,7 +11,7 @@ import {useReducedMotion} from '../../hooks/useReducedMotion';
 import {useLettering} from './MemoryObjects';
 import {COVER_STYLES} from '../../types/scrapbook';
 import {BookView} from '../BookView';
-import {CardBinders} from '../CardBinders';
+const CardBinders=lazy(()=>import('../CardBinders').then(m=>({default:m.CardBinders})));
 import {BINDER_COLORS} from '../../lib/cardBinders';
 import {BookIdentityEditor} from '../BookIdentityEditor';
 import {canSee} from '../../lib/permissions';
@@ -109,7 +109,7 @@ export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
     <primitive object={model}/>
     {/* The lettering follows the authored hinge, including its cover opening. */}
     {hinge&&<CoverLettering hinge={hinge} texture={coverMap} normal={coverNormal?.normalMap??undefined}/>}
-    {phase==='editing'&&visible&&<PageTurnContext.Provider value={turnApi}>{binder?<CardBinders key={binder.id} initialId={binder.id} frame={EditorSurface} onClose={()=>send('close')}/>:<BookView frame={EditorSurface} portalTarget={host} onClose={()=>send('close')}/>}</PageTurnContext.Provider>}
+    {phase==='editing'&&visible&&<PageTurnContext.Provider value={turnApi}><Suspense fallback={<Html center><p role="status">Opening binder…</p></Html>}>{binder?<CardBinders key={binder.id} initialId={binder.id} frame={EditorSurface} onClose={()=>send('close')}/>:<BookView frame={EditorSurface} portalTarget={host} onClose={()=>send('close')}/>}</Suspense></PageTurnContext.Provider>}
     <Html><Bridge>{host&&(phase==='cover'||phase==='arriving'||phase==='opening'||phase==='closing'||phase==='leaving')&&createPortal(
       <section className="ks-workbench-cover-panel" aria-label="Scrapbook cover" aria-busy={phase!=='cover'}>
         {phase==='cover'?<>

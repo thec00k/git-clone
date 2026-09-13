@@ -34,7 +34,7 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
       }
       if(obj.name==='Semantic_Rug_terracotta'){
         const mats=Array.isArray(obj.material)?obj.material:[obj.material];
-        mats.forEach(mat=>{if(mat instanceof THREE.MeshStandardMaterial)mat.color.set(activeRoom.id==='beachfront'?'#b5b49b':'#909577');});
+        mats.forEach(mat=>{if(mat instanceof THREE.MeshStandardMaterial)mat.color.set(activeRoom.id==='beachfront'?'#b5b49b':activeRoom.id==='cyberpunk'?'#554166':'#909577');});
       }
       if (obj.name === "Outside_View" || obj.name === "Win_Glass") {
         const material = new THREE.MeshBasicMaterial();

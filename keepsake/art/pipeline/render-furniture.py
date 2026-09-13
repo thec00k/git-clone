@@ -1,11 +1,13 @@
 """Review renders for the furniture drawer. Does not resave editable sources."""
-import bpy, json, math
+import bpy, json, math, sys
 from pathlib import Path
 from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'public'/'room'/'furniture'
 items=json.loads((OUT/'catalog.json').read_text(encoding='utf-8'))
+requested=set(sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else set()
 for item in items:
+    if requested and item['id'] not in requested:continue
     source=ROOT/'art'/'furniture'/(item['id']+'.blend')
     output=OUT/(item['id']+'.png')
     if output.exists() and output.stat().st_mtime>source.stat().st_mtime:continue

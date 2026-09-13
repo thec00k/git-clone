@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -25,12 +25,14 @@ export function HotspotAnchor({
   object,
   active,
   prompt,
+  ariaLabel,
   onActivate,
 }: {
   id: HotspotAction;
   object: THREE.Object3D;
   active: boolean;
   prompt?: string;
+  ariaLabel?: string;
   onActivate: () => void;
 }) {
   const box = useMemo(() => {
@@ -64,7 +66,7 @@ export function HotspotAnchor({
           data-tour={id}
           aria-hidden="true"
           tabIndex={-1}
-          aria-label={HOTSPOT_LABEL[id] ?? id}
+          aria-label={ariaLabel ?? HOTSPOT_LABEL[id] ?? id}
           onClick={(e) => {
             e.stopPropagation();
             onActivate();
@@ -84,12 +86,16 @@ const _faceLook = new THREE.Vector3();
 function useFaced(point: THREE.Vector3, minDot = 0.18) {
   const { camera } = useThree();
   const [on, setOn] = useState(false);
+  const previous = useRef(false);
   useFrame(() => {
     _faceDir.copy(point).sub(camera.position);
     const dist = _faceDir.length();
     camera.getWorldDirection(_faceLook);
     const faced = dist > 0.08 && _faceDir.normalize().dot(_faceLook) > minDot;
-    setOn((prev) => (prev === faced ? prev : faced));
+    if (previous.current !== faced) {
+      previous.current = faced;
+      setOn(faced);
+    }
   });
   return on;
 }
@@ -98,15 +104,17 @@ export function FacedHtml({
   point,
   children,
   position,
+  calculatePosition,
 }: {
   point: THREE.Vector3;
   children: ReactNode;
   position?: [number, number, number];
+  calculatePosition?: (object:THREE.Object3D,camera:THREE.Camera,size:{width:number;height:number})=>number[];
 }) {
   const faced = useFaced(point);
   if (!faced) return null;
   return (
-    <Html position={position} center occlude={false} style={{ pointerEvents: "auto" }}>
+    <Html position={position} calculatePosition={calculatePosition} center occlude={false} style={{ pointerEvents: "auto" }}>
       {children}
     </Html>
   );

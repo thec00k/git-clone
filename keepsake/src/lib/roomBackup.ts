@@ -5,7 +5,7 @@ import {MEMORY_MOODS} from './memoryAtmosphere.ts';
 import {KEEPSAKE_PRINTS,isPaperStyle} from './stationery.ts';
 import {validFurnitureChoices} from './furniture.ts';
 import {CRT_COLORS} from './roomMusic.ts';
-import {ROOM_GOODS,SHOP_GOODS,EXTRA_GOODS} from './roomShop.ts';
+import {ROOM_GOODS,SHOP_GOODS,POSTER_GOODS} from './roomShop.ts';
 import {soundCloudUrl} from './soundcloud.ts';
 import type { AppState } from '../types/app';
 import {PLACES,REWARDS} from './discoveries.ts';
@@ -70,28 +70,36 @@ export function parseRoomBackup(text:string):AppState{
  ensure(object(s.progress)&&['visitedAtNight','previewedAsVisitor','completedTour'].every(k=>typeof s.progress ==='object'&&typeof (s.progress as RecordValue)[k]==='boolean'));
  const e=s.environment;ensure(object(e)&&['auto','day','dusk','night'].includes(e.timeMode as string)&&['spring','summer','autumn','winter'].includes(e.season as string)&&['clear','rain','snow'].includes(e.weather as string)&&['ambient','spotify','lofi','soundcloud'].includes(e.musicProvider as string));
  ensure(e.entryMusic===undefined||['off','mellow','spotify','soundcloud'].includes(e.entryMusic as string));
+ ensure(e.cloudPalette===undefined||['multicolor','crt','off'].includes(e.cloudPalette as string));
+ ensure(e.capsuleFinish===undefined||['metal','wood'].includes(e.capsuleFinish as string));
  ensure(e.crtColor===undefined||Object.hasOwn(CRT_COLORS,e.crtColor as string));
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
  ensure(['memoryLighting','soundGeography','displayCaseLit'].every(k=>e[k]===undefined||typeof e[k]==='boolean'));
  ensure(s.displayCaseScans===undefined||records(s.displayCaseScans,x=>string(x.id)&&string(x.title)&&string(x.modelSrc)&&number(x.shelf)&&(x.shelf as number)>=0&&(x.shelf as number)<4&&number(x.slot)&&(x.slot as number)>=0&&(x.slot as number)<4));
- ensure(e.roomTheme===undefined || ['woodland','beachfront'].includes(e.roomTheme as string));
+ ensure(e.roomTheme===undefined || ['woodland','beachfront','cyberpunk'].includes(e.roomTheme as string));
  ensure(e.furniture===undefined||validFurnitureChoices(e.furniture));
  ensure(e.coastalWindowOpen===undefined || typeof e.coastalWindowOpen==='boolean');
- ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
+ ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront','cyberpunk'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
  ensure(e.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));
  ensure(['lampOn','ceilingOn','shelfLit','musicOn','pinsLocked'].every(k=>typeof e[k]==='boolean')&&['volume','ambienceVolume'].every(k=>number(e[k])&&(e[k] as number)>=0&&(e[k] as number)<=1));
  ensure(s.latestPrint===undefined || object(s.latestPrint)&&image(s.latestPrint.src)&&number(s.latestPrint.printedAt));
  ensure(s.roomDecor===undefined||object(s.roomDecor)&&strings(s.roomDecor.owned)&&(s.roomDecor.owned as string[]).every(id=>SHOP_GOODS.some(g=>g.id===id))&&new Set(s.roomDecor.owned as string[]).size===(s.roomDecor.owned as string[]).length&&(s.roomDecor.sillItem===undefined||string(s.roomDecor.sillItem)&&(s.roomDecor.owned as string[]).includes(s.roomDecor.sillItem as string)&&ROOM_GOODS.some(i=>i.id===(s.roomDecor as RecordValue).sillItem)));
- if(object(s.roomDecor))ensure(s.roomDecor.posterItem===undefined||string(s.roomDecor.posterItem)&&(s.roomDecor.owned as string[]).includes(s.roomDecor.posterItem as string)&&EXTRA_GOODS.some(i=>i.id===(s.roomDecor as RecordValue).posterItem&&i.kind==='Poster'));
+ if(object(s.roomDecor)){
+   ensure(s.roomDecor.posterItem===undefined||string(s.roomDecor.posterItem)&&(s.roomDecor.owned as string[]).includes(s.roomDecor.posterItem as string)&&POSTER_GOODS.some(i=>i.id===(s.roomDecor as RecordValue).posterItem));
+   ensure(s.roomDecor.neonCherry===undefined||typeof s.roomDecor.neonCherry==='boolean');
+   ensure(s.roomDecor.neonCherry!==true||(s.roomDecor.owned as string[]).includes('neon-cherries'));
+   ensure(s.roomDecor.neonSign===undefined||s.roomDecor.neonSign===null||['neon-cherries','neon-heart'].includes(s.roomDecor.neonSign as string)&&(s.roomDecor.owned as string[]).includes(s.roomDecor.neonSign as string));
+   ensure(s.roomDecor.snakePaused===undefined||typeof s.roomDecor.snakePaused==='boolean');
+ }
  if(object(s.roomDecor)&&s.roomDecor.layouts!==undefined){
    ensure(object(s.roomDecor.layouts));
    const owned=s.roomDecor.owned as string[];
    for(const [theme,layout] of Object.entries(s.roomDecor.layouts)){
-     ensure(['woodland','beachfront'].includes(theme)&&object(layout));
+     ensure(['woodland','beachfront','cyberpunk'].includes(theme)&&object(layout));
      ensure(layout.crtColor===undefined||string(layout.crtColor)&&Object.hasOwn(CRT_COLORS,layout.crtColor as string));
      ensure(layout.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));
      ensure(layout.sillItem===undefined||string(layout.sillItem)&&owned.includes(layout.sillItem as string)&&ROOM_GOODS.some(i=>i.id===layout.sillItem));
-     ensure(layout.posterItem===undefined||string(layout.posterItem)&&owned.includes(layout.posterItem as string)&&EXTRA_GOODS.some(i=>i.id===layout.posterItem&&i.kind==='Poster'));
+     ensure(layout.posterItem===undefined||string(layout.posterItem)&&owned.includes(layout.posterItem as string)&&POSTER_GOODS.some(i=>i.id===layout.posterItem));
    }
  }
  ensure(s.framePhotoId===undefined||string(s.framePhotoId));

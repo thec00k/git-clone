@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import {createSnake,stepSnake,SNAKE_ROUTE,createPlayerSnake,steerPlayerSnake,stepPlayerSnake} from '../src/lib/snakePoster.ts';
+import {buyNeonExtra,placeNeonCherry,placePoster,placeNeonSign,getNeonSign} from '../src/lib/roomShop.ts';
+import {switchRoomTheme} from '../src/lib/roomThemes.ts';
+import {parseRoomBackup,serializeRoom} from '../src/lib/roomBackup.ts';
+const n=SNAKE_ROUTE.length;
+assert.equal(new Set(SNAKE_ROUTE.map(p=>p.join(','))).size,144);
+for(let i=0;i<n;i++){const a=SNAKE_ROUTE[i],b=SNAKE_ROUTE[(i+1)%n];assert.equal(Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1]),1,'Route is continuous, including wraparound');}
+let game=createSnake(),rounds=0;
+for(let i=0;i<30000;i++){
+ const occupied=new Set(Array.from({length:game.length},(_,k)=>(game.head-k+n)%n));
+ assert.equal(occupied.size,game.length);assert.ok(!occupied.has(game.food),'Food stays outside snake');
+ const next=stepSnake(game);assert.ok(next.round>game.round||!occupied.has(next.head),'Autoplay does not hit its body');rounds=next.round;game=next;
+}
+assert.ok(rounds>1,'Completed board restarts safely');
+let player=createPlayerSnake();assert.equal(stepPlayerSnake(player),player,'Waits for user direction before starting');
+assert.equal(steerPlayerSnake(player,'left'),player,'Cannot reverse into neck');
+player=steerPlayerSnake(player,'up');assert.equal(steerPlayerSnake(player,'left'),player,'Only one turn can be queued per step');
+player=stepPlayerSnake(player);assert.deepEqual(player.body[0],[5,5]);
+while(player.status==='playing')player=stepPlayerSnake(player);assert.equal(player.status,'lost','Wall collision ends manual game');
+player=steerPlayerSnake(createPlayerSnake(),'right');for(let i=0;i<3;i++)player=stepPlayerSnake(player);
+assert.equal(player.score,1);assert.equal(player.body.length,5);assert.ok(!player.body.some(p=>p[0]===player.food[0]&&p[1]===player.food[1]));
+const coil={...player,body:[[2,2],[2,3],[1,3],[1,2],[1,1],[2,1],[3,1],[3,2]],direction:'up',queued:'up',food:[8,8],status:'playing'};
+assert.equal(stepPlayerSnake(coil).status,'lost','Body collision ends manual game');
+let s={version:1,profile:{displayName:'Test'},books:[{id:'book',title:'A memory',subtitle:'',coverStyle:'forest',visibility:'private',createdAt:1,updatedAt:1,pages:[{id:'p1',elements:[]}]}],activeBookId:'book',archive:[],archiveTabs:[],pins:[],guestbook:[],notes:[],pinNotes:[],achievements:[],achievementsSeen:[],ownedStickerPacks:['everyday'],stamps:12,achievementsAt:{},receipts:{},progress:{visitedAtNight:false,previewedAsVisitor:false,completedTour:false},environment:{timeMode:'day',season:'autumn',weather:'clear',musicProvider:'ambient',lampOn:true,ceilingOn:true,shelfLit:true,musicOn:false,pinsLocked:false,volume:.5,ambienceVolume:.4,roomQuality:'high'},roomDecor:{owned:[]}};
+s=switchRoomTheme(s,'cyberpunk');const stamps=s.stamps;
+s=buyNeonExtra(buyNeonExtra(s,'neon-cherries'),'poster-snake');assert.equal(s.stamps,stamps);assert.equal(buyNeonExtra(s,'poster-snake'),s);
+s={...s,roomDecor:{...s.roomDecor,snakePaused:true}};
+const back=switchRoomTheme(parseRoomBackup(serializeRoom(switchRoomTheme(s,'woodland'))),'cyberpunk');
+assert.equal(back.roomDecor.posterItem,'poster-snake');assert.equal(back.roomDecor.neonCherry,true);assert.equal(back.roomDecor.snakePaused,true);
+assert.equal(switchRoomTheme(s,'beachfront').roomDecor.posterItem,undefined,'Exclusive poster does not occupy a new non-neon room');
+const hidden=parseRoomBackup(serializeRoom(placePoster(placeNeonCherry(back,false))));assert.equal(hidden.roomDecor.neonCherry,false);assert.equal(hidden.roomDecor.posterItem,undefined);
+assert.equal(getNeonSign({owned:['neon-cherries'],neonCherry:true}),'neon-cherries','Old saves retain their cherry sign');
+const heart=buyNeonExtra(back,'neon-heart');assert.equal(getNeonSign(heart.roomDecor),'neon-heart');assert.equal(heart.roomDecor.neonCherry,false);assert.equal(heart.roomDecor.posterItem,back.roomDecor.posterItem);assert.equal(heart.stamps,back.stamps);
+assert.equal(getNeonSign(switchRoomTheme(parseRoomBackup(serializeRoom(switchRoomTheme(heart,'woodland'))),'cyberpunk').roomDecor),'neon-heart');
+const cherryAgain=placeNeonSign(heart,'neon-cherries');assert.equal(getNeonSign(cherryAgain.roomDecor),'neon-cherries');assert.ok(cherryAgain.roomDecor.owned.includes('neon-heart'));
+assert.equal(getNeonSign(parseRoomBackup(serializeRoom(placeNeonSign(heart,null))).roomDecor),null);
+assert.equal(placeNeonSign(back,'neon-heart'),back,'Cannot place an unowned sign');
+assert.throws(()=>parseRoomBackup(serializeRoom({...heart,roomDecor:{...heart.roomDecor,neonSign:'invalid'}})));
+const hiddenAfterSwitch=switchRoomTheme(switchRoomTheme(hidden,'woodland'),'cyberpunk');assert.equal(hiddenAfterSwitch.roomDecor.posterItem,undefined,'Removed poster stays removed after switching away and back');assert.equal(hiddenAfterSwitch.roomDecor.neonCherry,false,'Removed sign stays removed after switching away and back');
+assert.throws(()=>parseRoomBackup(serializeRoom({...s,roomDecor:{...s.roomDecor,snakePaused:'yes'}})));
+console.log('PASS autoplay continuity/growth/restart, player steering/food/wall/body collisions; Extras purchase, removal, room switching and backup.');

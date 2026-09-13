@@ -25,3 +25,17 @@ assert.equal(coast.environment.crtColor,'coastal');
 assert.equal(forest.environment.crtColor,'green','Woodland restores its screen preset');
 assert.equal(ownsRoomTheme(forest,'beachfront'),true,'the acquired color remains unlocked after leaving Beachfront');
 assert.throws(()=>parseRoomBackup(serializeRoom({...state,environment:{...state.environment,crtColor:'coastal'}})),'unowned exclusive color cannot be imported');
+
+const neon=switchRoomTheme(forest,'cyberpunk');
+assert.equal(neon.environment.roomTheme,'cyberpunk');
+const neonDecor={...neon,roomDecor:{...neon.roomDecor,owned:[...neon.roomDecor.owned,'holo-cat'],sillItem:'holo-cat'},environment:{...neon.environment,crtColor:'pink'}};
+const neonRestored=switchRoomTheme(parseRoomBackup(serializeRoom(switchRoomTheme(neonDecor,'woodland'))),'cyberpunk');
+assert.equal(neonRestored.roomDecor.sillItem,'holo-cat');
+assert.equal(neonRestored.environment.crtColor,'pink');
+assert.deepEqual(neonRestored.books,state.books);
+console.log('Neon City hologram and CRT preferences survive room switching and backup.');
+const cloudRoom={...neonRestored,environment:{...neonRestored.environment,cloudPalette:'multicolor',capsuleFinish:'metal'}};
+const cloudBackup=parseRoomBackup(serializeRoom(cloudRoom));
+assert.equal(cloudBackup.environment.cloudPalette,'multicolor');assert.equal(cloudBackup.environment.capsuleFinish,'metal');
+assert.throws(()=>parseRoomBackup(serializeRoom({...cloudRoom,environment:{...cloudRoom.environment,cloudPalette:'invalid'}})));
+assert.throws(()=>parseRoomBackup(serializeRoom({...cloudRoom,environment:{...cloudRoom.environment,capsuleFinish:'invalid'}})));

@@ -1,0 +1,120 @@
+/* Keepsake UI library: keep these tokens separate from authored page content. */
+:root {
+  --ks-ui-font: Inter, "Segoe UI", sans-serif;
+  --ks-ui-heading: Fraunces, Georgia, serif;
+  --ks-ui-heading-weight: 500;
+  --ks-ui-space: 8px;
+  --ks-ui-radius: 8px;
+  --ks-ui-border: color-mix(in srgb, var(--ks-ui-paper) 25%, var(--ks-ui-panel));
+  --ks-ui-hover: color-mix(in srgb, var(--ks-ui-paper) 12%, var(--ks-ui-panel));
+  --ks-ui-muted: color-mix(in srgb, var(--ks-ui-paper) 78%, var(--ks-ui-panel));
+}
+:root[data-keepsake-theme="beachfront"] { --ks-ui-heading-weight: 400; }
+:root[data-keepsake-theme="cyberpunk"] { --ks-ui-heading: Inter, "Segoe UI", sans-serif; --ks-ui-heading-weight: 600; }
+:root[data-keepsake-theme="snowy-mountain"] { --ks-ui-heading: Georgia, serif; --ks-ui-heading-weight: 400; }
+:root[data-keepsake-theme="stormy-lighthouse"] { --ks-ui-heading: Georgia, serif; --ks-ui-heading-weight: 600; }
+:is(.ks-panel,.ks-room-controls,.ks-editor-toolbar,.ks-binder-controls,.ks-binder-dialog,.ks-import-dialog,.ks-photo-printer-dialog,.ks-workbench-cover-panel,.ks-shelf-preview,.ks-music-dock-bar) {
+  font-family:var(--ks-ui-font); font-size:14px; line-height:1.5;
+}
+:is(.ks-panel,.ks-room-menu-panel,.ks-editor-toolbar,.ks-room-controls,.ks-binder-controls) {
+  background:var(--ks-ui-panel); color:var(--ks-ui-paper);
+  border:1px solid var(--ks-ui-border); border-radius:12px;
+}
+:is(.ks-panel,.ks-room-menu-panel,.ks-binder-controls) :is(h1,h2,h3),.ks-room-menu-organized header strong,.ks-room-name h2 {
+  font-family:var(--ks-ui-heading);font-weight:var(--ks-ui-heading-weight);line-height:1.25;
+}
+:is(.ks-panel,.ks-room-menu-panel) h2 {font-size:24px}
+:is(.ks-panel,.ks-room-menu-panel) h3 {font-size:19px}
+:is(.ks-tool,.ks-chip,.ks-room-controls button,.ks-room-controls summary,.ks-binder-controls button) {
+  font-family:var(--ks-ui-font);font-size:13px;font-weight:500;line-height:1.35;
+  min-height:44px;border-radius:var(--ks-ui-radius);letter-spacing:normal;
+}
+.ks-tool {background:var(--ks-ui-hover);color:var(--ks-ui-paper);box-shadow:none;border:1px solid var(--ks-ui-border)}
+.ks-chip {background:var(--ks-ui-panel);color:var(--ks-ui-paper);border:1px solid var(--ks-ui-border);box-shadow:none}
+.ks-chip:hover {background:var(--ks-ui-hover);color:var(--ks-ui-paper)}
+:is(.ks-tool,.ks-room-controls button,.ks-room-controls summary):hover:not(:disabled) {background:var(--ks-ui-hover);color:var(--ks-ui-paper)}
+:is(.ks-tool--accent,.ks-tool[aria-pressed="true"],.ks-room-controls .ks-room-primary,.ks-room-sections button[aria-pressed="true"],.ks-settings nav button[aria-pressed="true"]) {
+  background:var(--ks-ui-paper);color:var(--ks-ui-panel);border-color:var(--ks-ui-paper);
+}
+:is(.ks-tool--accent,.ks-tool[aria-pressed="true"],.ks-room-controls .ks-room-primary):hover:not(:disabled) {background:var(--ks-ui-metal);color:var(--ks-ui-panel)}
+:is(.ks-tool,.ks-chip,.ks-room-controls button,.ks-room-controls summary,.ks-panel input,.ks-panel select,.ks-panel textarea):focus-visible {outline:3px solid var(--ks-ui-metal);outline-offset:3px}
+:is(.ks-tool,.ks-chip,.ks-panel button):disabled {opacity:.45;cursor:not-allowed}
+:is(.ks-room-controls,.ks-editor-toolbar) svg {color:currentColor}
+:is(.ks-panel,.ks-binder-controls) :is(input,select,textarea):not([type="range"]):not([type="checkbox"]):not([type="color"]):not([type="file"]) {
+  font-family:var(--ks-ui-font);font-size:14px;line-height:1.5;
+  background:var(--ks-ui-hover);color:var(--ks-ui-paper);border:1px solid var(--ks-ui-border);border-radius:var(--ks-ui-radius);padding:10px 12px;max-width:100%;
+}
+.ks-panel select option {background:var(--ks-ui-panel);color:var(--ks-ui-paper)}
+/* Paper dialogs use the same family with an inverted surface. */
+:is(.ks-import-dialog,.ks-photo-printer-dialog,.ks-shelf-preview,.ks-workbench-cover-panel,.ks-binder-dialog) {
+  background:var(--ks-ui-paper);color:var(--ks-ui-ink);border-color:var(--ks-ui-metal);
+}
+:is(.ks-import-dialog,.ks-photo-printer-dialog,.ks-shelf-preview,.ks-workbench-cover-panel,.ks-binder-dialog) :is(h2,h3) {font-family:var(--ks-ui-heading);font-weight:var(--ks-ui-heading-weight)}
+:is(.ks-import-dialog,.ks-photo-printer-dialog,.ks-binder-controls) button {
+  font-family:var(--ks-ui-font);min-height:44px;border-radius:var(--ks-ui-radius);
+}
+.ks-binder-controls {background:var(--ks-ui-panel);color:var(--ks-ui-paper)}
+:is(.ks-workbench-cover-panel,.ks-shelf-preview,.ks-workbench-cover-actions) .ks-tool,.ks-photo-printer-dialog .is-primary {background:var(--ks-ui-panel);color:var(--ks-ui-paper)}
+.ks-editor-toolbar .ks-tool {min-height:44px;font-size:13px;border-radius:var(--ks-ui-radius)}
+.ks-editor-toolbar .ks-tool:hover {color:var(--ks-ui-paper)}
+.ks-editor-toolbar .ks-tool[aria-pressed="true"]:hover {color:var(--ks-ui-panel)}
+.ks-settings .text-paper\/60,.ks-settings .text-paper\/50,.ks-panel .text-paper\/55 {color:var(--ks-ui-muted)}
+.ks-panel input::placeholder,.ks-panel textarea::placeholder {color:var(--ks-ui-muted);opacity:1}
+.ks-panel :is(input[type="range"],input[type="checkbox"]) {accent-color:var(--ks-ui-metal)}
+.ks-settings input[type="checkbox"] {display:inline-block;width:16px;height:16px;padding:0;margin:0 8px 0 0;vertical-align:middle}
+.ks-spotify-dock:not(.is-on-crt),.ks-archive-bar {font-family:var(--ks-ui-font);background:var(--ks-ui-panel);color:var(--ks-ui-paper)}
+.ks-music-dock-bar :is(button,a) {min-height:44px;font-family:var(--ks-ui-font)}
+.ks-room>header {font-family:var(--ks-ui-font)}
+.ks-room>header label {color:var(--ks-ui-ink)}
+.ks-room>header label>span {color:inherit}
+.ks-room>header .ks-caption {font-family:var(--ks-ui-heading)}
+.ks-frame-actions {display:flex;gap:4px;align-items:center;padding:4px;background:var(--ks-ui-panel);color:var(--ks-ui-paper);border:1px solid var(--ks-ui-border);border-radius:8px;white-space:nowrap}
+.ks-frame-actions button {min-width:32px;min-height:32px;font:14px var(--ks-ui-font);padding:4px 8px;border-radius:4px}
+.ks-frame-actions button:hover {background:var(--ks-ui-hover)}
+.ks-frame-actions button:focus-visible {outline:2px solid var(--ks-ui-metal)}
+.ks-room-menu-organized {width:min(344px,calc(100vw - 24px));padding:16px}
+.ks-room-section {min-height:0;gap:2px}
+.ks-room-section button {padding:8px 10px}
+.ks-room-menu-organized small {font:12px/1.5 var(--ks-ui-font);color:var(--ks-ui-muted);opacity:1;letter-spacing:normal}
+.ks-room-menu-organized footer {margin-top:12px;padding-top:8px}
+.ks-room-menu-organized footer small {display:none}
+.ks-settings {width:min(720px,100%);padding:24px}
+.ks-settings nav {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:4px;background:#0002;border-radius:10px;margin:16px 0}
+.ks-settings nav .ks-tool {border:0;background:transparent;padding:8px;min-width:0}
+.ks-settings nav .ks-tool[aria-pressed="true"] {background:var(--ks-ui-paper);color:var(--ks-ui-panel)}
+.ks-settings section {border-color:var(--ks-ui-border);padding-top:16px}
+.ks-settings section>p {font-size:13px;color:var(--ks-ui-muted);line-height:1.6}
+.ks-settings summary {font:500 13px/1.5 var(--ks-ui-font);color:var(--ks-ui-paper);padding:10px 0}
+.ks-settings details {border-top:1px solid var(--ks-ui-border);margin-top:16px}
+.ks-settings .ks-tool {text-transform:none}
+.ks-ui-switch {display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:8px 10px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.ks-ui-switch-label {display:flex;align-items:center;gap:8px}
+.ks-ui-switch-state {display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ks-ui-muted)}
+.ks-ui-switch-track {display:block;width:32px;height:20px;border:1px solid var(--ks-ui-border);border-radius:20px;background:var(--ks-ui-hover);padding:3px}
+.ks-ui-switch-track::after {content:"";display:block;width:12px;height:12px;border-radius:50%;background:var(--ks-ui-paper);transition:transform var(--ks-motion-short)}
+.ks-ui-switch[aria-checked="true"] .ks-ui-switch-track {background:var(--ks-ui-metal)}
+.ks-ui-switch[aria-checked="true"] .ks-ui-switch-track::after {transform:translateX(12px);background:var(--ks-ui-panel)}
+.ks-room-section .ks-ui-switch span {margin-left:0;color:inherit;font-size:inherit}
+.ks-room-section .ks-ui-switch .ks-ui-switch-state {margin-left:auto;font-size:12px}
+.ks-room-menu-panel label {margin-top:0;padding:8px 10px;border-top:0;gap:12px;font:500 13px/1.4 var(--ks-ui-font)}
+.ks-room-menu-panel select {min-width:0;max-width:55%;min-height:44px;padding:8px 10px;border-radius:var(--ks-ui-radius);font:13px var(--ks-ui-font);background:var(--ks-ui-hover);color:var(--ks-ui-paper);border:1px solid var(--ks-ui-border)}
+.ks-room-menu-panel select option {background:var(--ks-ui-panel);color:var(--ks-ui-paper)}
+.ks-room-menu-panel select:focus-visible {outline:3px solid var(--ks-ui-metal);outline-offset:2px}
+.ks-room-sections button[role="tab"][aria-selected="true"] {background:var(--ks-ui-paper);color:var(--ks-ui-panel)}
+.ks-room-menu-organized {overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--ks-ui-metal) transparent}
+.ks-room-menu-panel header button {min-width:44px;flex:none}
+@media(max-width:600px) {
+ .ks-settings {padding:16px;max-height:calc(100dvh - 24px)}
+ .ks-settings nav .ks-tool {font-size:12px;padding:6px 2px}
+ .ks-room-controls {max-width:calc(100% - 16px);gap:2px;padding:4px;bottom:62px}
+ .ks-room-controls>button,.ks-room-controls summary {font-size:12px;padding:8px 6px;gap:4px}
+ .ks-room-controls>button svg {display:none}
+ .ks-room-menu-panel svg {display:block}
+}
+@media(max-width:480px) {
+ .ks-room-controls {width:calc(100% - 16px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));box-sizing:border-box;bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+ .ks-room-controls>.ks-room-primary {grid-column:1 / -1}
+ .ks-room-controls>.ks-room-menu {position:static}
+ .ks-room-controls>button,.ks-room-controls summary {width:100%;min-width:0;white-space:normal;padding:8px 4px;min-height:44px}
+ .ks-room-menu-panel {position:absolute;right:0;bottom:calc(100% + 8px);max-height:calc(100dvh - 210px - env(safe-area-inset-bottom,0px));max-width:100%;box-sizing:border-box}
+}

@@ -24,11 +24,11 @@ try {
   await page.waitForTimeout(4000);
   await page.screenshot({path:new URL(room+'-night.png',out).pathname.replace(/^\//,'')});
   await page.locator('.ks-room-menu>summary').press('Enter');
-  await page.getByRole('button',{name:'Atmosphere',exact:true}).press('Enter');
+  await page.getByRole('tab',{name:'Atmosphere',exact:true}).press('Enter');
   await page.getByRole('button',{name:'Display case On',exact:true}).press('Enter');
   await page.waitForTimeout(400);await page.reload();
   await page.getByRole('button',{name:'Take a seat',exact:true}).waitFor();await page.locator('.ks-room-menu>summary').press('Enter');
-  await page.getByRole('button',{name:'Atmosphere',exact:true}).press('Enter');
+  await page.getByRole('tab',{name:'Atmosphere',exact:true}).press('Enter');
   await page.getByRole('button',{name:'Display case Off',exact:true}).waitFor();
   assert.deepEqual(errors,[]);console.log('PASS '+room+': focus, LEDs and saved setting, no browser errors.');
   await context.close();

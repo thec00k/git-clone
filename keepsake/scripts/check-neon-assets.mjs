@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+import {roomAssets} from '../src/generated/roomAssets.ts';
+const directory=new URL('../public/room/cyberpunk/',import.meta.url);
+const manifest=JSON.parse(fs.readFileSync(new URL('asset-manifest.json',directory),'utf8'));
+const bytes=fs.readFileSync(new URL('cyberpunk.glb',directory));
+const hash=createHash('sha256').update(bytes).digest('hex');
+for(const quality of ['balanced','high']){assert.equal(manifest.qualities[quality].sha256,hash);assert.equal(manifest.qualities[quality].bytes,bytes.length);assert.equal(roomAssets.cyberpunk[quality],`/room/cyberpunk/cyberpunk.glb?v=${hash.slice(0,12)}`);}
+assert.ok(bytes.length<8*1048576);
+const gltf=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
+assert.ok(gltf.extensionsRequired.includes('KHR_draco_mesh_compression'));
+for(const name of ['Desk','ks_book','ks_window','ks_shelf','ks_door','Map_Sheet','Neon_Hologram_cat','Neon_Hologram_car','Neon_Hologram_flower','Neon_Jelly_0','Neon_Jelly_1'])assert.ok(gltf.nodes.some(n=>n.name===name),name);
+assert.ok(!gltf.nodes.some(n=>n.name?.startsWith('Woodland_Botanical_Print')));
+assert.ok(!gltf.nodes.some(n=>n.name?.startsWith('Neon_Cloud_')));
+assert.ok(gltf.nodes.some(n=>n.name==='Neon_Infinity_Surface'));
+assert.ok(gltf.nodes.some(n=>n.name==='Neon_Window_Reveal'));
+for(const name of ['Neon_Door_Left','Neon_Door_Right','Neon_Door_Head','Neon_Mushroom_Mushroom_Azure'])assert.ok(gltf.nodes.some(n=>n.name===name),name);
+assert.ok(!gltf.nodes.some(n=>['Accent_Pot','Accent_Leaf1','Accent_Leaf2'].includes(n.name)),'Cactus is replaced in Neon City');
+assert.ok(!gltf.nodes.some(n=>/curtain/i.test(n.name??'')));
+assert.ok(!gltf.nodes.some(n=>n.name?.startsWith('Win_Muntin')));
+const primitives=gltf.meshes.flatMap(m=>m.primitives);
+const triangles=primitives.reduce((n,p)=>n+gltf.accessors[p.indices].count/3,0);
+assert.ok(triangles<180000);assert.ok(primitives.length<350);
+assert.ok(!gltf.images?.some(i=>i.uri),'Textures must be embedded');
+console.log(`Neon City: ${(bytes.length/1048576).toFixed(2)} MiB, ${triangles} triangles, ${primitives.length} primitives; anchors, compression and revision verified.`);

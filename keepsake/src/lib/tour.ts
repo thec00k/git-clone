@@ -69,7 +69,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: "map",
     speaker: TOUR_SPEAKER,
-    text: "The corkboard is a memory map. Pin a place the way you'd pin a postcard. No exact coordinates, just a mark.",
+    text: "The memory map holds the places tied to your keepsakes. Pin a place the way you'd pin a postcard. No exact coordinates, just a mark.",
     focus: "map",
   },
   {

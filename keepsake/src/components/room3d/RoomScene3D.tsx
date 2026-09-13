@@ -176,7 +176,7 @@ export function RoomScene3D({
           powerPreference: "default",
         }}
       >
-        <color attach="background" args={[phase === "night" ? "#12161c" : phase === "dusk" ? "#2a1c14" : "#5a6570"]} />
+        <color attach="background" args={[activeRoom.id === "cyberpunk" ? "#070b20" : phase === "night" ? "#12161c" : phase === "dusk" ? "#2a1c14" : "#5a6570"]} />
         <RoomPerformance/>
         <Suspense fallback={<RoomLoading />}>
           <RoomModel

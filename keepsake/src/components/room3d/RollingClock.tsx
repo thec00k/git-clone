@@ -17,9 +17,9 @@ function RollingDigit({ value }: { value: number }) {
   );
 }
 
-export function RollingClock({ timeMode }: { timeMode: TimeMode }) {
+export function RollingClock({ timeMode: _timeMode }: { timeMode: TimeMode }) {
   const [now, setNow] = useState(() => new Date());
-  const { h, m, live } = clockFromMode(timeMode, now);
+  const { h, m, live } = clockFromMode("auto", now);
   const label = clockLabel(h, m);
 
   useEffect(() => {

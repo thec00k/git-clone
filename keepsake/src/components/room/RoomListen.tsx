@@ -4,6 +4,7 @@ import { useListen } from "../../store/listen";
 import { useNav } from "../../store/nav";
 import { listenThings, LISTEN_INTRO, type ListenId } from "../../lib/roomListen";
 import { roomLayoutFromSearch } from "../../lib/roomLayout";
+import { useApp } from "../../store/appStore";
 
 export function RoomListen({
   onAct,
@@ -12,12 +13,22 @@ export function RoomListen({
 }) {
   const { preview, setPreview, announcement, announce, scene } = useListen();
   const { touring, setRoomFace } = useNav();
+  const { environment } = useApp();
+  const neon = environment.roomTheme === "cyberpunk";
   const layout = useMemo(() => roomLayoutFromSearch(), []);
   const things = listenThings({
     layout,
     seated: scene?.seated ?? false,
     shopOpen: scene?.shopOpen ?? false,
-  });
+  }).map((thing) =>
+    neon && thing.id === "map"
+      ? {
+          ...thing,
+          name: "The holographic map",
+          hint: "A living neon world map. Open it to revisit memories and pin new places.",
+        }
+      : thing,
+  );
 
   const speak = (text: string) => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;

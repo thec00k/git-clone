@@ -43,10 +43,12 @@ export type MusicProvider = "ambient" | "spotify" | "lofi" | "soundcloud";
 export interface Environment {
   /** Optional artifact-case LEDs follow the CRT palette; old saves default on. */
   displayCaseLit?: boolean;
+  cloudPalette?: 'multicolor' | 'crt' | 'off';
+  capsuleFinish?: 'metal' | 'wood';
   memoryLighting?: boolean;
   soundGeography?: boolean;
   furniture?: import('../lib/furniture').RoomFurnitureChoices;
-  roomTheme?: "woodland" | "beachfront";
+  roomTheme?: "woodland" | "beachfront" | "cyberpunk";
   roomQuality?: "balanced" | "high";
   /** Beachfront casements; old rooms default to open. */
   coastalWindowOpen?: boolean;
@@ -155,8 +157,8 @@ export interface AppState {
   archive: ArchivePhoto[];
   archiveTabs: ArchiveTab[];
   environment: Environment;
-  ownedRoomThemes?: ("woodland" | "beachfront")[];
-  roomDecor?: {owned:string[];sillItem?:string;posterItem?:string;layouts?:Partial<Record<"woodland"|"beachfront",{sillItem?:string;posterItem?:string;crtColor?:Environment['crtColor']}>>};
+  ownedRoomThemes?: ("woodland" | "beachfront" | "cyberpunk")[];
+  roomDecor?: {owned:string[];sillItem?:string;posterItem?:string;neonCherry?:boolean;neonSign?:'neon-cherries'|'neon-heart'|null;snakePaused?:boolean;layouts?:Partial<Record<"woodland"|"beachfront"|"cyberpunk",{sillItem?:string;posterItem?:string;crtColor?:Environment['crtColor']}>>};
   guestbook: GuestEntry[];
   notes: PageNote[];
   pinNotes: PinNote[];
