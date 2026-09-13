@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => ({
     },
         
     optimizeDeps : {
+        include        : [ "three" ],
         esbuildOptions : {
             target : "es2020",
         },
