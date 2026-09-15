@@ -164,7 +164,7 @@ export function RoomScene3D({
     >
       <RoomSound environment={environment} face={roomFace} reading={workbenchPhase==='editing'}/>
       <div className="ks-room3d-picture" role="group" aria-label="Interactive room">
-      <Canvas key={activeRoom.id}
+      <Canvas
         frameloop={tabVisible&&!discoveryOpen&&!binderOpen?'always':'demand'}
         camera={{ fov: seated ? 38 : activeRoom.fov, near: 0.08, far: 40, position: activeRoom.views.front.position }}
         dpr={[1, profile.dpr]}
