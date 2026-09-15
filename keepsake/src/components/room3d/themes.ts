@@ -27,7 +27,8 @@ export const classicRoom: RoomTheme = {
 };
 export const beachfrontRoom: RoomTheme = {...woodlandRoom, id: "beachfront", title: "Beachfront", subtitle: "Salt air and afternoons worth keeping.", asset: "/room/beachfront/beachfront.glb", woodland: false};
 export const cyberpunkRoom: RoomTheme = {...woodlandRoom,id:'cyberpunk',title:'Neon City',subtitle:'Small memories above a city of light.',asset:'/room/cyberpunk/cyberpunk.glb',woodland:false};
-export const roomThemes = { woodland: woodlandRoom, beachfront: beachfrontRoom, cyberpunk:cyberpunkRoom, classic: classicRoom };
+export const skyCastleRoom: RoomTheme = {...woodlandRoom,id:'sky-castle',title:'Sky Castle',subtitle:'A quiet home above the clouds.',asset:'/room/sky-castle/sky-castle.glb',woodland:false};
+export const roomThemes = { woodland: woodlandRoom, beachfront: beachfrontRoom, cyberpunk:cyberpunkRoom, 'sky-castle':skyCastleRoom, classic: classicRoom };
 
 export const qualityProfiles = {
   balanced: { dpr: 1.25, shadows: false, particles: 70 },

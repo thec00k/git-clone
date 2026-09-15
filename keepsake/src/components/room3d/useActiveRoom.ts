@@ -1,14 +1,14 @@
 import {useApp} from '../../store/appStore';
-import {beachfrontRoom, classicRoom, woodlandRoom,cyberpunkRoom} from './themes';
+import {classicRoom,roomThemes} from './themes';
 import {useMemo} from 'react';
 import {roomAssets} from '../../generated/roomAssets';
 export function useActiveRoom() {
   const {environment} = useApp();
   const classic = new URLSearchParams(window.location.search).get('theme') === 'classic';
-  const room = environment.roomTheme === 'cyberpunk' ? 'cyberpunk' : environment.roomTheme === 'beachfront' ? 'beachfront' : 'woodland';
+  const room = environment.roomTheme && environment.roomTheme in roomAssets ? environment.roomTheme : 'woodland';
   const quality = environment.roomQuality ?? 'balanced';
   return useMemo(() => classic ? classicRoom : {
-    ...(room === 'cyberpunk' ? cyberpunkRoom : room === 'beachfront' ? beachfrontRoom : woodlandRoom),
+    ...roomThemes[room],
     asset: roomAssets[room][quality],
   }, [classic,room,quality]);
 }

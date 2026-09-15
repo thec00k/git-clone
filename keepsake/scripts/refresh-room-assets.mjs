@@ -130,7 +130,7 @@ for (const room of rooms) {
   fs.writeFileSync(path.join(root,'public/room',room,'asset-manifest.json'), JSON.stringify(reports[room],null,2)+'\n');
 }
 const runtime = {};
-for (const room of ['woodland','beachfront','cyberpunk']) {
+for (const room of ['woodland','beachfront','cyberpunk','sky-castle']) {
   const manifest = path.join(root,'public/room',room,'asset-manifest.json');
   if (!fs.existsSync(manifest)) continue;
   const data = JSON.parse(fs.readFileSync(manifest,'utf8'));

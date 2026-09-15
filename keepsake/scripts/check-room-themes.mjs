@@ -34,6 +34,19 @@ assert.equal(neonRestored.roomDecor.sillItem,'holo-cat');
 assert.equal(neonRestored.environment.crtColor,'pink');
 assert.deepEqual(neonRestored.books,state.books);
 console.log('Neon City hologram and CRT preferences survive room switching and backup.');
+const sky=switchRoomTheme(neonDecor,'sky-castle');
+assert.equal(sky.environment.roomTheme,'sky-castle');
+const memoryKeys=Object.keys(neonDecor).filter(k=>!['environment','roomDecor','ownedRoomThemes'].includes(k));
+for(const key of memoryKeys)assert.deepEqual(sky[key],neonDecor[key],key+' survives Sky Castle');
+const furnished={...sky,environment:{...sky.environment,furniture:{woodland:{chair:'chair-3'},'sky-castle':{desk:'desk-2',chair:'chair-1'}}}};
+for(const room of ['woodland','beachfront','cyberpunk']){
+ const returned=switchRoomTheme(parseRoomBackup(serializeRoom(switchRoomTheme(furnished,room))),'sky-castle');
+ for(const key of memoryKeys)assert.deepEqual(returned[key],furnished[key],key+' survives '+room+' round trip');
+ assert.deepEqual(returned.environment.furniture,furnished.environment.furniture,'furniture choices stay per room');
+ assert.equal(returned.environment.roomTheme,'sky-castle');
+}
+assert.equal(switchRoomTheme(sky,'sky-castle'),sky,'Sky Castle reselection is a no-op');
+console.log('Sky Castle preserves all memory fields and room furniture through every existing room and backup.');
 const cloudRoom={...neonRestored,environment:{...neonRestored.environment,cloudPalette:'multicolor',capsuleFinish:'metal'}};
 const cloudBackup=parseRoomBackup(serializeRoom(cloudRoom));
 assert.equal(cloudBackup.environment.cloudPalette,'multicolor');assert.equal(cloudBackup.environment.capsuleFinish,'metal');

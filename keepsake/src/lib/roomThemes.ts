@@ -1,10 +1,10 @@
 import type {AppState} from '../types/app';
-export type RoomThemeId = 'woodland' | 'beachfront' | 'cyberpunk';
+export type RoomThemeId = 'woodland' | 'beachfront' | 'cyberpunk' | 'sky-castle';
 export function ownsRoomTheme(state: AppState, room: RoomThemeId): boolean {
   return room === 'woodland' || (state.ownedRoomThemes?.includes(room) ?? state.environment.roomTheme === room);
 }
 export function switchRoomTheme(state: AppState, next: RoomThemeId): AppState {
-  if (!['woodland','beachfront','cyberpunk'].includes(next)) return state;
+  if (!['woodland','beachfront','cyberpunk','sky-castle'].includes(next)) return state;
   const current = state.environment.roomTheme ?? 'woodland';
   if (current === next) return state;
   const decor = state.roomDecor ?? {owned: []};

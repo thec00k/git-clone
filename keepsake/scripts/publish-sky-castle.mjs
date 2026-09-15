@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+const bytes=fs.readFileSync('public/room/sky-castle/sky-castle.glb');
+const sha256=createHash('sha256').update(bytes).digest('hex');
+const asset={file:'sky-castle.glb',bytes:bytes.length,sha256};
+fs.writeFileSync('public/room/sky-castle/asset-manifest.json',JSON.stringify({room:'sky-castle',qualities:{balanced:asset,high:asset}},null,2)+'\n');
+const file='src/generated/roomAssets.ts',text=fs.readFileSync(file,'utf8');
+const entry=`  "sky-castle": {"balanced":"/room/sky-castle/sky-castle.glb?v=${sha256.slice(0,12)}","high":"/room/sky-castle/sky-castle.glb?v=${sha256.slice(0,12)}"},`;
+fs.writeFileSync(file,text.includes('"sky-castle":')?text.replace(/  "sky-castle":.*?,\n/,entry+'\n'):text.replace('export const roomAssets = {','export const roomAssets = {\n'+entry));
+console.log(`Sky Castle asset: ${(bytes.length/1024/1024).toFixed(2)} MiB, ${sha256.slice(0,12)}`);

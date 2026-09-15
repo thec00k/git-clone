@@ -76,10 +76,10 @@ export function parseRoomBackup(text:string):AppState{
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
  ensure(['memoryLighting','soundGeography','displayCaseLit'].every(k=>e[k]===undefined||typeof e[k]==='boolean'));
  ensure(s.displayCaseScans===undefined||records(s.displayCaseScans,x=>string(x.id)&&string(x.title)&&string(x.modelSrc)&&number(x.shelf)&&(x.shelf as number)>=0&&(x.shelf as number)<4&&number(x.slot)&&(x.slot as number)>=0&&(x.slot as number)<4));
- ensure(e.roomTheme===undefined || ['woodland','beachfront','cyberpunk'].includes(e.roomTheme as string));
+ ensure(e.roomTheme===undefined || ['woodland','beachfront','cyberpunk','sky-castle'].includes(e.roomTheme as string));
  ensure(e.furniture===undefined||validFurnitureChoices(e.furniture));
  ensure(e.coastalWindowOpen===undefined || typeof e.coastalWindowOpen==='boolean');
- ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront','cyberpunk'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
+ ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront','cyberpunk','sky-castle'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
  ensure(e.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));
  ensure(['lampOn','ceilingOn','shelfLit','musicOn','pinsLocked'].every(k=>typeof e[k]==='boolean')&&['volume','ambienceVolume'].every(k=>number(e[k])&&(e[k] as number)>=0&&(e[k] as number)<=1));
  ensure(s.latestPrint===undefined || object(s.latestPrint)&&image(s.latestPrint.src)&&number(s.latestPrint.printedAt));
@@ -95,7 +95,7 @@ export function parseRoomBackup(text:string):AppState{
    ensure(object(s.roomDecor.layouts));
    const owned=s.roomDecor.owned as string[];
    for(const [theme,layout] of Object.entries(s.roomDecor.layouts)){
-     ensure(['woodland','beachfront','cyberpunk'].includes(theme)&&object(layout));
+     ensure(['woodland','beachfront','cyberpunk','sky-castle'].includes(theme)&&object(layout));
      ensure(layout.crtColor===undefined||string(layout.crtColor)&&Object.hasOwn(CRT_COLORS,layout.crtColor as string));
      ensure(layout.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));
      ensure(layout.sillItem===undefined||string(layout.sillItem)&&owned.includes(layout.sillItem as string)&&ROOM_GOODS.some(i=>i.id===layout.sillItem));

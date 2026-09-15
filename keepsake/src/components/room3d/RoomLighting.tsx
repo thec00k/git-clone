@@ -31,6 +31,7 @@ export function RoomLights({
   const memoryMood=environment.memoryLighting&&bookPhase==='editing'?activeBook?.memoryMood:undefined;
   const coastal = useActiveRoom().id === 'beachfront';
   const neon = useActiveRoom().id === 'cyberpunk';
+  const skyCastle = useActiveRoom().id === 'sky-castle';
   const night = phase === "night";
   const dusk = phase === "dusk";
   const ceiling = useMemo(() => {
@@ -51,15 +52,15 @@ export function RoomLights({
 
 
   const lightColor=useMemo(()=>{
-    const color=new THREE.Color(neon?'#939cff':night?'#c8d4f0':dusk?'#ffb070':'#ffe6b8');
+    const color=new THREE.Color(neon?'#939cff':skyCastle?(night?'#9bc5e8':dusk?'#efcbd8':'#eff5ff'):night?'#c8d4f0':dusk?'#ffb070':'#ffe6b8');
     if(memoryMood&&memoryMood!=='neutral'&&MEMORY_MOODS[memoryMood])color.lerp(new THREE.Color(MEMORY_MOODS[memoryMood].light),.22);
     return color;
-  },[night,dusk,memoryMood,neon]);
+  },[night,dusk,memoryMood,neon,skyCastle]);
   const ambientColor=useMemo(()=>new THREE.Color(night?'#8a9bb8':'#fff4e6'),[night]);
   useFrame((_, dt) => {
     const t=motionFactor(dt,MOTION.light,reduced);
     const lights:[[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number]]=[
-      [ambientRef.current,night?.16:dusk?.24:.34],[sunRef.current,neon?.65:night?.55:dusk?1.35:2.1],[ceilingRef.current,environment.ceilingOn!==false?(coastal?2.3:3.2):0],[lampRef.current,environment.lampOn&&!neon?(night?3.8:dusk?2.8:1.6)*(coastal?.28:1):0],[skyRef.current,night?.25:.55]];
+      [ambientRef.current,night?.16:dusk?.24:.34],[sunRef.current,neon?.65:skyCastle?(night?.35:dusk?.9:1.4):night?.55:dusk?1.35:2.1],[ceilingRef.current,environment.ceilingOn!==false?(skyCastle?1.25:coastal?2.3:3.2):0],[lampRef.current,environment.lampOn&&!neon?(night?3.8:dusk?2.8:1.6)*(coastal||skyCastle?.28:1):0],[skyRef.current,night?.25:.55]];
     lights.forEach(([light,target])=>{if(light)light.intensity=THREE.MathUtils.lerp(light.intensity,target,t);});
     sunRef.current?.color.lerp(lightColor,t);ambientRef.current?.color.lerp(ambientColor,t);
     const blades =
@@ -78,7 +79,7 @@ export function RoomLights({
   return (
     <>
       <ambientLight ref={ambientRef} intensity={.25} color="#fff4e6" />
-      <hemisphereLight ref={skyRef} args={["#bac4ba", "#3f4931", .4]} />
+      <hemisphereLight ref={skyRef} args={[skyCastle?"#c2dbf1":"#bac4ba", skyCastle?"#9c97b3":"#3f4931", .4]} />
       <directionalLight position={windowSun.toArray()} ref={sunRef} intensity={1} color="#ffe6b8" castShadow shadow-mapSize={[2048,2048]} shadow-camera-near={.1} shadow-camera-far={12} shadow-camera-left={-4} shadow-camera-right={4} shadow-camera-top={4} shadow-camera-bottom={-4} shadow-bias={-.00008} shadow-normalBias={.003} />
       {(
         <pointLight ref={ceilingRef} position={ceiling.toArray()} intensity={3.2} color={neon?"#cac3ff":"#fff6ea"} distance={9} />

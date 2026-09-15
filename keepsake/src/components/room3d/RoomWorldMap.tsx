@@ -21,13 +21,13 @@ function hologramTexture(onLoad:(texture:THREE.Texture)=>void) {
 }
 
 export function RoomWorldMap({scene,onOpen}:{scene:THREE.Object3D;onOpen:()=>void}) {
- const {environment}=useApp();const neon=environment.roomTheme==='cyberpunk';const reduced=useReducedMotion();
- const [loaded,setLoaded]=useState<{texture:THREE.Texture;neon:boolean}|null>(null);const material=useRef<THREE.MeshBasicMaterial>(null),scan=useRef<THREE.Mesh>(null),glow=useRef<THREE.MeshBasicMaterial>(null);
+ const {environment}=useApp();const neon=environment.roomTheme==='cyberpunk';const sky=environment.roomTheme==='sky-castle';const reduced=useReducedMotion();
+ const [loaded,setLoaded]=useState<{texture:THREE.Texture;neon:boolean;sky?:boolean}|null>(null);const material=useRef<THREE.MeshBasicMaterial>(null),scan=useRef<THREE.Mesh>(null),glow=useRef<THREE.MeshBasicMaterial>(null);
  useEffect(()=>{
   if(neon)return hologramTexture(texture=>setLoaded({texture,neon:true}));
-  let live=true;const map=new THREE.TextureLoader().load('/maps/world-room.svg',()=>{if(live)setLoaded({texture:map,neon:false});});map.colorSpace=THREE.SRGBColorSpace;
+  let live=true;const map=new THREE.TextureLoader().load(sky?'/maps/world-sky-castle.svg':'/maps/world-room.svg',()=>{if(live)setLoaded({texture:map,neon:false,sky});});map.colorSpace=THREE.SRGBColorSpace;
   return()=>{live=false;map.dispose();};
- },[neon]);
+ },[neon,sky]);
  const surface=useMemo(()=>{
   const sheet=scene.getObjectByName("Map_Sheet");if(!sheet)return null;
   const b=new THREE.Box3().setFromObject(sheet),width=(b.max.z-b.min.z)*.96;
@@ -44,7 +44,7 @@ export function RoomWorldMap({scene,onOpen}:{scene:THREE.Object3D;onOpen:()=>voi
   if(glow.current)glow.current.opacity=reduced ? .09 : .075+Math.sin(time*1.8)*.02;
   if(scan.current)scan.current.position.y=reduced ? 0 : ((time*.19)%(surface.height-.024))-(surface.height-.024)/2;
  });
- if(!surface||!loaded||loaded.neon!==neon)return null;const texture=loaded.texture;
+ if(!surface||!loaded||loaded.neon!==neon||!!loaded.sky!==sky)return null;const texture=loaded.texture;
  const color=CRT_LIGHT_COLORS[environment.crtColor??'blue'];
  if(!neon)return <mesh name="World_Map_Print" position={surface.position} rotation={[0,Math.PI/2,0]} onClick={e=>{e.stopPropagation();if(e.delta<4)onOpen();}}><planeGeometry args={[surface.width,surface.height]}/><meshStandardMaterial map={texture} color="#f6edd7" roughness={1} polygonOffset polygonOffsetFactor={-1}/></mesh>;
  const frame=.025,depth=.026;

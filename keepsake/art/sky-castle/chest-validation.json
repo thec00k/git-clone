@@ -1,0 +1,21 @@
+{
+  "result": "PASS",
+  "preservedNodes": [
+    "Body_Aged_honey_brass",
+    "Body_Attic_warm_oak",
+    "Body_Dark_worn_oak_edges",
+    "Body_Interior_cedar",
+    "Body_Patinated_side_handles",
+    "Lid_Aged_honey_brass",
+    "Lid_Attic_warm_oak",
+    "Lid_Dark_worn_oak_edges",
+    "TimeCapsule_LidPivot"
+  ],
+  "triangles": 17136,
+  "bytes": 827464,
+  "lidPivot": [
+    0.0,
+    0.17399999499320984,
+    0.25200000405311584
+  ]
+}

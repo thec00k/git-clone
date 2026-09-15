@@ -1,6 +1,7 @@
 import {TimeCapsuleChest} from './TimeCapsuleChest';
 import {CabinetPhoto} from './CabinetPhoto';
 import {NeonAtmosphere} from './NeonAtmosphere';
+import {SkyCastleFinish} from './SkyCastleFinish';
 import {NeonExtras} from './NeonExtras';
 import {useNav} from '../../store/nav';
 import {useApp} from '../../store/appStore';
@@ -69,6 +70,7 @@ export function RoomModel({
       <MemoryObjects scene={cloned} onBook={() => onActivate("book")} />
       <CabinetPhoto scene={cloned}/>
       {neon&&<><NeonAtmosphere scene={cloned}/><NeonExtras/></>}
+      {environment.roomTheme==='sky-castle'&&<SkyCastleFinish scene={cloned} phase={phase}/>}
       <FurnitureModels scene={cloned}/>
       <PropRefinements scene={cloned}/>
       <Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>

@@ -10,6 +10,7 @@
   --ks-ui-muted: color-mix(in srgb, var(--ks-ui-paper) 78%, var(--ks-ui-panel));
 }
 :root[data-keepsake-theme="beachfront"] { --ks-ui-heading-weight: 400; }
+:root[data-keepsake-theme="sky-castle"] { --ks-ui-panel:#343549; --ks-ui-paper:#F6F0E4; --ks-ui-ink:#343549; --ks-ui-metal:#DCC38E; --ks-ui-heading:Georgia,serif; --ks-ui-heading-weight:400; }
 :root[data-keepsake-theme="cyberpunk"] { --ks-ui-heading: Inter, "Segoe UI", sans-serif; --ks-ui-heading-weight: 600; }
 :root[data-keepsake-theme="snowy-mountain"] { --ks-ui-heading: Georgia, serif; --ks-ui-heading-weight: 400; }
 :root[data-keepsake-theme="stormy-lighthouse"] { --ks-ui-heading: Georgia, serif; --ks-ui-heading-weight: 600; }
