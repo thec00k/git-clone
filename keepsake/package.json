@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": "24.18.1"
+  },
   "scripts": {
     "assets:doctor": "node scripts/refresh-room-assets.mjs --doctor",
     "assets:refresh": "node scripts/refresh-room-assets.mjs",
