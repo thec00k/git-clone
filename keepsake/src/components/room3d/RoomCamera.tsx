@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { RoomFace } from "../../lib/roomLayout";
 import {useActiveRoom} from "./useActiveRoom";
-import {DISPLAY_CASE_VIEW} from './ArtifactDisplayCase';
+import {DISPLAY_CASE_VIEW,CABIN_DISPLAY_CASE_VIEW} from './ArtifactDisplayCase';
 const EYE_Y = 1.32;
 const WORKBENCH_VIEW={position:new THREE.Vector3(-.15,1.55,-1.12),target:new THREE.Vector3(-.15,.78,-1.72)};
 
@@ -83,7 +83,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
   useEffect(() => { touringRef.current = touring||workbench||!!photoView; seatedRef.current = seated||workbench; }, [touring, seated,workbench,photoView]);
   const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const overhead = wantsDeskOverhead();
-  const view = photoView ?? (workbench ? WORKBENCH_VIEW : displayCase && !touring ? DISPLAY_CASE_VIEW : reading && !touring ? READING_VIEW : overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face]);
+  const view = photoView ?? (workbench ? WORKBENCH_VIEW : displayCase && !touring ? activeRoom.id==='snowy-mountain'?CABIN_DISPLAY_CASE_VIEW:DISPLAY_CASE_VIEW : reading && !touring ? READING_VIEW : overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face]);
 
   useEffect(() => {
     userMoved.current = false;

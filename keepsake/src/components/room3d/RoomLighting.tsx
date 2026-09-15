@@ -31,6 +31,8 @@ export function RoomLights({
   const memoryMood=environment.memoryLighting&&bookPhase==='editing'?activeBook?.memoryMood:undefined;
   const coastal = useActiveRoom().id === 'beachfront';
   const neon = useActiveRoom().id === 'cyberpunk';
+  const cabin = useActiveRoom().id === 'snowy-mountain';
+  const cabinLampReplacement = cabin && !!environment.furniture?.['snowy-mountain']?.lamp;
   const night = phase === "night";
   const dusk = phase === "dusk";
   const ceiling = useMemo(() => {
@@ -59,7 +61,7 @@ export function RoomLights({
   useFrame((_, dt) => {
     const t=motionFactor(dt,MOTION.light,reduced);
     const lights:[[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number],[THREE.Light|null,number]]=[
-      [ambientRef.current,night?.16:dusk?.24:.34],[sunRef.current,neon?.65:night?.55:dusk?1.35:2.1],[ceilingRef.current,environment.ceilingOn!==false?(coastal?2.3:3.2):0],[lampRef.current,environment.lampOn&&!neon?(night?3.8:dusk?2.8:1.6)*(coastal?.28:1):0],[skyRef.current,night?.25:.55]];
+      [ambientRef.current,night?.16:dusk?.24:.34],[sunRef.current,neon?.65:night?.55:dusk?1.35:2.1],[ceilingRef.current,environment.ceilingOn!==false?(cabin?1.55:coastal?2.3:3.2):0],[lampRef.current,environment.lampOn&&!neon&&(!cabin||cabinLampReplacement)?(night?3.8:dusk?2.8:1.6)*(coastal?.28:1):0],[skyRef.current,night?.25:.55]];
     lights.forEach(([light,target])=>{if(light)light.intensity=THREE.MathUtils.lerp(light.intensity,target,t);});
     sunRef.current?.color.lerp(lightColor,t);ambientRef.current?.color.lerp(ambientColor,t);
     const blades =

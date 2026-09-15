@@ -403,7 +403,7 @@ export function LampFixture({
 }) {
   const {environment}=useApp();
   const lampChoice=environment.furniture?.[environment.roomTheme??'woodland']?.lamp;
-  const ownBulb=environment.roomTheme==='cyberpunk'||lampChoice==='lamp-2'||lampChoice==='lamp-3';
+  const ownBulb=environment.roomTheme==='snowy-mountain'||environment.roomTheme==='cyberpunk'||lampChoice==='lamp-2'||lampChoice==='lamp-3';
   const fixture=useRef<THREE.Group>(null);
   useFrame(()=>{fixture.current?.position.copy(lampShadePos(scene));});
   const lamp = useMemo(() => scene.getObjectByName(LAMP_OBJECT), [scene]);
@@ -456,6 +456,10 @@ export function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode
   const room = useActiveRoom();
   const clock = useMemo(() => scene.getObjectByName(CLOCK_OBJECT), [scene]);
   const digits = useMemo(() => scene.getObjectByName(CLOCK_DIGITS), [scene]);
+  const chairOccluder = useMemo(() => {
+    const chair = scene.getObjectByName(CHAIR_OBJECT);
+    return chair ? { current: chair } : null;
+  }, [scene]);
   const pose = useMemo(() => {
     const face = digits && hasGeometry(digits) ? digits : clock && hasGeometry(clock) ? clock : null;
     if (!face) return null;
@@ -473,7 +477,14 @@ export function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode
   if (!pose) return null;
   return (
     <group position={pose.pos.toArray()} quaternion={pose.quat}>
-      <Html transform occlude={false} distanceFactor={400} position={[0, 0, 0]} scale={pose.scale} style={{ pointerEvents: "none" }}>
+      <Html
+        transform
+        occlude={room.id === 'snowy-mountain' && chairOccluder ? [chairOccluder] : false}
+        distanceFactor={400}
+        position={[0, 0, 0]}
+        scale={pose.scale}
+        style={{ pointerEvents: "none" }}
+      >
         <div data-clock-locked="1" className={room.id === 'beachfront' ? 'ks-coastal-clock' : undefined}>
           <RollingClock timeMode={timeMode} />
         </div>

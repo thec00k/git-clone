@@ -48,7 +48,8 @@ export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,on
       </>}
       {section==='Atmosphere'&&<>
        {room.id==='cyberpunk'&&<><label className="flex items-center justify-between gap-3 py-2">Infinity mirror<select aria-label="Infinity mirror" value={environment.cloudPalette??'multicolor'} onChange={e=>setEnvironment({cloudPalette:e.target.value as Environment['cloudPalette']})}><option value="multicolor">Multicolor</option><option value="crt">Match CRT</option><option value="off">Off</option></select></label><label className="flex items-center justify-between gap-3 py-2">Time capsule<select aria-label="Time capsule finish" value={environment.capsuleFinish??'metal'} onChange={e=>setEnvironment({capsuleFinish:e.target.value as Environment['capsuleFinish']})}><option value="metal">Metallic</option><option value="wood">Attic wood</option></select></label></>}
-       <UiSwitch checked={environment.lampOn} onChange={onLamp}><Lamp size={16}/>{room.id==="cyberpunk"?"Lava lamp":"Desk lamp"}</UiSwitch>
+       {room.id==='snowy-mountain'&&<UiSwitch checked={environment.fireplaceSound!==false} onChange={()=>setEnvironment({fireplaceSound:environment.fireplaceSound===false})}><Music2 size={16}/>Fireplace sound</UiSwitch>}
+       <UiSwitch checked={environment.lampOn} onChange={onLamp}><Lamp size={16}/>{room.id==='snowy-mountain'?'Desk lantern':room.id==="cyberpunk"?"Lava lamp":"Desk lamp"}</UiSwitch>
        <UiSwitch checked={environment.ceilingOn!==false} onChange={onCeiling}><Lightbulb size={16}/>Ceiling light</UiSwitch>
        <UiSwitch checked={environment.shelfLit} onChange={()=>setEnvironment({shelfLit:!environment.shelfLit})}><Library size={16}/>Bookshelf lights</UiSwitch>
        {!isVisitor&&<UiSwitch checked={environment.displayCaseLit!==false} onChange={()=>setEnvironment({displayCaseLit:environment.displayCaseLit===false})}><Lightbulb size={16}/>Display case</UiSwitch>}

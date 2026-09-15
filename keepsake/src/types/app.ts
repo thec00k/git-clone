@@ -47,8 +47,10 @@ export interface Environment {
   capsuleFinish?: 'metal' | 'wood';
   memoryLighting?: boolean;
   soundGeography?: boolean;
+  /** Cabin fireplace audio; starts only after a user gesture. */
+  fireplaceSound?: boolean;
   furniture?: import('../lib/furniture').RoomFurnitureChoices;
-  roomTheme?: "woodland" | "beachfront" | "cyberpunk";
+  roomTheme?: "woodland" | "beachfront" | "cyberpunk" | "snowy-mountain";
   roomQuality?: "balanced" | "high";
   /** Beachfront casements; old rooms default to open. */
   coastalWindowOpen?: boolean;
@@ -157,8 +159,8 @@ export interface AppState {
   archive: ArchivePhoto[];
   archiveTabs: ArchiveTab[];
   environment: Environment;
-  ownedRoomThemes?: ("woodland" | "beachfront" | "cyberpunk")[];
-  roomDecor?: {owned:string[];sillItem?:string;posterItem?:string;neonCherry?:boolean;neonSign?:'neon-cherries'|'neon-heart'|null;snakePaused?:boolean;layouts?:Partial<Record<"woodland"|"beachfront"|"cyberpunk",{sillItem?:string;posterItem?:string;crtColor?:Environment['crtColor']}>>};
+  ownedRoomThemes?: ("woodland" | "beachfront" | "cyberpunk" | "snowy-mountain")[];
+  roomDecor?: {owned:string[];sillItem?:string;posterItem?:string;neonCherry?:boolean;cabinMounts?:string[];neonSign?:'neon-cherries'|'neon-heart'|null;snakePaused?:boolean;layouts?:Partial<Record<"woodland"|"beachfront"|"cyberpunk"|"snowy-mountain",{sillItem?:string;posterItem?:string;crtColor?:Environment['crtColor']}>>};
   guestbook: GuestEntry[];
   notes: PageNote[];
   pinNotes: PinNote[];

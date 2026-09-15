@@ -18,14 +18,14 @@ const patterns:Partial<Record<FurnitureCategory,RegExp>>={
   cabinet:/^Archive_(Back|Deck|Header|Inlay|Plinth|SideL|SideR|Top)$/,
   bookshelf:/^Shelf_(Back|Bot|Kick|SideL|SideR|Top)$/,
   crt:/^CRT_/,
-  rug:/^Semantic_Rug_(terracotta|oatmeal_linen)$/,
+  rug:/^(Semantic_Rug_(terracotta|oatmeal_linen)|Cabin_Hide_(Rug|Fibres))$/,
   curtains:/^Semantic_Curtain_/,
 };
 const anchors:Partial<Record<FurnitureCategory,string>>={chair:'ks_chair',beanbag:'Beanbag',crt:'ks_crt'};
 
 export function FurnitureModels({scene}:{scene:THREE.Object3D}){
   const {environment}=useApp();const room=useActiveRoom().id;
-  const choices=room==='woodland'||room==='beachfront'||room==='cyberpunk'?environment.furniture?.[room]:undefined;
+  const choices=room==='woodland'||room==='beachfront'||room==='cyberpunk'||room==='snowy-mountain'?environment.furniture?.[room]:undefined;
   return <>{FURNITURE_ITEMS.filter(item=>choices?.[item.category]===item.id&&item.category!=='printer').map(item=><FurnitureReplacement key={item.category} scene={scene} id={item.id} category={item.category}/>)}</>;
 }
 

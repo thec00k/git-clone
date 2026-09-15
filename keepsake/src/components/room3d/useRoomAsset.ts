@@ -18,10 +18,12 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
       if (!(obj instanceof THREE.Mesh)) return;
       obj.castShadow = true;
       obj.receiveShadow = true;
+      if(activeRoom.id==='snowy-mountain'&&/Fur_Fibres|Hide_Fibres/.test(obj.name)){obj.castShadow=false;obj.receiveShadow=false;}
       const copy = (material: THREE.Material) => {
         const local = material.clone(); materials.push(local); return local;
       };
       obj.material = Array.isArray(obj.material) ? obj.material.map(copy) : copy(obj.material);
+      if(obj.name==='Lamp_Glass'&&activeRoom.id==='snowy-mountain'){obj.castShadow=false;const mats=Array.isArray(obj.material)?obj.material:[obj.material];mats.forEach(m=>{m.depthWrite=false;});}
       if (/Beachfront_Prop_(Fishbowl|Bowl_Rim|Bowl_Water|Waterline)|Beachfront_Casement_.*_Glass/.test(obj.name)) {
         obj.castShadow = false;
         obj.receiveShadow = false;
@@ -43,12 +45,13 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
       }
     });
     const shelf=cloned.getObjectByName('ks_shelf');
+    for(const name of ['Cabin_Deer_Mount','Cabin_Bear_Mount']){const mount=cloned.getObjectByName(name);if(mount)mount.visible=false;}
     if(shelf) shelf.position.z += BOOKSHELF_WINDOW_SHIFT;
     const clock=cloned.getObjectByName('ks_clock');
     if(clock) clock.position.x -= .06;
     cloned.updateMatrixWorld(true);
     const beanbag=cloned.getObjectByName('Beanbag');
-    if(beanbag){const box=new THREE.Box3().setFromObject(beanbag);const delta=new THREE.Vector3(-2.38-box.min.x,0,2.005-box.max.z);beanbag.position.add(delta);}
+    if(beanbag){const box=new THREE.Box3().setFromObject(beanbag);const delta=new THREE.Vector3(-2.38-box.min.x,0,(activeRoom.id==='snowy-mountain'?1.43:2.005)-box.max.z);beanbag.position.add(delta);}
     return { cloned, materials };
   }, [scene, activeRoom.id]);
   useEffect(() => () => materials.forEach(material => material.dispose()), [materials]);

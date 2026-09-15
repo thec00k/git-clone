@@ -27,6 +27,8 @@ export function RoomListen({
           name: "The holographic map",
           hint: "A living neon world map. Open it to revisit memories and pin new places.",
         }
+      : environment.roomTheme==='snowy-mountain'&&thing.id==='lamp'
+      ? {...thing,name:'The desk lantern',hint:'A warm flickering lantern on the desk. Turn it on or off.'}
       : thing,
   );
 

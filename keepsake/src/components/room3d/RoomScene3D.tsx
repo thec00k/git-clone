@@ -1,3 +1,4 @@
+import {SnowyMountainScenery} from './SnowyMountainScenery';
 import {useActiveRoom} from "./useActiveRoom";
 import {BeachfrontScenery} from "./BeachfrontScenery";
 import { RoomSound } from './RoomSound';
@@ -165,7 +166,7 @@ export function RoomScene3D({
       <div className="ks-room3d-picture" role="group" aria-label="Interactive room">
       <Canvas key={activeRoom.id}
         frameloop={tabVisible&&!discoveryOpen&&!binderOpen?'always':'demand'}
-        camera={{ fov: seated ? 38 : activeRoom.fov, near: 0.08, far: 40, position: activeRoom.views.front.position }}
+        camera={{ fov: seated ? 38 : activeRoom.fov, near: 0.08, far: activeRoom.id==='snowy-mountain'?120:40, position: activeRoom.views.front.position }}
         dpr={[1, profile.dpr]}
         shadows={profile.shadows}
         gl={{
@@ -194,6 +195,7 @@ export function RoomScene3D({
             onToggleLamp={toggleLamp}
             onToggleCeiling={toggleCeiling}
           />
+        {activeRoom.id==='snowy-mountain'&&<SnowyMountainScenery phase={phase}/>}
         {activeRoom.woodland && <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />}
         {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment}/>}
         </Suspense>

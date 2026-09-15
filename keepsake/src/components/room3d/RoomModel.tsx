@@ -1,3 +1,4 @@
+import {SnowyMountainEffects} from './SnowyMountainEffects';
 import {TimeCapsuleChest} from './TimeCapsuleChest';
 import {CabinetPhoto} from './CabinetPhoto';
 import {NeonAtmosphere} from './NeonAtmosphere';
@@ -68,10 +69,11 @@ export function RoomModel({
       {coastal&&<CoastalInteractions scene={cloned} open={environment.coastalWindowOpen!==false}/>}
       <MemoryObjects scene={cloned} onBook={() => onActivate("book")} />
       <CabinetPhoto scene={cloned}/>
+      {environment.roomTheme==='snowy-mountain'&&<SnowyMountainEffects scene={cloned} phase={phase}/>}
       {neon&&<><NeonAtmosphere scene={cloned}/><NeonExtras/></>}
       <FurnitureModels scene={cloned}/>
       <PropRefinements scene={cloned}/>
-      <Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
+      <Suspense fallback={null}><ArtifactDisplayCase roomScene={cloned}/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
       <ChairFloorContact scene={cloned}/>
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>

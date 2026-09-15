@@ -1,0 +1,15 @@
+{
+  "room": "snowy-mountain",
+  "qualities": {
+    "balanced": {
+      "file": "snowy-mountain.glb",
+      "bytes": 6347832,
+      "sha256": "a802805d2ef9ab2b51339483129b242a05e050e4747f7855d76bd6410b35d457"
+    },
+    "high": {
+      "file": "snowy-mountain.glb",
+      "bytes": 6347832,
+      "sha256": "a802805d2ef9ab2b51339483129b242a05e050e4747f7855d76bd6410b35d457"
+    }
+  }
+}

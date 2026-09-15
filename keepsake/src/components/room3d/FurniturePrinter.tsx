@@ -7,7 +7,7 @@ import {useActiveRoom} from './useActiveRoom';
 /** Keeps the printer's photo and click target in the shared desk assembly. */
 export function FurniturePrinter({children}:{children:ReactNode}){
   const {environment}=useApp();const room=useActiveRoom().id;
-  const id=room==='woodland'||room==='beachfront'||room==='cyberpunk'?environment.furniture?.[room]?.printer:undefined;
+  const id=room==='woodland'||room==='beachfront'||room==='cyberpunk'||room==='snowy-mountain'?environment.furniture?.[room]?.printer:undefined;
   const [model,setModel]=useState<THREE.Object3D|null>(null);
   useEffect(()=>{
     let live=true;const materials:THREE.Material[]=[];setModel(null);

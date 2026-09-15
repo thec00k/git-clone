@@ -5,7 +5,7 @@ import {MEMORY_MOODS} from './memoryAtmosphere.ts';
 import {KEEPSAKE_PRINTS,isPaperStyle} from './stationery.ts';
 import {validFurnitureChoices} from './furniture.ts';
 import {CRT_COLORS} from './roomMusic.ts';
-import {ROOM_GOODS,SHOP_GOODS,POSTER_GOODS} from './roomShop.ts';
+import {ROOM_GOODS,SHOP_GOODS,POSTER_GOODS,CABIN_EXTRAS} from './roomShop.ts';
 import {soundCloudUrl} from './soundcloud.ts';
 import type { AppState } from '../types/app';
 import {PLACES,REWARDS} from './discoveries.ts';
@@ -76,10 +76,11 @@ export function parseRoomBackup(text:string):AppState{
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
  ensure(['memoryLighting','soundGeography','displayCaseLit'].every(k=>e[k]===undefined||typeof e[k]==='boolean'));
  ensure(s.displayCaseScans===undefined||records(s.displayCaseScans,x=>string(x.id)&&string(x.title)&&string(x.modelSrc)&&number(x.shelf)&&(x.shelf as number)>=0&&(x.shelf as number)<4&&number(x.slot)&&(x.slot as number)>=0&&(x.slot as number)<4));
- ensure(e.roomTheme===undefined || ['woodland','beachfront','cyberpunk'].includes(e.roomTheme as string));
+ ensure(e.fireplaceSound===undefined || typeof e.fireplaceSound==='boolean');
+ ensure(e.roomTheme===undefined || ['woodland','beachfront','cyberpunk','snowy-mountain'].includes(e.roomTheme as string));
  ensure(e.furniture===undefined||validFurnitureChoices(e.furniture));
  ensure(e.coastalWindowOpen===undefined || typeof e.coastalWindowOpen==='boolean');
- ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront','cyberpunk'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
+ ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront','cyberpunk','snowy-mountain'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
  ensure(e.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));
  ensure(['lampOn','ceilingOn','shelfLit','musicOn','pinsLocked'].every(k=>typeof e[k]==='boolean')&&['volume','ambienceVolume'].every(k=>number(e[k])&&(e[k] as number)>=0&&(e[k] as number)<=1));
  ensure(s.latestPrint===undefined || object(s.latestPrint)&&image(s.latestPrint.src)&&number(s.latestPrint.printedAt));
@@ -90,12 +91,13 @@ export function parseRoomBackup(text:string):AppState{
    ensure(s.roomDecor.neonCherry!==true||(s.roomDecor.owned as string[]).includes('neon-cherries'));
    ensure(s.roomDecor.neonSign===undefined||s.roomDecor.neonSign===null||['neon-cherries','neon-heart'].includes(s.roomDecor.neonSign as string)&&(s.roomDecor.owned as string[]).includes(s.roomDecor.neonSign as string));
    ensure(s.roomDecor.snakePaused===undefined||typeof s.roomDecor.snakePaused==='boolean');
+   ensure(s.roomDecor.cabinMounts===undefined||strings(s.roomDecor.cabinMounts)&&new Set(s.roomDecor.cabinMounts as string[]).size===(s.roomDecor.cabinMounts as string[]).length&&(s.roomDecor.cabinMounts as string[]).every(id=>(s.roomDecor as RecordValue).owned instanceof Array&&((s.roomDecor as RecordValue).owned as string[]).includes(id)&&CABIN_EXTRAS.some(i=>i.id===id)));
  }
  if(object(s.roomDecor)&&s.roomDecor.layouts!==undefined){
    ensure(object(s.roomDecor.layouts));
    const owned=s.roomDecor.owned as string[];
    for(const [theme,layout] of Object.entries(s.roomDecor.layouts)){
-     ensure(['woodland','beachfront','cyberpunk'].includes(theme)&&object(layout));
+     ensure(['woodland','beachfront','cyberpunk','snowy-mountain'].includes(theme)&&object(layout));
      ensure(layout.crtColor===undefined||string(layout.crtColor)&&Object.hasOwn(CRT_COLORS,layout.crtColor as string));
      ensure(layout.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));
      ensure(layout.sillItem===undefined||string(layout.sillItem)&&owned.includes(layout.sillItem as string)&&ROOM_GOODS.some(i=>i.id===layout.sillItem));

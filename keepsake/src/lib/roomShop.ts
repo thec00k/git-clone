@@ -8,7 +8,16 @@ export function buyRoomGood(s:AppState,id:string):AppState{const item=ROOM_GOODS
 export function placeRoomGood(s:AppState,id?:string):AppState{const d=s.roomDecor??{owned:[]};if(id&&(!d.owned.includes(id)||!ROOM_GOODS.some(i=>i.id===id)))return s;return {...s,roomDecor:{...d,sillItem:id}};}
 export const EXTRA_GOODS=[{id:'sparkle-markers',title:'Sparkly marker pair',price:4,kind:'Markers',icon:'✨',description:'Gold and rose ink with tiny paper glints.'},{id:'fern-stamp',title:'Woodland fern stamp',price:2,kind:'Stamp',icon:'🌿',description:'A reusable fern imprint in the scrapbook sticker tray.'},{id:'poster-botanical',title:'Botanical field poster',price:3,kind:'Poster',icon:'🌱',description:'A cream paper study of woodland leaves.'},{id:'poster-night',title:'Moonlit mountain poster',price:3,kind:'Poster',icon:'🌙',description:'An ink-blue sky above quiet mountains.'}] as const;
 export const NEON_EXTRAS=[{id:'neon-cherries',title:'Cherry neon sign',price:0,kind:'Sign',icon:'🍒',description:'Two glowing cherries above the light switch.'},{id:'neon-heart',title:'Red heart neon sign',price:0,kind:'Sign',icon:'♥',description:'A glowing red heart for the shared sign spot.'},{id:'poster-snake',title:'Snake maze poster',price:0,kind:'Poster',icon:'▦',description:'An endlessly played Snake game in a neon frame.'}] as const;
-export const SHOP_GOODS=[...ROOM_GOODS,...EXTRA_GOODS,...NEON_EXTRAS];
+export const CABIN_EXTRAS=[{id:'cabin-deer',title:'Deer taxidermy mount',price:0,kind:'Mount',icon:'🦌',description:'A winter-coated stag on an oak plaque, left of the window.'},{id:'cabin-bear',title:'Bear taxidermy mount',price:0,kind:'Mount',icon:'🐻',description:'A brown bear head on an oak plaque, right of the window.'}] as const;
+export const SHOP_GOODS=[...ROOM_GOODS,...EXTRA_GOODS,...NEON_EXTRAS,...CABIN_EXTRAS];
+export function placeCabinMount(s:AppState,id:string,placed:boolean):AppState{
+ const d=s.roomDecor??{owned:[]};if(s.environment.roomTheme!=='snowy-mountain'||!CABIN_EXTRAS.some(i=>i.id===id)||!d.owned.includes(id))return s;
+ const mounts=d.cabinMounts??[];return {...s,roomDecor:{...d,cabinMounts:placed?[...new Set([...mounts,id])]:mounts.filter(m=>m!==id)}};
+}
+export function buyCabinExtra(s:AppState,id:string):AppState{
+ const d=s.roomDecor??{owned:[]};if(s.environment.roomTheme!=='snowy-mountain'||!CABIN_EXTRAS.some(i=>i.id===id)||d.owned.includes(id))return s;
+ return placeCabinMount({...s,roomDecor:{...d,owned:[...d.owned,id]}},id,true);
+}
 export const POSTER_GOODS=[...EXTRA_GOODS,...NEON_EXTRAS].filter(i=>i.kind==='Poster');
 export function getNeonSign(d:AppState['roomDecor']){const id=d?.neonSign!==undefined?d.neonSign:d?.neonCherry?'neon-cherries':null;return id&&d?.owned.includes(id)?id:null;}
 export function placeNeonSign(s:AppState,id:'neon-cherries'|'neon-heart'|null):AppState{const d=s.roomDecor??{owned:[]};if(id&&!d.owned.includes(id))return s;return {...s,roomDecor:{...d,neonSign:id,neonCherry:id==='neon-cherries'}};}
