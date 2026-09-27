@@ -1,0 +1,9 @@
+.ks-study-controls{position:absolute;z-index:35;top:86px;left:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:calc(100% - 40px);padding:10px 14px;background:#f2e7cff5;color:#263d32;border:1px solid #bfa06a;border-radius:12px;box-shadow:0 4px 22px #18251c25}
+.ks-study-label{font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.ks-study-controls nav{display:flex;gap:4px}
+.ks-study-controls button,.ks-study-controls select{min-height:44px;padding:8px 12px;border:1px solid #84917b;border-radius:7px;background:#faf6ec;color:#263d32;font:inherit;font-size:13px}
+.ks-study-controls button[aria-pressed=true]{background:#263d32;color:#f2e7cf}
+.ks-study-controls label{display:flex;align-items:center;gap:7px;font-size:12px}
+.ks-study-controls :is(button,select):focus-visible{outline:3px solid #ae703e;outline-offset:2px}
+@media(max-width:640px){.ks-study-controls{top:70px;left:8px;max-width:calc(100% - 16px);padding:6px 8px;gap:6px}.ks-study-label{display:none}.ks-study-controls nav{width:100%}.ks-study-controls nav button{flex:1}.ks-study-controls select{padding:6px;min-height:44px}}
+

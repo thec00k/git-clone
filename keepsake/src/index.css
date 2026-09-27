@@ -1569,138 +1569,71 @@
   }
 
   .ks-archive-well {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-height: 0;
-    padding: 1.25rem 0 0;
-    border-left: 1.35rem solid #6e4328;
-    border-right: 1.35rem solid #6e4328;
-    border-bottom: 1.6rem solid #5c3a24;
-    background:
-      linear-gradient(180deg, rgb(44 28 20 / 0.18), rgb(20 12 8 / 0.32)),
-      #7a4c2e;
-    box-shadow:
-      inset 0 18px 40px rgb(20 10 6 / 0.35),
-      inset 18px 0 24px rgb(20 10 6 / 0.18),
-      inset -18px 0 24px rgb(20 10 6 / 0.18);
+    display:flex;flex:1;flex-direction:column;min-height:0;
+    width:min(850px,100%);margin:0 auto;padding:24px 18px 0;
+    border:solid #745039;border-width:0 18px 0;border-radius:14px 14px 0 0;
+    background:linear-gradient(90deg,#30241e,#4d3c2e 15%,#564634 50%,#3b2b21);
+    box-shadow:inset 0 18px 40px #1e130c88,0 8px 60px #0003;
   }
-
-  .ks-archive-well-note {
-    margin: 0 auto 1rem;
-    max-width: 28rem;
-    padding: 0 1rem;
-    color: var(--color-paper);
-    font-size: 0.95rem;
-    text-align: center;
-    opacity: 0.82;
+  .ks-archive-drawer-heading{text-align:center;color:#f5e7cc;flex-shrink:0}
+  .ks-archive-drawer-heading>span{font-size:10px;letter-spacing:.2em;opacity:.65}
+  .ks-archive-well-note{margin:8px 0 16px;font-size:14px;color:#ecddc3}
+  .ks-archive-find{width:min(320px,95%);padding:9px 14px;margin-bottom:14px;border:1px solid #a18b6b;border-radius:6px;background:#f2e8d8;color:#382c22}
+  .ks-archive-bar{height:5px;flex-shrink:0;margin:0 14px;border-radius:4px;background:linear-gradient(#e5cf97,#857453);box-shadow:0 3px 7px #0008}
+  .ks-archive-drawer-scroll{overflow:auto;min-height:0;flex:1;scrollbar-color:#a08b6c #34281e;overscroll-behavior:contain;padding:30px 24px 0;}
+  .ks-archive-rail{list-style:none;margin:0;padding:0 0 20px;perspective:1200px;}
+  .ks-archive-sort{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px;margin:0 0 16px;font-size:13px}
+  .ks-archive-sort select{max-width:100%;padding:8px 12px;border:1px solid #a18b6b;border-radius:6px;background:#f2e8d8;color:#382c22;font:inherit}
+  .ks-archive-sort select:focus-visible{outline:3px solid #e8c46d;outline-offset:3px}
+  .ks-archive-file-slot{position:relative;height:94px;}
+  .ks-archive-file{
+    width:100%;height:82px;position:relative;display:flex;flex-direction:column;
+    padding:0;border:0;background:transparent;color:#3e382b;text-align:left;
+    transform:translateY(0);transform-origin:50% 0;
+    transition:transform .24s ease,filter .24s ease;cursor:pointer;
+    filter:drop-shadow(0 3px 2px #160f0a33);
   }
-
-  .ks-archive-bar {
-    flex: 0 0 auto;
-    width: min(46rem, 94%);
-    height: 0.42rem;
-    margin: 0 auto;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #e0c49a 0%, #c4a078 42%, #8d5a36 100%);
-    box-shadow: 0 3px 0 #3a2216, 0 8px 14px rgb(20 10 6 / 0.28);
+  .ks-archive-file:hover,.ks-archive-file:focus-visible{transform:translateY(-3px);filter:brightness(1.04) drop-shadow(0 5px 4px #140d0866)}
+  .ks-archive-file:focus-visible{outline:3px solid #e8c46d;outline-offset:5px;border-radius:8px}
+  .ks-archive-file-tab{
+    position:relative;display:block;margin-left:12px;max-width:80%;width:max-content;min-width:150px;
+    border:1px solid #ab9770;border-bottom:0;border-radius:8px 12px 0 0;
+    padding:7px 18px 6px;background:#e4d7bb;font:500 15px/1.2 Georgia,serif;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;
+    box-shadow:inset 0 2px 0 #fff7;
   }
-
-  .ks-archive-rail {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 0.45rem;
-    min-height: 22rem;
-    padding: 0 0.75rem 2.25rem;
-    overflow-x: auto;
+  .ks-archive-file--all .ks-archive-file-tab{background:#87917b;color:#17271f;border-color:#65715d}
+  .ks-archive-file--favorites .ks-archive-file-tab{background:#b78e76;color:#362319;border-color:#976f59}
+  .ks-archive-file-body{
+    width:100%;flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:7px;
+    border:1px solid #b9a57d;border-radius:6px 8px 9px 9px;padding:10px 20px;
+    background:linear-gradient(110deg,#efe5d0,#e1d3b7);
+    box-shadow:inset 0 1px 0 #fff8;
   }
-
-  .ks-archive-file {
-    display: flex;
-    flex-direction: column;
-    width: 7.4rem;
-    min-width: 7.4rem;
-    height: 18rem;
-    margin-top: -0.12rem;
-    padding: 0;
-    border: 1px solid #c9b8a4;
-    border-radius: 3px 10px 4px 4px;
-    background: linear-gradient(180deg, #f6efe4 0%, #eadcc8 100%);
-    color: var(--color-ink);
-    box-shadow: 4px 8px 0 rgb(20 10 6 / 0.18);
-    transform: translateY(0);
-    animation: ks-archive-settle 0.48s both;
-    animation-delay: calc(var(--ks-file-i, 0) * 45ms);
-    transition: transform 0.28s var(--ease-out);
+  .ks-archive-file-title{display:none}
+  .ks-archive-file-count{font-size:12px;color:#655b47;letter-spacing:.03em}
+  .ks-archive-file-hook{position:absolute;top:36px;left:-5px;right:-5px;height:3px;border-radius:4px;background:#a59373;z-index:-1}
+  .ks-archive-category-tabs{display:flex;gap:6px;overflow-x:auto;padding:16px 2px 10px;border-bottom:1px solid #806e4c33}
+  .ks-archive-category-tabs .ks-tool{flex-shrink:0;border-radius:8px 8px 3px 3px;padding:10px 16px;white-space:nowrap}
+  .ks-archive-category-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;min-height:62px}
+  .ks-archive-current-name{font:italic 18px Georgia,serif;margin-right:8px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ks-archive-name-input{background:#f5eddf;color:#382c22;border:1px solid #a18b6b;border-radius:5px;padding:8px;width:160px;max-width:40vw}
+  .ks-archive-photo-categories{padding:4px 10px 12px;font-size:12px}
+  .ks-archive-photo-categories summary{cursor:pointer;opacity:.75}
+  .ks-archive-drawer-front{position:relative;flex-shrink:0;margin:0 -18px;padding:16px 12px 12px;text-align:center;color:#dfc9a5;
+    background:repeating-linear-gradient(0deg,#ffffff03 0 2px,transparent 2px 5px),linear-gradient(#805a3b,#573a28);border-top:7px solid #9e7952;box-shadow:0 -10px 18px #1e150f77}
+  .ks-archive-drawer-front>span{display:block;font-size:9px;letter-spacing:.22em}
+  .ks-archive-drawer-front>i{display:block;width:100px;height:14px;margin:9px auto 0;border:3px solid #b8a077;border-radius:3px 3px 8px 8px;box-shadow:0 3px 4px #281c14}
+  .ks-archive-empty{text-align:center;color:#e7d5b6;padding:30px 5px}
+  @media(max-width:600px){
+    .ks-archive-well{border-width:0 9px;padding:16px 5px 0;border-radius:0}
+    .ks-archive-drawer-scroll{padding:23px 8px 0}
+    .ks-archive-file-tab{margin-left:10px;max-width:85%;min-width:115px;font-size:14px;padding:7px 12px}
+    .ks-archive-file-body{padding:10px 17px}
+    .ks-archive-drawer-front{margin:0 -5px}
   }
-
-  @keyframes ks-archive-settle {
-    from { transform: translateY(1.1rem); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  .ks-archive-file:hover,
-  .ks-archive-file:focus-visible {
-    transform: translateY(-0.85rem);
-  }
-
-  .ks-archive-file-hook {
-    display: block;
-    width: 1.15rem;
-    height: 0.62rem;
-    margin: -0.12rem auto 0.2rem;
-    border: 2px solid #8d6a44;
-    border-bottom: none;
-    border-radius: 9px 9px 0 0;
-    box-shadow: inset 0 1px 0 #e8d2b0;
-  }
-
-  .ks-archive-file-tab {
-    display: block;
-    margin: 0.2rem 0.45rem 0 auto;
-    max-width: 78%;
-    padding: 0.22rem 0.55rem;
-    border-radius: 3px 6px 0 0;
-    background: #d8c4a8;
-    font-family: var(--font-script);
-    font-size: 1.15rem;
-    line-height: 1.1;
-    text-align: right;
-  }
-
-  .ks-archive-file--all .ks-archive-file-tab {
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
-  }
-
-  .ks-archive-file--favorites .ks-archive-file-tab {
-    background: #8b3a32;
-    color: #fff8f0;
-  }
-
-  .ks-archive-file-body {
-    display: flex;
-    flex: 1;
-    align-items: flex-end;
-    padding: 0.7rem 0.65rem 0.85rem;
-  }
-
-  .ks-archive-file-count {
-    color: var(--color-ink-soft);
-    font-size: 0.78rem;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ks-archive-file {
-      animation: none;
-    }
-    .ks-archive-file,
-    .ks-archive-file:hover,
-    .ks-archive-file:focus-visible {
-      transition: none;
-      transform: none;
-    }
+  @media(prefers-reduced-motion:reduce){
+    .ks-archive-file,.ks-archive-file:hover,.ks-archive-file:focus-visible{transition:none;transform:none}
   }
 
   .ks-sticker-shop {

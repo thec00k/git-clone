@@ -1,0 +1,42 @@
+{
+  "checks": [
+    "Study loads at the authored height without standing-height clamp.",
+    "All three desktop camera endpoints and FOVs settle.",
+    "Rapid view changes finish at the latest requested camera.",
+    "Named views work with the keyboard; arrow keys do not move an authored camera.",
+    "Live scrapbook opens, edits its title, turns pages, drags a photo and undoes the change.",
+    "Actual drawer-shop room switches preserve books, photos, pins, capsules, binders and artifact records; other rooms ignore the study route.",
+    "Edited memories persist after reloading the study.",
+    "Six repeated season/light changes keep GPU texture counts stable.",
+    "Portrait uses its own three poses with no horizontal page overflow, including reduced motion.",
+    "Portrait scrapbook editor opens and returns to the room.",
+    "No browser runtime errors."
+  ],
+  "captures": [
+    "desktop-establishing",
+    "desktop-desk",
+    "desktop-window",
+    "desktop-winter-night",
+    "desktop-winter-day",
+    "desktop-editor",
+    "portraitEstablishing",
+    "portraitDesk",
+    "portraitWindow",
+    "portrait-editor"
+  ],
+  "textureCounts": [
+    39,
+    39,
+    39,
+    39,
+    39,
+    39
+  ],
+  "errors": [],
+  "metrics": {
+    "draws": "57",
+    "triangles": "6202",
+    "textures": "39",
+    "renderer": "Headless Edge / software rendering; not a hardware performance benchmark"
+  }
+}

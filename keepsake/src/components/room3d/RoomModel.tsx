@@ -1,3 +1,4 @@
+import {Vector3} from 'three';
 import {TimeCapsuleChest} from './TimeCapsuleChest';
 import {CabinetPhoto} from './CabinetPhoto';
 import {NeonAtmosphere} from './NeonAtmosphere';
@@ -55,9 +56,11 @@ export function RoomModel({
   const {phase:workbenchPhase,binderId}=useWorkbench();
   const {setEnvironment,activeBook}=useApp();
   const hasDeskBook=!!binderId||!!activeBook;
+  const study=useActiveRoom().study===true;
   const coastal=useActiveRoom().id==='beachfront';
   const neon=useActiveRoom().id==='cyberpunk';
   const cloned = useRoomAsset(phase, environment);
+  const hearthPosition = useMemo(() => cloned.getObjectByName('Hearth_Light')?.getWorldPosition(new Vector3()), [cloned]);
   const roots = useMemo(() => collectHotspotRoots(cloned), [cloned]);
 
   return (
@@ -69,11 +72,11 @@ export function RoomModel({
       <MemoryObjects scene={cloned} onBook={() => onActivate("book")} />
       <CabinetPhoto scene={cloned}/>
       {neon&&<><NeonAtmosphere scene={cloned}/><NeonExtras/></>}
-      <FurnitureModels scene={cloned}/>
-      <PropRefinements scene={cloned}/>
+      {!study&&<><FurnitureModels scene={cloned}/><PropRefinements scene={cloned}/></>}
       <Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
-      <ChairFloorContact scene={cloned}/>
+      {!study&&<ChairFloorContact scene={cloned}/>}
+      {study&&hearthPosition&&environment.season==='winter'&&<pointLight position={hearthPosition} color="#eec391" intensity={phase==='day'?.2:.7} distance={2.2}/>}
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />
       <ArchiveCabinet

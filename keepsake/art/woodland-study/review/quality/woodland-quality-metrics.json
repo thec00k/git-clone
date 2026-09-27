@@ -1,0 +1,32 @@
+[
+  {
+    "stage": "before",
+    "view": "room",
+    "metric": "144 fps · p95 7.2 ms · 551 draws · 127236 triangles · DPR 1.00 · 1200 frames"
+  },
+  {
+    "stage": "before",
+    "view": "desk",
+    "metric": "144 fps · p95 7.1 ms · 235 draws · 24328 triangles · DPR 1.00 · 1200 frames"
+  },
+  {
+    "stage": "before",
+    "view": "window",
+    "metric": "144 fps · p95 7.1 ms · 117 draws · 16892 triangles · DPR 1.00 · 1200 frames"
+  },
+  {
+    "stage": "after",
+    "view": "desk",
+    "metric": "144 fps · p95 7.2 ms · 219 draws · 31000 triangles · DPR 1.00 · 1200 frames"
+  },
+  {
+    "stage": "after",
+    "view": "window",
+    "metric": "144 fps · p95 7.1 ms · 85 draws · 21804 triangles · DPR 1.00 · 1200 frames"
+  },
+  {
+    "stage": "after",
+    "view": "room",
+    "metric": "142 fps · p95 8.2 ms · 489 draws · 142404 triangles · DPR 1.00 · 1200 frames"
+  }
+]

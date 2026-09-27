@@ -1,3 +1,5 @@
+import {woodlandStudyPose,type WoodlandStudyView} from './woodlandStudy';
+import {useReducedMotion} from '../../hooks/useReducedMotion';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -57,15 +59,19 @@ function clampInRoom(pos: THREE.Vector3, ROOM_WALK: {minX:number;maxX:number;min
   if (pos.z > .88 && pos.x > 1.30) pos.x = 1.30;
 }
 
-/** Eye-height look: yaw/pitch only. The camera never leaves standing height. */
-export function EyeCamera({ face, seated, touring, viewRevision, reading = false, workbench = false, displayCase = false }: { face: RoomFace; seated: boolean; touring: boolean; viewRevision: number; reading?: boolean; workbench?:boolean; displayCase?:boolean }) {
+/** Walking stays at eye height; named study views and the editor use authored poses. */
+export function EyeCamera({ face, seated, touring, viewRevision, reading = false, workbench = false, displayCase = false, studyView = null }: { studyView?:WoodlandStudyView|null; face: RoomFace; seated: boolean; touring: boolean; viewRevision: number; reading?: boolean; workbench?:boolean; displayCase?:boolean }) {
   const activeRoom = useActiveRoom();
   const [photoView,setPhotoView]=useState<{position:THREE.Vector3;target:THREE.Vector3}|null>(null);
   useEffect(()=>{const change=(e:Event)=>{const d=(e as CustomEvent).detail;setPhotoView(d?{position:new THREE.Vector3(...d.position),target:new THREE.Vector3(...d.target)}:null);};window.addEventListener('ks-frame-view',change);return()=>window.removeEventListener('ks-frame-view',change);},[]);
   const ROOM_WALK = activeRoom.walkBounds;
   const FACE_VIEW = useMemo(() => Object.fromEntries(Object.entries(activeRoom.views).map(([face,v]) => [face,{position:new THREE.Vector3(...v.position),target:new THREE.Vector3(...v.target)}])) as Record<RoomFace,{position:THREE.Vector3;target:THREE.Vector3}>, [activeRoom]);
   const SEATED_VIEW = useMemo(() => ({position:new THREE.Vector3(...activeRoom.seated.position),target:new THREE.Vector3(...activeRoom.seated.target)}),[activeRoom]);
-  const { camera, gl } = useThree();
+  const { camera, gl, size } = useThree();
+  const portrait=size.width/size.height<.85;
+  const studyPose=useMemo(()=>studyView&&activeRoom.study?woodlandStudyPose(studyView,portrait):null,[studyView,activeRoom.study,portrait]);
+  const studyCamera=useMemo(()=>studyPose?{position:new THREE.Vector3(...studyPose.position),target:new THREE.Vector3(...studyPose.target)}:null,[studyPose]);
+  const authored=!!studyCamera&&!workbench&&!photoView&&!displayCase&&!reading&&!touring&&!seated;
   const aim=useMemo(()=>({matrix:new THREE.Matrix4(),quaternion:new THREE.Quaternion()}),[]);
   const scratch=useMemo(()=>({forward:new THREE.Vector3(),right:new THREE.Vector3(),target:new THREE.Vector3()}),[]);
   const diagnosticElapsed=useRef(0);
@@ -80,13 +86,14 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
 
   const seatedRef = useRef(seated);
 
-  useEffect(() => { touringRef.current = touring||workbench||!!photoView; seatedRef.current = seated||workbench; }, [touring, seated,workbench,photoView]);
-  const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  useEffect(() => { touringRef.current = touring||workbench||!!photoView||authored; seatedRef.current = seated||workbench; }, [touring, seated,workbench,photoView,authored]);
+  const reduced = useReducedMotion();
   const overhead = wantsDeskOverhead();
-  const view = photoView ?? (workbench ? WORKBENCH_VIEW : displayCase && !touring ? DISPLAY_CASE_VIEW : reading && !touring ? READING_VIEW : overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : FACE_VIEW[face]);
+  const view = photoView ?? (workbench ? WORKBENCH_VIEW : displayCase && !touring ? DISPLAY_CASE_VIEW : reading && !touring ? READING_VIEW : overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : authored ? studyCamera! : FACE_VIEW[face]);
 
   useEffect(() => {
     userMoved.current = false;
+    keys.current={f:0,r:0};dragging.current=false;
     const look = lookFromView(view.position, view.target);
     yaw.current = look.yaw;
     pitch.current = look.pitch;
@@ -183,7 +190,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
       camera.position.lerp(view.position, t);
       if (overhead) {
         camera.position.copy(view.position);
-      } else if (!seated&&!workbench&&!photoView) {
+      } else if (!seated&&!workbench&&!photoView&&!authored) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }
@@ -209,7 +216,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
 
     if(camera instanceof THREE.PerspectiveCamera){
       const bookFov=Math.max(42,THREE.MathUtils.radToDeg(2*Math.atan(.42/Math.max(.35,camera.aspect))));
-      const targetFov=workbench?bookFov:seated?38:activeRoom.fov;
+      const targetFov=workbench?bookFov:authored&&studyPose?studyPose.fov:seated?38:activeRoom.fov;
       const nextFov=Math.abs(camera.fov-targetFov)<.001?targetFov:THREE.MathUtils.lerp(camera.fov,targetFov,reduced?1:1-Math.exp(-dt*7));
       if(camera.fov!==nextFov){camera.fov=nextFov;camera.updateProjectionMatrix();}
     }
@@ -219,6 +226,8 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
     const host = gl.domElement.closest(".ks-room3d");
     if (host instanceof HTMLElement) {
       host.dataset.cam = `${camera.position.x.toFixed(3)},${camera.position.y.toFixed(3)},${camera.position.z.toFixed(3)}`;
+      if(camera instanceof THREE.PerspectiveCamera)host.dataset.fov=camera.fov.toFixed(2);
+      if(activeRoom.study){host.dataset.textureCount=String(gl.info.memory.textures);host.dataset.drawCalls=String(gl.info.render.calls);host.dataset.triangles=String(gl.info.render.triangles);}
       host.dataset.eye = camera.position.y.toFixed(3);
       host.dataset.look = `${yaw.current.toFixed(3)},${pitch.current.toFixed(3)}`;
       host.dataset.walk = keys.current.f || keys.current.r ? "1" : "0";

@@ -43,6 +43,7 @@ export function Archive() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const tabs = state.archiveTabs;
+  useEffect(() => { setEditingId(null); setAdding(false); }, [tab]);
 
   const recent = useMemo(
     () => [...state.archive].sort((a, b) => b.createdAt - a.createdAt),
@@ -164,7 +165,7 @@ export function Archive() {
         />
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Archive tabs">
+      <div className="ks-archive-category-tabs" role="tablist" aria-label="Archive tabs">
         <button className={`ks-tool ${tab === "all" ? "ks-tool--accent" : ""}`} role="tab" aria-selected={tab === "all"} onClick={() => setTab("all")}>
           All
         </button>
@@ -172,7 +173,7 @@ export function Archive() {
           <Heart size={13} fill={tab === "favorites" ? "currentColor" : "none"} /> Favourites
         </button>
         {tabs.map((t) =>
-          editingId === t.id ? (
+          editingId === t.id && tab === t.id ? (
             <span key={t.id} className="flex items-center gap-1">
               <input
                 className="w-28 rounded bg-black/30 px-2 py-1 text-sm text-paper outline-none"
@@ -194,15 +195,17 @@ export function Archive() {
               <button className={`ks-tool ${tab === t.id ? "ks-tool--accent" : ""}`} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
                 {t.name}
               </button>
-              <button className="ks-chip ml-0.5 h-7 w-7" aria-label={`Rename ${t.name}`} onClick={() => startRename(t.id, t.name)}>
+              {tab === t.id && <><button className="ks-chip ml-0.5 h-7 w-7" aria-label={`Rename ${t.name}`} onClick={() => startRename(t.id, t.name)}>
                 <Pencil size={11} />
               </button>
               <button className="ks-chip h-7 w-7" aria-label={`Remove ${t.name} tab`} onClick={() => { if (tab === t.id) setTab("all"); removeArchiveTab(t.id); }}>
                 <X size={12} />
-              </button>
+              </button></>}
             </span>
           ),
         )}
+      </div>
+      <div className="ks-archive-category-actions">
         {adding ? (
           <span className="flex items-center gap-1">
             <input
@@ -260,7 +263,7 @@ export function Archive() {
             </div>
             <div className="px-2 pb-2 text-xs">{a.original?<button className="ks-tool" onClick={()=>void downloadOriginal(a.original!).catch(e=>setUploadStatus(e instanceof Error?e.message:"Download failed."))}>Download original</button>:<span>Display copy only</span>}</div>
             {tabs.length > 0 && (
-              <div className="flex flex-wrap gap-1 px-2 pb-2">
+              <details className="ks-archive-photo-categories"><summary>Categories</summary><div className="flex flex-wrap gap-1 pt-2">
                 {tabs.map((t) => (
                   <button
                     key={t.id}
@@ -273,7 +276,7 @@ export function Archive() {
                     {t.name}
                   </button>
                 ))}
-              </div>
+              </div></details>
             )}
           </div>
         ))}

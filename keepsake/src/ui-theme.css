@@ -30,6 +30,11 @@
   min-height:44px;border-radius:var(--ks-ui-radius);letter-spacing:normal;
 }
 .ks-tool {background:var(--ks-ui-hover);color:var(--ks-ui-paper);box-shadow:none;border:1px solid var(--ks-ui-border)}
+.ks-archive-category-tabs{flex-wrap:wrap;overflow:visible;gap:8px}
+.ks-archive-category-tabs .ks-tool{background:#e9dfcc;color:#514936;border:1px solid #bcae9466;border-radius:8px 8px 3px 3px;padding:9px 15px;min-height:40px}
+.ks-archive-category-tabs .ks-tool[aria-selected="true"]{background:var(--ks-ui-panel);color:var(--ks-ui-paper);border-color:var(--ks-ui-panel)}
+.ks-archive-category-tabs .ks-chip{background:transparent;color:#514936;border:0;min-width:30px;min-height:36px;padding:6px}
+.ks-archive-category-actions .ks-tool{background:transparent;color:#514936;border:1px dashed #9b8b70;border-radius:6px;box-shadow:none}
 .ks-chip {background:var(--ks-ui-panel);color:var(--ks-ui-paper);border:1px solid var(--ks-ui-border);box-shadow:none}
 .ks-chip:hover {background:var(--ks-ui-hover);color:var(--ks-ui-paper)}
 :is(.ks-tool,.ks-room-controls button,.ks-room-controls summary):hover:not(:disabled) {background:var(--ks-ui-hover);color:var(--ks-ui-paper)}
@@ -118,3 +123,8 @@
  .ks-room-controls>button,.ks-room-controls summary {width:100%;min-width:0;white-space:normal;padding:8px 4px;min-height:44px}
  .ks-room-menu-panel {position:absolute;right:0;bottom:calc(100% + 8px);max-height:calc(100dvh - 210px - env(safe-area-inset-bottom,0px));max-width:100%;box-sizing:border-box}
 }
+
+/* Keep archive navigation quiet and the active category unmistakable. */
+.ks-archive-category-tabs .ks-tool[aria-selected="true"],
+.ks-archive-category-tabs .ks-tool[aria-selected="true"]:hover {background:var(--ks-ui-panel) !important;color:var(--ks-ui-paper) !important;border-color:var(--ks-ui-panel)}
+.ks-archive-category-tabs .ks-tool[aria-selected="false"]:hover {background:#ded1b9;color:#382f22}

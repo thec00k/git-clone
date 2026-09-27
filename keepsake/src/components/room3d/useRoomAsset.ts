@@ -14,12 +14,19 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
   const { cloned, materials } = useMemo(() => {
     const cloned = scene.clone(true);
     const materials: THREE.Material[] = [];
+    const staticMaterials = new Map<THREE.Material, THREE.Material>();
     cloned.traverse(obj => {
       if (!(obj instanceof THREE.Mesh)) return;
       obj.castShadow = true;
       obj.receiveShadow = true;
+      // Tiny trim receives light but does not need its own shadow-map pass.
+      if (activeRoom.study && obj.name.startsWith("Quality_")) obj.castShadow = false;
       const copy = (material: THREE.Material) => {
-        const local = material.clone(); materials.push(local); return local;
+        const share = activeRoom.study && obj.userData.quality_static_batch === true;
+        if (share && staticMaterials.has(material)) return staticMaterials.get(material)!;
+        const local = material.clone(); materials.push(local);
+        if (share) staticMaterials.set(material, local);
+        return local;
       };
       obj.material = Array.isArray(obj.material) ? obj.material.map(copy) : copy(obj.material);
       if (/Beachfront_Prop_(Fishbowl|Bowl_Rim|Bowl_Water|Waterline)|Beachfront_Casement_.*_Glass/.test(obj.name)) {
@@ -43,14 +50,14 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
       }
     });
     const shelf=cloned.getObjectByName('ks_shelf');
-    if(shelf) shelf.position.z += BOOKSHELF_WINDOW_SHIFT;
+    if(shelf&&!activeRoom.study) shelf.position.z += BOOKSHELF_WINDOW_SHIFT;
     const clock=cloned.getObjectByName('ks_clock');
-    if(clock) clock.position.x -= .06;
+    if(clock&&!activeRoom.study) clock.position.x -= .06;
     cloned.updateMatrixWorld(true);
     const beanbag=cloned.getObjectByName('Beanbag');
-    if(beanbag){const box=new THREE.Box3().setFromObject(beanbag);const delta=new THREE.Vector3(-2.38-box.min.x,0,2.005-box.max.z);beanbag.position.add(delta);}
+    if(beanbag&&!activeRoom.study){const box=new THREE.Box3().setFromObject(beanbag);const delta=new THREE.Vector3(-2.38-box.min.x,0,2.005-box.max.z);beanbag.position.add(delta);}
     return { cloned, materials };
-  }, [scene, activeRoom.id]);
+  }, [scene, activeRoom.id, activeRoom.study]);
   useEffect(() => () => materials.forEach(material => material.dispose()), [materials]);
   useEffect(() => {
     cloned.traverse(obj => {

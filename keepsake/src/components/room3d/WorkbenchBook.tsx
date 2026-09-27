@@ -9,6 +9,7 @@ import {useNav,NavContext} from '../../store/nav';
 import {useWorkbench,Context as WorkbenchContext} from '../../store/workbench';
 import {useReducedMotion} from '../../hooks/useReducedMotion';
 import {useLettering} from './MemoryObjects';
+import {useActiveRoom} from './useActiveRoom';
 import {COVER_STYLES} from '../../types/scrapbook';
 import {BookView} from '../BookView';
 const CardBinders=lazy(()=>import('../CardBinders').then(m=>({default:m.CardBinders})));
@@ -34,6 +35,7 @@ function EditorSurface({header,footer,children}:{header?:ReactNode;footer?:React
 
 export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
   const asset=use(loadBook());
+  const study=useActiveRoom().study===true;
   const {activeBook,state,renameBook,setBookCover,update}=useApp();
   const {viewAs,isVisitor}=useNav();
   const {phase,send,binderId}=useWorkbench();
@@ -51,9 +53,9 @@ export function WorkbenchBook({roomScene}:{roomScene:THREE.Object3D}) {
   useEffect(()=>()=>{if(chair){chair.object.position.copy(chair.position);chair.object.quaternion.copy(chair.rotation);}},[chair]);
   const {model,materials}=useMemo(()=>{
     const model=asset.scene.clone(true);const materials:THREE.Material[]=[];
-    model.traverse(o=>{if(o instanceof THREE.Mesh){o.castShadow=true;o.receiveShadow=true;const copy=(m:THREE.Material)=>{const next=m.clone();materials.push(next);return next;};o.material=Array.isArray(o.material)?o.material.map(copy):copy(o.material);}});
+    model.traverse(o=>{if(o instanceof THREE.Mesh){o.castShadow=true;o.receiveShadow=true;const copy=(m:THREE.Material)=>{const next=m.clone();if(study&&next instanceof THREE.MeshStandardMaterial&&next.name==='Book_Linen'){next.roughness=.94;next.normalScale.set(.24,.24);}materials.push(next);return next;};o.material=Array.isArray(o.material)?o.material.map(copy):copy(o.material);}});
     return {model,materials};
-  },[asset]);
+  },[asset,study]);
   useEffect(()=>()=>materials.forEach(m=>m.dispose()),[materials]);
   const visible=!!binder||activeBook&&canSee(activeBook.visibility,viewAs,state.profile.allowFriendScrapbooks===true);
   const palette=binder?{leather:binder.color,ink:'#f2e7cf'}:COVER_STYLES[activeBook?.coverStyle??'forest'];

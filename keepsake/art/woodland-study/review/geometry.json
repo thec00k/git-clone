@@ -1,0 +1,17 @@
+{
+  "bytes": 6456224,
+  "meshes": 229,
+  "triangles": 55516,
+  "checks": [
+    "Functional anchors",
+    "Camera manifest alignment",
+    "Square and triangular apertures",
+    "Roof closure",
+    "All authored camera corridors",
+    "Desk and sill clearance",
+    "Hearth clearance",
+    "Chair heading",
+    "Chimney ceiling and door clearance",
+    "Rounded log geometry"
+  ]
+}

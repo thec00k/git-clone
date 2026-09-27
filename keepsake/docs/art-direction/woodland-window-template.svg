@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3200" height="2400" viewBox="0 0 3200 2400">
+<title>Woodland 2.0 provisional Procreate registration guide</title><desc>3200 by 2400 canvas with central 2400 by 1800 composition area. Hide this guide before exporting artwork.</desc>
+<rect width="3200" height="2400" fill="#e9e3d6"/>
+<rect x="400" y="300" width="2400" height="1800" fill="#f7f2e7" stroke="#596953" stroke-width="8"/>
+<path d="M1600 300V2100 M400 1200H2800" stroke="#b7ae9e" stroke-width="3" stroke-dasharray="18 18"/>
+<path d="M400 1390H2800" stroke="#587b82" stroke-width="5" stroke-dasharray="24 14"/>
+<g fill="#34473d" font-family="Arial,sans-serif"><text x="150" y="150" font-size="64">WOODLAND / REGISTERED LAYER MASTER</text><text x="480" y="420" font-size="46">Provisional visible composition: 2400 × 1800</text><text x="480" y="1360" font-size="38">Suggested landscape horizon — adjust after camera proof</text><text x="150" y="2250" font-size="42">3200 × 2400 total · 400px side / 300px top-bottom overscan · paint beyond safe area</text><text x="150" y="2330" font-size="36">Hide guide on export. Do not bake the window frame or triangular aperture into artwork.</text></g>
+</svg>

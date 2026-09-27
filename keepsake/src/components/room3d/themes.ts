@@ -1,6 +1,7 @@
 import type { RoomFace } from "../../lib/roomLayout";
 type Point = [number, number, number];
 export interface RoomTheme {
+  study?: boolean;
   id: string; title: string; subtitle: string; asset: string; woodland: boolean;
   views: Record<RoomFace, { position: Point; target: Point }>;
   seated: { position: Point; target: Point };

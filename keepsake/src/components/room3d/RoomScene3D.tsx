@@ -1,3 +1,6 @@
+import type {WoodlandStudyView} from './woodlandStudy';
+import {WoodlandStudyExterior} from './WoodlandStudyExterior';
+import {WoodlandStudyControls} from './WoodlandStudyControls';
 import {useActiveRoom} from "./useActiveRoom";
 import {BeachfrontScenery} from "./BeachfrontScenery";
 import { RoomSound } from './RoomSound';
@@ -27,8 +30,8 @@ const CardBinders=lazy(()=>import('../CardBinders').then(m=>({default:m.CardBind
 export function RoomScene3D({
   roomFace,
   setRoomFace,
-  phase,
-  environment,
+  phase:basePhase,
+  environment:baseEnvironment,
   tourFocus,
   touring,
   onOpenWindow,
@@ -48,6 +51,12 @@ export function RoomScene3D({
   onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
 }) {
   const activeRoom=useActiveRoom();
+  const study=activeRoom.study===true;
+  const [studyView,setStudyView]=useState<WoodlandStudyView|null>('establishing');
+  const [studyPhase,setStudyPhase]=useState<Phase>('dusk');
+  const [winter,setWinter]=useState(false);
+  const phase=study?studyPhase:basePhase;
+  const environment=study?{...baseEnvironment,season:(winter?'winter':'autumn') as Environment['season']}:baseEnvironment;
   const {phase:workbenchPhase,openBinder}=useWorkbench();
   const atWorkbench=workbenchPhase!=='room';
   const quality=environment.roomQuality??"balanced";
@@ -58,7 +67,7 @@ export function RoomScene3D({
   const [displayCase,setDisplayCase]=useState(false);
   const [binderOpen,setBinderOpen]=useState(false);
   useEffect(()=>{if(roomFace!=="front" || touring)setReading(false);},[roomFace,touring]);
-  const lookAt = (face: RoomFace) => { setDisplayCase(false);setReading(false);setSeated(false);setShopOpen(false);setRoomFace(face); setViewRevision(v => v + 1); };
+  const lookAt = (face: RoomFace) => { setStudyView(null); setDisplayCase(false);setReading(false);setSeated(false);setShopOpen(false);setRoomFace(face); setViewRevision(v => v + 1); };
   const profile = useRoomRenderProfile(quality);
   const [seated, setSeated] = useState(false);
   useEffect(()=>{if(atWorkbench || touring || seated)setDisplayCase(false);},[atWorkbench,touring,seated]);
@@ -155,6 +164,9 @@ export function RoomScene3D({
     <div
       className="ks-room3d"
       data-room-face={roomFace}
+      data-study={study?'woodland':undefined}
+      data-study-view={study?studyView??'free':undefined}
+      data-study-season={study?(winter?'winter':'autumn'):undefined}
       data-workbench={workbenchPhase}
       data-seated={seated ? "1" : "0"}
       data-ceiling={environment.ceilingOn !== false ? "1" : "0"}
@@ -195,13 +207,15 @@ export function RoomScene3D({
             onToggleLamp={toggleLamp}
             onToggleCeiling={toggleCeiling}
           />
-        {activeRoom.woodland && <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />}
+        {activeRoom.woodland && !study && <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />}
+        {study&&<WoodlandStudyExterior winter={winter} phase={phase}/>}
         {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment} particles={profile.particles}/>}
         {activeRoom.id === "cyberpunk" && environment.weather !== "clear" && <OutdoorWeather kind={environment.weather} count={profile.particles} room="cyberpunk"/>}
         </Suspense>
-        <EyeCamera displayCase={displayCase} workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
+        <EyeCamera studyView={study?studyView:null} displayCase={displayCase} workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>
       </div>
+      {study&&!touring&&!atWorkbench&&<WoodlandStudyControls view={studyView} onView={v=>{setStudyView(v);setDisplayCase(false);setReading(false);setSeated(false);setShopOpen(false);setRoomFace('front');setViewRevision(n=>n+1);}} winter={winter} onWinter={setWinter} phase={studyPhase} onPhase={setStudyPhase}/>}
       <div id="ks-workbench-controls" className="ks-workbench-controls"/>
       {binderOpen&&!isVisitor&&<Suspense fallback={<p>Opening binders…</p>}><CardBinders onPick={id=>{setBinderOpen(false);openBinder(id);}} onClose={()=>setBinderOpen(false)}/></Suspense>}
       {!touring && !atWorkbench && <RoomControls onSettings={onOpenWindow} onCardBinders={()=>setBinderOpen(true)} onDisplayCase={()=>{setRoomFace('right');setSeated(false);setReading(false);setDisplayCase(true);setViewRevision(v=>v+1);}} onLibrary={()=>onGo("shelf")} onReading={()=>{setDisplayCase(false);setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment}

@@ -52,7 +52,8 @@ export function Room() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const [par, setPar] = useState({ x: 0, y: 0 });
   const layout = useMemo(() => roomLayoutFromSearch(), []);
-  const roomAsset = useActiveRoom().asset;
+  const activeRoom = useActiveRoom();
+  const roomAsset = activeRoom.asset;
   useEffect(() => {
     if (layout !== 'glb') return;
     // Start the selected room download while the 3D JavaScript is loading.
@@ -344,7 +345,7 @@ export function Room() {
           </button>
         )}
 
-        {!touring && <PhaseBadge phase={phase} />}
+        {!touring && !activeRoom.study && <PhaseBadge phase={phase} />}
       </main>
 
       <RoomCurator visible={layout !== "glb" && (layout === "flat" || roomFace === "front") && !touring} />
