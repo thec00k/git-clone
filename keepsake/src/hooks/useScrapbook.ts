@@ -1,4 +1,6 @@
 import { movePageSpread } from '../lib/spreads';
+import {placeWaitingPhoto} from '../lib/photoInbox';
+import {paperSettings,unitAmount,isStickerFinish,type PaperSettings,type StickerFinish} from '../lib/materials';
 import {isPaperStyle,type PaperStyle} from '../lib/stationery';
 import {insertPhotoBatch,type ImportPhoto} from '../lib/photoBatch';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -125,6 +127,15 @@ export function useScrapbook() {
   );
 
   const nextZ = (els: PageElement[]) => els.reduce((max, e) => Math.max(max, e.z), 0) + 1;
+  const setStickerFinish=useCallback((id:string,patch:{finish?:StickerFinish;finishStrength?:number})=>{
+    const loc=locate(id);if(loc?.element.type!=='sticker')return;
+    const clean={...(isStickerFinish(patch.finish)?{finish:patch.finish}:{}),...(patch.finishStrength===undefined?{}:{finishStrength:unitAmount(patch.finishStrength,.65)})};
+    remember(true);updateActiveBook(b=>({...b,pages:b.pages.map(p=>p.id===loc.pageId?{...p,elements:p.elements.map(e=>e.id===id?{...e,...clean}:e)}:p)}));
+  },[locate,remember,updateActiveBook]);
+  const setPaperMaterial=useCallback((pageId:string,settings:PaperSettings|undefined)=>{
+    if(!bookRef.current?.pages.some(p=>p.id===pageId))return;
+    remember(true);updateActiveBook(b=>({...b,pages:b.pages.map(p=>p.id===pageId?{...p,paper:settings?paperSettings(settings):undefined}:p)}));
+  },[remember,updateActiveBook]);
   const setPagePaper=useCallback((pageId:string,style:PaperStyle)=>{
     if(!isPaperStyle(style)||!bookRef.current?.pages.some(p=>p.id===pageId&&p.backgroundStyle!==style))return;
     remember(true);updateActiveBook(b=>({...b,pages:b.pages.map(p=>p.id===pageId?{...p,backgroundStyle:style}:p)}));
@@ -166,6 +177,16 @@ export function useScrapbook() {
     [pages, mutatePageElements],
   );
 
+  const placePendingPhoto=useCallback((pageId:string,photo:import('../types/app').ArchivePhoto)=>{
+    if(!bookRef.current)return;
+    const next=placeWaitingPhoto(bookRef.current,pageId,photo);
+    if(next===bookRef.current)return;
+    remember(true);updateActiveBook(b=>placeWaitingPhoto(b,pageId,photo));
+    setSelectedId(next.pages.find(p=>p.id===pageId)?.elements.at(-1)?.id??null);
+  },[remember,updateActiveBook]);
+  const returnPendingPhoto=useCallback((id:string)=>{
+    remember(true);updateActiveBook(b=>({...b,pendingPhotoIds:(b.pendingPhotoIds??[]).filter(p=>p!==id)}));
+  },[remember,updateActiveBook]);
   const addCaption = useCallback(
     (pageId: string) => {
       const page = pages.find((p) => p.id === pageId);
@@ -419,7 +440,11 @@ export function useScrapbook() {
     setActivePageId,
     updateElement,
     setPagePaper,
+    setPaperMaterial,
+    setStickerFinish,
     addPhoto,
+    placePendingPhoto,
+    returnPendingPhoto,
     addCaption,
     addSticker,
     addStroke,

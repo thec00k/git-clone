@@ -1,4 +1,7 @@
+import {WaitingPhotos} from "./WaitingPhotos";
 import {PhotoImportDialog} from './PhotoImportDialog';
+import '../photoStacks.css';
+import {PaperControls} from './MaterialControls';
 import {PAPER_STYLES,stickerLabel,type PaperStyle} from '../lib/stationery';
 import { MAX_PHOTOS_PER_PAGE } from '../types/scrapbook';
 import {StickerStore} from './StickerStore';
@@ -268,6 +271,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
                 onColor={(id, color) => sb.updateElement(id, { color })}
                 onReplace={handleReplace}
                 onDelete={sb.removeElement}
+                onFinish={sb.setStickerFinish}
               />
             )}
             {showPresets && (
@@ -326,6 +330,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
                 <summary>Pages <ChevronRight size={14} /></summary>
                 <div>
                   <label className="ks-paper-picker">Paper for selected page<select aria-label="Paper for selected page" disabled={!targetPageId||!!turn} value={sb.pages.find(p=>p.id===targetPageId)?.backgroundStyle??'plain'} onChange={e=>targetPageId&&sb.setPagePaper(targetPageId,e.target.value as PaperStyle)}>{Object.entries(PAPER_STYLES).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
+                  <PaperControls key={targetPageId} settings={sb.pages.find(p=>p.id===targetPageId)?.paper} disabled={!targetPageId||!!turn} onChange={settings=>targetPageId&&sb.setPaperMaterial(targetPageId,settings)}/>
                   <button className="ks-tool" onClick={sb.addSpread} disabled={!!turn}><Plus size={16} /> Add a spread</button>
                   <button className="ks-tool" onClick={sb.deleteCurrentSpread} disabled={sb.spreadCount <= 1 || !!turn}><Trash2 size={16} /> Delete this spread</button>
                   <p>Deleted a spread by mistake? Use Undo.</p>
@@ -348,6 +353,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
             if (!isVisitor) setShowPhotos(true);
           }}
         />)}
+        {!isVisitor&&overlay(<WaitingPhotos photos={(sb.book.pendingPhotoIds??[]).flatMap(id=>{const photo=state.archive.find(p=>p.id===id);return photo?[photo]:[];})} disabled={!!turn||!targetPageId||!!sb.pages.find(p=>p.id===targetPageId)?.titlePage||(sb.pages.find(p=>p.id===targetPageId)?.elements.filter(e=>e.type==='photo').length??0)>=MAX_PHOTOS_PER_PAGE} onPlace={photo=>{if(targetPageId)sb.placePendingPhoto(targetPageId,photo);}} onReturn={sb.returnPendingPhoto}/>)}
         <div className="ks-book-stage">
           <div className="ks-book-canvas">
           {overlay(<button
@@ -412,15 +418,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
         />
       )}
       </div>
-      {showPhotos && !isVisitor && overlay(<PhotoImportDialog onClose={()=>setShowPhotos(false)} onAdd={photos=>{
-        if(!targetPageId)return;
-        const target=sb.pages.find(page=>page.id===targetPageId);
-        if(!target)return;
-        const ready=photos.map(p=>({...p,photoId:p.photoId??addArchivePhoto(p.src,p.aspect,[],p.original)}));
-        if(ready.length===1 && target.elements.filter(e=>e.type==='photo').length<MAX_PHOTOS_PER_PAGE) sb.addPhoto(targetPageId,ready[0].src,ready[0].photoId);
-        else sb.addPhotoBatch(targetPageId,ready);
-        setShowPhotos(false);
-      }}/>) }
+      {showPhotos && !isVisitor && overlay(<PhotoImportDialog onClose={()=>setShowPhotos(false)}/>)}
       {showKeys && overlay(<ShortcutsHelp onClose={() => setShowKeys(false)} />)}
       {showPrint && sb.book && overlay(<PrintView book={sb.book} onClose={() => setShowPrint(false)} />)}
     </Frame>

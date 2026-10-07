@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import {queuePhotos,placeWaitingPhoto} from '../src/lib/photoInbox.ts';
+import {parseRoomBackup,serializeRoom} from '../src/lib/roomBackup.ts';
+const state={version:1,profile:{displayName:'Test'},books:[{id:'book',title:'Memories',subtitle:'',coverStyle:'forest',visibility:'private',createdAt:1,updatedAt:1,pages:[{id:'p1',elements:[]}]}],activeBookId:'book',archive:[{id:'photo',src:'/samples/test.jpg',aspect:1,createdAt:1,categories:[],favorite:false}],archiveTabs:[],pins:[],guestbook:[],notes:[],pinNotes:[],achievements:[],achievementsSeen:[],ownedStickerPacks:['everyday'],stamps:12,achievementsAt:{},receipts:{},progress:{visitedAtNight:false,previewedAsVisitor:false,completedTour:false},environment:{timeMode:'day',season:'autumn',weather:'clear',musicProvider:'ambient',lampOn:true,ceilingOn:true,shelfLit:true,musicOn:false,pinsLocked:false,volume:.5,ambienceVolume:.4,roomQuality:'high'}};
+const book=state.books[0],photo=state.archive[0];
+assert.ok(book&&photo);
+const queued=queuePhotos(book,[photo.id,photo.id]);
+assert.deepEqual(queued.pendingPhotoIds,[photo.id]);
+assert.deepEqual(queued.pages,book.pages);
+assert.equal(book.pendingPhotoIds,undefined);
+const page={id:'inbox-test',elements:[]};
+const ready={...queued,pages:[page]};
+const placed=placeWaitingPhoto(ready,page.id,photo);
+assert.deepEqual(placed.pendingPhotoIds,[]);
+assert.equal(placed.pages[0].elements[0].photoId,photo.id);
+assert.equal(placed.pages[0].elements[0].src,photo.src);
+assert.equal(placeWaitingPhoto(placed,page.id,photo),placed);
+assert.equal(placeWaitingPhoto(ready,'missing',photo),ready);
+const title={...ready,pages:[{...page,titlePage:true}]};
+assert.equal(placeWaitingPhoto(title,page.id,photo),title);
+const full={...ready,pages:[{...page,elements:Array(6).fill(placed.pages[0].elements[0])}]};
+assert.equal(placeWaitingPhoto(full,page.id,photo),full);
+const saved={...state,books:state.books.map(b=>b.id===book.id?queued:b)};
+assert.deepEqual(parseRoomBackup(serializeRoom(saved)).books[0].pendingPhotoIds,[photo.id]);
+const corrupt={...saved,books:[{...queued,pendingPhotoIds:['missing']}]};
+assert.throws(()=>parseRoomBackup(serializeRoom(corrupt)));
+assert.deepEqual(ready.pendingPhotoIds,[photo.id]); // undo snapshot retains the waiting pile
+console.log('Photo inbox: queue deduplication, placement, page limits, snapshots and backup persistence passed.');

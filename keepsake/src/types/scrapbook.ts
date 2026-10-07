@@ -49,6 +49,8 @@ export interface StickerElement extends BaseElement {
   type: "sticker";
   /** emoji glyph or SVG sticker id */
   glyph: string;
+  finish?: import('../lib/materials').StickerFinish;
+  finishStrength?: number;
 }
 
 /** Marker ink on the page. Points are percentages of the page. */
@@ -73,10 +75,13 @@ export interface Page {
   id: string;
   titlePage?: boolean;
   backgroundStyle?: string;
+  paper?: import('../lib/materials').PaperSettings;
   elements: PageElement[];
 }
 
 export interface Scrapbook {
+  /** Archive references waiting beside this book, not yet placed on a page. */
+  pendingPhotoIds?: string[];
   memoryLinks?: string[];
   memoryMood?: import('../lib/memoryAtmosphere').MemoryMood;
   id: string;

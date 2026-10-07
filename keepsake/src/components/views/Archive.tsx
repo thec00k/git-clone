@@ -1,3 +1,4 @@
+import {BatchPhotoReview} from "../BatchPhotoReview";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookPlus, Check, Heart, Lock, Pencil, Plus, Search, Upload, X } from "lucide-react";
 import { useApp } from "../../store/appStore";
@@ -36,6 +37,7 @@ export function Archive() {
   const [draftName, setDraftName] = useState("");
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
+  const [reviewIds,setReviewIds]=useState<string[]>([]);
   const [uploadStatus,setUploadStatus]=useState('');
   const [uploading,setUploading]=useState(false);
   const stopUpload=useRef(false);
@@ -63,19 +65,19 @@ export function Archive() {
   async function upload(files: FileList | null) {
     if (!files || uploading) return;
     const list=Array.from(files),cats=tab !== 'all' && tab !== 'favorites' ? [tab] : [];
-    setUploading(true);stopUpload.current=false;let count=0,failed=0;
+    setUploading(true);stopUpload.current=false;let count=0,failed=0;const imported:string[]=[];
     try{
       await checkImportCapacity(list);
       for (const file of list) {
         if(stopUpload.current)break;
         let photo;try{photo=await loadImageFile(file,state.profile.preserveOriginals!==false);}catch{failed++;continue;}
         if(stopUpload.current)break;
-        await checkStorageCapacity(photo.src.length);addArchivePhoto(photo.src,photo.aspect,cats,photo.original);count++;
+        await checkStorageCapacity(photo.src.length);imported.push(addArchivePhoto(photo.src,photo.aspect,cats,photo.original));count++;
         setUploadStatus(`Imported ${count} of ${list.length}…`);
       }
       setUploadStatus(`${count} imported; ${failed} unreadable. ${stopUpload.current?'Import stopped.':''}`);
     }catch(error){setUploadStatus(`${count} imported. ${error instanceof Error?error.message:'Import failed.'}`);}
-    setUploading(false);
+    setUploading(false);if(imported.length)setReviewIds(imported);
   }
 
   function placeInBook(src: string, photoId: string) {
@@ -151,6 +153,7 @@ export function Archive() {
         </>
       }
     >
+      {!!reviewIds.length&&<BatchPhotoReview photoIds={reviewIds} notice={uploadStatus} onClose={()=>setReviewIds([])}/>}
       <input ref={inputRef} type="file" accept="image/*" multiple hidden aria-label="Upload photographs" onChange={(e) => { upload(e.target.files); e.target.value = ""; }} />
 
       <div className="mt-3 flex items-center gap-2 rounded-full bg-black/25 px-3 py-1.5">

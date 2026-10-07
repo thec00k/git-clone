@@ -6,6 +6,8 @@ import { clamp } from "../lib/clamp";
 import {pagePixelPoint} from '../lib/pageCoordinates';
 import { usePointerDrag } from "../hooks/usePointerDrag";
 import { useElementGesture } from "../hooks/useElementGesture";
+import {StickerSurface} from './StickerSurface';
+import {useReducedMotion} from '../hooks/useReducedMotion';
 
 interface Props {
   element: PageElement;
@@ -100,9 +102,15 @@ function TransformableElement({
     (patch) => onTransform(element.id, patch),
   );
 
+  const reduced=useReducedMotion();
+  const [light,setLight]=useState({x:.35,y:.25});
+  const held=useRef(new Set<number>());
+  const [lifted,setLifted]=useState(false);
+  const release=(e:ReactPointerEvent<HTMLElement>)=>{held.current.delete(e.pointerId);setLifted(held.current.size>0);gesture.onPointerUp(e);};
   const onDown = (e: ReactPointerEvent<HTMLElement>) => {
     e.stopPropagation();
     onSelect(element.id);
+    if(!(e.target as HTMLElement).closest('[data-no-drag]')){held.current.add(e.pointerId);setLifted(true);}
     gesture.onPointerDown(e);
   };
 
@@ -111,9 +119,12 @@ function TransformableElement({
       className="ks-el"
       style={positionStyle}
       onPointerDown={onDown}
-      onPointerMove={gesture.onPointerMove}
-      onPointerUp={gesture.onPointerUp}
-      onPointerCancel={gesture.onPointerCancel}
+      onPointerMove={e=>{gesture.onPointerMove(e);if(element.type==='sticker'&&!reduced){const r=e.currentTarget.getBoundingClientRect();setLight({x:clamp((e.clientX-r.left)/r.width,0,1),y:clamp((e.clientY-r.top)/r.height,0,1)});}}}
+      onPointerLeave={()=>{if(!lifted)setLight({x:.35,y:.25});}}
+      onPointerUp={release}
+      onPointerCancel={release}
+      onLostPointerCapture={e=>{held.current.delete(e.pointerId);setLifted(held.current.size>0);}}
+      onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect(element.id);}}}
       role="button"
       tabIndex={0}
       aria-label={element.type === "photo" ? "Photograph" : "Sticker"}
@@ -122,15 +133,15 @@ function TransformableElement({
         <PhotoInner element={element} />
       ) : (
         <div
+          className="ks-sticker-lift"
+          data-lifted={lifted&&!reduced}
           style={{
-            fontSize: `${element.w}cqw`,
             lineHeight: 1,
             textAlign: "center",
             userSelect: "none",
-            filter: "drop-shadow(0 4px 6px rgb(20 14 10 / 0.35))",
           }}
         >
-          <KeepsakeGlyph glyph={element.glyph}/>
+          <StickerSurface glyph={element.glyph} finish={element.finish} strength={element.finishStrength} light={light}/>
         </div>
       )}
 
@@ -413,4 +424,3 @@ function CaptionView({
     </div>
   );
 }
-import {KeepsakeGlyph} from './KeepsakeGlyph';

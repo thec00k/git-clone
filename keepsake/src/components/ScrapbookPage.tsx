@@ -1,4 +1,5 @@
 import {InkGlints} from './InkGlints';
+import {PaperSurface} from './PaperSurface';
 import {PaperDecoration} from './StationeryArt';
 import { useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
@@ -64,6 +65,7 @@ export function ScrapbookPage({
         onDeselect();
       }}
     >
+      <PaperSurface settings={page.paper}/>
       <PaperDecoration style={page.backgroundStyle}/>
       {page.titlePage && (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-[8%] text-center">

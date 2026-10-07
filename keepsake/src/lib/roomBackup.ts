@@ -1,4 +1,5 @@
 import {ownsRoomTheme} from './roomThemes.ts';
+import {isStickerFinish,validPaperSettings} from './materials.ts';
 import {BINDER_COLORS,MAX_BINDER_CARDS,validateCardGlb} from './cardBinders.ts';
 import {withOriginalFiles} from './originalPhotos.ts';
 import {MEMORY_MOODS} from './memoryAtmosphere.ts';
@@ -40,7 +41,7 @@ export function parseRoomBackup(text:string):AppState{
   if(!string(e.id)||!['x','y','w','rotation','z'].every(k=>number(e[k])))return false;
   if(e.type==='photo')return image(e.src)&&['polaroid','tape','flush'].includes(e.frame as string)&&(e.cropAspect===undefined||(number(e.cropAspect)&&(e.cropAspect as number)>0&&(e.cropAspect as number)<=5));
   if(e.type==='caption')return string(e.text)&&number(e.fontSize)&&string(e.color);
-  if(e.type==='sticker')return string(e.glyph);
+  if(e.type==='sticker')return string(e.glyph)&&(e.finish===undefined||isStickerFinish(e.finish))&&(e.finishStrength===undefined||number(e.finishStrength)&&(e.finishStrength as number)>=0&&(e.finishStrength as number)<=1);
   return e.type==='stroke'&&string(e.color)&&number(e.width)&&records(e.points,p=>number(p.x)&&number(p.y));
  }))));
  const books=s.books as AppState['books'];const ids=books.map(b=>b.id);ensure(new Set(ids).size===ids.length);
@@ -50,9 +51,11 @@ export function parseRoomBackup(text:string):AppState{
  ensure(s.profile.lastFoundPhotosAt===undefined||number(s.profile.lastFoundPhotosAt));
  ensure(s.profile.preserveOriginals===undefined||typeof s.profile.preserveOriginals==='boolean');
  ensure(books.every(b=>b.pages.every(p=>p.backgroundStyle===undefined||isPaperStyle(p.backgroundStyle))));
+ ensure(books.every(b=>b.pages.every(p=>p.paper===undefined||validPaperSettings(p.paper))));
  const pageIds=books.flatMap(b=>b.pages.map(p=>p.id));ensure(new Set(pageIds).size===pageIds.length);
  ensure(s.activeBookId===null || ids.includes(s.activeBookId as string));
  ensure(records(s.archive,a=>string(a.id)&&image(a.src)&&number(a.aspect)&&(a.aspect as number)>0&&number(a.createdAt)&&strings(a.categories)&&typeof a.favorite==='boolean'));
+ ensure(books.every(b=>b.pendingPhotoIds===undefined||strings(b.pendingPhotoIds)&&new Set(b.pendingPhotoIds).size===b.pendingPhotoIds.length&&b.pendingPhotoIds.every(id=>(s.archive as {id:string}[]).some(p=>p.id===id))));
  ensure(s.originalFiles===undefined||object(s.originalFiles));
  ensure((s.archive as RecordValue[]).every(p=>p.ticket===undefined||object(p.ticket)&&['event','venue','date','style'].every(k=>string((p.ticket as RecordValue)[k]))&&p.ticket.provenance==='commemorative-template'));
  ensure((s.archive as RecordValue[]).every(p=>p.activity===undefined||object(p.activity)&&(p.activity.lastMeaningfulAt===undefined||number(p.activity.lastMeaningfulAt))&&(p.activity.dismissed===undefined||typeof p.activity.dismissed==='boolean')));

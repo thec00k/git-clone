@@ -6,9 +6,26 @@ A calm digital scrapbook in a handcrafted 3D room. React/TypeScript/Vite applica
 
 Woodland Writing Room is the playable local prototype. It includes a scrapbook editor, interactive shelf books, photo archive and printer, visible memory map, guestbook/discoveries, day/night and weather, CRT music, and a drawer shop.
 
-Start with the [current project checklist](docs/project-status.md) for verified work, remaining acceptance checks and the ordered roadmap. [Prototype implementation notes](docs/woodland-prototype.md) contain historical detail; [asset provenance](art/woodland/asset-ledger.json) tracks room sources.
+For a clean handoff, start with [current handoff status](docs/handoff-current.md), then use this index to find the product direction and implementation records. The [September project checklist](docs/project-status.md) is a dated acceptance snapshot, not the latest branch/room status. [Prototype notes](docs/woodland-prototype.md) retain historical implementation details; [asset provenance](art/woodland/asset-ledger.json) tracks room sources.
 
-The original pitch and design-bible PDFs are not included here. Older worklog/suggestion PDFs are historical, not the current implementation contract.
+## Handoff reading order
+
+1. [Current handoff status and branch map](docs/handoff-current.md) — what is on this branch, what remains on separate room branches, and how to continue without overwriting work.
+2. [New Art Direction and Room Production Bible](docs/Keepsake_New_Art_Direction_and_Room_Production_Bible.pdf) — the approved **Illustrated Nostalgia** direction and production contract. This supersedes conflicting earlier visual proposals.
+3. [Updated Bible v4](docs/Keepsake_Updated_Bible_v4.pdf) and [decisions that resolve v4 proposals](docs/v4-decisions.md) — product goals and later owner choices.
+4. [Art direction package](docs/art-direction/README.md) — Figma direction matrix, Woodland camera/composition study, framework audit, production phases, and proof results.
+5. [Current project status snapshot](docs/project-status.md) — detailed acceptance inventory, dated September 9, 2026; verify claims against the current branch before treating them as current.
+
+### Current implementation records
+
+- [Batch photo review and scrapbook waiting stack](docs/photo-review-stack.md) — swipeable upload review, archive-backed photo references, saved per-book waiting pile, placement and undo.
+- [Paper material studies](art/paper-studies/README.md) and [interactive comparison page](material-study.html) — source renders, included paper textures, shader settings and page/sticker previews.
+- [Blender asset workflow](docs/blender-asset-workflow.md), [woodland room notes](docs/woodland-prototype.md), [Beachfront notes](docs/beachfront-prototype.md), and [room performance review](docs/three-room-quality-pass.md).
+- [UI design system](docs/ui-design-system.md), [artifact and card binders](docs/artifacts-and-card-binders.md), [furniture checks](docs/furniture-quality-checks.md), [time-capsule implementation](docs/time-capsule-chest.md), and [remaining polish direction](docs/next-polish-direction.md).
+
+### Historical records
+
+[Figma and display-case summary](docs/Keepsake_Figma_and_Artifact_Display_Case_Summary.pdf), [worklog](docs/keepsake-worklog.pdf), and [suggestions](docs/keepsake-suggestions.pdf) preserve earlier context. Consult the newer art-direction Bible and current handoff record first.
 
 ## Run and check
 

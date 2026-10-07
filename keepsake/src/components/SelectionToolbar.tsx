@@ -1,4 +1,6 @@
 import { useRef } from "react";
+import {StickerFinishControls} from './MaterialControls';
+import type {StickerFinish} from '../lib/materials';
 import {
   ArrowDownToLine,
   ArrowUpToLine,
@@ -24,6 +26,7 @@ interface Props {
   onColor: (id: string, color: string) => void;
   onReplace: (id: string, file: File) => void;
   onDelete: (id: string) => void;
+  onFinish: (id:string,patch:{finish?:StickerFinish;finishStrength?:number})=>void;
 }
 
 export function SelectionToolbar({
@@ -37,6 +40,7 @@ export function SelectionToolbar({
   onColor,
   onReplace,
   onDelete,
+  onFinish,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { element } = selected;
@@ -57,16 +61,16 @@ export function SelectionToolbar({
       </button>
       <button
         className="ks-chip"
-        aria-label={isPhoto ? "Smaller" : "Narrower text box"}
-        title={isPhoto ? "Smaller" : "Narrower text box"}
+        aria-label={element.type !== "caption" ? "Smaller" : "Narrower text box"}
+        title={element.type !== "caption" ? "Smaller" : "Narrower text box"}
         onClick={() => onScale(id, 1 / 1.12)}
       >
         <Minus size={16} />
       </button>
       <button
         className="ks-chip"
-        aria-label={isPhoto ? "Bigger" : "Wider text box"}
-        title={isPhoto ? "Bigger" : "Wider text box"}
+        aria-label={element.type !== "caption" ? "Bigger" : "Wider text box"}
+        title={element.type !== "caption" ? "Bigger" : "Wider text box"}
         onClick={() => onScale(id, 1.12)}
       >
         <Plus size={16} />
@@ -76,6 +80,8 @@ export function SelectionToolbar({
       </button>
 
       <span className="mx-0.5 h-6 w-px bg-paper/15" />
+
+      {element.type==='sticker'&&<StickerFinishControls glyph={element.glyph} finish={element.finish} strength={element.finishStrength} onChange={patch=>onFinish(id,patch)}/>}
 
       <button className="ks-chip" aria-label="Bring forward" title="Bring forward" onClick={() => onForward(id)}>
         <ArrowUpToLine size={16} />
