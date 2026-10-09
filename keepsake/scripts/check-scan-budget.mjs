@@ -2,8 +2,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {GLB_BUDGET, imageSize, inspectGlb} from '../src/lib/glbBudget.ts';
 import {validateCardGlb} from '../src/lib/cardBinders.ts';
-import {PNG_1X1, buildGlb, jpegWithSize, pngWithSize, toArrayBuffer} from './glb-fixtures.mjs';
+import {PNG_1X1, buildGlb, jpegWithSize, pngWithSize, scannerGlb, toArrayBuffer} from './glb-fixtures.mjs';
 
+function swiftTriangleBudget() {
+  const swift = readFileSync(new URL('../KeepsakeScanner/LowPolyMesh.swift', import.meta.url), 'utf8');
+  return Number((/triangleBudget\s*=\s*([\d_]+)/.exec(swift) ?? [])[1]?.replaceAll('_', ''));
+}
 const check = (options) => inspectGlb(toArrayBuffer(buildGlb(options)));
 const rejects = (options, pattern, label) => assert.throws(() => check(options), pattern, label);
 const png = (width, height) => ({mimeType: 'image/png', bytes: pngWithSize(width, height)});
@@ -36,6 +40,31 @@ rejects({images: Array.from({length: 5}, () => png(8, 8))}, /four textures/, 'im
 rejects({images: [png(8, 8)], edit: (json) => ({...json, bufferViews: json.bufferViews.map((view, index) => (index === 1 ? {...view, byteLength: 1_000_000} : view))})}, /could not be read/, 'out-of-range texture');
 rejects({images: [png(8, 8)], edit: (json) => ({...json, images: [{...json.images[0], mimeType: undefined}]})}, /could not be read/, 'missing mime type');
 
+// Vertex colours, as Keepsake Scanner writes them, and the variants glTF allows.
+assert.equal(check({colors: true}).vertexColors, true);
+assert.equal(check().vertexColors, false);
+const recolor = (change) => ({colors: true, edit: (json) => ({...json, accessors: json.accessors.map((accessor, index) => (index === 1 ? {...accessor, ...change} : accessor))})});
+assert.equal(check(recolor({componentType: 5121})).vertexColors, true, '8-bit normalized colours');
+assert.equal(check(recolor({componentType: 5126, normalized: undefined, type: 'VEC3'})).vertexColors, true, 'float RGB colours');
+rejects(recolor({count: 2}), /colours are invalid/, 'one colour per vertex');
+rejects(recolor({normalized: false}), /colours are invalid/, 'integer colours must be normalized');
+rejects(recolor({type: 'SCALAR'}), /colours are invalid/, 'colour type');
+rejects(recolor({componentType: 5125}), /colours are invalid/, 'colour component type');
+rejects(recolor({bufferView: undefined}), /colours are invalid/, 'colours must be stored in a buffer view');
+rejects(recolor({bufferView: 99}), /colours are invalid/, 'colour buffer view must exist');
+rejects(recolor({sparse: {count: 1}}), /colours are invalid/, 'sparse colours');
+rejects({colors: true, edit: (json) => ({...json, meshes: [{primitives: [{attributes: {POSITION: 0, COLOR_0: 1.5}}]}]})}, /colours are invalid/, 'colour index must be an integer');
+rejects({edit: (json) => ({...json, meshes: [{primitives: [{attributes: {POSITION: 0, COLOR_0: 9}}]}]})}, /colours are invalid/, 'missing colour accessor');
+assert.equal(validateCardGlb(toArrayBuffer(buildGlb(recolor({count: 2}))), false).asset.version, '2.0', 'restore does not re-check colours');
+
+// What Keepsake Scanner exports. Worst case for size: the scanner's 45,000-triangle budget
+// with no shared vertices still fits under 5 MB with colours, as one part and one material.
+const scannerOutput = inspectGlb(toArrayBuffer(scannerGlb()));
+assert.deepEqual([scannerOutput.vertexColors, scannerOutput.primitives, scannerOutput.materials, scannerOutput.images.length], [true, 1, 1, 0]);
+const worstCase = scannerGlb({triangles: swiftTriangleBudget()});
+assert.ok(worstCase.length < GLB_BUDGET.maxBytes, `worst-case coloured scan is ${worstCase.length} bytes`);
+assert.equal(inspectGlb(toArrayBuffer(worstCase)).triangles, swiftTriangleBudget());
+
 // Draw-call style limits.
 assert.equal(check({primitives: GLB_BUDGET.maxPrimitives}).primitives, 16);
 rejects({primitives: GLB_BUDGET.maxPrimitives + 1}, /16 mesh parts/, 'too many primitives');
@@ -56,8 +85,7 @@ const remote = buildGlb({edit: (json) => ({...json, images: [{uri: 'https://exam
 assert.throws(() => validateCardGlb(toArrayBuffer(remote), false), /embedded textures/, 'restore still refuses network references');
 
 // The Swift scanner cannot import the budget, so make sure its constant does not drift past it.
-const swift = readFileSync(new URL('../KeepsakeScanner/LowPolyMesh.swift', import.meta.url), 'utf8');
-const swiftBudget = Number((/triangleBudget\s*=\s*([\d_]+)/.exec(swift) ?? [])[1]?.replaceAll('_', ''));
+const swiftBudget = swiftTriangleBudget();
 assert.ok(swiftBudget > 0 && swiftBudget <= GLB_BUDGET.maxTriangles, `scanner triangleBudget (${swiftBudget}) must be set and no larger than ${GLB_BUDGET.maxTriangles}`);
 
-console.log('PASS scan budget: texture size/memory, parts, materials and format limits; backup restore stays lenient; scanner triangle budget within limit.');
+console.log('PASS scan budget: texture size/memory, parts, materials, format and vertex-colour limits; scanner output layout and worst-case size; backup restore stays lenient.');

@@ -3,13 +3,14 @@ import {Canvas} from '@react-three/fiber';
 import {Bounds,OrbitControls} from '@react-three/drei';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
+import {matteDefaultMaterial} from '../lib/scanDisplay';
 
 export function BinderScan({src}:{src:string}) {
  const [scene,setScene]=useState<THREE.Group|null>(null),[error,setError]=useState('');
  useEffect(()=>{
   let active=true;let asset:THREE.Group|undefined;setScene(null);setError('');
   const dispose=(root:THREE.Group)=>root.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material]){for(const value of Object.values(m))if(value instanceof THREE.Texture)value.dispose();m.dispose();}}});
-  new GLTFLoader().load(src,g=>{asset=g.scene;if(active)setScene(asset);else dispose(asset);},undefined,()=>{if(active)setError('This scan could not be displayed. Try a new GLB export.');});
+  new GLTFLoader().load(src,g=>{asset=g.scene;matteDefaultMaterial(asset,!!g.parser.json.materials?.length);if(active)setScene(asset);else dispose(asset);},undefined,()=>{if(active)setError('This scan could not be displayed. Try a new GLB export.');});
   return()=>{active=false;if(asset)dispose(asset);};
  },[src]);
  if(error)return <p role="alert">{error}</p>;

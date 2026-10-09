@@ -26,7 +26,7 @@ Device imports accept up to 20 pictures per batch and 180 cards per binder. Impo
 
 Already reconstructed card scans can be imported as embedded GLB files (5 MB, 50,000 triangles, 200 nodes, four textures, nine scans per binder). Required compressed extensions and external asset URLs are rejected. Models render only in the inspection viewer, with drag orbit and zoom, not as eighteen simultaneous 3D canvases. Imports do not prove the file came from a physical scan; `imported-scan` records the chosen import route. New imports are also limited to 16 mesh parts, 8 materials and PNG/JPEG textures of at most 2048 px per side (about four million pixels in total); backup restore keeps the older rules so saved scans still restore. See [scanner budget and privacy](scanner-budget-and-privacy.md).
 
-Photograph a card invokes the device's image capture/file chooser. This is not photogrammetry. Phone-to-3D reconstruction is explicitly unavailable until a provider and storage pipeline are connected. Scans are saved locally and in backups, with no upload to a generation service.
+Photograph a card invokes the device's image capture/file chooser. This is not photogrammetry. Photo-based reconstruction (for phones without LiDAR) is unavailable; LiDAR phones use Keepsake Scanner, which makes the model on the phone and sends it encrypted to the user's own computer (see [scanner work record](scanner-opus-handoff.md)). Scans are saved locally and in backups, with no upload to a generation service.
 
 ## Verification
 

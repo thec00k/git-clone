@@ -2,7 +2,11 @@ import Foundation
 import ARKit
 import simd
 
-struct LowPolyMesh { var positions: [SIMD3<Float>]; var indices: [UInt32] }
+struct LowPolyMesh {
+    var positions: [SIMD3<Float>]; var indices: [UInt32]
+    /// The grid actually used. Vertices sit up to about 0.87 x this from the true surface.
+    var voxelSize: Float = 0
+}
 
 extension LowPolyMesh {
     /// Keepsake's importer rejects meshes over `GLB_BUDGET.maxTriangles` (50,000, in
@@ -35,7 +39,11 @@ extension LowPolyMesh {
                     indices = [Int(raw[0]), Int(raw[1]), Int(raw[2])]
                 }
                 guard indices.allSatisfy({ $0 >= 0 && $0 < vertices.count }) else { continue }
-                corners.append(contentsOf: [point(indices[0]), point(indices[1]), point(indices[2])])
+                let triangle = [point(indices[0]), point(indices[1]), point(indices[2])]
+                // A non-finite point would poison the bounds and make JSONSerialization throw an
+                // Objective-C exception that Swift cannot catch.
+                guard triangle.allSatisfy({ $0.x.isFinite && $0.y.isFinite && $0.z.isFinite }) else { continue }
+                corners.append(contentsOf: triangle)
             }
         }
         guard !corners.isEmpty else { throw ScannerError.noGeometry }
@@ -77,17 +85,17 @@ extension LowPolyMesh {
             if let new = remap[old] { return new }
             let new = UInt32(compacted.count); remap[old] = new; compacted.append(points[Int(old)]); return new
         }
-        return LowPolyMesh(positions: compacted, indices: compactIndices)
+        return LowPolyMesh(positions: compacted, indices: compactIndices, voxelSize: voxelSize)
     }
 }
 
 enum ScannerError: LocalizedError {
-    case noGeometry, tooComplex
+    case noGeometry, tooComplex, tooLarge
     var errorDescription: String? {
         switch self {
         case .noGeometry: "Not enough LiDAR geometry was captured. Try a larger, matte object with more light."
         case .tooComplex: "This scan has too much detail to keep small. Try Light detail or scan less of the surroundings."
+        case .tooLarge: "This scan is larger than Keepsake allows (5 MB). Try Light detail."
         }
     }
 }
-private extension simd_float4 { var xyz: SIMD3<Float> { SIMD3(x, y, z) } }

@@ -1,5 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {Html, useGLTF} from '@react-three/drei';
+import {matteDefaultMaterial} from '../../lib/scanDisplay';
 import {useFrame} from '@react-three/fiber';
 import type {ThreeEvent} from '@react-three/fiber';
 import * as THREE from 'three';
@@ -64,7 +65,7 @@ export function ArtifactDisplayCase() {
     {on && [.60,1.08,1.58,2.04].map(y => <rectAreaLight key={y} color={tint} intensity={3.5} width={.65} height={.18} position={[0,y-.018,.04]} rotation={[-Math.PI/2,0,0]}/>)}
   </group>;
 }
-function DisplayScan({src,selected,onSelect,onDragStart,onDragEnd}:{src:string;selected:boolean;onSelect:()=>void;onDragStart:()=>void;onDragEnd:()=>void}) {const {scene}=useGLTF(src);const copy=useMemo(()=>{const root=scene.clone(true);root.traverse(o=>{if(o instanceof THREE.Mesh)o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();});return root;},[scene]);useEffect(()=>{copy.traverse(o=>{if(o instanceof THREE.Mesh)for(const m of Array.isArray(o.material)?o.material:[o.material])if(m instanceof THREE.MeshStandardMaterial){m.emissive.set(selected?'#e4c447':'#000');m.emissiveIntensity=selected?.55:0;}});},[copy,selected]);return <primitive object={copy} scale={.11} onPointerDown={(e:ThreeEvent<PointerEvent>)=>{e.stopPropagation();onSelect();onDragStart();}} onPointerUp={(e:ThreeEvent<PointerEvent>)=>{e.stopPropagation();onDragEnd();}}/>;}
+function DisplayScan({src,selected,onSelect,onDragStart,onDragEnd}:{src:string;selected:boolean;onSelect:()=>void;onDragStart:()=>void;onDragEnd:()=>void}) {const gltf=useGLTF(src);const scene=gltf.scene;const hasMaterials=!!gltf.parser.json.materials?.length;const copy=useMemo(()=>{const root=scene.clone(true);root.traverse(o=>{if(o instanceof THREE.Mesh)o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();});matteDefaultMaterial(root,hasMaterials);return root;},[scene,hasMaterials]);useEffect(()=>{copy.traverse(o=>{if(o instanceof THREE.Mesh)for(const m of Array.isArray(o.material)?o.material:[o.material])if(m instanceof THREE.MeshStandardMaterial){m.emissive.set(selected?'#e4c447':'#000');m.emissiveIntensity=selected?.55:0;}});},[copy,selected]);return <primitive object={copy} scale={.11} onPointerDown={(e:ThreeEvent<PointerEvent>)=>{e.stopPropagation();onSelect();onDragStart();}} onPointerUp={(e:ThreeEvent<PointerEvent>)=>{e.stopPropagation();onDragEnd();}}/>;}
 
 function DisplayCaseDoors({scene,open}:{scene:THREE.Object3D;open:boolean}) {
  const reduced=useReducedMotion();

@@ -24,13 +24,13 @@ export const GLB_BUDGET = {
 
 export interface GltfJson {
   asset?: {version?: string};
-  meshes?: {primitives?: {attributes?: {POSITION?: number}; indices?: number; mode?: number}[]}[];
+  meshes?: {primitives?: {attributes?: {POSITION?: number; COLOR_0?: number}; indices?: number; mode?: number}[]}[];
   nodes?: {children?: number[]}[];
   materials?: unknown[];
   images?: {uri?: string; bufferView?: number; mimeType?: string}[];
   buffers?: {uri?: string}[];
   bufferViews?: {byteOffset?: number; byteLength?: number}[];
-  accessors?: {count?: number}[];
+  accessors?: {count?: number; type?: string; componentType?: number; normalized?: boolean; bufferView?: number; sparse?: unknown}[];
   extensionsRequired?: string[];
 }
 
@@ -41,10 +41,26 @@ export interface GlbReport {
   materials: number;
   images: {mimeType: string; width: number; height: number}[];
   texturePixels: number;
+  /** True when every primitive carries vertex colours (COLOR_0). */
+  vertexColors: boolean;
   json: GltfJson;
 }
 
 const BIN_CHUNK = 0x004e4942;
+
+/**
+ * glTF vertex colours: one per position, RGB or RGBA, as floats or as normalized
+ * 8/16-bit integers. Keepsake Scanner writes normalized 16-bit RGBA in linear colour.
+ */
+function validVertexColors(json: GltfJson, positionIndex: number | undefined, colorIndex: number): boolean {
+  if (!Number.isInteger(colorIndex)) return false;
+  const colors = json.accessors?.[colorIndex], positions = positionIndex === undefined ? undefined : json.accessors?.[positionIndex];
+  if (!colors || !positions || colors.count !== positions.count) return false;
+  // Stored in the file itself: a real buffer view, not sparse data.
+  if (colors.sparse !== undefined || colors.bufferView === undefined || !Number.isInteger(colors.bufferView) || !json.bufferViews?.[colors.bufferView]) return false;
+  if (colors.type !== 'VEC3' && colors.type !== 'VEC4') return false;
+  return colors.componentType === 5126 || ((colors.componentType === 5121 || colors.componentType === 5123) && colors.normalized === true);
+}
 
 /** Width and height from a PNG or JPEG header, without decoding the image. */
 export function imageSize(bytes: Uint8Array, mimeType: string): {width: number; height: number} {
@@ -107,12 +123,14 @@ export function inspectGlb(buffer: ArrayBuffer, {strict = true}: {strict?: boole
   };
   nodes.forEach((_, index) => visit(index));
 
-  let triangles = 0, primitives = 0;
+  let triangles = 0, primitives = 0, allColored = true;
   for (const mesh of json.meshes ?? []) for (const primitive of mesh.primitives ?? []) {
     primitives++;
     const accessor = primitive.indices ?? primitive.attributes?.POSITION;
     const count = accessor === undefined ? undefined : json.accessors?.[accessor]?.count;
     if (count === undefined || !Number.isFinite(count) || count <= 0 || (primitive.mode !== undefined && primitive.mode !== 4)) throw new Error('Use a triangle mesh for the card.');
+    if (primitive.attributes?.COLOR_0 === undefined) allColored = false;
+    else if (strict && !validVertexColors(json, primitive.attributes.POSITION, primitive.attributes.COLOR_0)) throw new Error('This scan\'s colours are invalid. Export it again from Keepsake Scanner.');
     triangles += count / 3;
   }
   if (primitives === 0) throw new Error('This file contains no card mesh.');
@@ -138,5 +156,5 @@ export function inspectGlb(buffer: ArrayBuffer, {strict = true}: {strict?: boole
   }
   const texturePixels = images.reduce((sum, image) => sum + image.width * image.height, 0);
   if (texturePixels > GLB_BUDGET.maxTexturePixels) throw new Error('Textures use too much memory. Keep the total under about four million pixels, such as one 2048 by 2048 image.');
-  return {triangles, nodes: nodes.length, primitives, materials, images, texturePixels, json};
+  return {triangles, nodes: nodes.length, primitives, materials, images, texturePixels, vertexColors: allColored, json};
 }

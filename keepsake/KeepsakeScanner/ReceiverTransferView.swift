@@ -7,6 +7,7 @@ enum ScannerRoomTheme: String, CaseIterable, Identifiable {
     var tint: Color { switch self { case .woodland: .green; case .beachfront: .orange; case .cyberpunk: .purple } }
 }
 
+/// Kept in memory only while the app is open; never saved to the phone.
 struct ReceiverDestination { var address = ""; var pairCode = ""; var roomTheme: ScannerRoomTheme = .woodland }
 
 struct ReceiverTransferView: View {
@@ -14,16 +15,40 @@ struct ReceiverTransferView: View {
     let file: URL?
     @Environment(\.dismiss) private var dismiss
     @State private var state = ""
+    @State private var sending = false
+    @State private var sent = false
+
     var body: some View {
         NavigationStack { Form {
-            Section("Desktop receiver") { TextField("http://192.168.x.x:4318", text: $destination.address).textInputAutocapitalization(.never).keyboardType(.URL); TextField("Pairing code", text: $destination.pairCode).textInputAutocapitalization(.characters); Picker("Keepsake room", selection: $destination.roomTheme) { ForEach(ScannerRoomTheme.allCases) { Text($0.title).tag($0) } } }
-            Section { Button("Transfer scan") { Task { await send() } }.disabled(file == nil || destination.address.isEmpty || destination.pairCode.isEmpty) }
-            if !state.isEmpty { Text(state).font(.footnote) }
-            Section("How it works") { Text("On the desktop run npm run scanner:receive. Enter the local address and pairing code shown there. Transfer only on a trusted Wi-Fi network.") }
-        }.navigationTitle("Send to desktop").toolbar { Button("Done") { dismiss() } } }
+            Section("Your computer") {
+                TextField("192.168.1.20:4318", text: $destination.address)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL).textContentType(.URL)
+                TextField("Pairing code (XXXX-XXXX-XXXX)", text: $destination.pairCode)
+                    .textInputAutocapitalization(.characters).autocorrectionDisabled().font(.body.monospaced())
+                Picker("Keepsake room", selection: $destination.roomTheme) { ForEach(ScannerRoomTheme.allCases) { Text($0.title).tag($0) } }
+            }
+            Section {
+                Button { Task { await send() } } label: {
+                    HStack { Text(sent ? "Sent" : "Send scan"); if sending { Spacer(); ProgressView() } }
+                }.disabled(file == nil || sending || sent || destination.address.isEmpty || PairingCode.normalize(destination.pairCode) == nil)
+            }
+            if !state.isEmpty { Section { Text(state).font(.footnote) } }
+            Section("How it works") {
+                Text("On the computer, run npm run scanner:receive in the Keepsake folder and enter the address and pairing code it shows. The scan is encrypted on this phone before it is sent and only that computer can open it. Nothing is uploaded to the internet.")
+            }
+        }.navigationTitle("Send to computer").toolbar { Button("Done") { dismiss() } } }
     }
+
     private func send() async {
-        guard let file, let url = URL(string: destination.address + "/upload") else { state = "Enter a complete receiver address."; return }
-        do { var request = URLRequest(url: url); request.httpMethod = "POST"; request.setValue("model/gltf-binary", forHTTPHeaderField: "Content-Type"); request.setValue(destination.pairCode, forHTTPHeaderField: "X-Keepsake-Pair-Code"); request.setValue(file.deletingPathExtension().lastPathComponent, forHTTPHeaderField: "X-Keepsake-Scan-Name"); request.setValue(destination.roomTheme.rawValue, forHTTPHeaderField: "X-Keepsake-Room-Theme"); let data = try Data(contentsOf: file); request.httpBody = data; request.setValue(String(data.count), forHTTPHeaderField: "Content-Length"); let (_, response) = try await URLSession.shared.data(for: request); guard (response as? HTTPURLResponse)?.statusCode == 201 else { state = "The desktop did not accept this scan. Check the address and pairing code."; return }; state = "Transferred. In Keepsake, choose Receive a scan from your phone → Import latest phone scan." } catch { state = "Transfer failed: \(error.localizedDescription)" }
+        guard let file else { return }
+        sending = true; state = "Securing the transfer…"
+        defer { sending = false }
+        do {
+            try await ScanTransfer.send(file: file, name: file.deletingPathExtension().lastPathComponent, roomTheme: destination.roomTheme.rawValue, address: destination.address, code: destination.pairCode)
+            sent = true
+            state = "Sent and confirmed. In Keepsake on the computer, choose Receive a scan from your phone → Import latest phone scan."
+        } catch {
+            state = error.localizedDescription
+        }
     }
 }
