@@ -38,6 +38,11 @@ jobs:
           xcodebuild test -project KeepsakeScanner.xcodeproj -scheme KeepsakeScanner \
             -destination "platform=iOS Simulator,id=$UDID" \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 2>&1 | tee "$RUNNER_TEMP/xcodebuild.log"
+      - name: Report errors as annotations
+        if: failure()
+        run: |
+          grep -E "error:|Test Case .* failed|Assertion|Fatal error" "$RUNNER_TEMP/xcodebuild.log" | sort -u | head -30 | sed -E 's#^.*/KeepsakeScanner/##' | while IFS= read -r line; do echo "::error title=xcodebuild::${line}"; done
+          echo "::error title=xcodebuild-tail::$(tail -25 "$RUNNER_TEMP/xcodebuild.log" | sed -E 's/%/%25/g' | tr '\n' '|' | cut -c1-3000)"
       - name: Check the Swift export against Keepsake's importer budget
         run: node keepsake/scripts/check-swift-export.mjs "$RUNNER_TEMP/swift-export.glb"
       - name: Keep the build log
