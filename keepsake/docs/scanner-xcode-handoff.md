@@ -1,6 +1,6 @@
 # Scanner: Xcode handoff
 
-> **STATUS: ON HOLD since 2026-10-09.** The scanner branch is parked, not abandoned. Nothing is half-edited: the branch is green in CI and safe to leave. Pick it up with the "Resume here" list below. Git tag `scanner-hold-2026-10-09` marks the parked state.
+> **STATUS: ON HOLD since 2026-10-09.** The scanner branch is parked, not abandoned. Nothing is half-edited: the branch is green in CI and safe to leave. Pick it up with the "Resume here" list below. Last green CI run: commit `991b5c6`+ fixes, run 37998426620 (the later commits are docs and the CI trigger only).
 
 ## Resume here
 1. Decide to resume, then restore the push trigger in `.github/workflows/scanner-build.yml` (comment at the top shows it). It is manual-only while on hold.
