@@ -13,3 +13,7 @@ vite.config.ts.timestamp-*
 
 # Phone scans received by the desktop receiver are private memories; never commit them.
 scanner-imports/
+
+# Scanner Xcode project is generated from KeepsakeScanner/project.yml
+keepsake/KeepsakeScanner/Generated/
+keepsake/KeepsakeScanner/*.xcodeproj/

@@ -2,6 +2,10 @@
 
 Branch `codex/scanner-texture-pipeline`. Rules, budget and threat model: [scanner-budget-and-privacy.md](scanner-budget-and-privacy.md). Phone setup and device checklist: [`KeepsakeScanner/README.md`](../KeepsakeScanner/README.md).
 
+## 2026-10-09, part 3: no-Mac build path
+
+Added `KeepsakeScanner/project.yml` (XcodeGen), simulator tests, `scripts/check-swift-export.mjs` and a macOS GitHub Actions workflow so the Swift code can be compiled and tested without a Mac. Hand-off for the Xcode/device steps: [scanner-xcode-handoff.md](scanner-xcode-handoff.md). None of it has run yet.
+
 ## 2026-10-09, part 2: colour and secure pairing (done; Swift not yet compiled)
 
 **Secure transfer, protocol 1.** Replaced the reusable 32-bit header code over plain HTTP. The phone now encrypts and authenticates each scan with a key derived from a 60-bit pairing code that never crosses the network, and the receiver proves receipt. Reads are limited to pages on the same computer, or Keepsake alone when `KEEPSAKE_SCANNER_ORIGINS` is set. The previous design let any device on the network, or any web page open in the user's browser, read the latest scan. It also leaked part of the code from `/health` and had no lockout. Old plaintext clients get a "please update" reply (426). See the budget doc for the full design and its limits.

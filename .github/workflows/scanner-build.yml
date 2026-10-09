@@ -1,0 +1,48 @@
+name: Keepsake Scanner (iOS)
+
+on:
+  push:
+    branches: ['codex/scanner-**']
+    paths:
+      - 'keepsake/KeepsakeScanner/**'
+      - 'keepsake/scripts/scan-envelope.mjs'
+      - 'keepsake/scripts/check-swift-export.mjs'
+      - 'keepsake/src/lib/glbBudget.ts'
+      - '.github/workflows/scanner-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate the Xcode project
+        working-directory: keepsake/KeepsakeScanner
+        run: xcodegen generate
+      - name: Build and test on the iOS Simulator (no signing)
+        working-directory: keepsake/KeepsakeScanner
+        env:
+          TEST_RUNNER_KEEPSAKE_GLB_OUT: ${{ runner.temp }}/swift-export.glb
+        run: |
+          set -o pipefail
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for k,v in d.items() if 'iOS' in k for x in v if 'iPhone' in x['name']))")
+          xcodebuild test -project KeepsakeScanner.xcodeproj -scheme KeepsakeScanner \
+            -destination "platform=iOS Simulator,id=$UDID" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 2>&1 | tee "$RUNNER_TEMP/xcodebuild.log"
+      - name: Check the Swift export against Keepsake's importer budget
+        run: node keepsake/scripts/check-swift-export.mjs "$RUNNER_TEMP/swift-export.glb"
+      - name: Keep the build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: ${{ runner.temp }}/xcodebuild.log

@@ -1,0 +1,53 @@
+# XcodeGen spec: `xcodegen generate` in this folder creates KeepsakeScanner.xcodeproj
+# with the Info.plist keys, Swift 5 mode and iOS 17 target the README describes.
+# The generated project is not committed; CI and the Xcode handoff both generate it.
+name: KeepsakeScanner
+options:
+  bundleIdPrefix: com.keepsake
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+targets:
+  KeepsakeScanner:
+    type: application
+    platform: iOS
+    sources:
+      - path: .
+        excludes:
+          - README.md
+          - project.yml
+          - Tests
+    info:
+      path: Generated/Info.plist
+      properties:
+        CFBundleDisplayName: Keepsake Scanner
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIRequiredDeviceCapabilities: [arkit]
+        NSCameraUsageDescription: Keepsake uses the camera and LiDAR to create a private 3D scan.
+        NSLocalNetworkUsageDescription: Keepsake sends a scan directly to your own computer on your local network.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.keepsake.scanner
+        GENERATE_INFOPLIST_FILE: NO
+  KeepsakeScannerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: KeepsakeScanner
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  KeepsakeScanner:
+    build:
+      targets:
+        KeepsakeScanner: all
+    test:
+      targets: [KeepsakeScannerTests]
