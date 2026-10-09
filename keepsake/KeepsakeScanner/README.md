@@ -36,7 +36,10 @@ It shows the computer's local addresses and a pairing code like `K7QF-M2XD-9P10`
 
 How it is protected: the code never crosses the network. The phone turns it into keys (PBKDF2-SHA256 with 600,000 rounds, then HKDF) and seals the scan with AES-256-GCM, so others on the Wi-Fi can neither read nor replace it. The computer confirms receipt with proof that it knows the code. Wrong codes, repeated uploads and old codes are refused; ten wrong attempts or 30 minutes without a scan replace the code. Received scans can be read only on that same computer, and only by pages it serves; set `KEEPSAKE_SCANNER_ORIGINS` to Keepsake's exact address to allow Keepsake alone. The full threat model is in [scanner budget and privacy](../docs/scanner-budget-and-privacy.md).
 
-## Status (2026-10-09, branch `codex/scanner-texture-pipeline`)
+## Status (2026-10-09, branch `codex/scanner-texture-pipeline`) — ON HOLD
+
+Parked until a Mac and a LiDAR device are available. How to resume: [Xcode handoff](../docs/scanner-xcode-handoff.md). CI is manual-only meanwhile.
+
 
 - Desktop side (receiver, encryption, import budget, colour validation): implemented and covered by `npm run check:scans`. The phone's encryption is pinned to the same test vectors, verified independently in Python. An independent review found no critical or high issues; its medium and low findings are fixed.
 - **The Swift app has not been compiled or run.** It was written without Xcode. A macOS CI workflow (`.github/workflows/scanner-build.yml`) compiles it and runs `Tests/` on the simulator: green as of 2026-10-09 (transfer vectors match the receiver; worst-case export passes the importer budget). It has not run on a device; do a real scan on a LiDAR iPhone or iPad.

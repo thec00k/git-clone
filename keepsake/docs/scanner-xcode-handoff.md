@@ -1,5 +1,14 @@
 # Scanner: Xcode handoff
 
+> **STATUS: ON HOLD since 2026-10-09.** The scanner branch is parked, not abandoned. Nothing is half-edited: the branch is green in CI and safe to leave. Pick it up with the "Resume here" list below. Git tag `scanner-hold-2026-10-09` marks the parked state.
+
+## Resume here
+1. Decide to resume, then restore the push trigger in `.github/workflows/scanner-build.yml` (comment at the top shows it). It is manual-only while on hold.
+2. Get a Mac (or cloud Mac) and an iPhone/iPad Pro with LiDAR; follow "With a Mac" and the device checklist below.
+3. On the computer run `npm ci && npm run build && npm run lint` for the `.tsx` changes (never type-checked).
+4. Fix whatever the device checklist finds (first suspects: `ScanColorizer.swift` `u`/`v` projection; `NSAllowsLocalNetworking` with a LAN IP).
+5. Rebase or merge onto the then-current `codex/woodland-composition-proof` (the scanner touches no room assets; expect doc conflicts only), open a PR. `main` is untouched.
+
 Branch `codex/scanner-texture-pipeline`. Written 2026-10-09 for whoever next has a Mac (or a cloud Mac). The Swift app in `KeepsakeScanner/` now compiles and passes its simulator tests in CI, but has **never run on a device**; everything else on the scanner path is done and tested. Design and threat model: [scanner-budget-and-privacy.md](scanner-budget-and-privacy.md). Work record: [scanner-opus-handoff.md](scanner-opus-handoff.md).
 
 ## Without a Mac: GitHub Actions compiles and tests it

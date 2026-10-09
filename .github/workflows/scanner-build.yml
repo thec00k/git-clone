@@ -1,14 +1,13 @@
 name: Keepsake Scanner (iOS)
 
+# ON HOLD (2026-10-09): automatic runs paused so no macOS minutes are spent.
+# To resume, restore this trigger:
+#   push:
+#     branches: ['codex/scanner-**']
+#     paths: ['keepsake/KeepsakeScanner/**', 'keepsake/scripts/scan-envelope.mjs',
+#             'keepsake/scripts/check-swift-export.mjs', 'keepsake/src/lib/glbBudget.ts',
+#             '.github/workflows/scanner-build.yml']
 on:
-  push:
-    branches: ['codex/scanner-**']
-    paths:
-      - 'keepsake/KeepsakeScanner/**'
-      - 'keepsake/scripts/scan-envelope.mjs'
-      - 'keepsake/scripts/check-swift-export.mjs'
-      - 'keepsake/src/lib/glbBudget.ts'
-      - '.github/workflows/scanner-build.yml'
   workflow_dispatch:
 
 permissions:

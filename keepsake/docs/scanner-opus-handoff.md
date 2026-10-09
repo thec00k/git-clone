@@ -1,6 +1,6 @@
 # Scanner work record
 
-Branch `codex/scanner-texture-pipeline`. Rules, budget and threat model: [scanner-budget-and-privacy.md](scanner-budget-and-privacy.md). Phone setup and device checklist: [`KeepsakeScanner/README.md`](../KeepsakeScanner/README.md).
+**ON HOLD (2026-10-09)** — see [scanner-xcode-handoff.md](scanner-xcode-handoff.md) for how to resume. Branch `codex/scanner-texture-pipeline`. Rules, budget and threat model: [scanner-budget-and-privacy.md](scanner-budget-and-privacy.md). Phone setup and device checklist: [`KeepsakeScanner/README.md`](../KeepsakeScanner/README.md).
 
 ## 2026-10-09, part 3: no-Mac build path
 
