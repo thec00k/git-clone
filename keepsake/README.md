@@ -19,7 +19,7 @@ For a clean handoff, start with [current handoff status](docs/handoff-current.md
 ### Current implementation records
 
 - [Batch photo review and scrapbook waiting stack](docs/photo-review-stack.md) — swipeable upload review, archive-backed photo references, saved per-book waiting pile, placement and undo.
-- [Scanner model budget and privacy rules](docs/scanner-budget-and-privacy.md) and the [scanner work record](docs/scanner-opus-handoff.md) (branch `codex/scanner-texture-pipeline`) — shared GLB limits, encrypted phone-to-computer transfer, vertex-colour scans, and what still needs checking on a Mac and iPhone.
+- [Scanner model budget and privacy rules](docs/scanner-budget-and-privacy.md) and the [scanner work record](docs/scanner-opus-handoff.md) (branch `codex/scanner-texture-pipeline`, **on hold**) — shared GLB limits, encrypted phone-to-computer transfer, vertex-colour scans, and what still needs checking on a Mac and iPhone.
 - [Paper material studies](art/paper-studies/README.md) and [interactive comparison page](material-study.html) — source renders, included paper textures, shader settings and page/sticker previews.
 - [Blender asset workflow](docs/blender-asset-workflow.md), [woodland room notes](docs/woodland-prototype.md), [Beachfront notes](docs/beachfront-prototype.md), and [room performance review](docs/three-room-quality-pass.md).
 - [UI design system](docs/ui-design-system.md), [artifact and card binders](docs/artifacts-and-card-binders.md), [furniture checks](docs/furniture-quality-checks.md), [time-capsule implementation](docs/time-capsule-chest.md), and [remaining polish direction](docs/next-polish-direction.md).
