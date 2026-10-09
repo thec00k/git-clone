@@ -4,7 +4,7 @@ Branch `codex/scanner-texture-pipeline`. Rules, budget and threat model: [scanne
 
 ## 2026-10-09, part 3: no-Mac build path
 
-Added `KeepsakeScanner/project.yml` (XcodeGen), simulator tests, `scripts/check-swift-export.mjs` and a macOS GitHub Actions workflow so the Swift code can be compiled and tested without a Mac. Hand-off for the Xcode/device steps: [scanner-xcode-handoff.md](scanner-xcode-handoff.md). None of it has run yet.
+Added `KeepsakeScanner/project.yml` (XcodeGen), simulator tests, `scripts/check-swift-export.mjs` and a macOS GitHub Actions workflow so the Swift code can be compiled and tested without a Mac. Hand-off for the Xcode/device steps: [scanner-xcode-handoff.md](scanner-xcode-handoff.md). First CI run found two Swift compile errors (fixed); the second run is green: compiles, transfer vectors match, worst-case export passes the budget. Still unverified: anything needing LiDAR, camera or a real network.
 
 ## 2026-10-09, part 2: colour and secure pairing (done; Swift not yet compiled)
 

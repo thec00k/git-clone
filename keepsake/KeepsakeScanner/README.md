@@ -39,5 +39,5 @@ How it is protected: the code never crosses the network. The phone turns it into
 ## Status (2026-10-09, branch `codex/scanner-texture-pipeline`)
 
 - Desktop side (receiver, encryption, import budget, colour validation): implemented and covered by `npm run check:scans`. The phone's encryption is pinned to the same test vectors, verified independently in Python. An independent review found no critical or high issues; its medium and low findings are fixed.
-- **The Swift app has not been compiled or run.** It was written without Xcode. A macOS CI workflow (`.github/workflows/scanner-build.yml`) now compiles it and runs `Tests/` on the simulator; its first result is pending. Then do a real scan on a LiDAR device.
+- **The Swift app has not been compiled or run.** It was written without Xcode. A macOS CI workflow (`.github/workflows/scanner-build.yml`) compiles it and runs `Tests/` on the simulator: green as of 2026-10-09 (transfer vectors match the receiver; worst-case export passes the importer budget). It has not run on a device; do a real scan on a LiDAR iPhone or iPad.
 - To check on a device: scan a household object, confirm it arrives coloured and correctly oriented in a binder, try a wrong code (refused), and scan something large (it should finish at a coarser detail or say there is too much detail, never lose part of the object).

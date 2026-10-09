@@ -1,6 +1,6 @@
 # Scanner: Xcode handoff
 
-Branch `codex/scanner-texture-pipeline`. Written 2026-10-09 for whoever next has a Mac (or a cloud Mac). The Swift app in `KeepsakeScanner/` has **never been compiled or run**; everything else on the scanner path is done and tested. Design and threat model: [scanner-budget-and-privacy.md](scanner-budget-and-privacy.md). Work record: [scanner-opus-handoff.md](scanner-opus-handoff.md).
+Branch `codex/scanner-texture-pipeline`. Written 2026-10-09 for whoever next has a Mac (or a cloud Mac). The Swift app in `KeepsakeScanner/` now compiles and passes its simulator tests in CI, but has **never run on a device**; everything else on the scanner path is done and tested. Design and threat model: [scanner-budget-and-privacy.md](scanner-budget-and-privacy.md). Work record: [scanner-opus-handoff.md](scanner-opus-handoff.md).
 
 ## Without a Mac: GitHub Actions compiles and tests it
 
@@ -10,13 +10,13 @@ What a green run proves: the Swift compiles; phone and desktop agree on the encr
 
 What it cannot prove: anything needing LiDAR, the camera or a real network (the simulator has none). Colour quality, orientation and the actual transfer still need an iPhone Pro.
 
-The first run will probably surface compile errors, since the code was written blind. Paste the failing lines from the `xcodebuild-log` artifact (or the run page) and they can be fixed without a Mac. Note that macOS runner minutes are billed at 10x on private repositories.
+**Result (2026-10-09, Xcode 16.4, iOS 18.5 simulator): green.** The first run found two compile errors (`ARGeometryElement` has no `offset`; an ambiguous `withUnsafeBytes` call); both are fixed. The app now compiles, the transfer self-test passes against the receiver's vectors, and the Swift-written worst-case GLB passes the importer budget. If a later run fails, the workflow reports compile errors as annotations on the run (the log artifact itself can't always be downloaded). Note that macOS runner minutes are billed at 10x on private repositories.
 
 ## With a Mac
 
 1. `brew install xcodegen`, then in `keepsake/KeepsakeScanner/`: `xcodegen generate` and open `KeepsakeScanner.xcodeproj`. This sets Swift 5 mode, iOS 17, the camera and local-network descriptions and `NSAllowsLocalNetworking` for you. (Doing it by hand: see [`KeepsakeScanner/README.md`](../KeepsakeScanner/README.md).)
 2. Select your team under Signing & Capabilities, choose your iPhone Pro or iPad Pro (LiDAR is required), build and run.
-3. Press Cmd-U once. `testTransferMatchesReceiverVectors` must pass; if it fails the phone and `scripts/scan-envelope.mjs` disagree and no scan should be sent.
+3. Press Cmd-U once (CI already passes these; this confirms your setup).
 
 ## Device checklist (cannot be done in CI)
 
