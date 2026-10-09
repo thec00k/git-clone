@@ -22,6 +22,7 @@
     "check:discoveries": "node scripts/check-discoveries.mjs && node scripts/check-discovery-geometry.mjs",
     "check:workbench": "node scripts/check-workbench.mjs && node scripts/check-furniture.mjs",
     "check:workbench:browser": "node scripts/check-workbench-browser.mjs",
+    "check:scans": "node scripts/check-scan-budget.mjs && node scripts/check-scanner-receiver.mjs",
     "scanner:receive": "node scripts/scanner-receiver.mjs"
   },
   "dependencies": {

@@ -31,3 +31,11 @@ npm run scanner:receive
 It displays a local receiver address and fresh pairing code. In the iOS app choose **Send to desktop**, enter them, select the room palette, then transfer. In Keepsake’s Card Binders choose **Receive a scan from your phone → Import latest phone scan** to add it directly. The receiver also writes a GLB backup to `keepsake/scanner-imports/`.
 
 This is direct device-to-device traffic on the same Wi-Fi network. The pairing code prevents accidental uploads on that network, but it is not encrypted; do not use it on public Wi-Fi. The selected room palette travels as lightweight metadata so the desktop can present a consistent destination, while the GLB itself remains a portable, untextured model.
+
+## Status (2026-10-09, branch `codex/scanner-texture-pipeline`)
+
+- Over-budget scans now get a coarser grid for the whole object instead of having triangles cut off the end (`LowPolyMesh.swift`). The shared limits live in `src/lib/glbBudget.ts`; see [scanner budget and privacy](../docs/scanner-budget-and-privacy.md).
+- The room palette list matches the current rooms (Woodland, Beachfront, Cyberpunk). The retired Snowy Mountain room is Woodland's winter season; the receiver maps an older build's `snowy` tag to Woodland.
+- The desktop receiver rejects any scan over Keepsake's model budget before saving it, and received scans are git-ignored (`scanner-imports/`).
+- **Not yet compiled or run on a device.** These Swift changes were written without Xcode. Build first and fix any errors.
+- **Not yet done:** colour on scans, and secure pairing/transfer. Until then use the receiver only on a trusted home network. Details and the plan are in [scanner-opus-handoff.md](../docs/scanner-opus-handoff.md).

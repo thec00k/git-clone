@@ -29,7 +29,7 @@ export function parseRoomBackup(text:string):AppState{
    ensure(binder.cards.filter(c=>c.modelSrc).length<=9);
    for(const card of binder.cards)if(card.modelSrc){
     ensure(card.modelSrc.length<7*1024*1024&&/^data:model\/gltf-binary;base64,[A-Za-z0-9+/]*={0,2}$/.test(card.modelSrc));
-    const binary=atob(card.modelSrc.split(',')[1]);const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));validateCardGlb(bytes.buffer);
+    const binary=atob(card.modelSrc.split(',')[1]);const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));validateCardGlb(bytes.buffer,false);
    }
   }
  ensure(s.deskBinderId===undefined||string(s.deskBinderId)&&(s.cardBinders as {id:string}[]|undefined)?.some(b=>b.id===s.deskBinderId));

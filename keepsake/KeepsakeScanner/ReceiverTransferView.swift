@@ -1,10 +1,10 @@
 import SwiftUI
 
 enum ScannerRoomTheme: String, CaseIterable, Identifiable {
-    case woodland, beachfront, cyberpunk, snowy
+    case woodland, beachfront, cyberpunk
     var id: String { rawValue }
     var title: String { rawValue.capitalized }
-    var tint: Color { switch self { case .woodland: .green; case .beachfront: .orange; case .cyberpunk: .purple; case .snowy: .cyan } }
+    var tint: Color { switch self { case .woodland: .green; case .beachfront: .orange; case .cyberpunk: .purple } }
 }
 
 struct ReceiverDestination { var address = ""; var pairCode = ""; var roomTheme: ScannerRoomTheme = .woodland }

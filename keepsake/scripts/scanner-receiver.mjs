@@ -12,11 +12,16 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { networkInterfaces } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { GLB_BUDGET, inspectGlb } from '../src/lib/glbBudget.ts';
 
 const port = Number(process.env.KEEPSAKE_SCANNER_PORT || 4318);
 const outputDirectory = resolve(process.env.KEEPSAKE_SCANNER_OUTPUT || 'scanner-imports');
 const pairCode = randomBytes(4).toString('hex').toUpperCase();
-const maxBytes = 5 * 1024 * 1024;
+const maxBytes = GLB_BUDGET.maxBytes;
+// Rooms a scan can be tagged for. Older scanner builds still offer the retired Snowy Mountain
+// room; that room is now Woodland's winter season, so it maps to Woodland.
+const roomThemes = new Set(['woodland', 'beachfront', 'cyberpunk']);
+const legacyRoomThemes = { snowy: 'woodland', 'snowy-mountain': 'woodland' };
 
 function localAddresses() {
   return Object.values(networkInterfaces()).flat().filter((entry) => entry && entry.family === 'IPv4' && !entry.internal).map((entry) => entry.address);
@@ -25,7 +30,9 @@ function localAddresses() {
 let latest = null;
 function send(response, status, body, contentType = 'application/json', headers = {}) {
   response.writeHead(status, {'Content-Type': contentType, 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*', ...headers});
-  response.end(typeof body === 'string' ? body : JSON.stringify(body));
+  // Strings and file bytes go out as-is; only plain objects are JSON. (JSON.stringify on a
+  // Buffer would send {"type":"Buffer",...} instead of the GLB.)
+  response.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
 }
 
 function safeEquals(a, b) {
@@ -35,6 +42,12 @@ function safeEquals(a, b) {
 
 function isGlb(buffer) {
   return buffer.length >= 20 && buffer.readUInt32LE(0) === 0x46546c67 && buffer.readUInt32LE(4) === 2 && buffer.readUInt32LE(8) === buffer.length;
+}
+
+function roomTheme(value) {
+  const cleaned = String(value || '').toLowerCase().replace(/[^a-z-]/g, '').slice(0, 32);
+  const theme = legacyRoomThemes[cleaned] ?? cleaned;
+  return roomThemes.has(theme) ? theme : 'woodland';
 }
 
 function filename(value) {
@@ -63,14 +76,21 @@ const server = createServer(async (request, response) => {
   request.on('end', async () => {
     const scan = Buffer.concat(parts);
     if (!isGlb(scan)) return send(response, 422, {error: 'That file is not a valid GLB 2.0 container.'});
+    // Same rules Keepsake applies on import, so a scan that would be refused later never reaches the room.
+    try { inspectGlb(scan.buffer.slice(scan.byteOffset, scan.byteOffset + scan.byteLength)); }
+    catch (error) { return send(response, 422, {error: error instanceof Error ? error.message : 'This scan is over Keepsake\'s model budget.'}); }
     await mkdir(outputDirectory, {recursive: true});
     const path = join(outputDirectory, filename(request.headers['x-keepsake-scan-name']));
     await writeFile(path, scan, {flag: 'wx'});
-    latest = {path, name: path.split(/[\\/]/).pop(), roomTheme: String(request.headers['x-keepsake-room-theme'] || 'woodland').replace(/[^a-z-]/gi, '').slice(0, 32), bytes: scan.length, receivedAt: Date.now()};
+    latest = {path, name: path.split(/[\\/]/).pop(), roomTheme: roomTheme(request.headers['x-keepsake-room-theme']), bytes: scan.length, receivedAt: Date.now()};
     send(response, 201, {ok: true, file: path, bytes: scan.length});
     console.log(`Received ${scan.length.toLocaleString()} bytes → ${path}`);
   });
 });
+
+// A phone that stalls mid-upload should not hold a connection open.
+server.requestTimeout = 30_000;
+server.headersTimeout = 10_000;
 
 server.listen(port, '0.0.0.0', () => {
   const addresses = localAddresses();
