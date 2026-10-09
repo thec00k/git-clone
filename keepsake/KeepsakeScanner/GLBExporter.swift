@@ -64,5 +64,5 @@ enum GLBExporter {
     }
 }
 
-private extension FixedWidthInteger { var littleEndianData: Data { withUnsafeBytes(of: self.littleEndian, Data.init) } }
+private extension FixedWidthInteger { var littleEndianData: Data { var value = self.littleEndian; return withUnsafeBytes(of: &value) { Data($0) } } }
 private extension Float { var littleEndianData: Data { bitPattern.littleEndian.littleEndianData } }

@@ -26,7 +26,7 @@ extension LowPolyMesh {
                 return (anchor.transform * SIMD4<Float>(local, 1)).xyz
             }
             for face in 0..<geometry.faces.count {
-                let address = geometry.faces.buffer.contents().advanced(by: geometry.faces.offset + geometry.faces.bytesPerIndex * face * 3)
+                let address = geometry.faces.buffer.contents().advanced(by: geometry.faces.bytesPerIndex * face * 3)
                 // ARKit may encode faces as either 16- or 32-bit indices. Reading
                 // according to bytesPerIndex avoids corrupting captures on devices
                 // whose meshes remain small enough to use UInt16.
