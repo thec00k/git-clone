@@ -1,4 +1,4 @@
-import {ownsRoomTheme} from './roomThemes.ts';
+import {ownsRoomTheme,LEGACY_ROOM_IDS} from './roomThemes.ts';
 import {isStickerFinish,validPaperSettings} from './materials.ts';
 import {BINDER_COLORS,MAX_BINDER_CARDS,validateCardGlb} from './cardBinders.ts';
 import {withOriginalFiles} from './originalPhotos.ts';
@@ -20,6 +20,7 @@ const image=(v:unknown)=>string(v)&&(/^(data:image\/(png|jpeg|webp|gif);base64,|
 function records(v:unknown,check:(v:RecordValue)=>boolean){return Array.isArray(v)&&v.every(x=>object(x)&&check(x));}
 export function parseRoomBackup(text:string):AppState{
  const file:unknown=JSON.parse(text);ensure(object(file)&&file.format==='keepsake-room'&&file.backupVersion===1&&object(file.state));const s=file.state;
+  if(object(s.environment)&&LEGACY_ROOM_IDS.includes(s.environment.roomTheme as string))s.environment.roomTheme='woodland';
   if(s.cardBinders!==undefined){
   ensure(Array.isArray(s.cardBinders)&&s.cardBinders.length<=12);
   ensure(records(s.cardBinders,b=>string(b.id)&&string(b.title)&&(b.title as string).length<=80&&BINDER_COLORS.includes(b.color as string)&&(b.coverSrc===undefined||image(b.coverSrc))&&Array.isArray(b.cards)&&b.cards.length<=MAX_BINDER_CARDS&&records(b.cards,c=>string(c.id)&&string(c.title)&&(c.title as string).length<=100&&['image','imported-scan'].includes(c.source as string)&&['paper','foil'].includes(c.finish as string)&&(c.position===undefined||(Number.isInteger(c.position)&&(c.position as number)>=0&&(c.position as number)<MAX_BINDER_CARDS))&&(c.src===undefined||image(c.src))&&(c.backSrc===undefined||image(c.backSrc))&&(c.source==='image'?image(c.src):string(c.modelSrc)))));
@@ -69,6 +70,7 @@ export function parseRoomBackup(text:string):AppState{
  ensure(records(s.notes,n=>string(n.id)&&string(n.bookId)&&string(n.pageId)&&string(n.author)&&string(n.message)&&number(n.createdAt)&&typeof n.approved==='boolean'));
  ensure(records(s.pinNotes,n=>string(n.id)&&string(n.pinId)&&string(n.author)&&string(n.message)&&number(n.createdAt)));
  ensure(strings(s.achievements)&&strings(s.achievementsSeen)&&strings(s.ownedStickerPacks)&&number(s.stamps));
+ ensure(s.stampsClaimedOn===undefined||typeof s.stampsClaimedOn==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s.stampsClaimedOn));
  ensure(object(s.achievementsAt)&&Object.values(s.achievementsAt).every(number)&&object(s.receipts)&&Object.values(s.receipts).every(number));
  ensure(object(s.progress)&&['visitedAtNight','previewedAsVisitor','completedTour'].every(k=>typeof s.progress ==='object'&&typeof (s.progress as RecordValue)[k]==='boolean'));
  const e=s.environment;ensure(object(e)&&['auto','day','dusk','night'].includes(e.timeMode as string)&&['spring','summer','autumn','winter'].includes(e.season as string)&&['clear','rain','snow'].includes(e.weather as string)&&['ambient','spotify','lofi','soundcloud'].includes(e.musicProvider as string));
@@ -84,6 +86,7 @@ export function parseRoomBackup(text:string):AppState{
  ensure(s.displayCaseScans===undefined||records(s.displayCaseScans,x=>string(x.id)&&string(x.title)&&string(x.modelSrc)&&number(x.shelf)&&(x.shelf as number)>=0&&(x.shelf as number)<4&&number(x.slot)&&(x.slot as number)>=0&&(x.slot as number)<4));
  ensure(e.roomTheme===undefined || ['woodland','beachfront','cyberpunk'].includes(e.roomTheme as string));
  ensure(e.furniture===undefined||validFurnitureChoices(e.furniture));
+ ensure(e.fireplaceSound===undefined||typeof e.fireplaceSound==='boolean');
  ensure(e.coastalWindowOpen===undefined || typeof e.coastalWindowOpen==='boolean');
  ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront','cyberpunk'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);
  ensure(e.crtColor!=='coastal'||ownsRoomTheme(s as unknown as AppState,'beachfront'));

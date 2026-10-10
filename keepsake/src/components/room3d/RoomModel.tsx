@@ -1,3 +1,4 @@
+import {HearthFire} from './HearthFire';
 import {Vector3} from 'three';
 import {TimeCapsuleChest} from './TimeCapsuleChest';
 import {CabinetPhoto} from './CabinetPhoto';
@@ -76,7 +77,7 @@ export function RoomModel({
       <Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
       {!study&&<ChairFloorContact scene={cloned}/>}
-      {study&&hearthPosition&&(environment.season==='winter'||environment.season==='autumn')&&<pointLight position={hearthPosition} color="#eec391" intensity={phase==='day'?.2:.7} distance={2.2}/>}
+      {study&&hearthPosition&&(environment.season==='winter'||environment.season==='autumn')&&<HearthFire phase={phase}/>}
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />
       <ArchiveCabinet

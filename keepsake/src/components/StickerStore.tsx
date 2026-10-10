@@ -33,7 +33,7 @@ export function StickerStore({ onClose }: { onClose: () => void }) {
           <div>
             <p className="font-display text-xl text-paper">The drawer</p>
             <p className="ks-caption text-paper/70" style={{ fontSize: "1.05rem" }}>
-              little treasures, paid in stamps
+              little treasures, paid in stamps. A few arrive each day you visit.
             </p>
           </div>
           <div className="flex items-center gap-2">

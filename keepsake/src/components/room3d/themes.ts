@@ -23,13 +23,9 @@ export const woodlandRoom: RoomTheme = {
   walkBounds: { minX: -2.08, maxX: 2.08, minZ: -1.12, maxZ: 1.82, keepOut: { minX: -1.5, maxX: -.3, minZ: 1.45 } },
   budget: { maxBytes: 8 * 1024 * 1024, maxTriangles: 180000, maxMaterials: 80, maxPrimitives: 350 },
 };
-export const classicRoom: RoomTheme = {
-  ...woodlandRoom, id: "classic", title: "The original room", asset: "/room/keepsake.glb", woodland: false,
-  views: { ...sharedViews, front: { position: [.05,1.32,.62], target: [-.15,.88,-1.62] } }, fov: 42,
-};
 export const beachfrontRoom: RoomTheme = {...woodlandRoom, id: "beachfront", title: "Beachfront", subtitle: "Salt air and afternoons worth keeping.", asset: "/room/beachfront/beachfront.glb", woodland: false, walkBounds: {...woodlandRoom.walkBounds, keepOut: undefined}};
 export const cyberpunkRoom: RoomTheme = {...woodlandRoom,id:'cyberpunk',title:'Neon City',subtitle:'Small memories above a city of light.',asset:'/room/cyberpunk/cyberpunk.glb',woodland:false,walkBounds:{...woodlandRoom.walkBounds,keepOut:undefined}};
-export const roomThemes = { woodland: woodlandRoom, beachfront: beachfrontRoom, cyberpunk:cyberpunkRoom, classic: classicRoom };
+export const roomThemes = { woodland: woodlandRoom, beachfront: beachfrontRoom, cyberpunk:cyberpunkRoom };
 
 export const qualityProfiles = {
   balanced: { dpr: 1.25, shadows: false, particles: 70 },

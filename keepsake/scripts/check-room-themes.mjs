@@ -19,12 +19,12 @@ assert.equal(parseRoomBackup(serializeRoom(closedWindow)).environment.coastalWin
 assert.equal(switchRoomTheme(switchRoomTheme(closedWindow,'woodland'),'beachfront').environment.coastalWindowOpen,false,'Window preference survives switching rooms');
 assert.throws(()=>parseRoomBackup(serializeRoom({...closedWindow,environment:{...closedWindow.environment,coastalWindowOpen:'closed'}})),'Window preference must be boolean');
 
-assert.equal(ownsRoomTheme(state,'beachfront'),false);
-assert.equal(ownsRoomTheme(coast,'beachfront'),true);
+assert.equal(ownsRoomTheme(state,'beachfront'),true,'rooms are freely swappable');
+assert.equal(coast.ownedRoomThemes,undefined,'switching no longer records ownership');
 assert.equal(coast.environment.crtColor,'coastal');
 assert.equal(forest.environment.crtColor,'green','Woodland restores its screen preset');
-assert.equal(ownsRoomTheme(forest,'beachfront'),true,'the acquired color remains unlocked after leaving Beachfront');
-assert.throws(()=>parseRoomBackup(serializeRoom({...state,environment:{...state.environment,crtColor:'coastal'}})),'unowned exclusive color cannot be imported');
+assert.equal(parseRoomBackup(serializeRoom({...state,environment:{...state.environment,crtColor:'coastal'}})).environment.crtColor,'coastal');
+for(const legacy of ['classic','snowy-mountain'])assert.equal(parseRoomBackup(serializeRoom({...state,environment:{...state.environment,roomTheme:legacy}})).environment.roomTheme,'woodland','retired room ids fall back to Woodland');
 
 const neon=switchRoomTheme(forest,'cyberpunk');
 assert.equal(neon.environment.roomTheme,'cyberpunk');

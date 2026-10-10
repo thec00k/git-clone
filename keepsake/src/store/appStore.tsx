@@ -1,6 +1,7 @@
 import {musicOnEntry} from '../lib/roomMusic';
 import {validFurnitureChoices} from '../lib/furniture';
-import {ownsRoomTheme} from '../lib/roomThemes';
+import {claimDailyStamps} from "../lib/stamps";
+import {ownsRoomTheme,LEGACY_ROOM_IDS} from '../lib/roomThemes';
 import {
   createContext,
   useCallback,
@@ -155,10 +156,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         : createSeed();
       if(!initial.achievementBaseline)initial.achievementBaseline=baseline(initial);
-      if (!initial.ownedRoomThemes && initial.environment.roomTheme === 'beachfront') {
-        initial.ownedRoomThemes = ['woodland','beachfront'];
-        initial.environment = {...initial.environment, crtColor:'coastal'};
-      }
+      if (LEGACY_ROOM_IDS.includes(initial.environment.roomTheme as string)) initial.environment = {...initial.environment, roomTheme:'woodland'};
       setState(musicOnEntry(initial));
       loadedRef.current = true;
     })().catch(error => { if (!cancelled) setLoadError(error instanceof Error ? error.message : 'Your saved room could not be read.'); });
@@ -225,6 +223,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const update = useCallback((fn: (prev: AppState) => AppState) => {
     setState((prev) => (prev ? recordPhotoActivity(prev,fn(prev)) : prev));
   }, []);
+  // Daily stamps: once when the room opens and again if the tab is left open past midnight.
+  const loadedState = !!state;
+  useEffect(() => {
+    if (!loadedState) return;
+    const claim = () => { if (!document.hidden) update((p) => claimDailyStamps(p, new Date())); };
+    claim();
+    document.addEventListener('visibilitychange', claim);
+    return () => document.removeEventListener('visibilitychange', claim);
+  }, [loadedState, update]);
 
   const updateActiveBook = useCallback(
     (fn: (b: Scrapbook) => Scrapbook) => {

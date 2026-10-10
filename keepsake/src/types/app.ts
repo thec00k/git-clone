@@ -79,6 +79,8 @@ export interface Environment {
   crtColor?: "blue" | "green" | "purple" | "pink" | "orange" | "red" | "coastal";
   volume: number; // 0..1
   ambienceVolume: number; // 0..1
+  /** Hearth crackle in Woodland's fall and winter. Undefined means on. */
+  fireplaceSound?: boolean;
   /** When true, map pins cannot be dragged (click still opens edit). */
   pinsLocked: boolean;
 }
@@ -182,6 +184,8 @@ export interface AppState {
   receipts: Record<string, number>; // curated-RNG opportunity id -> last shown at
   /** Local drawer-shop currency. No real money. */
   stamps: number;
+  /** Local calendar day (YYYY-MM-DD) the daily stamps were last granted. No streak is kept. */
+  stampsClaimedOn?: string;
   /** Sticker pack ids the drawer has already sold you. Always includes everyday. */
   ownedStickerPacks: string[];
 }

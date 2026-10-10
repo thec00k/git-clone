@@ -185,7 +185,7 @@ export function RoomScene3D({
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: activeRoom.id === "classic" ? .62 : activeRoom.id === "beachfront" ? 1.12 : 1.05,
+          toneMappingExposure: activeRoom.id === "beachfront" ? 1.12 : 1.05,
           failIfMajorPerformanceCaveat: false,
           powerPreference: "default",
         }}

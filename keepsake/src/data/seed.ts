@@ -1,5 +1,6 @@
 import type { AppState, ArchivePhoto } from "../types/app";
 import { TIDY_ROOM } from "../types/app";
+import { STARTING_STAMPS } from "../lib/stamps";
 import type { Scrapbook } from "../types/scrapbook";
 import { uid } from "../lib/id";
 
@@ -197,7 +198,7 @@ export function createSeed(): AppState {
     achievementsSeen: [],
     progress: { visitedAtNight: false, previewedAsVisitor: false, completedTour: false },
     receipts: {},
-    stamps: 12,
+    stamps: STARTING_STAMPS,
     ownedStickerPacks: ["everyday"],
   };
 }

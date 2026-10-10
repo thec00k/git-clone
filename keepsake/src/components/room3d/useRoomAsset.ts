@@ -46,7 +46,7 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
       if (obj.name === "Outside_View" || obj.name === "Win_Glass") {
         const material = new THREE.MeshBasicMaterial();
         materials.push(material); obj.material = material;
-        if (activeRoom.id !== "classic") obj.visible = false;
+        obj.visible = false;
       }
     });
     const shelf=cloned.getObjectByName('ks_shelf');

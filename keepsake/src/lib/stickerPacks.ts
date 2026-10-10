@@ -62,7 +62,7 @@ export const STICKER_PACKS: StickerPack[] = [
   },
 ];
 
-export const STARTING_STAMPS = 12;
+export { STARTING_STAMPS } from './stamps';
 
 export function packById(id: string): StickerPack | undefined {
   return STICKER_PACKS.find((p) => p.id === id);
