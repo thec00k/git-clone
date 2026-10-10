@@ -35,7 +35,8 @@ function Garland({a, b, depth, count, kind, colors, size = .13, thickness = .004
   </group>;
 }
 const WIN_A = new THREE.Vector3(-1.1, 3.0, -2.06), WIN_B = new THREE.Vector3(.8, 3.0, -2.06);
-const MANTEL_A = new THREE.Vector3(MANTEL.minX, MANTEL.y + .02, MANTEL.z - .08), MANTEL_B = new THREE.Vector3(MANTEL.maxX, MANTEL.y + .02, MANTEL.z - .08);
+// Drape the Christmas garland across the mantel's front face so it reads from the room (on top it hid behind the edge).
+const MANTEL_A = new THREE.Vector3(MANTEL.minX + .02, MANTEL.y - .04, MANTEL.z - .13), MANTEL_B = new THREE.Vector3(MANTEL.maxX - .02, MANTEL.y - .04, MANTEL.z - .13);
 
 function Pumpkin({position, scale = 1}: {position: [number, number, number]; scale?: number}) {
   const body = useMemo(() => paper('#e0762a', '#ff8a2a', .25), []), stem = useMemo(() => paper('#5b6b2e'), []);
@@ -67,7 +68,7 @@ function Tree() {
 }
 function Stocking({x, color}: {x: number; color: string}) {
   const red = useMemo(() => paper(color), [color]), cuff = useMemo(() => paper('#f4efe2'), []);
-  return <group position={[x, .9, MANTEL.z - .08]}>
+  return <group position={[x, .84, MANTEL.z - .15]}>
     <mesh material={red} position={[0, .02, 0]}><boxGeometry args={[.07, .17, .035]}/></mesh>
     <mesh material={red} position={[.03, -.07, 0]}><boxGeometry args={[.11, .06, .035]}/></mesh>
     <mesh material={cuff} position={[0, .11, 0]}><boxGeometry args={[.08, .035, .04]}/></mesh>
@@ -123,7 +124,7 @@ function HolidaySet({holiday, coastal}: {holiday: HolidayId; coastal: boolean}) 
 }
 const DECOR: Record<HolidayId, () => ReactNode> = {
   christmas: () => <>
-    <Garland a={MANTEL_A} b={MANTEL_B} depth={.07} count={8} kind="flag" colors={['#b23a3a', '#f2d36b']} size={.03} thickness={.02} lineColor="#3f6b45"/>
+    <Garland a={MANTEL_A} b={MANTEL_B} depth={.09} count={9} kind="flag" colors={['#b23a3a', '#f2d36b']} size={.035} thickness={.024} lineColor="#3f6b45"/>
     <Stocking x={-1.2} color="#b23a3a"/><Stocking x={-.91} color="#2f6b4f"/><Stocking x={-.62} color="#b23a3a"/>
     <Tree/>
   </>,
