@@ -4,7 +4,7 @@ A calm digital scrapbook in a handcrafted 3D room. React/TypeScript/Vite applica
 
 ## Current build
 
-Woodland Writing Room is the playable local prototype. It includes a scrapbook editor, interactive shelf books, photo archive and printer, visible memory map, guestbook/discoveries, day/night and weather, CRT music, and a drawer shop.
+Woodland Writing Room is the playable local prototype and now follows the real date: spring, summer, autumn and winter automatically (Room settings > Season to override or freeze). See the [current handoff](docs/handoff-current.md). It includes a scrapbook editor, interactive shelf books, photo archive and printer, visible memory map, guestbook/discoveries, day/night and weather, CRT music, and a drawer shop.
 
 For a clean handoff, start with [current handoff status](docs/handoff-current.md), then use this index to find the product direction and implementation records. The [September project checklist](docs/project-status.md) is a dated acceptance snapshot, not the latest branch/room status. [Prototype notes](docs/woodland-prototype.md) retain historical implementation details; [asset provenance](art/woodland/asset-ledger.json) tracks room sources.
 
@@ -49,7 +49,7 @@ Spotify is optional. SoundCloud plays public links; account OAuth is pending. Th
 
 ## Rooms and source assets
 
-- Default: public/room/woodland/woodland.glb
+- Default: public/room/woodland-study/woodland-study.glb (the legacy public/room/woodland/woodland.glb is pending removal)
 - Blender source: art/woodland/woodland.blend
 - Modular runtime: src/components/room3d/
 - Previous room: ?theme=classic
