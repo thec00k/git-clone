@@ -7,7 +7,6 @@ import {renderedMesh,visibleBounds} from './furnitureContact';
 import {useApp} from '../../store/appStore';
 import {useNav} from '../../store/nav';
 import {activeDiscovery,discoveryState,PLACES,REWARDS,discover} from '../../lib/discoveries';
-import {useActiveRoom} from './useActiveRoom';
 export function DiscoveryObject({scene}:{scene:THREE.Object3D}){
  const note=useRef<THREE.Group>(null);
  const ray=useMemo(()=>new THREE.Raycaster(),[]);
@@ -26,7 +25,7 @@ export function DiscoveryObject({scene}:{scene:THREE.Object3D}){
   note.current.rotation.set(-Math.PI/2,0,.18);
  });
  const {state,update}=useApp();const {isVisitor,touring,setDiscoveryOpen}=useNav();
- const activeRoom=useActiveRoom();const letter=activeDiscovery(state);if(!letter||isVisitor||touring||discoveryState(state).frequency==='off')return null;
+ const letter=activeDiscovery(state);if(!letter||isVisitor||touring||discoveryState(state).frequency==='off')return null;
  const inBook=!!letter.guestEntryId&&(letter.delivery==='book'||discoveryState(state).guestNotesOnDesk===false);
  const place=PLACES.find(p=>p.id===(inBook?'guestbook':letter.location))!;
  const open=()=>{update(s=>discover(s,letter.id,Date.now()));setDiscoveryOpen(letter.id);};
