@@ -29,14 +29,14 @@ try {
     sessionStorage.setItem('ks-tour-done', '1');
   }, LOOKS);
   await page.goto(base + '/?room=flat');
-  try { await page.getByRole('button', {name: /^Open scrapbook/}).click({timeout: 20000}); }
+  try { await page.locator('[aria-label^="Open scrapbook"]').first().click({timeout: 20000, force: true}); }
   catch (e) {
     console.log('URL', page.url()); console.log('BUTTONS', JSON.stringify(await page.evaluate(() => [...document.querySelectorAll('button,[role=button]')].map(b => b.getAttribute('aria-label') || b.textContent?.trim()).filter(Boolean).slice(0, 60))));
     await page.screenshot({path: `${outDir}/book-debug.png`}); throw e;
   }
   await page.waitForTimeout(2500);
   await page.screenshot({path: `${outDir}/book-lettering.png`});
-  await page.getByRole('button', {name: 'Export or print this book'}).click();
+  await page.locator('[aria-label="Export or print this book"]').first().click({force: true});
   await page.waitForTimeout(1500);
   await page.screenshot({path: `${outDir}/print-lettering.png`});
   console.log('captured book and print views');
