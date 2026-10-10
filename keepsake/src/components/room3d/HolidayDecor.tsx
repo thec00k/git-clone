@@ -1,4 +1,4 @@
-import {useMemo,type ReactNode} from 'react';
+import {useEffect,useMemo,useRef,type ReactNode} from 'react';
 import * as THREE from 'three';
 import {useSeasonal} from '../../hooks/useSeasonal';
 import type {HolidayId} from '../../types/app';
@@ -108,7 +108,18 @@ function HeartsOnMantel() {
 
 export function HolidayDecor() {
   const {holiday} = useSeasonal();
-  return <group name="Holiday_Decor" userData={{holiday}}>{holiday && DECOR[holiday]()}</group>;
+  return <group name="Holiday_Decor" userData={{holiday}}>{holiday && <HolidaySet key={holiday} holiday={holiday}/>}</group>;
+}
+/** Keyed by holiday so a change unmounts the old set. Materials and geometries are created in useMemo and passed
+ * as props, which react-three-fiber does not dispose, so collect them after mount and free them on unmount. */
+function HolidaySet({holiday}: {holiday: HolidayId}) {
+  const group = useRef<THREE.Group>(null);
+  useEffect(() => {
+    const owned = new Set<{dispose(): void}>();
+    group.current?.traverse(o => { if (o instanceof THREE.Mesh) { owned.add(o.geometry); (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => owned.add(m)); } });
+    return () => owned.forEach(x => x.dispose());
+  }, []);
+  return <group ref={group}>{DECOR[holiday]()}</group>;
 }
 const DECOR: Record<HolidayId, () => ReactNode> = {
   christmas: () => <>

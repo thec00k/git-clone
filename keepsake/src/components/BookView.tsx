@@ -128,7 +128,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
-      if (e.defaultPrevented || showPrint || showKeys || printerOpen) return;
+      if (e.defaultPrevented || showPrint || showKeys || printerOpen || showPhotos || showShop || showNotes || document.querySelector("[aria-modal=true]")) return;
       if (t?.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')) return;
       const mod = e.metaKey || e.ctrlKey;
       if (!isVisitor && !turn && mod && e.key.toLowerCase() === "z") {

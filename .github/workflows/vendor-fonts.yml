@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false  # keep the write token out of .git/config while third-party installs run
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -35,4 +37,4 @@ jobs:
           git add keepsake/public/fonts keepsake/src/fonts.css
           git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
           git commit -m "Vendor Inter, Fraunces and Caveat (self-hosted fonts)"
-          git push
+          git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:${{ github.ref_name }}

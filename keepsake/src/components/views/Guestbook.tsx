@@ -28,6 +28,7 @@ export function Guestbook() {
             aria-label="Your name"
             className="w-40 rounded bg-black/25 px-3 py-2 text-paper outline-none"
             placeholder="your name"
+            maxLength={60}
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
           />

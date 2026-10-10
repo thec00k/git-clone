@@ -66,7 +66,9 @@ export function useScrapbook() {
     if (!current || !prev) return;
     futureRef.current.push(current);
     restoringRef.current = true;
-    updateActiveBook(() => prev);
+    // History covers pages and the waiting pile only; title, cover, playlist and links made since stay.
+    updateActiveBook((cur) => ({ ...cur, pages: prev.pages, pendingPhotoIds: prev.pendingPhotoIds }));
+    burstRef.current = false;
     restoringRef.current = false;
     setSelectedId(null);
     setHistoryTick((n) => n + 1);
@@ -78,7 +80,9 @@ export function useScrapbook() {
     if (!current || !next) return;
     pastRef.current.push(current);
     restoringRef.current = true;
-    updateActiveBook(() => next);
+    // History covers pages and the waiting pile only; title, cover, playlist and links made since stay.
+    updateActiveBook((cur) => ({ ...cur, pages: next.pages, pendingPhotoIds: next.pendingPhotoIds }));
+    burstRef.current = false;
     restoringRef.current = false;
     setSelectedId(null);
     setHistoryTick((n) => n + 1);

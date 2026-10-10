@@ -5,6 +5,7 @@ import type {ThreeEvent} from '@react-three/fiber';
 import * as THREE from 'three';
 import {RectAreaLightUniformsLib} from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import {useApp} from '../../store/appStore';
+import {useNav} from '../../store/nav';
 import {CRT_LIGHT_COLORS} from '../../lib/roomMusic';
 import {validateCardGlb} from '../../lib/cardBinders';
 import {DISPLAY_MODEL_ACCEPT,DISPLAY_MODEL_FORMATS,importDisplayModel,modelDataUrl} from '../../lib/displayModelImport';
@@ -17,8 +18,9 @@ export const DISPLAY_CASE_VIEW = {position: new THREE.Vector3(-.35,1.38,-.65), t
 
 export function ArtifactDisplayCase() {
   const {environment,state,update} = useApp();
+  const {isVisitor}=useNav();
   const input=useRef<HTMLInputElement>(null), pending=useRef<{shelf:number;slot:number}|null>(null); const [message,setMessage]=useState(''); const [doorsOpen,setDoorsOpen]=useState(false); const [selected,setSelected]=useState<string|null>(null); const [dragging,setDragging]=useState<string|null>(null); const scans=state.displayCaseScans??[];
-  const add=async(file:File|undefined)=>{const place=pending.current;pending.current=null;if(!file||!place)return;try{setMessage(file.name.toLowerCase().endsWith('.glb')?'Checking model…':'Converting model locally…');const buffer=await importDisplayModel(file);validateCardGlb(buffer);const modelSrc=await modelDataUrl(buffer);update(s=>({...s,displayCaseScans:[...(s.displayCaseScans??[]).filter(x=>x.shelf!==place.shelf||x.slot!==place.slot),{id:crypto.randomUUID(),title:file.name.replace(/\.(glb|usdz|obj|ply|stl)$/i,''),modelSrc,...place}]}));setMessage('Model placed.');}catch(e){setMessage(e instanceof Error?e.message:'Could not add model.');}};
+  const add=async(file:File|undefined)=>{const place=pending.current;pending.current=null;if(!file||!place||isVisitor)return;try{setMessage(file.name.toLowerCase().endsWith('.glb')?'Checking model…':'Converting model locally…');const buffer=await importDisplayModel(file);validateCardGlb(buffer);const modelSrc=await modelDataUrl(buffer);update(s=>({...s,displayCaseScans:[...(s.displayCaseScans??[]).filter(x=>x.shelf!==place.shelf||x.slot!==place.slot),{id:crypto.randomUUID(),title:file.name.replace(/\.(glb|usdz|obj|ply|stl)$/i,''),modelSrc,...place}]}));setMessage('Model placed.');}catch(e){setMessage(e instanceof Error?e.message:'Could not add model.');}};
   const {scene} = useGLTF('/room/furniture/display-case.glb?v=right-angle-3');
   const tint = CRT_LIGHT_COLORS[environment.crtColor ?? 'green'];
   const on = environment.displayCaseLit !== false;
@@ -38,8 +40,8 @@ export function ArtifactDisplayCase() {
     return {copy, materials};
   }, [scene]);
   useEffect(() => () => model.materials.forEach(m => m.dispose()), [model]);
-  useEffect(()=>{const remove=(e:KeyboardEvent)=>{if(e.key!=='Backspace'||!selected||e.target instanceof HTMLInputElement)return;e.preventDefault();update(s=>({...s,displayCaseScans:(s.displayCaseScans??[]).filter(x=>x.id!==selected)}));setSelected(null);setMessage('Object removed.');};window.addEventListener('keydown',remove);return()=>window.removeEventListener('keydown',remove);},[selected,update]);
-  const move=(to:{shelf:number;slot:number})=>{if(!dragging)return;const from=scans.find(x=>x.id===dragging),other=scans.find(x=>x.shelf===to.shelf&&x.slot===to.slot);if(!from)return;update(s=>({...s,displayCaseScans:(s.displayCaseScans??[]).map(x=>x.id===from.id?{...x,...to}:other&&x.id===other.id?{...x,shelf:from.shelf,slot:from.slot}:x)}));setDragging(null);setSelected(from.id);setMessage(other?'Objects swapped.':'Object moved.');};
+  useEffect(()=>{const remove=(e:KeyboardEvent)=>{const t=e.target;if(e.key!=='Backspace'||!selected||!doorsOpen||isVisitor||t instanceof HTMLElement&&(t.closest('input,textarea,select,[contenteditable=true]')||document.querySelector('[aria-modal=true]')))return;e.preventDefault();update(s=>({...s,displayCaseScans:(s.displayCaseScans??[]).filter(x=>x.id!==selected)}));setSelected(null);setMessage('Object removed.');};window.addEventListener('keydown',remove);return()=>window.removeEventListener('keydown',remove);},[selected,update,doorsOpen,isVisitor]);
+  const move=(to:{shelf:number;slot:number})=>{if(!dragging||isVisitor)return;const from=scans.find(x=>x.id===dragging),other=scans.find(x=>x.shelf===to.shelf&&x.slot===to.slot);if(!from)return;update(s=>({...s,displayCaseScans:(s.displayCaseScans??[]).map(x=>x.id===from.id?{...x,...to}:other&&x.id===other.id?{...x,shelf:from.shelf,slot:from.slot}:x)}));setDragging(null);setSelected(from.id);setMessage(other?'Objects swapped.':'Object moved.');};
   useEffect(() => {
     model.materials.forEach(m => {
       if (!(m instanceof THREE.MeshStandardMaterial)) return;

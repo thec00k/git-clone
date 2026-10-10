@@ -15,13 +15,16 @@ export function createFireplaceAudio():FireplaceAudio {
  const source=context.createBufferSource();source.buffer=buffer;source.loop=true;
  const filter=context.createBiquadFilter();filter.type='lowpass';filter.frequency.value=4400;
  const panner=context.createPanner();panner.panningModel='HRTF';panner.distanceModel='inverse';panner.refDistance=1.15;panner.maxDistance=9;panner.rolloffFactor=1;
- panner.positionX.value=-.91;panner.positionY.value=.5;panner.positionZ.value=1.9;
+ if(panner.positionX){panner.positionX.value=-.91;panner.positionY.value=.5;panner.positionZ.value=1.9;}else panner.setPosition(-.91,.5,1.9);
  const gain=context.createGain();gain.gain.value=0;source.connect(filter).connect(panner).connect(gain).connect(context.destination);source.start();
  let closed=false;
  return {
   resume(){if(!closed)void context.resume().catch(()=>{});},suspend(){if(!closed)void context.suspend().catch(()=>{});},
   volume(v){if(!closed)gain.gain.setTargetAtTime(Math.max(0,Math.min(1,v))*.65,context.currentTime,.12);},
-  listener(p,f,u){if(closed)return;const l=context.listener;for(const [a,v] of [[l.positionX,p.x],[l.positionY,p.y],[l.positionZ,p.z],[l.forwardX,f.x],[l.forwardY,f.y],[l.forwardZ,f.z],[l.upX,u.x],[l.upY,u.y],[l.upZ,u.z]] as const)a.setTargetAtTime(v,context.currentTime,.035);},
+  listener(p,f,u){if(closed)return;const l=context.listener;
+   // Firefox lacks the AudioParam listener fields; fall back to the older setters there.
+   if(!l.positionX){l.setPosition(p.x,p.y,p.z);l.setOrientation(f.x,f.y,f.z,u.x,u.y,u.z);return;}
+   for(const [a,v] of [[l.positionX,p.x],[l.positionY,p.y],[l.positionZ,p.z],[l.forwardX,f.x],[l.forwardY,f.y],[l.forwardZ,f.z],[l.upX,u.x],[l.upY,u.y],[l.upZ,u.z]] as const)a.setTargetAtTime(v,context.currentTime,.035);},
   dispose(){if(closed)return;closed=true;source.stop();source.disconnect();filter.disconnect();panner.disconnect();gain.disconnect();void context.close().catch(()=>{});},
  };
 }

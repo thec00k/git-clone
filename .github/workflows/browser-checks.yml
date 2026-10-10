@@ -25,6 +25,8 @@ jobs:
       SHOT_DIR: ${{ github.workspace }}/shots
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false  # keep the write token out of .git/config while third-party installs run
       - uses: actions/setup-node@v4
         with:
           node-version: 24

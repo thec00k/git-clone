@@ -1,10 +1,11 @@
 import type {AppState} from '../types/app';
 import {checkStorageCapacity} from './importLimits.ts';
+import {stripMetadata} from './stripMetadata.ts';
 export interface OriginalPhoto {key:string;name:string;type:string;size:number}
 function db():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{const r=indexedDB.open('keepsake-originals',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
 async function digest(blob:Blob){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join('');}
 async function put(key:string,blob:Blob){const d=await db();try{await new Promise<void>((resolve,reject)=>{const tx=d.transaction('files','readwrite');tx.objectStore('files').put(blob,key);tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error);tx.onerror=()=>reject(tx.error);});}finally{d.close();}}
-export async function preserveOriginal(file:File):Promise<OriginalPhoto>{await checkStorageCapacity(file.size);const key=await digest(file);await put(key,file);return {key,name:file.name,type:file.type||'application/octet-stream',size:file.size};}
+export async function preserveOriginal(input:File):Promise<OriginalPhoto>{const file=await stripMetadata(input);await checkStorageCapacity(file.size);const key=await digest(file);await put(key,file);return {key,name:file.name,type:file.type||'application/octet-stream',size:file.size};}
 export async function readOriginal(original:OriginalPhoto):Promise<Blob>{const d=await db();try{return await new Promise((resolve,reject)=>{const r=d.transaction('files').objectStore('files').get(original.key);r.onsuccess=()=>r.result instanceof Blob&&r.result.size===original.size?resolve(r.result):reject(new Error('A preserved original is missing. Re-import its source file before exporting a complete backup.'));r.onerror=()=>reject(r.error);});}finally{d.close();}}
 function dataUrl(blob:Blob):Promise<string>{return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=()=>reject(r.error);r.readAsDataURL(blob);});}
 export async function withOriginalFiles(state:AppState):Promise<AppState>{

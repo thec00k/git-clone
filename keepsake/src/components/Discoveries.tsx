@@ -50,7 +50,7 @@ function Correspondence({id,onClose}:{id:string;onClose:()=>void}){
  function putInBook(){
   if(!letter||!state.books.some(b=>b.id===bookId))return;
   const pageId=uid('page');const now=Date.now();
-  const elements:PageElement[]=[{id:uid('house'),type:'caption',x:50,y:22,w:80,rotation:0,z:1,text:letter.title,fontSize:7,color:'#453e2f'},{id:uid('house'),type:'caption',x:50,y:52,w:78,rotation:0,z:2,text:letter.text+'\n— '+(letter.author??'the house'),fontSize:5,color:'#514737'}];
+  const elements:PageElement[]=[{id:uid('house'),type:'caption',x:50,y:22,w:80,rotation:0,z:1,text:letter.title.slice(0,280),fontSize:7,color:'#453e2f'},{id:uid('house'),type:'caption',x:50,y:52,w:78,rotation:0,z:2,text:(letter.text+'\n— '+(letter.author??'the house').slice(0,60)).slice(0,280),fontSize:5,color:'#514737'}];
   if(letter.reward)elements.push({id:uid('el'),type:'sticker',x:50,y:80,w:15,rotation:-5,z:3,glyph:REWARDS[letter.reward]?.glyph??'✦'});
   update(s=>{
    const next=keepDiscovery(s,id,now);const ds=discoveryState(next);

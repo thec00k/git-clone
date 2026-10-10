@@ -143,7 +143,8 @@ export async function completeLoginIfRedirected(): Promise<boolean> {
   url.searchParams.delete("state");
   window.history.replaceState({}, "", url.toString());
 
-  if (!verifier || (expectedState && state !== expectedState)) return false;
+  sessionStorage.removeItem(STATE_KEY);
+  if (!verifier || !expectedState || state !== expectedState) { sessionStorage.removeItem(VERIFIER_KEY); return false; }
 
   const body = new URLSearchParams({
     client_id: clientId,

@@ -405,7 +405,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addGuestEntry = useCallback(
     (author: string, message: string,deskCopy=false) =>
-      update((p) => ({ ...p, guestbook: [{ id: uid("g"), author, message,deskCopy,createdAt: Date.now() }, ...p.guestbook] })),
+      update((p) => ({ ...p, guestbook: [{ id: uid("g"), author: author.slice(0, 60), message: message.slice(0, 160),deskCopy,createdAt: Date.now() }, ...p.guestbook] })),
     [update],
   );
 

@@ -1,4 +1,4 @@
-import {useMemo} from 'react';
+import {useEffect,useMemo} from 'react';
 import * as THREE from 'three';
 import {useApp} from '../../store/appStore';
 import {roomAgeLevel} from '../../lib/roomAge';
@@ -9,6 +9,7 @@ export function DustBunnies() {
   const level = roomAgeLevel(environment.tidiedAt, Date.now());
   const mat = useMemo(() => new THREE.MeshStandardMaterial({color: '#cfc6b4', roughness: 1, transparent: true, opacity: .8, flatShading: true}), []);
   const geo = useMemo(() => new THREE.IcosahedronGeometry(.05, 0), []);
+  useEffect(() => () => { mat.dispose(); geo.dispose(); }, [mat, geo]);
   if (!level) return null;
   const count = level * 2 + 1 > CORNERS.length ? CORNERS.length : level * 2 + 1;
   return <group name="Dust_Bunnies">{CORNERS.slice(0, count).map(([x, z], i) => <mesh key={i} geometry={geo} material={mat} position={[x, .025, z]} scale={[1 + (i % 3) * .3, .5, 1 + ((i + 1) % 3) * .25]} rotation={[0, i, 0]}/>)}</group>;
