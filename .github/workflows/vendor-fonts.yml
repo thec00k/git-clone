@@ -1,10 +1,13 @@
 name: Vendor fonts
 
-# Manual job: downloads the typefaces from the npm registry, copies them into
+# One-off job: downloads the typefaces from the npm registry, copies them into
 # keepsake/public/fonts, writes keepsake/src/fonts.css and commits the result
-# to the branch it was run on.
+# to the branch. Runs when .github/requests/vendor-fonts is changed on a codex/
+# branch (workflow_dispatch only works for workflows already on the default branch).
 on:
-  workflow_dispatch:
+  push:
+    branches: ['codex/**']
+    paths: ['.github/requests/vendor-fonts']
 
 permissions:
   contents: write
