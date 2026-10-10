@@ -9,11 +9,11 @@ export function useActiveRoom() {
   const study = room === 'woodland';
   const review = study && wantsWoodlandStudy(window.location.search);
   const quality = environment.roomQuality ?? 'balanced';
-  return useMemo(() => {
+  return useMemo(() => ({
     ...(room === 'cyberpunk' ? cyberpunkRoom : room === 'beachfront' ? beachfrontRoom : woodlandRoom),
     asset: study ? WOODLAND_STUDY_ASSET : roomAssets[room][quality],
     study,
     review,
     ...(review ? {title:'Woodland composition study'} : {}),
-  }, [room,quality,study,review]);
+  }), [room,quality,study,review]);
 }
