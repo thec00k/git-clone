@@ -1,7 +1,8 @@
 import {musicOnEntry} from '../lib/roomMusic';
 import {validFurnitureChoices} from '../lib/furniture';
 import {claimDailyStamps} from "../lib/stamps";
-import {ownsRoomTheme,LEGACY_ROOM_IDS} from '../lib/roomThemes';
+import {msUntilNextDay} from "../lib/seasons";
+import {ownsRoomTheme,normalizeLegacyRooms} from '../lib/roomThemes';
 import {
   createContext,
   useCallback,
@@ -156,7 +157,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         : createSeed();
       if(!initial.achievementBaseline)initial.achievementBaseline=baseline(initial);
-      if (LEGACY_ROOM_IDS.includes(initial.environment.roomTheme as string)) initial.environment = {...initial.environment, roomTheme:'woodland'};
+      normalizeLegacyRooms(initial);
       setState(musicOnEntry(initial));
       loadedRef.current = true;
     })().catch(error => { if (!cancelled) setLoadError(error instanceof Error ? error.message : 'Your saved room could not be read.'); });
@@ -215,7 +216,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const restoreRoom = useCallback(async (next: AppState) => {
     next=await restoreOriginalFiles(next);
-    next={...next,achievementBaseline:next.achievementBaseline??baseline(next)};
+    next={...next,achievementBaseline:next.achievementBaseline??baseline(next),environment:{...next.environment,tidiedAt:Date.now()}};
     window.clearTimeout(saveTimer.current);
     if (!await persist(next)) throw new Error("The restored room could not be saved.");
     stateRef.current=next;setState(next);setNewlyUnlocked([]);setSaveStatus('saved');
@@ -230,7 +231,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const claim = () => { if (!document.hidden) update((p) => { const c = claimDailyStamps(p, new Date()); return c.environment.tidiedAt === undefined ? { ...c, environment: { ...c.environment, tidiedAt: Date.now() } } : c; }); };
     claim();
     document.addEventListener('visibilitychange', claim);
-    return () => document.removeEventListener('visibilitychange', claim);
+    let timer = window.setTimeout(function tick() { claim(); timer = window.setTimeout(tick, msUntilNextDay() + 1000); }, msUntilNextDay() + 1000);
+    return () => { window.clearTimeout(timer); document.removeEventListener('visibilitychange', claim); };
   }, [loadedState, update]);
 
   const updateActiveBook = useCallback(

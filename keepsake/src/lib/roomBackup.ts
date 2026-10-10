@@ -1,4 +1,5 @@
-import {ownsRoomTheme,LEGACY_ROOM_IDS} from './roomThemes.ts';
+import {CAPTION_LOOKS} from '../types/scrapbook.ts';
+import {ownsRoomTheme,normalizeLegacyRooms} from './roomThemes.ts';
 import {isStickerFinish,validPaperSettings} from './materials.ts';
 import {BINDER_COLORS,MAX_BINDER_CARDS,validateCardGlb} from './cardBinders.ts';
 import {withOriginalFiles} from './originalPhotos.ts';
@@ -20,7 +21,7 @@ const image=(v:unknown)=>string(v)&&(/^(data:image\/(png|jpeg|webp|gif);base64,|
 function records(v:unknown,check:(v:RecordValue)=>boolean){return Array.isArray(v)&&v.every(x=>object(x)&&check(x));}
 export function parseRoomBackup(text:string):AppState{
  const file:unknown=JSON.parse(text);ensure(object(file)&&file.format==='keepsake-room'&&file.backupVersion===1&&object(file.state));const s=file.state;
-  if(object(s.environment)&&LEGACY_ROOM_IDS.includes(s.environment.roomTheme as string))s.environment.roomTheme='woodland';
+  normalizeLegacyRooms(s);
   if(s.cardBinders!==undefined){
   ensure(Array.isArray(s.cardBinders)&&s.cardBinders.length<=12);
   ensure(records(s.cardBinders,b=>string(b.id)&&string(b.title)&&(b.title as string).length<=80&&BINDER_COLORS.includes(b.color as string)&&(b.coverSrc===undefined||image(b.coverSrc))&&Array.isArray(b.cards)&&b.cards.length<=MAX_BINDER_CARDS&&records(b.cards,c=>string(c.id)&&string(c.title)&&(c.title as string).length<=100&&['image','imported-scan'].includes(c.source as string)&&['paper','foil'].includes(c.finish as string)&&(c.position===undefined||(Number.isInteger(c.position)&&(c.position as number)>=0&&(c.position as number)<MAX_BINDER_CARDS))&&(c.src===undefined||image(c.src))&&(c.backSrc===undefined||image(c.backSrc))&&(c.source==='image'?image(c.src):string(c.modelSrc)))));
@@ -41,7 +42,7 @@ export function parseRoomBackup(text:string):AppState{
  ensure(records(s.books,b=>string(b.id)&&string(b.title)&&string(b.subtitle)&&['cocoa','forest','wine','midnight','ochre'].includes(b.coverStyle as string)&&['private','friends','public'].includes(b.visibility as string)&&number(b.createdAt)&&number(b.updatedAt)&&records(b.pages,p=>string(p.id)&&(p.titlePage===undefined||typeof p.titlePage==='boolean')&&records(p.elements,e=>{
   if(!string(e.id)||!['x','y','w','rotation','z'].every(k=>number(e[k])))return false;
   if(e.type==='photo')return image(e.src)&&['polaroid','tape','flush'].includes(e.frame as string)&&(e.cropAspect===undefined||(number(e.cropAspect)&&(e.cropAspect as number)>0&&(e.cropAspect as number)<=5));
-  if(e.type==='caption')return string(e.text)&&number(e.fontSize)&&string(e.color)&&(e.look===undefined||['chrome','glow','rhinestone','bubble','fire','ice','ransom'].includes(e.look as string));
+  if(e.type==='caption')return string(e.text)&&(e.text as string).length<=280&&number(e.fontSize)&&(e.fontSize as number)>0&&(e.fontSize as number)<=40&&string(e.color)&&(e.look===undefined||CAPTION_LOOKS.some(l=>l.id===e.look));
   if(e.type==='sticker')return string(e.glyph)&&(e.finish===undefined||isStickerFinish(e.finish))&&(e.finishStrength===undefined||number(e.finishStrength)&&(e.finishStrength as number)>=0&&(e.finishStrength as number)<=1);
   return e.type==='stroke'&&string(e.color)&&number(e.width)&&records(e.points,p=>number(p.x)&&number(p.y));
  }))));
@@ -83,7 +84,8 @@ export function parseRoomBackup(text:string):AppState{
  ensure(e.hemisphere===undefined||['auto','north','south'].includes(e.hemisphere as string));
  ensure(e.holidaysOff===undefined||(Array.isArray(e.holidaysOff)&&e.holidaysOff.length<=5&&e.holidaysOff.every(h=>['valentines','easter','independence-day','halloween','christmas'].includes(h as string))));
  ensure(['memoryLighting','soundGeography','displayCaseLit'].every(k=>e[k]===undefined||typeof e[k]==='boolean'));
- ensure(s.displayCaseScans===undefined||records(s.displayCaseScans,x=>string(x.id)&&string(x.title)&&string(x.modelSrc)&&number(x.shelf)&&(x.shelf as number)>=0&&(x.shelf as number)<4&&number(x.slot)&&(x.slot as number)>=0&&(x.slot as number)<4));
+ ensure(s.displayCaseScans===undefined||Array.isArray(s.displayCaseScans)&&s.displayCaseScans.length<=16&&new Set((s.displayCaseScans as {shelf:number;slot:number}[]).map(x=>x.shelf+':'+x.slot)).size===s.displayCaseScans.length);
+ ensure(s.displayCaseScans===undefined||records(s.displayCaseScans,x=>string(x.id)&&string(x.title)&&string(x.modelSrc)&&/^data:model\/gltf-binary;base64,[A-Za-z0-9+/]*={0,2}$/.test(x.modelSrc as string)&&(x.modelSrc as string).length<7*1024*1024&&number(x.shelf)&&(x.shelf as number)>=0&&(x.shelf as number)<4&&number(x.slot)&&(x.slot as number)>=0&&(x.slot as number)<4));
  ensure(e.roomTheme===undefined || ['woodland','beachfront','cyberpunk'].includes(e.roomTheme as string));
  ensure(e.furniture===undefined||validFurnitureChoices(e.furniture));
  ensure(e.tidiedAt===undefined||number(e.tidiedAt)&&(e.tidiedAt as number)>=0);

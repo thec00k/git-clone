@@ -15,3 +15,13 @@ export function switchRoomTheme(state: AppState, next: RoomThemeId): AppState {
   const target = layouts[next] ?? {sillItem: decor.sillItem, posterItem: decor.posterItem==='poster-snake'&&next!=='cyberpunk'?undefined:decor.posterItem, crtColor: next === 'beachfront' ? 'coastal' as const : next === 'cyberpunk' ? 'blue' as const : 'green' as const};
   return {...state, environment: {...state.environment, roomTheme: next, crtColor: target.crtColor ?? (next === 'beachfront' ? 'coastal' : next === 'cyberpunk' ? 'blue' : 'green')}, roomDecor: {...decor, sillItem: target.sillItem, posterItem: target.posterItem, layouts}};
 }
+
+const LIVE_ROOMS = ['woodland','beachfront','cyberpunk'];
+/** Rewrites retired room ids (in the saved theme, ownership list and per-room layouts) so old saves load and their backups restore. Mutates a plain parsed state. */
+export function normalizeLegacyRooms(state: any): void {
+  const env = state?.environment;
+  if (env && LEGACY_ROOM_IDS.includes(env.roomTheme)) env.roomTheme = 'woodland';
+  if (Array.isArray(state?.ownedRoomThemes)) state.ownedRoomThemes = [...new Set(state.ownedRoomThemes.filter((id: unknown) => LIVE_ROOMS.includes(id as string)))];
+  const layouts = state?.roomDecor?.layouts;
+  if (layouts && typeof layouts === 'object') for (const key of Object.keys(layouts)) if (!LIVE_ROOMS.includes(key)) delete layouts[key];
+}

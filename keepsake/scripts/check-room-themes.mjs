@@ -41,3 +41,15 @@ const cloudBackup=parseRoomBackup(serializeRoom(cloudRoom));
 assert.equal(cloudBackup.environment.cloudPalette,'multicolor');assert.equal(cloudBackup.environment.capsuleFinish,'metal');
 assert.throws(()=>parseRoomBackup(serializeRoom({...cloudRoom,environment:{...cloudRoom.environment,cloudPalette:'invalid'}})));
 assert.throws(()=>parseRoomBackup(serializeRoom({...cloudRoom,environment:{...cloudRoom.environment,capsuleFinish:'invalid'}})));
+{
+  // Backups of saves from retired rooms (classic, Snowy Mountain) must still restore.
+  const legacy=structuredClone(state);
+  legacy.ownedRoomThemes=['woodland','snowy-mountain'];
+  legacy.roomDecor={...(legacy.roomDecor??{owned:[]}),layouts:{'snowy-mountain':{sillItem:undefined},woodland:{}}};
+  legacy.environment.roomTheme='snowy-mountain';
+  const fixed=parseRoomBackup(serializeRoom(legacy));
+  assert.equal(fixed.environment.roomTheme,'woodland');
+  assert.deepEqual(fixed.ownedRoomThemes,['woodland']);
+  assert.equal(fixed.roomDecor.layouts['snowy-mountain'],undefined);
+  console.log('Legacy room ids, ownership lists and layouts are normalised so old backups restore.');
+}

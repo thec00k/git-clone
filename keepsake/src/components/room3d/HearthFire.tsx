@@ -22,19 +22,21 @@ const FIRE=new THREE.Vector3(-.91,.5,1.9);
 
 function HearthSound(){
  const {camera}=useThree();const {environment}=useApp();
- const sound=useRef<FireplaceAudio|null>(null),elapsed=useRef(0),settings=useRef(environment);
+ const gesture=useRef(false),sound=useRef<FireplaceAudio|null>(null),elapsed=useRef(0),settings=useRef(environment);
  useEffect(()=>{settings.current=environment;},[environment]);
  const v=useMemo(()=>({p:new THREE.Vector3(),f:new THREE.Vector3(),u:new THREE.Vector3()}),[]);
  const wanted=()=>settings.current.fireplaceSound!==false&&settings.current.ambienceVolume>0&&!document.hidden;
  useEffect(()=>{
   let alive=true;
   // Browsers only allow audio after a gesture; start on the first one.
-  const start=()=>{if(!alive||!wanted())return;try{sound.current??=createFireplaceAudio();sound.current.resume();}catch{/* audio never blocks the room */}};
+  const start=()=>{gesture.current=true;if(!alive||!wanted())return;try{sound.current??=createFireplaceAudio();sound.current.resume();}catch{/* audio never blocks the room */}};
   const visibility=()=>{if(document.hidden)sound.current?.suspend();else if(sound.current&&wanted())sound.current.resume();};
   window.addEventListener('pointerdown',start);window.addEventListener('keydown',start);document.addEventListener('visibilitychange',visibility);
   return()=>{alive=false;window.removeEventListener('pointerdown',start);window.removeEventListener('keydown',start);document.removeEventListener('visibilitychange',visibility);sound.current?.dispose();sound.current=null;};
  },[]);
- useEffect(()=>{const s=sound.current;if(!s)return;s.volume(environment.fireplaceSound===false?0:environment.ambienceVolume);if(wanted())s.resume();else s.suspend();},[environment.fireplaceSound,environment.ambienceVolume]);
+ useEffect(()=>{
+  if(!sound.current&&gesture.current&&wanted()){try{sound.current=createFireplaceAudio();}catch{/* no audio */}}
+  const s=sound.current;if(!s)return;s.volume(environment.fireplaceSound===false?0:environment.ambienceVolume);if(wanted())s.resume();else s.suspend();},[environment.fireplaceSound,environment.ambienceVolume]);
  useFrame((_,dt)=>{
   elapsed.current+=dt;if(elapsed.current<.05)return;elapsed.current=0;
   const s=sound.current;if(!s)return;

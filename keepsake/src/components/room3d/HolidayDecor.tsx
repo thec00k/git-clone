@@ -23,7 +23,7 @@ function Garland({a, b, depth, count, kind, colors, size = .13, thickness = .004
     if (kind === 'heart') return new THREE.ShapeGeometry(heartShape());
     const s = new THREE.Shape(); s.moveTo(-.5, 0); s.lineTo(.5, 0); s.lineTo(0, -1.15); s.closePath(); return new THREE.ShapeGeometry(s);
   }, [kind]);
-  const mats = useMemo(() => colors.map(c => new THREE.MeshStandardMaterial({color: c, roughness: .95, side: THREE.DoubleSide, flatShading: true})), [colors]);
+  const mats = useMemo(() => colors.map(c => new THREE.MeshStandardMaterial({color: c, roughness: .95, side: THREE.DoubleSide, flatShading: true})), [colors.join(',')]);
   const line = useMemo(() => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(Array.from({length: 13}, (_, i) => sag(a, b, depth, i / 12))), 24, thickness, 5), [a, b, depth, thickness]);
   const lineMat = useMemo(() => paper(lineColor), [lineColor]);
   return <group>

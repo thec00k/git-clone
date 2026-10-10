@@ -58,7 +58,11 @@ function clampInRoom(pos: THREE.Vector3, ROOM_WALK: RoomTheme['walkBounds']) {
   pos.z = THREE.MathUtils.clamp(pos.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
   // The hearth stands on the Woodland south wall: stay out of its footprint.
   const k = ROOM_WALK.keepOut;
-  if (k && pos.x > k.minX && pos.x < k.maxX && pos.z > k.minZ) pos.z = k.minZ;
+  if (k && pos.x > k.minX && pos.x < k.maxX && pos.z > k.minZ) {
+    // Slide out along the nearest edge instead of snapping the viewer across the room.
+    const dz = pos.z - k.minZ, dl = pos.x - k.minX, dr = k.maxX - pos.x;
+    if (dz <= dl && dz <= dr) pos.z = k.minZ; else if (dl < dr) pos.x = k.minX; else pos.x = k.maxX;
+  }
   // Keep the viewer's body clear of the cabinet, including its handles.
   if (pos.z > .88 && pos.x > 1.30) pos.x = 1.30;
 }
@@ -231,7 +235,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
     if (host instanceof HTMLElement) {
       host.dataset.cam = `${camera.position.x.toFixed(3)},${camera.position.y.toFixed(3)},${camera.position.z.toFixed(3)}`;
       if(camera instanceof THREE.PerspectiveCamera)host.dataset.fov=camera.fov.toFixed(2);
-      if(activeRoom.study){host.dataset.textureCount=String(gl.info.memory.textures);host.dataset.drawCalls=String(gl.info.render.calls);host.dataset.triangles=String(gl.info.render.triangles);}
+      if(activeRoom.review){host.dataset.textureCount=String(gl.info.memory.textures);host.dataset.drawCalls=String(gl.info.render.calls);host.dataset.triangles=String(gl.info.render.triangles);}
       host.dataset.eye = camera.position.y.toFixed(3);
       host.dataset.look = `${yaw.current.toFixed(3)},${pitch.current.toFixed(3)}`;
       host.dataset.walk = keys.current.f || keys.current.r ? "1" : "0";

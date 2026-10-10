@@ -6,7 +6,8 @@
 # real hosted build has been exercised (Spotify, SoundCloud, scan import).
 
 /*
-  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://sdk.scdn.co https://w.soundcloud.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.scdn.co https://*.sndcdn.com; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob: https://api.spotify.com https://accounts.spotify.com https://open.spotify.com http://127.0.0.1:* http://localhost:*; frame-src https://open.spotify.com https://w.soundcloud.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://sdk.scdn.co https://open.spotify.com https://w.soundcloud.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.scdn.co https://*.sndcdn.com; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob: https://api.spotify.com https://accounts.spotify.com https://open.spotify.com http://127.0.0.1:* http://localhost:*; frame-src https://open.spotify.com https://w.soundcloud.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()

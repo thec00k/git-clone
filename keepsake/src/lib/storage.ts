@@ -59,6 +59,7 @@ async function persist(state: AppState): Promise<void> {
     hashes.set(src, PREFIX + Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join(''));
   }
   const packed = mapStrings(state, s => hashes.get(s) ?? s);
+  const referenced = new Set([...images].map(src => hashes.get(src)!));
   const db = await openDb();
   try {
     await new Promise<void>((resolve,reject) => {
@@ -68,10 +69,12 @@ async function persist(state: AppState): Promise<void> {
       check.onsuccess = () => {
         if ((check.result ?? 0) !== revision) { conflict = true; tx.abort(); return; }
         for (const src of images) { const key = hashes.get(src)!; if (!knownAssets.has(key)) tx.objectStore('images').put(src,key); }
+        // Photos no longer in the room are removed so deleting something really frees it (and its privacy).
+        for (const key of knownAssets) if (!referenced.has(key)) tx.objectStore('images').delete(key);
         tx.objectStore('app').put(packed,'state');
         tx.objectStore('app').put(revision + 1,'revision');
       };
-      tx.oncomplete = () => { revision++; for (const src of images) knownAssets.add(hashes.get(src)!); resolve(); };
+      tx.oncomplete = () => { revision++; knownAssets = new Set(referenced); resolve(); };
       tx.onabort = () => reject(conflict ? new SaveConflict() : tx.error ?? new Error('Saving was interrupted.'));
       tx.onerror = () => reject(tx.error);
     });
