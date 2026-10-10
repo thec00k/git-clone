@@ -1,3 +1,4 @@
+import type {RoomTheme} from './themes';
 import {woodlandStudyPose,type WoodlandStudyView} from './woodlandStudy';
 import {useReducedMotion} from '../../hooks/useReducedMotion';
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -52,9 +53,12 @@ function lookDir(yaw: number, pitch: number, target = new THREE.Vector3()) {
   return target.set(Math.sin(yaw) * cp, Math.sin(pitch), -Math.cos(yaw) * cp);
 }
 
-function clampInRoom(pos: THREE.Vector3, ROOM_WALK: {minX:number;maxX:number;minZ:number;maxZ:number}) {
+function clampInRoom(pos: THREE.Vector3, ROOM_WALK: RoomTheme['walkBounds']) {
   pos.x = THREE.MathUtils.clamp(pos.x, ROOM_WALK.minX, ROOM_WALK.maxX);
   pos.z = THREE.MathUtils.clamp(pos.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
+  // The hearth stands on the Woodland south wall: stay out of its footprint.
+  const k = ROOM_WALK.keepOut;
+  if (k && pos.x > k.minX && pos.x < k.maxX && pos.z > k.minZ) pos.z = k.minZ;
   // Keep the viewer's body clear of the cabinet, including its handles.
   if (pos.z > .88 && pos.x > 1.30) pos.x = 1.30;
 }

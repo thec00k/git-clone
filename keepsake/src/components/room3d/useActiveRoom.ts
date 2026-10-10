@@ -7,12 +7,14 @@ export function useActiveRoom() {
   const {environment} = useApp();
   const classic = new URLSearchParams(window.location.search).get('theme') === 'classic';
   const room = environment.roomTheme === 'cyberpunk' ? 'cyberpunk' : environment.roomTheme === 'beachfront' ? 'beachfront' : 'woodland';
-  const study = !classic && room === 'woodland' && wantsWoodlandStudy(window.location.search);
+  const study = !classic && room === 'woodland';
+  const review = study && wantsWoodlandStudy(window.location.search);
   const quality = environment.roomQuality ?? 'balanced';
   return useMemo(() => classic ? classicRoom : {
     ...(room === 'cyberpunk' ? cyberpunkRoom : room === 'beachfront' ? beachfrontRoom : woodlandRoom),
     asset: study ? WOODLAND_STUDY_ASSET : roomAssets[room][quality],
     study,
-    ...(study ? {title:'Woodland composition study'} : {}),
-  }, [classic,room,quality,study]);
+    review,
+    ...(review ? {title:'Woodland composition study'} : {}),
+  }, [classic,room,quality,study,review]);
 }

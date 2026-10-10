@@ -52,11 +52,12 @@ export function RoomScene3D({
 }) {
   const activeRoom=useActiveRoom();
   const study=activeRoom.study===true;
-  const [studyView,setStudyView]=useState<WoodlandStudyView|null>('establishing');
+  const review=activeRoom.review===true;
+  const [studyView,setStudyView]=useState<WoodlandStudyView|null>(review?'establishing':null);
   const [studyPhase,setStudyPhase]=useState<Phase>('dusk');
   const [winter,setWinter]=useState(false);
-  const phase=study?studyPhase:basePhase;
-  const environment=study?{...baseEnvironment,season:(winter?'winter':'autumn') as Environment['season']}:baseEnvironment;
+  const phase=review?studyPhase:basePhase;
+  const environment=review?{...baseEnvironment,season:(winter?'winter':'autumn') as Environment['season']}:baseEnvironment;
   const {phase:workbenchPhase,openBinder}=useWorkbench();
   const atWorkbench=workbenchPhase!=='room';
   const quality=environment.roomQuality??"balanced";
@@ -165,8 +166,8 @@ export function RoomScene3D({
       className="ks-room3d"
       data-room-face={roomFace}
       data-study={study?'woodland':undefined}
-      data-study-view={study?studyView??'free':undefined}
-      data-study-season={study?(winter?'winter':'autumn'):undefined}
+      data-study-view={review?studyView??'free':undefined}
+      data-study-season={study?environment.season:undefined}
       data-workbench={workbenchPhase}
       data-seated={seated ? "1" : "0"}
       data-ceiling={environment.ceilingOn !== false ? "1" : "0"}
@@ -208,14 +209,14 @@ export function RoomScene3D({
             onToggleCeiling={toggleCeiling}
           />
         {activeRoom.woodland && !study && <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />}
-        {study&&<WoodlandStudyExterior winter={winter} phase={phase}/>}
+        {study&&<WoodlandStudyExterior season={environment.season} phase={phase}/>}
         {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment} particles={profile.particles}/>}
         {activeRoom.id === "cyberpunk" && environment.weather !== "clear" && <OutdoorWeather kind={environment.weather} count={profile.particles} room="cyberpunk"/>}
         </Suspense>
-        <EyeCamera studyView={study?studyView:null} displayCase={displayCase} workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
+        <EyeCamera studyView={review?studyView:null} displayCase={displayCase} workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>
       </div>
-      {study&&!touring&&!atWorkbench&&<WoodlandStudyControls view={studyView} onView={v=>{setStudyView(v);setDisplayCase(false);setReading(false);setSeated(false);setShopOpen(false);setRoomFace('front');setViewRevision(n=>n+1);}} winter={winter} onWinter={setWinter} phase={studyPhase} onPhase={setStudyPhase}/>}
+      {review&&!touring&&!atWorkbench&&<WoodlandStudyControls view={studyView} onView={v=>{setStudyView(v);setDisplayCase(false);setReading(false);setSeated(false);setShopOpen(false);setRoomFace('front');setViewRevision(n=>n+1);}} winter={winter} onWinter={setWinter} phase={studyPhase} onPhase={setStudyPhase}/>}
       <div id="ks-workbench-controls" className="ks-workbench-controls"/>
       {binderOpen&&!isVisitor&&<Suspense fallback={<p>Opening binders…</p>}><CardBinders onPick={id=>{setBinderOpen(false);openBinder(id);}} onClose={()=>setBinderOpen(false)}/></Suspense>}
       {!touring && !atWorkbench && <RoomControls onSettings={onOpenWindow} onCardBinders={()=>setBinderOpen(true)} onDisplayCase={()=>{setRoomFace('right');setSeated(false);setReading(false);setDisplayCase(true);setViewRevision(v=>v+1);}} onLibrary={()=>onGo("shelf")} onReading={()=>{setDisplayCase(false);setRoomFace("front");setSeated(false);setReading(true);setViewRevision(v=>v+1);}} seated={seated} environment={environment}

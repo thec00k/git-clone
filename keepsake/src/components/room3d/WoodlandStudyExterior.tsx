@@ -6,13 +6,17 @@ const DEPTHS = [-19, -15, -11, -8, -5.5, -3.7];
 /** Rough registered paint layers: shared geography, authored depth, no autonomous drift.
  * Canvas marks are deliberately provisional. Replace with registered art exports after camera proof.
  */
-function paintLayer(index: number, winter: boolean, phase: Phase) {
+type Season='spring'|'summer'|'autumn'|'winter';
+function paintLayer(index: number, season: Season, phase: Phase) {
+  const winter = season === 'winter';
   const canvas = document.createElement('canvas');
   canvas.width = 1024; canvas.height = 768;
   const c = canvas.getContext('2d')!;
   const night = phase === 'night', dusk = phase === 'dusk';
   const palettes = winter
     ? (night ? ['#172838','#344b5b','#3b5968','#647e89','#3b5964','#263f48'] : ['#b9ccd2','#8fa9b4','#6b8994','#d6dedd','#59767b','#3d595d'])
+    : season==='autumn'&&!night ? (dusk ? ['#b0a79a','#8b8878','#8a6b45','#b0793c','#8c5b33','#4d4332'] : ['#cdc9b4','#a8a58c','#9a7a4a','#c58a3e','#9d6a36','#554a35'])
+    : season==='spring'&&!night ? (dusk ? ['#c1b2b0','#93a095','#6f8f72','#9fb07c','#6f9a63','#3f5c48'] : ['#d3dccb','#a4b9a6','#7ba67f','#b5c98a','#78a85f','#456a4c'])
     : (night ? ['#1c2b36','#34464c','#354d4a','#54685a','#364c3f','#263e35'] : dusk ? ['#a8b3ae','#7d9291','#617b70','#a49970','#67694b','#3b5447'] : ['#c8d3c2','#99aaa0','#708a78','#afaa79','#7b7e52','#405d49']);
   const path=(points:number[][],color:string)=>{
     c.fillStyle=color; c.beginPath(); points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();
@@ -51,8 +55,8 @@ function paintLayer(index: number, winter: boolean, phase: Phase) {
   texture.generateMipmaps=false;texture.minFilter=THREE.LinearFilter;texture.magFilter=THREE.LinearFilter;
   return texture;
 }
-export function WoodlandStudyExterior({winter,phase}:{winter:boolean;phase:Phase}) {
-  const textures=useMemo(()=>DEPTHS.map((_,i)=>paintLayer(i,winter,phase)),[winter,phase]);
+export function WoodlandStudyExterior({season,phase}:{season:Season;phase:Phase}) {
+  const textures=useMemo(()=>DEPTHS.map((_,i)=>paintLayer(i,season,phase)),[season,phase]);
   useEffect(()=>()=>textures.forEach(t=>t.dispose()),[textures]);
   return <group name="woodland-study-layered-exterior">
     {DEPTHS.map((z,i)=><mesh key={z} name={'Study_Exterior_Layer_'+i} position={[-.15,2.15,z]} renderOrder={i-10}>
