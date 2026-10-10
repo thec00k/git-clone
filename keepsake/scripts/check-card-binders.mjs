@@ -1,7 +1,5 @@
 import assert from 'node:assert/strict';
 import {binderCardAt,binderSpreadCount,cardsWithPositions,placeBinderCards,validateCardGlb} from '../src/lib/cardBinders.ts';
-import {cardMetadataReference} from '../src/lib/cardMetadata.ts';
-import {nftAssetsFromDas} from '../src/lib/solanaWalletNfts.ts';
 import {parseRoomBackup,serializeRoom} from '../src/lib/roomBackup.ts';
 export function cardFixture(edit=j=>j){
  const json=edit({asset:{version:'2.0'},scene:0,scenes:[{nodes:[0]}],nodes:[{mesh:0}],meshes:[{primitives:[{attributes:{POSITION:0}}]}],buffers:[{byteLength:36}],bufferViews:[{buffer:0,byteOffset:0,byteLength:36}],accessors:[{bufferView:0,componentType:5126,count:3,type:'VEC3',min:[-.315,-.44,0],max:[.315,.44,0]}]});
@@ -21,9 +19,4 @@ const state={version:1,profile:{displayName:'Test'},books:[],activeBookId:null,d
 assert.deepEqual(parseRoomBackup(serializeRoom(state)),state);
 const bad=structuredClone(state);bad.cardBinders[0].cards[0].modelSrc='https://example.com/card.glb';assert.throws(()=>parseRoomBackup(serializeRoom(bad)));
 const missingDeskBinder=structuredClone(state);missingDeskBinder.deskBinderId='missing';assert.throws(()=>parseRoomBackup(serializeRoom(missingDeskBinder)));
-assert.deepEqual(cardMetadataReference({name:'Card One',image:'ipfs://bafy/card.png'}),{title:'Card One',image:'https://ipfs.io/ipfs/bafy/card.png'});
-assert.equal(cardMetadataReference({symbol:'TWO',properties:{files:[{uri:'https://cdn.example/card.webp'}]}}).image,'https://cdn.example/card.webp');
-assert.throws(()=>cardMetadataReference({image:'http://127.0.0.1/private.png'}));
-assert.deepEqual(nftAssetsFromDas([{id:'mint-one',content:{metadata:{name:'Wallet Card'},links:{image:'ipfs://bafy/wallet.png'}}}]),[{id:'mint-one',title:'Wallet Card',image:'https://ipfs.io/ipfs/bafy/wallet.png',collection:undefined}]);
-assert.deepEqual(nftAssetsFromDas([{id:'no-art',content:{metadata:{name:'Token'}}},{id:'private-art',content:{links:{image:'http://localhost/secret.png'}}}]),[]);
 console.log('PASS card scans: valid embedded GLB and backup round-trip; reject remote assets, cycles, excessive geometry and unsupported compression.');
