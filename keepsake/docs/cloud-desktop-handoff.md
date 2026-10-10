@@ -1,5 +1,7 @@
 # Cloud and desktop collaboration handoff
 
+> **Superseded in part (2026-10-10):** this page predates the current plan. `main` is intentionally unchanged and is **not** the integration branch. Work continues on `codex/woodland-composition-proof` and its feature branches (currently `codex/foundations-and-seasons`). Use [handoff-current.md](handoff-current.md) for status and `claude/owner-decisions` in the Keepsake project for decisions.
+
 Repository: https://github.com/thec00k/git-clone.git
 Application: keepsake/ (React/Vite/Three.js). Use main as the shared integration branch.
 
