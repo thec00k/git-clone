@@ -1,0 +1,42 @@
+name: Keepsake CI
+
+on:
+  push:
+    branches: ['codex/**']
+    paths: ['keepsake/**', '.github/**']
+  pull_request:
+    paths: ['keepsake/**', '.github/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: keepsake
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: keepsake/package-lock.json
+      - name: Install
+        run: bash ../.github/scripts/run-step.sh install npm ci
+      - name: Type-check and build
+        if: always()
+        run: bash ../.github/scripts/run-step.sh build npm run build
+      - name: Lint
+        if: always()
+        run: bash ../.github/scripts/run-step.sh lint npm run lint
+      - name: Automated acceptance checks
+        if: always()
+        run: bash ../.github/scripts/run-step.sh acceptance npm run check:acceptance
