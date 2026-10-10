@@ -41,6 +41,9 @@ jobs:
           nohup npx vite --host 127.0.0.1 --port 5184 > "$RUNNER_TEMP/vite.log" 2>&1 &
           for i in $(seq 1 60); do curl -sf http://127.0.0.1:5184/ >/dev/null && exit 0; sleep 1; done
           cat "$RUNNER_TEMP/vite.log"; exit 1
+      - name: Lettering sheet
+        if: always()
+        run: bash ../.github/scripts/run-step.sh lettering node scripts/capture-lettering.mjs
       - name: Room screenshots
         if: always()
         run: bash ../.github/scripts/run-step.sh capture node scripts/capture-room.mjs

@@ -13,7 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import type { ElementLocation } from "../hooks/useScrapbook";
-import { SHARPIE_COLORS } from "../types/scrapbook";
+import { SHARPIE_COLORS, CAPTION_LOOKS, type CaptionLook } from "../types/scrapbook";
 
 interface Props {
   selected: ElementLocation;
@@ -24,6 +24,7 @@ interface Props {
   onBackward: (id: string) => void;
   onCycleFrame: (id: string) => void;
   onColor: (id: string, color: string) => void;
+  onLook: (id: string, look: CaptionLook | undefined) => void;
   onReplace: (id: string, file: File) => void;
   onDelete: (id: string) => void;
   onFinish: (id:string,patch:{finish?:StickerFinish;finishStrength?:number})=>void;
@@ -38,6 +39,7 @@ export function SelectionToolbar({
   onBackward,
   onCycleFrame,
   onColor,
+  onLook,
   onReplace,
   onDelete,
   onFinish,
@@ -128,6 +130,16 @@ export function SelectionToolbar({
               className="h-5 w-5 rounded-full border border-paper/25"
               style={{ background: c }}
             />
+          ))}
+        </span>
+      )}
+      {element.type === "caption" && (
+        <span className="mx-0.5 flex items-center gap-1" role="group" aria-label="Lettering style">
+          <button className="ks-look-swatch" aria-pressed={!element.look} aria-label="Handwritten lettering" title="Handwritten" onClick={() => onLook(id, undefined)} style={{ fontFamily: "var(--font-script)", fontStyle: "normal", fontWeight: 600 }}>Aa</button>
+          {CAPTION_LOOKS.map((l) => (
+            <button key={l.id} className="ks-look-swatch" aria-pressed={element.look === l.id} aria-label={`${l.label} lettering`} title={l.label} onClick={() => onLook(id, l.id)}>
+              <span className={`ks-look ks-look-${l.id}`}>Aa</span>
+            </button>
           ))}
         </span>
       )}

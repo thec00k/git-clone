@@ -1,0 +1,16 @@
+/* Y2K lettering for scrapbook captions: pure CSS, no images or extra fonts, so it prints and backs up cleanly.
+   Each look ignores the ink colour on purpose (chrome is chrome). Motion is limited to a slow shimmer and is off for reduced-motion. */
+.ks-look{font-family:var(--font-display);font-style:italic;font-weight:900;letter-spacing:.01em;line-height:1.05}
+.ks-look-chrome{background:linear-gradient(180deg,#fff 0%,#dfe6ee 30%,#8795a8 48%,#2e3a4b 52%,#aeb9c8 66%,#f4f7fb 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:.012em #2a3442;filter:drop-shadow(0 .035em .015em rgba(20,26,36,.45))}
+.ks-look-glow{display:inline-block;padding:.12em .4em .16em;border-radius:.5em;background:linear-gradient(180deg,#26123f,#150a2a);-webkit-text-fill-color:#fff;text-shadow:0 0 .1em #fff,0 0 .22em #ff7be5,0 0 .45em #ff3fc6,0 0 .8em #a02bff;box-shadow:0 .04em .12em rgba(30,10,60,.45)}
+.ks-look-rhinestone{background:radial-gradient(circle at 50% 50%,#fff 0 .035em,transparent .06em) 0 0/.2em .2em,linear-gradient(120deg,#ff9ad5,#c9a2ff 45%,#8fd3ff 75%,#ff9ad5);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:.014em #7a4f9c;filter:drop-shadow(0 .03em .02em rgba(90,40,120,.4));animation:ks-twinkle 3.2s ease-in-out infinite}
+.ks-look-bubble{-webkit-text-fill-color:#35e0ff;text-shadow:-.04em -.04em 0 #fff,.04em -.04em 0 #fff,-.04em .04em 0 #fff,.04em .04em 0 #fff,0 -.06em 0 #fff,0 .06em 0 #fff,-.06em 0 0 #fff,.06em 0 0 #fff,.1em .1em 0 #7a35e6,.07em .13em 0 #7a35e6}
+.ks-look-fire{background:linear-gradient(180deg,#fff7b0 0%,#ffc531 30%,#ff5a1f 62%,#9a1500 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:.01em #5a0d00;filter:drop-shadow(0 -.05em .07em #ff8a00) drop-shadow(0 .03em 0 #3a0a00);animation:ks-flare 1.6s steps(1) infinite}
+.ks-look-ice{background:linear-gradient(180deg,#fff 0%,#d4f0ff 35%,#7cc4f2 70%,#3f8fd2 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:.016em #1f5f99;filter:drop-shadow(0 0 .08em #8fe0ff) drop-shadow(0 .03em 0 rgba(20,70,120,.5))}
+@keyframes ks-twinkle{0%,100%{filter:drop-shadow(0 .03em .02em rgba(90,40,120,.4)) brightness(1)}50%{filter:drop-shadow(0 .03em .02em rgba(90,40,120,.4)) brightness(1.18)}}
+@keyframes ks-flare{0%{filter:drop-shadow(0 -.05em .07em #ff8a00) drop-shadow(0 .03em 0 #3a0a00)}33%{filter:drop-shadow(0 -.07em .09em #ff9d1a) drop-shadow(0 .03em 0 #3a0a00)}66%{filter:drop-shadow(0 -.04em .06em #ff7a00) drop-shadow(0 .03em 0 #3a0a00)}}
+@media (prefers-reduced-motion:reduce){.ks-look-rhinestone,.ks-look-fire{animation:none}}
+/* Small swatches in the caption toolbar. */
+.ks-look-swatch{font:900 italic 15px/1 var(--font-display);min-width:34px;padding:4px 6px;border-radius:6px;background:#f3ead9}
+.ks-look-swatch[aria-pressed="true"]{outline:2px solid var(--ks-ui-metal,#c9a15a)}
+.ks-look-swatch.ks-look-glow{padding:4px 6px}

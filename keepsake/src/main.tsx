@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./fonts.css";
 import "./index.css";
 import "./ui-theme.css";
+import "./lettering.css";
 import App from "./App";
 import { AppProvider } from "./store/appStore";
 import { NavProvider } from "./store/nav";

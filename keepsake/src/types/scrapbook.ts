@@ -37,12 +37,24 @@ export interface PhotoElement extends BaseElement {
   cropAspect?: number;
 }
 
+/** Early-2000s lettering for captions (src/lettering.css). Undefined is the handwritten default. */
+export const CAPTION_LOOKS = [
+  { id: "chrome", label: "Chrome" },
+  { id: "glow", label: "Glow" },
+  { id: "rhinestone", label: "Rhinestone" },
+  { id: "bubble", label: "Bubble" },
+  { id: "fire", label: "Fire" },
+  { id: "ice", label: "Ice" },
+] as const;
+export type CaptionLook = (typeof CAPTION_LOOKS)[number]["id"];
+
 export interface CaptionElement extends BaseElement {
   type: "caption";
   text: string;
   /** font size in container-query width units (cqw) so it scales with the page */
   fontSize: number;
   color: string;
+  look?: CaptionLook;
 }
 
 export interface StickerElement extends BaseElement {

@@ -269,6 +269,7 @@ export function BookView({frame:Frame=RoomFrame,onClose,portalTarget}:{frame?:Co
                 onBackward={sb.sendBackward}
                 onCycleFrame={sb.cycleFrame}
                 onColor={(id, color) => sb.updateElement(id, { color })}
+                onLook={(id, look) => sb.updateElement(id, { look })}
                 onReplace={handleReplace}
                 onDelete={sb.removeElement}
                 onFinish={sb.setStickerFinish}

@@ -359,7 +359,7 @@ function CaptionView({
   }, [selected]);
 
   const captionStyle: CSSProperties = {
-    fontFamily: "var(--font-script)",
+    fontFamily: element.look ? undefined : "var(--font-script)",
     fontSize: `${element.fontSize}cqw`,
     color: element.color,
     lineHeight: 1.12,
@@ -406,6 +406,7 @@ function CaptionView({
           rows={2}
           style={{
             ...captionStyle,
+            fontFamily: "var(--font-script)",
             userSelect: "text",
             cursor: "text",
             background: "rgba(255,255,255,0.5)",
@@ -417,7 +418,7 @@ function CaptionView({
           }}
         />
       ) : (
-        <div className="ks-caption" style={captionStyle}>
+        <div className={element.look ? `ks-caption ks-look ks-look-${element.look}` : "ks-caption"} style={captionStyle}>
           {element.text || "…"}
         </div>
       )}
