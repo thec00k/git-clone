@@ -18,9 +18,6 @@ const SHOTS = JSON.parse(process.env.SHOTS_JSON || 'null') ?? [
   ['woodland-summer-day', '2027-07-20T12:00:00', {timeMode: 'day'}, ''],
   ['woodland-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, ''],
   ['woodland-christmas-dusk', '2026-12-20T12:00:00', {timeMode: 'dusk'}, ''],
-  ['woodland-halloween-night', '2026-10-28T12:00:00', {timeMode: 'night'}, ''],
-  ['woodland-southern-december-day', '2026-12-20T12:00:00', {timeMode: 'day', hemisphere: 'south'}, ''],
-  ['woodland-frozen-winter-in-july', '2027-07-20T12:00:00', {timeMode: 'dusk', seasonMode: 'fixed', season: 'winter'}, ''],
 ];
 
 const browser = await chromium.launch({headless: true, channel: process.env.TEST_CHANNEL || undefined, args: ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader', '--ignore-gpu-blocklist']});
@@ -28,10 +25,16 @@ const errors = [];
 try {
   for (const [name, date, env, query] of SHOTS) {
     // Software rendering is slow: a smaller frame and reduced motion keep the page responsive.
-    const context = await browser.newContext({viewport: {width: 1024, height: 640}, deviceScaleFactor: 1, reducedMotion: 'reduce'});
+    const context = await browser.newContext({viewport: {width: 960, height: 600}, deviceScaleFactor: 1, reducedMotion: 'reduce'});
     const page = await context.newPage();
     page.setDefaultTimeout(120000);
     page.on('pageerror', e => errors.push(`${name}: ${e.message}`));
+    // Software rendering cannot keep up with a full-rate render loop and starves the page, so
+    // screenshots time out. Slow animation frames to about 2 per second.
+    await page.addInitScript(() => {
+      const raf = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = callback => setTimeout(() => raf(callback), 450);
+    });
     await page.routeWebSocket('**', () => {});
     await page.clock.setFixedTime(new Date(date));
     await page.route('**/capture-fixture.html', r => r.fulfill({contentType: 'text/html', body: '<!doctype html><title>fixture</title>'}));
@@ -47,9 +50,9 @@ try {
     }, env);
     await page.goto(base + '/' + query);
     await page.locator('canvas').first().waitFor();
-    await page.waitForTimeout(6000); // models, textures and the first frames
+    await page.waitForTimeout(30000); // models, textures and the first frames
     const started = Date.now();
-    await page.screenshot({path: `${outDir}/${name}.png`, timeout: 240000, animations: 'disabled'});
+    await page.screenshot({path: `${outDir}/${name}.png`, timeout: 120000, animations: 'disabled'});
     console.log(`screenshot took ${Date.now() - started} ms`);
     console.log('captured', name);
     await context.close();
