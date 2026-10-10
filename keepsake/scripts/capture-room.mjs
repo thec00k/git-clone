@@ -22,6 +22,7 @@ const SHOTS = JSON.parse(process.env.SHOTS_JSON || 'null') ?? [
   ['holiday-valentines-window', '2027-02-10T12:00:00', {timeMode: 'day'}, '?view=window'],
   ['holiday-easter-hearth', '2027-03-28T12:00:00', {timeMode: 'day'}, '?view=hearth'],
   ['holiday-july4-window', '2027-07-03T12:00:00', {timeMode: 'day'}, '?view=window'],
+  ['beachfront-july4', '2027-07-03T12:00:00', {roomTheme: 'beachfront', timeMode: 'day'}, ''],
   ['woodland-hearth-winter-night', '2027-01-15T12:00:00', {timeMode: 'night'}, '?view=hearth'],
 ];
 

@@ -80,7 +80,8 @@ export function RoomModel({
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
       {!study&&<ChairFloorContact scene={cloned}/>}
       {study&&<HolidayDecor/>}
-      {study&&<DustBunnies/>}
+      {coastal&&<HolidayDecor coastal/>}
+      {(study||coastal)&&<DustBunnies/>}
       {study&&hearthPosition&&(environment.season==='winter'||environment.season==='autumn')&&<HearthFire phase={phase}/>}
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />

@@ -106,20 +106,20 @@ function HeartsOnMantel() {
   return <group>{[[-1.2, .1, 0], [-.9, .14, 1], [-.62, .09, 2]].map(([x, s, m], i) => <mesh key={i} geometry={geo} material={mats[m]} position={[x, MANTEL.y + s * .6, MANTEL.z - .08]} scale={s * 1.3}/>)}</group>;
 }
 
-export function HolidayDecor() {
+export function HolidayDecor({coastal = false}: {coastal?: boolean}) {
   const {holiday} = useSeasonal();
-  return <group name="Holiday_Decor" userData={{holiday}}>{holiday && <HolidaySet key={holiday} holiday={holiday}/>}</group>;
+  return <group name="Holiday_Decor" userData={{holiday}}>{holiday && <HolidaySet key={(coastal ? 'coast-' : '') + holiday} holiday={holiday} coastal={coastal}/>}</group>;
 }
 /** Keyed by holiday so a change unmounts the old set. Materials and geometries are created in useMemo and passed
  * as props, which react-three-fiber does not dispose, so collect them after mount and free them on unmount. */
-function HolidaySet({holiday}: {holiday: HolidayId}) {
+function HolidaySet({holiday, coastal}: {holiday: HolidayId; coastal: boolean}) {
   const group = useRef<THREE.Group>(null);
   useEffect(() => {
     const owned = new Set<{dispose(): void}>();
     group.current?.traverse(o => { if (o instanceof THREE.Mesh) { owned.add(o.geometry); (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => owned.add(m)); } });
     return () => owned.forEach(x => x.dispose());
   }, []);
-  return <group ref={group}>{DECOR[holiday]()}</group>;
+  return <group ref={group}>{coastal ? COASTAL[holiday]() : DECOR[holiday]()}</group>;
 }
 const DECOR: Record<HolidayId, () => ReactNode> = {
   christmas: () => <>
@@ -141,4 +141,14 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
     <Garland a={WIN_A} b={WIN_B} depth={.16} count={12} kind="flag" colors={['#b8312f', '#f4efe2', '#2a4a8c']} size={.13}/>
     <Flag/>
   </>,
+};
+
+/** Beachfront has no hearth: one garland across the arched window (below the string lights, which run y 2.0-3.08). */
+const ARCH_A = new THREE.Vector3(-1.0, 2.62, -2.0), ARCH_B = new THREE.Vector3(.78, 2.62, -2.0);
+const COASTAL: Record<HolidayId, () => ReactNode> = {
+  christmas: () => <Garland a={ARCH_A} b={ARCH_B} depth={.12} count={11} kind="flag" colors={['#b23a3a', '#2f6b4f', '#f2d36b']} size={.11}/>,
+  halloween: () => <><Garland a={ARCH_A} b={ARCH_B} depth={.12} count={11} kind="flag" colors={['#e0762a', '#1d1722']} size={.11}/>{[[-1.45, 2.4, .3], [1.15, 2.5, -.3]].map(([x, y, r], i) => <Bat key={i} position={[x, y, -2.0]} rot={r}/>)}</>,
+  valentines: () => <Garland a={ARCH_A} b={ARCH_B} depth={.14} count={11} kind="heart" colors={['#c9374f', '#f08aa5', '#e8566e', '#f4c6d0']} size={.11}/>,
+  easter: () => <Garland a={ARCH_A} b={ARCH_B} depth={.12} count={11} kind="flag" colors={['#f4b6c2', '#bfe3d0', '#f7e2a0', '#c7c3f0']} size={.11}/>,
+  'independence-day': () => <Garland a={ARCH_A} b={ARCH_B} depth={.12} count={12} kind="flag" colors={['#b8312f', '#f4efe2', '#2a4a8c']} size={.11}/>,
 };
