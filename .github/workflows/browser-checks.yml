@@ -1,0 +1,70 @@
+name: Browser checks
+
+# Runs the browser-based checks and takes room screenshots on a real (software
+# rendered) Chromium. Starts when .github/requests/browser-checks changes on a
+# codex/ branch. The screenshots are pushed to the "ci-shots" branch so they can
+# be looked at; it is rewritten every run and is never merged.
+on:
+  push:
+    branches: ['codex/**']
+    paths: ['.github/requests/browser-checks']
+
+permissions:
+  contents: write
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: keepsake
+    env:
+      TEST_BASE_URL: http://127.0.0.1:5184
+      TEST_CHANNEL: chromium
+      SHOT_DIR: ${{ github.workspace }}/shots
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: keepsake/package-lock.json
+      - name: Install
+        run: bash ../.github/scripts/run-step.sh install npm ci
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Start the dev server
+        run: |
+          nohup npx vite --host 127.0.0.1 --port 5184 > "$RUNNER_TEMP/vite.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:5184/ >/dev/null && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/vite.log"; exit 1
+      - name: Room screenshots
+        if: always()
+        run: bash ../.github/scripts/run-step.sh capture node scripts/capture-room.mjs
+      - name: Woodland study check
+        if: always()
+        run: bash ../.github/scripts/run-step.sh study-browser node scripts/check-woodland-study-browser.mjs
+      - name: Room performance check
+        if: always()
+        run: bash ../.github/scripts/run-step.sh performance-browser node scripts/check-room-performance-browser.mjs
+      - name: Storage check
+        if: always()
+        run: bash ../.github/scripts/run-step.sh storage-browser node scripts/check-storage-browser.mjs
+      - name: Collect screenshots
+        if: always()
+        run: |
+          mkdir -p "$SHOT_DIR"
+          find art -path '*/review/*.png' -newer package.json -exec cp {} "$SHOT_DIR"/ \; 2>/dev/null || true
+          ls -la "$SHOT_DIR"
+      - name: Publish screenshots to ci-shots
+        if: always()
+        run: |
+          cd "$SHOT_DIR" && git init -q -b ci-shots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "Run ${{ github.run_id }} on ${{ github.sha }}" > RUN.txt
+          git add -A && git commit -q -m "Screenshots for ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/ci-shots
