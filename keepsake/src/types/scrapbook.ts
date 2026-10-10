@@ -45,6 +45,7 @@ export const CAPTION_LOOKS = [
   { id: "bubble", label: "Bubble" },
   { id: "fire", label: "Fire" },
   { id: "ice", label: "Ice" },
+  { id: "ransom", label: "Magazine cut-outs" },
 ] as const;
 export type CaptionLook = (typeof CAPTION_LOOKS)[number]["id"];
 

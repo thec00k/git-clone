@@ -138,7 +138,7 @@ export function SelectionToolbar({
           <button className="ks-look-swatch" aria-pressed={!element.look} aria-label="Handwritten lettering" title="Handwritten" onClick={() => onLook(id, undefined)} style={{ fontFamily: "var(--font-script)", fontStyle: "normal", fontWeight: 600 }}>Aa</button>
           {CAPTION_LOOKS.map((l) => (
             <button key={l.id} className="ks-look-swatch" aria-pressed={element.look === l.id} aria-label={`${l.label} lettering`} title={l.label} onClick={() => onLook(id, l.id)}>
-              <span className={`ks-look ks-look-${l.id}`}>Aa</span>
+              <span className={`ks-look ks-look-${l.id}`}>{l.id === "ransom" ? "A\u200ba" : "Aa"}</span>
             </button>
           ))}
         </span>

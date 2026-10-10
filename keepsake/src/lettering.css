@@ -14,3 +14,9 @@
 .ks-look-swatch{font:900 italic 15px/1 var(--font-display);min-width:34px;padding:4px 6px;border-radius:6px;background:#f3ead9}
 .ks-look-swatch[aria-pressed="true"]{outline:2px solid var(--ks-ui-metal,#c9a15a)}
 .ks-look-swatch.ks-look-glow{padding:4px 6px}
+/* Magazine cut-outs: one scrap of paper per letter (RansomText.tsx). Own fonts per scrap, so the shared look styles don't apply. */
+.ks-look-ransom{font-style:normal;font-weight:400;letter-spacing:0;line-height:1.35}
+.ks-ransom{display:inline}
+.ks-ransom-word{display:inline-block;white-space:nowrap}
+.ks-ransom-gap{display:inline-block;width:.25em}
+.ks-ransom-scrap{display:inline-block;padding:.04em .09em;margin:0 .012em;line-height:1.05;box-shadow:.02em .04em .06em rgba(40,30,15,.35)}

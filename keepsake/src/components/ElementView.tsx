@@ -1,3 +1,4 @@
+import { RansomText } from "./RansomText";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { RotateCw } from "lucide-react";
@@ -419,7 +420,7 @@ function CaptionView({
         />
       ) : (
         <div className={element.look ? `ks-caption ks-look ks-look-${element.look}` : "ks-caption"} style={captionStyle}>
-          {element.text || "…"}
+          {element.look === "ransom" && element.text ? <RansomText text={element.text} /> : (element.text || "…")}
         </div>
       )}
     </div>
