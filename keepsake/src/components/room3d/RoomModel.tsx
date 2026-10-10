@@ -1,3 +1,5 @@
+import {DustBunnies} from './DustBunnies';
+import {HolidayDecor} from './HolidayDecor';
 import {HearthFire} from './HearthFire';
 import {Vector3} from 'three';
 import {TimeCapsuleChest} from './TimeCapsuleChest';
@@ -77,6 +79,8 @@ export function RoomModel({
       <Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
       {!study&&<ChairFloorContact scene={cloned}/>}
+      {study&&<HolidayDecor/>}
+      {study&&<DustBunnies/>}
       {study&&hearthPosition&&(environment.season==='winter'||environment.season==='autumn')&&<HearthFire phase={phase}/>}
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />

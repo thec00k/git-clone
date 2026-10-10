@@ -19,6 +19,13 @@ const SHOTS = JSON.parse(process.env.SHOTS_JSON || 'null') ?? [
   ['woodland-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, ''],
   ['woodland-christmas-dusk', '2026-12-20T12:00:00', {timeMode: 'dusk'}, ''],
   ['woodland-hearth-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
+  ['holiday-halloween-hearth', '2026-10-25T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
+  ['holiday-christmas-hearth', '2026-12-20T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
+  ['holiday-valentines-window', '2027-02-10T12:00:00', {timeMode: 'day'}, '?view=window'],
+  ['holiday-valentines-hearth', '2027-02-10T12:00:00', {timeMode: 'day'}, '?view=hearth'],
+  ['holiday-easter-hearth', '2027-03-28T12:00:00', {timeMode: 'day'}, '?view=hearth'],
+  ['holiday-july4-window', '2027-07-03T12:00:00', {timeMode: 'day'}, '?view=window'],
+  ['holiday-halloween-window', '2026-10-25T12:00:00', {timeMode: 'dusk'}, '?view=window'],
   ['woodland-hearth-winter-night', '2027-01-15T12:00:00', {timeMode: 'night'}, '?view=hearth'],
 ];
 

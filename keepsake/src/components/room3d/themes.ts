@@ -20,7 +20,7 @@ export const woodlandRoom: RoomTheme = {
   asset: "/room/woodland/woodland.glb", woodland: true,
   views: sharedViews, fov: 50,
   seated: { position: [-.34,1.26,-.58], target: [-.15,.82,-1.68] },
-  walkBounds: { minX: -2.08, maxX: 2.08, minZ: -1.12, maxZ: 1.82, keepOut: { minX: -1.5, maxX: -.3, minZ: 1.45 } },
+  walkBounds: { minX: -2.08, maxX: 2.08, minZ: -1.12, maxZ: 1.82, keepOut: { minX: -1.5, maxX: .1, minZ: 1.45 } },
   budget: { maxBytes: 8 * 1024 * 1024, maxTriangles: 180000, maxMaterials: 80, maxPrimitives: 350 },
 };
 export const beachfrontRoom: RoomTheme = {...woodlandRoom, id: "beachfront", title: "Beachfront", subtitle: "Salt air and afternoons worth keeping.", asset: "/room/beachfront/beachfront.glb", woodland: false, walkBounds: {...woodlandRoom.walkBounds, keepOut: undefined}};

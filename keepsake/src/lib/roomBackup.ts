@@ -86,6 +86,7 @@ export function parseRoomBackup(text:string):AppState{
  ensure(s.displayCaseScans===undefined||records(s.displayCaseScans,x=>string(x.id)&&string(x.title)&&string(x.modelSrc)&&number(x.shelf)&&(x.shelf as number)>=0&&(x.shelf as number)<4&&number(x.slot)&&(x.slot as number)>=0&&(x.slot as number)<4));
  ensure(e.roomTheme===undefined || ['woodland','beachfront','cyberpunk'].includes(e.roomTheme as string));
  ensure(e.furniture===undefined||validFurnitureChoices(e.furniture));
+ ensure(e.tidiedAt===undefined||number(e.tidiedAt)&&(e.tidiedAt as number)>=0);
  ensure(e.fireplaceSound===undefined||typeof e.fireplaceSound==='boolean');
  ensure(e.coastalWindowOpen===undefined || typeof e.coastalWindowOpen==='boolean');
  ensure(s.ownedRoomThemes===undefined||strings(s.ownedRoomThemes)&&(s.ownedRoomThemes as string[]).every(id=>['woodland','beachfront','cyberpunk'].includes(id))&&new Set(s.ownedRoomThemes as string[]).size===(s.ownedRoomThemes as string[]).length);

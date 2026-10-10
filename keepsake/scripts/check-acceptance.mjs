@@ -7,7 +7,7 @@ const scripts = [
   'check-workbench.mjs', 'check-furniture.mjs',
   'check-woodland.mjs', 'check-room-assets.mjs', 'check-editor.mjs', 'check-photo-batch.mjs', 'check-import-limits.mjs', 'check-friend-notes.mjs', 'check-memory-features.mjs',
   'check-discoveries.mjs', 'check-discovery-geometry.mjs', 'check-room-music.mjs',
-  'check-seasons.mjs', 'check-stamps.mjs', 'check-lettering.mjs', 'check-security-headers.mjs', 'check-asset-credits.mjs', 'check-room-shop.mjs', 'check-soundcloud.mjs', 'check-spotify.mjs', 'check-room-themes.mjs',
+  'check-seasons.mjs', 'check-stamps.mjs', 'check-room-age.mjs', 'check-lettering.mjs', 'check-security-headers.mjs', 'check-asset-credits.mjs', 'check-room-shop.mjs', 'check-soundcloud.mjs', 'check-spotify.mjs', 'check-room-themes.mjs',
 ];
 for (const script of scripts) {
   process.stdout.write(`\nChecking ${script}\n`);

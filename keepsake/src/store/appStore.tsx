@@ -227,7 +227,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const loadedState = !!state;
   useEffect(() => {
     if (!loadedState) return;
-    const claim = () => { if (!document.hidden) update((p) => claimDailyStamps(p, new Date())); };
+    const claim = () => { if (!document.hidden) update((p) => { const c = claimDailyStamps(p, new Date()); return c.environment.tidiedAt === undefined ? { ...c, environment: { ...c.environment, tidiedAt: Date.now() } } : c; }); };
     claim();
     document.addEventListener('visibilitychange', claim);
     return () => document.removeEventListener('visibilitychange', claim);
@@ -397,7 +397,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [persist]);
 
   const tidyRoom = useCallback(
-    () => flushSave(p => ({ ...p, activeBookId: null, deskBinderId: undefined, environment: { ...p.environment, ...TIDY_ROOM, season: p.environment.season } })),
+    () => flushSave(p => ({ ...p, activeBookId: null, deskBinderId: undefined, environment: { ...p.environment, ...TIDY_ROOM, season: p.environment.season, tidiedAt: Date.now() } })),
     [flushSave],
   );
 

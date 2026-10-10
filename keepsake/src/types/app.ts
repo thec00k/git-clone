@@ -81,6 +81,8 @@ export interface Environment {
   ambienceVolume: number; // 0..1
   /** Hearth crackle in Woodland's fall and winter. Undefined means on. */
   fireplaceSound?: boolean;
+  /** When the room was last tidied (ms). Drives cosmetic dust only. Missing means a freshly started clock. */
+  tidiedAt?: number;
   /** When true, map pins cannot be dragged (click still opens edit). */
   pinsLocked: boolean;
 }
