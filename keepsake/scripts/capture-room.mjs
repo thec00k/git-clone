@@ -27,9 +27,10 @@ const browser = await chromium.launch({headless: true, channel: process.env.TEST
 const errors = [];
 try {
   for (const [name, date, env, query] of SHOTS) {
-    const context = await browser.newContext({viewport: {width: 1440, height: 900}});
+    // Software rendering is slow: a smaller frame and reduced motion keep the page responsive.
+    const context = await browser.newContext({viewport: {width: 1024, height: 640}, deviceScaleFactor: 1, reducedMotion: 'reduce'});
     const page = await context.newPage();
-    page.setDefaultTimeout(60000);
+    page.setDefaultTimeout(120000);
     page.on('pageerror', e => errors.push(`${name}: ${e.message}`));
     await page.routeWebSocket('**', () => {});
     await page.clock.setFixedTime(new Date(date));
@@ -47,7 +48,9 @@ try {
     await page.goto(base + '/' + query);
     await page.locator('canvas').first().waitFor();
     await page.waitForTimeout(6000); // models, textures and the first frames
-    await page.screenshot({path: `${outDir}/${name}.png`});
+    const started = Date.now();
+    await page.screenshot({path: `${outDir}/${name}.png`, timeout: 240000, animations: 'disabled'});
+    console.log(`screenshot took ${Date.now() - started} ms`);
     console.log('captured', name);
     await context.close();
   }

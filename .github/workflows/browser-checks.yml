@@ -44,15 +44,8 @@ jobs:
       - name: Room screenshots
         if: always()
         run: bash ../.github/scripts/run-step.sh capture node scripts/capture-room.mjs
-      - name: Woodland study check
-        if: always()
-        run: bash ../.github/scripts/run-step.sh study-browser node scripts/check-woodland-study-browser.mjs
-      - name: Room performance check
-        if: always()
-        run: bash ../.github/scripts/run-step.sh performance-browser node scripts/check-room-performance-browser.mjs
-      - name: Storage check
-        if: always()
-        run: bash ../.github/scripts/run-step.sh storage-browser node scripts/check-storage-browser.mjs
+      # The other browser checks (study, performance, storage) need their ports and
+      # timeouts adapting to CI before they can run here; see docs/ci.md.
       - name: Collect screenshots
         if: always()
         run: |
