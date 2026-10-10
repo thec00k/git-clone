@@ -18,10 +18,10 @@ export function BeachfrontScenery({phase,environment,particles}: {phase:Phase;en
     if(boat.current){boat.current.position.y=.86+Math.sin(t*.5)*.035;boat.current.rotation.z=Math.sin(t*.4)*.025;}
   });
   return <group>
-    <CoastalSky phase={phase} storm={storm}/><CoastalWater phase={phase} storm={storm} high={high}/>
+    <CoastalSky phase={phase} storm={storm} season={environment.season}/><CoastalWater phase={phase} storm={storm} high={high}/>
     <CoastalHorizon phase={phase} storm={storm}/>
     <mesh position={[-.7,night?4.2:dusk?2.53:6,-29.4]}><circleGeometry args={[night?.43:dusk?.55:.6,48]}/><meshBasicMaterial color={night?'#eff4e4':dusk?'#ffcf83':'#fff0ce'} transparent opacity={storm?.65:1}/></mesh>
-    <CoastalClouds night={night} storm={storm}/>
+    <CoastalClouds night={night} storm={storm||environment.season==='winter'}/>
     {[0,1,2,3].map(i=><mesh key={i} position={[-15+i*1.9,.9,-24]} scale={[3,.65+(i%2)*.4,1.5]}><sphereGeometry args={[1,12,6]}/><meshBasicMaterial color={night?'#233b49':'#819c98'}/></mesh>)}
     <group ref={boat} position={[3,.86,-14]}>
       <mesh scale={[.7,.1,.2]}><sphereGeometry args={[1,12,6]}/><meshStandardMaterial color="#85583c"/></mesh>

@@ -13,6 +13,9 @@ await mkdir(outDir, {recursive: true});
 
 // name, fake date (local noon), environment patch, query string
 const SHOTS = JSON.parse(process.env.SHOTS_JSON || 'null') ?? [
+  ['beachfront-summer-day', '2027-07-20T12:00:00', {roomTheme: 'beachfront', timeMode: 'day'}, ''],
+  ['beachfront-winter-dusk', '2027-01-15T12:00:00', {roomTheme: 'beachfront', timeMode: 'dusk'}, ''],
+  ['beachfront-autumn-night', '2026-10-10T12:00:00', {roomTheme: 'beachfront', timeMode: 'night'}, ''],
   ['woodland-hearth-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
   ['holiday-halloween-hearth', '2026-10-25T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
   ['holiday-christmas-hearth', '2026-12-20T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],

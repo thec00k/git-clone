@@ -7,12 +7,14 @@ import {motionFactor,MOTION} from '../../lib/motion';
 
 const vertex=`varying vec3 world; void main(){vec4 p=modelMatrix*vec4(position,1.);world=p.xyz;gl_Position=projectionMatrix*viewMatrix*p;}`;
 /** Colors and wave detail are procedural: no external textures or video loops. */
-export function CoastalSky({phase,storm}:{phase:Phase;storm:boolean}){
+/** How each season colours the coast: a gentle grade over the same sky, never a different scene. */
+export const COAST_SEASON_TINT: Record<'spring'|'summer'|'autumn'|'winter',[string,number]> = {spring:['#f2d3dc',.1],summer:['#ffffff',0],autumn:['#d9b58f',.18],winter:['#9fb0b8',.3]};
+export function CoastalSky({phase,storm,season='summer'}:{phase:Phase;storm:boolean;season?:'spring'|'summer'|'autumn'|'winter'}){
  const reduced=useReducedMotion();
  const material=useMemo(()=>new THREE.ShaderMaterial({uniforms:{low:{value:new THREE.Color()},middle:{value:new THREE.Color()},high:{value:new THREE.Color()}},vertexShader:vertex,fragmentShader:`uniform vec3 low,middle,high;varying vec3 world;void main(){float h=clamp((world.y-2.2)/6.,0.,1.);vec3 c=mix(low,middle,smoothstep(0.,.5,h));c=mix(c,high,smoothstep(.45,1.,h));gl_FragColor=vec4(c,1.);#include <colorspace_fragment>
 }`.replace('#include','\n#include'),depthWrite:false}),[]);
  useEffect(()=>()=>material.dispose(),[material]);
- const colors=useMemo(()=>(phase==='dusk'?['#f3aa77','#9b76a5','#355783']:phase==='night'?['#293c59','#192c49','#0d1b32']:['#d2e4df','#93c3d2','#608da9']).map(c=>new THREE.Color(c).lerp(new THREE.Color('#82949d'),storm?.4:0)),[phase,storm]);
+ const colors=useMemo(()=>(phase==='dusk'?['#f3aa77','#9b76a5','#355783']:phase==='night'?['#293c59','#192c49','#0d1b32']:['#d2e4df','#93c3d2','#608da9']).map(c=>new THREE.Color(c).lerp(new THREE.Color('#82949d'),storm?.4:0).lerp(new THREE.Color(COAST_SEASON_TINT[season][0]),COAST_SEASON_TINT[season][1])),[phase,season,storm]);
  useFrame((_,dt)=>{const t=material.userData.ready?motionFactor(dt,MOTION.atmosphere,reduced):1;[material.uniforms.low,material.uniforms.middle,material.uniforms.high].forEach((u,i)=>u.value.lerp(colors[i],t));material.userData.ready=true;});
  return <mesh position={[0,6,-30]} material={material}><planeGeometry args={[65,25]}/></mesh>;
 }
