@@ -4,7 +4,7 @@
 //   TEST_BASE_URL=http://127.0.0.1:5184 SHOT_DIR=ci-shots node scripts/capture-room.mjs
 // Dates are faked in the browser (page.clock), so no real calendar is needed.
 import {createRequire} from 'node:module';
-import {mkdir} from 'node:fs/promises';
+import {mkdir, writeFile} from 'node:fs/promises';
 const require = createRequire(import.meta.url);
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:5184';
@@ -31,7 +31,13 @@ try {
     page.on('pageerror', e => errors.push(`${name}: ${e.message}`));
     // Software rendering cannot keep up with a full-rate render loop and starves the page, so
     // screenshots time out. Slow animation frames to about 2 per second.
+    // page.screenshot still hangs under software GL, so keep the WebGL buffer and read the canvas directly.
     await page.addInitScript(() => {
+      const getContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (type, attributes) {
+        if (typeof type === 'string' && type.includes('webgl')) attributes = {...(attributes || {}), preserveDrawingBuffer: true};
+        return getContext.call(this, type, attributes);
+      };
       const raf = window.requestAnimationFrame.bind(window);
       window.requestAnimationFrame = callback => setTimeout(() => raf(callback), 450);
     });
@@ -50,10 +56,9 @@ try {
     }, env);
     await page.goto(base + '/' + query);
     await page.locator('canvas').first().waitFor();
-    await page.waitForTimeout(30000); // models, textures and the first frames
-    const started = Date.now();
-    await page.screenshot({path: `${outDir}/${name}.png`, timeout: 120000, animations: 'disabled'});
-    console.log(`screenshot took ${Date.now() - started} ms`);
+    await page.waitForTimeout(25000); // models, textures and the first frames
+    const dataUrl = await page.evaluate(() => document.querySelector('canvas').toDataURL('image/png'));
+    await writeFile(`${outDir}/${name}.png`, Buffer.from(dataUrl.split(',')[1], 'base64'));
     console.log('captured', name);
     await context.close();
   }
