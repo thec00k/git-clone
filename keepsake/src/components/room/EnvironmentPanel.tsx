@@ -13,7 +13,8 @@ import {useNav} from '../../store/nav';
 import {useListen} from '../../store/listen';
 import {useFocusTrap} from '../../hooks/useFocusTrap';
 import {VolumeSlider} from '../VolumeSlider';
-import type {Season,TimeMode,Weather} from '../../types/app';
+import type {TimeMode,Weather} from '../../types/app';
+import {SeasonSettings} from './SeasonSettings';
 const sections = {appearance:'Room',music:'Sound',discoveries:'Privacy',saving:'Storage',help:'Help'};
 type Section=keyof typeof sections;
 export function EnvironmentPanel({onClose,initialSection='appearance'}:{onClose:()=>void;initialSection?:Section}){
@@ -24,7 +25,7 @@ export function EnvironmentPanel({onClose,initialSection='appearance'}:{onClose:
  <header><div><h2>Room settings</h2><p>Make yourself at home.</p></div><button className="ks-tool" onClick={onClose} aria-label="Close room settings">Done</button></header>
  <nav aria-label="Settings sections">{Object.entries(sections).map(([id,label])=><button key={id} className="ks-tool" aria-pressed={section===id} onClick={()=>setSection(id as Section)}>{label}</button>)}</nav>
  <section aria-label={sections[section]}>
- {section==='appearance'&&<><h3>Light and scenery</h3><Segment label="Time" value={environment.timeMode} options={['auto','day','dusk','night']} onChange={v=>setEnvironment({timeMode:v as TimeMode})}/><Segment label="Season" value={environment.season} options={['spring','summer','autumn','winter']} onChange={v=>setEnvironment({season:v as Season})}/><Segment label="Weather" value={environment.weather} options={['clear','rain','snow']} onChange={v=>setEnvironment({weather:v as Weather})}/>
+ {section==='appearance'&&<><h3>Light and scenery</h3><Segment label="Time" value={environment.timeMode} options={['auto','day','dusk','night']} onChange={v=>setEnvironment({timeMode:v as TimeMode})}/><SeasonSettings/><Segment label="Weather" value={environment.weather} options={['clear','rain','snow']} onChange={v=>setEnvironment({weather:v as Weather})}/>
  <p className="text-sm my-3">Rain and snow stay outdoors and appear through the window in every room.</p>
  <label className="block my-4">Graphics quality<select aria-label="Graphics quality" value={environment.roomQuality??'balanced'} onChange={e=>setEnvironment({roomQuality:e.target.value as 'balanced'|'high'})}><option value="balanced">Balanced · smoother and lighter</option><option value="high">High · detailed shadows and scenery</option></select></label><details><summary>About graphics quality</summary><p className="text-sm">Balanced saves power. High adds sharper rendering, shadows, and scenery detail. Your choice applies across rooms.</p></details>
  <p className="text-sm my-4">Quick light switches are in Room → Atmosphere.</p>

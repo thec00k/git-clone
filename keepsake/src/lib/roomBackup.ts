@@ -77,6 +77,9 @@ export function parseRoomBackup(text:string):AppState{
  ensure(e.capsuleFinish===undefined||['metal','wood'].includes(e.capsuleFinish as string));
  ensure(e.crtColor===undefined||Object.hasOwn(CRT_COLORS,e.crtColor as string));
  ensure(e.roomQuality===undefined || ['balanced','high'].includes(e.roomQuality as string));
+ ensure(e.seasonMode===undefined||['auto','fixed'].includes(e.seasonMode as string));
+ ensure(e.hemisphere===undefined||['auto','north','south'].includes(e.hemisphere as string));
+ ensure(e.holidaysOff===undefined||(Array.isArray(e.holidaysOff)&&e.holidaysOff.length<=5&&e.holidaysOff.every(h=>['valentines','easter','independence-day','halloween','christmas'].includes(h as string))));
  ensure(['memoryLighting','soundGeography','displayCaseLit'].every(k=>e[k]===undefined||typeof e[k]==='boolean'));
  ensure(s.displayCaseScans===undefined||records(s.displayCaseScans,x=>string(x.id)&&string(x.title)&&string(x.modelSrc)&&number(x.shelf)&&(x.shelf as number)>=0&&(x.shelf as number)<4&&number(x.slot)&&(x.slot as number)>=0&&(x.slot as number)<4));
  ensure(e.roomTheme===undefined || ['woodland','beachfront','cyberpunk'].includes(e.roomTheme as string));

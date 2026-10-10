@@ -390,7 +390,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [persist]);
 
   const tidyRoom = useCallback(
-    () => flushSave(p => ({ ...p, activeBookId: null, deskBinderId: undefined, environment: { ...p.environment, ...TIDY_ROOM } })),
+    () => flushSave(p => ({ ...p, activeBookId: null, deskBinderId: undefined, environment: { ...p.environment, ...TIDY_ROOM, season: p.environment.season } })),
     [flushSave],
   );
 

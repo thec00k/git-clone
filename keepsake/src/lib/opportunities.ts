@@ -6,6 +6,7 @@
  * quiet — "one beautiful thing is better than five", and often nothing happens.
  */
 import type { AppState } from "../types/app";
+import { resolveSeasonal } from "./seasons";
 
 export type OpportunityKind =
   | "welcome"
@@ -108,7 +109,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     id: "pressed-flower",
     priority: 13,
     cooldownMs: 20 * HOUR,
-    eligible: ({ state }) => state.environment.season === "spring" || state.environment.season === "summer",
+    eligible: ({ state }) => { const { season } = resolveSeasonal(state.environment); return season === "spring" || season === "summer"; },
   },
   {
     id: "season-note",

@@ -14,6 +14,7 @@ import { RoomTour } from "./RoomTour";
 import { RoomCurator } from "./RoomCurator";
 
 import { useFocusTrap } from "../../hooks/useFocusTrap";
+import { useSeasonal } from "../../hooks/useSeasonal";
 import { PhaseBadge, phaseOf } from "./RoomFurniture";
 import { RoomFlat } from "./RoomFlat";
 import {useActiveRoom} from '../room3d/useActiveRoom';
@@ -28,7 +29,7 @@ import type { ListenId } from "../../lib/roomListen";
 export function Room() {
   const {
     state,
-    environment,
+    environment: storedEnvironment,
     activeBook,
     recordProgress,
     newlyUnlocked,
@@ -40,6 +41,9 @@ export function Room() {
     addBook,
     setEnvironment,
   } = useApp();
+  // The room shows the season the calendar (or the user's override) says it is.
+  const seasonal = useSeasonal();
+  const environment = useMemo(() => ({ ...storedEnvironment, season: seasonal.season }), [storedEnvironment, seasonal.season]);
   const { go, viewAs, setViewAs, touring, tourFocus, startTour, roomFace, setRoomFace } = useNav();
   const { scene } = useListen();
   const [envOpen, setEnvOpen] = useState(false);

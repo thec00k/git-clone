@@ -36,6 +36,9 @@ export interface ArchivePhoto {
 
 export type TimeMode = "auto" | "day" | "dusk" | "night";
 export type Season = "spring" | "summer" | "autumn" | "winter";
+/** Which half of the year the room follows. "auto" is a best guess from the device's time zone. */
+export type Hemisphere = "north" | "south";
+export type HolidayId = "valentines" | "easter" | "independence-day" | "halloween" | "christmas";
 export type Weather = "clear" | "rain" | "snow";
 
 export type MusicProvider = "ambient" | "spotify" | "lofi" | "soundcloud";
@@ -53,7 +56,16 @@ export interface Environment {
   /** Beachfront casements; old rooms default to open. */
   coastalWindowOpen?: boolean;
   timeMode: TimeMode;
+  /**
+   * The season the room is frozen at. Used only when `seasonMode` is "fixed";
+   * otherwise the room follows the calendar (see src/lib/seasons.ts).
+   */
   season: Season;
+  /** Defaults to "auto": the room follows the date and the user's hemisphere. */
+  seasonMode?: "auto" | "fixed";
+  hemisphere?: "auto" | Hemisphere;
+  /** Holidays the user has switched off. All five are on by default. */
+  holidaysOff?: HolidayId[];
   weather: Weather;
   lampOn: boolean;
   /** Ceiling fan light. On/off only — day, dusk, and night stay on the window. */
