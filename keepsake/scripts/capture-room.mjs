@@ -18,6 +18,8 @@ const SHOTS = JSON.parse(process.env.SHOTS_JSON || 'null') ?? [
   ['woodland-summer-day', '2027-07-20T12:00:00', {timeMode: 'day'}, ''],
   ['woodland-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, ''],
   ['woodland-christmas-dusk', '2026-12-20T12:00:00', {timeMode: 'dusk'}, ''],
+  ['woodland-hearth-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
+  ['woodland-hearth-winter-night', '2027-01-15T12:00:00', {timeMode: 'night'}, '?view=hearth'],
 ];
 
 const browser = await chromium.launch({headless: true, channel: process.env.TEST_CHANNEL || undefined, args: ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader', '--ignore-gpu-blocklist']});

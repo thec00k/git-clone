@@ -1,4 +1,4 @@
-import type {WoodlandStudyView} from './woodlandStudy';
+import {queryStudyView,type WoodlandStudyView} from './woodlandStudy';
 import {WoodlandStudyExterior} from './WoodlandStudyExterior';
 import {WoodlandStudyControls} from './WoodlandStudyControls';
 import {useActiveRoom} from "./useActiveRoom";
@@ -53,7 +53,7 @@ export function RoomScene3D({
   const activeRoom=useActiveRoom();
   const study=activeRoom.study===true;
   const review=activeRoom.review===true;
-  const [studyView,setStudyView]=useState<WoodlandStudyView|null>(review?'establishing':null);
+  const [studyView,setStudyView]=useState<WoodlandStudyView|null>(review?'establishing':study?queryStudyView(window.location.search):null);
   const [studyPhase,setStudyPhase]=useState<Phase>('dusk');
   const [winter,setWinter]=useState(false);
   const phase=review?studyPhase:basePhase;
@@ -213,7 +213,7 @@ export function RoomScene3D({
         {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment} particles={profile.particles}/>}
         {activeRoom.id === "cyberpunk" && environment.weather !== "clear" && <OutdoorWeather kind={environment.weather} count={profile.particles} room="cyberpunk"/>}
         </Suspense>
-        <EyeCamera studyView={review?studyView:null} displayCase={displayCase} workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
+        <EyeCamera studyView={study?studyView:null} displayCase={displayCase} workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>
       </div>
       {review&&!touring&&!atWorkbench&&<WoodlandStudyControls view={studyView} onView={v=>{setStudyView(v);setDisplayCase(false);setReading(false);setSeated(false);setShopOpen(false);setRoomFace('front');setViewRevision(n=>n+1);}} winter={winter} onWinter={setWinter} phase={studyPhase} onPhase={setStudyPhase}/>}

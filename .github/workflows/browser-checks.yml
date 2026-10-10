@@ -44,6 +44,9 @@ jobs:
       - name: Lettering sheet
         if: always()
         run: bash ../.github/scripts/run-step.sh lettering node scripts/capture-lettering.mjs
+      - name: Book lettering
+        if: always()
+        run: bash ../.github/scripts/run-step.sh book node scripts/capture-book.mjs
       - name: Room screenshots
         if: always()
         run: bash ../.github/scripts/run-step.sh capture node scripts/capture-room.mjs
