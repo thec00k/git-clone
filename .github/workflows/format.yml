@@ -29,7 +29,7 @@ jobs:
       - name: Add dev tools
         run: npm install --save-dev --no-audit --no-fund prettier@^3 fake-indexeddb@^6
       - name: Format
-        run: npx prettier --write .
+        run: npx prettier --write . && npx prettier --write . && npx prettier --check .  # twice: a few files settle on the second pass
       - name: Build still passes
         run: bash ../.github/scripts/run-step.sh build npm run build
       - name: Lint still passes
