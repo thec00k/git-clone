@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {decide, checkUpload} from '../supabase/functions/_shared/moderation.ts';
+const clean = {csamHashMatch: false, nudity: 0, sexualMinor: 0, violence: 0, selfHarm: 0, classifierUnavailable: false};
+assert.deepEqual(decide(clean), {state: 'approved'});
+assert.equal(decide({...clean, csamHashMatch: true, classifierUnavailable: true}).state, 'removed', 'hash match always wins');
+assert.equal(decide({...clean, csamHashMatch: true}).escalate, 'ncmec-report');
+assert.equal(decide({...clean, classifierUnavailable: true}).state, 'pending', 'fail closed: nothing shown unchecked');
+assert.equal(decide({...clean, sexualMinor: .25, nudity: .99}).state, 'pending', 'possible minors go to urgent review, not silent rejection');
+assert.equal(decide({...clean, nudity: .9}).state, 'rejected');
+assert.equal(decide({...clean, nudity: .5}).state, 'pending');
+assert.equal(decide({...clean, selfHarm: .4}).state, 'pending');
+assert.equal(decide({...clean, violence: .95}).state, 'rejected');
+assert.equal(checkUpload({bytes: 26 * 1024 * 1024, type: 'image/jpeg'}, 0), 'Photos can be up to 25 MB.');
+assert.equal(checkUpload({bytes: 1000, type: 'image/svg+xml'}, 0), 'That file type is not supported.');
+assert.match(checkUpload({bytes: 1000, type: 'image/png'}, 500), /500 photos/);
+assert.equal(checkUpload({bytes: 1000, type: 'image/png'}, 499), null);
+console.log('Moderation decisions: hash matches escalate, unknowns are held, cautious thresholds; upload limits enforced.');

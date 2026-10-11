@@ -11,7 +11,7 @@ export function PhotoImportDialog({onClose}:{onClose:()=>void}){
  useFocusTrap(root,()=>{if(!busy&&!reviewIds.length)onClose();});useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  async function files(list:FileList|null){
   if(!list?.length)return;setBusy(true);setMessage('Preparing your photographs…');const ids:string[]=[];let failed=0;
-  try{await checkImportCapacity(Array.from(list));for(const file of Array.from(list)){
+  try{await checkImportCapacity(Array.from(list),state.archive.length);for(const file of Array.from(list)){
    if(!alive.current)return;let photo;try{photo=await loadImageFile(file,state.profile.preserveOriginals!==false);}catch{failed++;continue;}
    if(!alive.current)return;await checkStorageCapacity(photo.src.length);ids.push(addArchivePhoto(photo.src,photo.aspect,[],photo.original));
    setMessage(`Saved ${ids.length} of ${list.length} photographs.`);

@@ -2,7 +2,6 @@ name: Keepsake CI
 
 on:
   push:
-    branches: ['codex/**']
     paths: ['keepsake/**', '.github/**']
   pull_request:
     paths: ['keepsake/**', '.github/**']
@@ -40,3 +39,25 @@ jobs:
       - name: Automated acceptance checks
         if: always()
         run: bash ../.github/scripts/run-step.sh acceptance npm run check:acceptance
+
+  # Applies the Supabase migrations to a throwaway Postgres and runs the permission and safety tests.
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Migrations and policy tests
+        run: bash .github/scripts/run-step.sh database keepsake/supabase/tests/run.sh

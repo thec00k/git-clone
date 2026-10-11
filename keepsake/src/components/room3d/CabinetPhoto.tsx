@@ -24,7 +24,7 @@ export function CabinetPhoto({scene}:{scene:THREE.Object3D}) {
   if(texture){texture.flipY=false;texture.colorSpace=THREE.SRGBColorSpace;}
   return()=>{live=false;object.material=old;texture?.dispose();material.dispose();};
  },[object,photo?.src]);
- async function choose(file:File|undefined){if(!file)return;setBusy(true);setError('');try{await checkImportCapacity([file]);const image=await loadImageFile(file,state.profile.preserveOriginals!==false);await checkStorageCapacity(image.src.length);if(!alive.current)return;const id=addArchivePhoto(image.src,image.aspect,[],image.original);update(s=>({...s,framePhotoId:id}));}catch(e){if(alive.current)setError(e instanceof Error?e.message:'Could not load photo');}finally{if(alive.current)setBusy(false);}}
+ async function choose(file:File|undefined){if(!file)return;setBusy(true);setError('');try{await checkImportCapacity([file],state.archive.length);const image=await loadImageFile(file,state.profile.preserveOriginals!==false);await checkStorageCapacity(image.src.length);if(!alive.current)return;const id=addArchivePhoto(image.src,image.aspect,[],image.original);update(s=>({...s,framePhotoId:id}));}catch(e){if(alive.current)setError(e instanceof Error?e.message:'Could not load photo');}finally{if(alive.current)setBusy(false);}}
  if(!center||!box)return null;
  const open=()=>{setFocused(true);window.dispatchEvent(new CustomEvent('ks-frame-view',{detail:{position:[center.x,center.y+.035,center.z+.55],target:center.toArray()}}));};
  return <group>

@@ -1,3 +1,4 @@
+import {checkArchiveRoom} from '../lib/limits';
 import { useEffect, useRef, useState } from "react";
 import { X, Printer, MapPin, BookOpen, Upload } from "lucide-react";
 import { useApp } from "../store/appStore";
@@ -25,8 +26,8 @@ export function PhotoPrinter({onClose}:{onClose:()=>void}) {
  const book=state.books.find(b=>b.id===bookId);
  async function upload(file?:File) {
   if(!file)return;
-  try { const image=await loadImageFile(file,state.profile.preserveOriginals!==false);const id=addArchivePhoto(image.src,image.aspect,[],image.original);setPhoto({src:image.src,aspect:image.aspect,photoId:id});setPrinted(false);setError(""); }
-  catch {setError("That photo could not be opened. Try another image.");}
+  try { checkArchiveRoom(state.archive.length,1);const image=await loadImageFile(file,state.profile.preserveOriginals!==false);const id=addArchivePhoto(image.src,image.aspect,[],image.original);setPhoto({src:image.src,aspect:image.aspect,photoId:id});setPrinted(false);setError(""); }
+  catch (e) {setError(e instanceof Error&&e.message.startsWith("Your archive holds")?e.message:"That photo could not be opened. Try another image.");}
  }
  function placeInBook() {
   if(!photo || !book)return;

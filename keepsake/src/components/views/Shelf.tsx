@@ -1,3 +1,4 @@
+import { LIMITS } from '../../lib/limits';
 import {useWorkbench} from '../../store/workbench';
 import {newCardBinder} from '../../lib/cardBinders';
 import { RoomBackup } from '../RoomBackup';
@@ -39,7 +40,7 @@ export function Shelf() {
       }
     >
       {!isVisitor && <RoomBackup/>}
-      {choosing&&!isVisitor&&<div className="ks-panel p-4" role="group" aria-label="Choose new book type"><p>What would you like to make?</p><button className="ks-tool" onClick={()=>{setBinderId(null);addBook();setChoosing(false);go('book');}}>Scrapbook</button><button className="ks-tool" disabled={(state.cardBinders?.length??0)>=12} onClick={()=>{const b=newCardBinder();update(s=>({...s,cardBinders:[...(s.cardBinders??[]),b]}));setChoosing(false);openBinder(b.id);}}>Card binder</button></div>}
+      {choosing&&!isVisitor&&<div className="ks-panel p-4" role="group" aria-label="Choose new book type"><p>What would you like to make?</p><button className="ks-tool" disabled={state.books.length>=LIMITS.books} onClick={()=>{setBinderId(null);addBook();setChoosing(false);go('book');}}>Scrapbook</button>{state.books.length>=LIMITS.books&&<small role="status">Your shelf holds {LIMITS.books} scrapbooks.</small>}<button className="ks-tool" disabled={(state.cardBinders?.length??0)>=12} onClick={()=>{const b=newCardBinder();update(s=>({...s,cardBinders:[...(s.cardBinders??[]),b]}));setChoosing(false);openBinder(b.id);}}>Card binder</button></div>}
       {books.length === 0 && (
         <p className="mt-10 text-center text-paper/60">No books to show here.</p>
       )}

@@ -14,6 +14,7 @@ import type {
   StrokeElement,
 } from "../types/scrapbook";
 import { MAX_PHOTOS_PER_PAGE } from "../types/scrapbook";
+import { LIMITS, bookPhotoCount, canAddPage } from "../lib/limits";
 import { uid } from "../lib/id";
 import { clamp } from "../lib/clamp";
 import { computeLayout, type LayoutPreset } from "../lib/layout";
@@ -162,6 +163,7 @@ export function useScrapbook() {
       if (!page) return;
       const photoCount = page.elements.filter((e) => e.type === "photo").length;
       if (photoCount >= MAX_PHOTOS_PER_PAGE) return;
+      if (bookRef.current && bookPhotoCount(bookRef.current) >= LIMITS.photosPerBook) return;
       const jitter = (photoCount % 3) * 6 - 6;
       const el: PhotoElement = {
         id: uid("el"),
@@ -366,6 +368,7 @@ export function useScrapbook() {
   }, [updateActiveBook, spreadCount, remember]);
 
   const addPage=useCallback(()=>{
+    if(bookRef.current&&!canAddPage(bookRef.current))return;
     const id=uid('page');remember(true);
     updateActiveBook(b=>({...b,pages:[...b.pages,{id,elements:[]}]}));
     setSpread(Math.floor(pages.length/2));setActivePageId(id);setSelectedId(null);

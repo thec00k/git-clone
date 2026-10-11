@@ -1,6 +1,7 @@
 import {musicOnEntry} from '../lib/roomMusic';
 import {validFurnitureChoices} from '../lib/furniture';
 import {claimDailyStamps} from "../lib/stamps";
+import {LIMITS} from "../lib/limits";
 import {msUntilNextDay} from "../lib/seasons";
 import {ownsRoomTheme,normalizeLegacyRooms} from '../lib/roomThemes';
 import {
@@ -255,7 +256,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addBook = useCallback(() => {
     const id = uid("book");
-    update((p) => ({
+    update((p) => p.books.length >= LIMITS.books ? p : ({
       ...p,
       activeBookId: id,
       deskBinderId: undefined,
@@ -431,7 +432,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addPin = useCallback(
     (pin: Omit<MemoryPin, "id" | "createdAt">) =>
-      update((p) => ({ ...p, pins: [...p.pins, { ...pin, id: uid("pin"), createdAt: Date.now() }] })),
+      update((p) => p.pins.length >= LIMITS.pins ? p : ({ ...p, pins: [...p.pins, { ...pin, id: uid("pin"), createdAt: Date.now() }] })),
     [update],
   );
 

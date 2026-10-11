@@ -23,8 +23,12 @@ function openDb(): Promise<IDBDatabase> {
     req.onblocked = () => { blocked = true; reject(new Error('Close other Keepsake tabs, then retry opening your room.')); };
   });
 }
+/** Fields that hold file content (photos, card art, 3D scans). Their data: values are stored once, by hash,
+ * in the 'images' store, so the room record stays small and an edit never rewrites every photo or model. */
+const FILE_KEYS = new Set(['src', 'photoSrc', 'coverSrc', 'backSrc', 'modelSrc']);
+const isFileData = (s: string) => s.startsWith('data:image/') || s.startsWith('data:model/');
 function mapStrings(value: unknown, map: (s: string) => string, key = ''): unknown {
-  if (typeof value === 'string') return key === 'src' || key === 'photoSrc' ? map(value) : value;
+  if (typeof value === 'string') return FILE_KEYS.has(key) ? map(value) : value;
   if (Array.isArray(value)) return value.map(v => mapStrings(v, map));
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k,v]) => [k,mapStrings(v,map,k)]));
   return value;
@@ -53,7 +57,7 @@ export async function loadState(): Promise<AppState | null> {
 }
 async function persist(state: AppState): Promise<void> {
   const images = new Set<string>();
-  mapStrings(state, s => { if (s.startsWith('data:image/')) images.add(s); return s; });
+  mapStrings(state, s => { if (isFileData(s)) images.add(s); return s; });
   for (const src of images) if (!hashes.has(src)) {
     const digest = crypto.subtle ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(src)) : crypto.getRandomValues(new Uint8Array(32)).buffer;
     hashes.set(src, PREFIX + Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join(''));
@@ -74,7 +78,12 @@ async function persist(state: AppState): Promise<void> {
         tx.objectStore('app').put(packed,'state');
         tx.objectStore('app').put(revision + 1,'revision');
       };
-      tx.oncomplete = () => { revision++; knownAssets = new Set(referenced); resolve(); };
+      tx.oncomplete = () => {
+        revision++; knownAssets = new Set(referenced);
+        // Forget hashes of files no longer in the room so the cache does not grow for the whole session.
+        for (const [src, key] of hashes) if (!referenced.has(key)) hashes.delete(src);
+        resolve();
+      };
       tx.onabort = () => reject(conflict ? new SaveConflict() : tx.error ?? new Error('Saving was interrupted.'));
       tx.onerror = () => reject(tx.error);
     });

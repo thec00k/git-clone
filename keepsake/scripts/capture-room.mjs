@@ -12,7 +12,7 @@ const outDir = process.env.SHOT_DIR || 'ci-shots';
 await mkdir(outDir, {recursive: true});
 
 // name, fake date (local noon), environment patch, query string
-const SHOTS = JSON.parse(process.env.SHOTS_JSON || 'null') ?? [
+const ALL_SHOTS = [
   ['beachfront-summer-day', '2027-07-20T12:00:00', {roomTheme: 'beachfront', timeMode: 'day'}, ''],
   ['beachfront-winter-dusk', '2027-01-15T12:00:00', {roomTheme: 'beachfront', timeMode: 'dusk'}, ''],
   ['beachfront-autumn-night', '2026-10-10T12:00:00', {roomTheme: 'beachfront', timeMode: 'night'}, ''],
@@ -25,6 +25,9 @@ const SHOTS = JSON.parse(process.env.SHOTS_JSON || 'null') ?? [
   ['beachfront-july4', '2027-07-03T12:00:00', {roomTheme: 'beachfront', timeMode: 'day'}, ''],
   ['woodland-hearth-winter-night', '2027-01-15T12:00:00', {timeMode: 'night'}, '?view=hearth'],
 ];
+// The quick set runs on every code push; the full set on request (see .github/workflows/browser-checks.yml).
+const QUICK_SHOTS = ALL_SHOTS.filter(([name]) => ['woodland-autumn-dusk', 'beachfront-summer-day'].includes(name));
+const SHOTS = JSON.parse(process.env.SHOTS_JSON || 'null') ?? (process.env.QUICK ? QUICK_SHOTS : ALL_SHOTS);
 
 const browser = await chromium.launch({headless: true, channel: process.env.TEST_CHANNEL || undefined, args: ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader', '--ignore-gpu-blocklist']});
 const errors = [];

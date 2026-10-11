@@ -17,7 +17,7 @@ function FolderDialog({files,onClose,onImported}:{files:File[];onClose:()=>void;
  async function upload(){
   setBusy(true);stop.current=false;let category='',count=0,failed=0;let reason='';const ids:string[]=[];
   try{
-   await checkImportCapacity(files);
+   await checkImportCapacity(files,state.archive.length);
    for(let i=0;i<files.length;i++){
     if(stop.current)break;
     setStatus(`Reading ${i+1} of ${files.length}…`);

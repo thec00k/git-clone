@@ -67,7 +67,7 @@ export function Archive() {
     const list=Array.from(files),cats=tab !== 'all' && tab !== 'favorites' ? [tab] : [];
     setUploading(true);stopUpload.current=false;let count=0,failed=0;const imported:string[]=[];
     try{
-      await checkImportCapacity(list);
+      await checkImportCapacity(list, state.archive.length);
       for (const file of list) {
         if(stopUpload.current)break;
         let photo;try{photo=await loadImageFile(file,state.profile.preserveOriginals!==false);}catch{failed++;continue;}

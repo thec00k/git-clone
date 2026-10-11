@@ -1,3 +1,4 @@
+import { LIMITS, checkArchiveRoom } from '../../lib/limits';
 import { useEffect, useRef, useState } from "react";
 import {PinPageLink} from '../PinPageLink';
 import type { CSSProperties, PointerEvent as ReactPointerEvent, RefObject } from "react";
@@ -92,6 +93,7 @@ export function Atlas() {
     const file = files?.[0];
     if (!file) return;
     try {
+      checkArchiveRoom(state.archive.length, 1);
       const image = await loadImageFile(file,state.profile.preserveOriginals!==false);
       addArchivePhoto(image.src,image.aspect,[],image.original);
       setPhotoSrc(image.src);
@@ -162,6 +164,7 @@ export function Atlas() {
       }
     >
       <div className={`ks-atlas${neon?' ks-atlas--hologram':''}`} style={atlasStyle}>
+        {state.pins.length >= LIMITS.pins && <div className="ks-print-map-hint" role="status">Your map holds {LIMITS.pins} pins. Remove one to add another.</div>}
         {pendingPrint && <div className="ks-print-map-hint" role="status">Your photo is ready to pin. Click a place on the map, add a name, then save the pin. <button onClick={closeForm}>Cancel print</button></div>}
         <div className="ks-atlas-board">
           <div className={neon?'ks-atlas-holo-frame':'ks-cork ks-atlas-cork'}>

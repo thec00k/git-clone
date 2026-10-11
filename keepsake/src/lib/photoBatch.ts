@@ -1,9 +1,12 @@
+import {LIMITS,photosThatFit} from './limits.ts';
 import type {Scrapbook,Page,PhotoElement} from '../types/scrapbook';
 import {uid} from './id.ts';
 export type ImportPhoto={src:string;aspect:number;photoId?:string;name?:string;original?:import("./originalPhotos").OriginalPhoto};
 /** A batch is one editor operation. Existing content is never moved or overwritten. */
 export function insertPhotoBatch(book:Scrapbook,targetId:string,photos:ImportPhoto[]){
  if(!photos.length||photos.length>20)throw new Error('Choose between 1 and 20 photos.');
+ const fit=photosThatFit(book,photos.length);
+ if(fit<photos.length)throw new Error(fit?`This book has room for ${fit} more photo${fit===1?'':'s'} (${LIMITS.photosPerBook} photos, ${LIMITS.pagesPerBook} pages at most).`:`This book is full: ${LIMITS.photosPerBook} photos across ${LIMITS.pagesPerBook} pages. Start a new book for more.`);
  const target=book.pages.findIndex(p=>p.id===targetId);
  if(target<0)throw new Error('Choose a page first.');
  const reuse=!book.pages[target].titlePage&&book.pages[target].elements.length===0;
