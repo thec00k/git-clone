@@ -23,6 +23,7 @@ import {MAX_PHOTOS_PER_PAGE} from '../types/scrapbook';
 import {LIMITS, bookPhotoCount, canAddPage} from '../lib/limits';
 import {uid} from '../lib/id';
 import {clamp} from '../lib/clamp';
+import {nudgedPosition} from '../lib/pageCoordinates';
 import {computeLayout, type LayoutPreset} from '../lib/layout';
 import {thenNowPage} from '../lib/thenNow';
 import {useApp} from '../store/appStore';
@@ -349,6 +350,16 @@ export function useScrapbook() {
     [locate, updateElement],
   );
 
+  const nudgeElement = useCallback(
+    (elementId: string, delta: {x: number; y: number}) => {
+      const loc = locate(elementId);
+      if (!loc) return;
+      const next = nudgedPosition(loc.element, delta);
+      if (next.x !== loc.element.x || next.y !== loc.element.y) updateElement(elementId, next);
+    },
+    [locate, updateElement],
+  );
+
   const scaleBy = useCallback(
     (elementId: string, factor: number) => {
       const loc = locate(elementId);
@@ -522,6 +533,7 @@ export function useScrapbook() {
     bringForward,
     sendBackward,
     rotateBy,
+    nudgeElement,
     scaleBy,
     resetTransform,
     cycleFrame,

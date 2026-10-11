@@ -47,6 +47,8 @@ import {HomeChip} from './views/ViewShell';
 import {DeskClutter} from './DeskClutter';
 import type {ComponentType, ReactNode} from 'react';
 import {createPortal} from 'react-dom';
+import {ignorePageKey} from '../lib/keyTargets';
+import {nudgeDelta} from '../lib/pageCoordinates';
 
 export function BookView({
   frame: Frame = RoomFrame,
@@ -174,6 +176,12 @@ export function BookView({
       if (e.key === '?' || (e.shiftKey && e.key === '/')) {
         e.preventDefault();
         setShowKeys(v => !v);
+        return;
+      }
+      const nudge = !mod && !e.altKey ? nudgeDelta(e.key, e.shiftKey) : null;
+      if (nudge && !isVisitor && !turn && sb.selectedId) {
+        e.preventDefault();
+        sb.nudgeElement(sb.selectedId, nudge);
         return;
       }
       if (e.key === 'ArrowLeft') requestTurn('prev');
@@ -664,6 +672,7 @@ function ShortcutsHelp({onClose}: {onClose: () => void}) {
         <h2 className="mb-3 font-display text-xl">On the page</h2>
         <dl className="space-y-1.5 text-sm text-paper/80">
           <Row k="← →" v="Turn the page" />
+          <Row k="Arrows" v="Move the selected piece (Shift: further)" />
           <Row k="⌘Z / Ctrl Z" v="Undo" />
           <Row k="⌘⇧Z / Ctrl Y" v="Redo" />
           <Row k="Delete" v="Remove the selected piece" />
@@ -688,4 +697,3 @@ function Row({k, v}: {k: string; v: string}) {
 }
 import {KeepsakeGlyph} from './KeepsakeGlyph';
 import {discoveryState, REWARDS} from '../lib/discoveries';
-import {ignorePageKey} from '../lib/keyTargets';
