@@ -267,6 +267,9 @@ export function RoomScene3D({
               <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />
             )}
             {study && <WoodlandStudyExterior season={environment.season} phase={phase} />}
+            {study && environment.weather !== 'clear' && (
+              <OutdoorWeather kind={environment.weather} count={profile.particles} room="woodland" />
+            )}
             {activeRoom.id === 'beachfront' && (
               <BeachfrontScenery phase={phase} environment={environment} particles={profile.particles} />
             )}
