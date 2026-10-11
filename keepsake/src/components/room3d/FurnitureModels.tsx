@@ -3,7 +3,7 @@ import {useFrame} from '@react-three/fiber';
 import * as THREE from 'three';
 import {useApp} from '../../store/appStore';
 import {FURNITURE_ITEMS, type FurnitureCategory, type FurnitureId} from '../../lib/furniture';
-import {loadFurniture} from './furnitureAssetCache';
+import {loadFurniture, retainFurniture} from './furnitureAssetCache';
 import {useActiveRoom} from './useActiveRoom';
 import {furnitureBounds, fitFurniture} from '../../lib/furnitureGeometry';
 import {motionFactor, MOTION} from '../../lib/motion';
@@ -82,6 +82,7 @@ function FurnitureReplacement({
   useEffect(() => {
     let live = true;
     let restore = () => {};
+    const release = retainFurniture(id);
     loadFurniture(id)
       .then(asset => {
         if (!live) return;
@@ -336,6 +337,7 @@ function FurnitureReplacement({
       live = false;
       lampMaterials.current = [];
       restore();
+      release();
     };
   }, [scene, id, category]);
   return null;
