@@ -1,0 +1,108 @@
+public/room/beachfront/beachfront.glb
+  Poly Haven: ash_veneer_Diffuse.jpg, ash_veneer_Rough.jpg, ash_veneer_nor_dx.jpg, beige_wall_001_Rough.jpg, beige_wall_002_Rough.jpg, brown_leather_Diffuse.jpg, brown_leather_Rough.jpg, leather_white_Diffuse.jpg, leather_white_Rough.jpg, metal_plate_02_Diffuse.jpg, wood_floor_Diffuse.jpg, wood_floor_Rough.jpg, wool_boucle_nor_gl.jpg
+  other images: Beachfront | warm teak grain, Beachfront | whitewashed wood grain, Keepsake_Detail_linen_color, Keepsake_Detail_linen_normal, Keepsake_Detail_linen_roughness, Keepsake_Detail_plaster_color, Keepsake_Detail_plaster_normal, Keepsake_Detail_plaster_roughness, Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal, Keepsake_Detail_wood_roughness, Keepsake_Oatmeal_Weave, boat-study, coral-study, metal_plate_02_Metal-metal_plate_02_Rough
+public/room/beachfront/beachfront.high.glb
+  Poly Haven: ash_veneer_Diffuse.jpg, ash_veneer_Rough.jpg, ash_veneer_nor_dx.jpg, beige_wall_001_Rough.jpg, beige_wall_002_Rough.jpg, brown_leather_Diffuse.jpg, brown_leather_Rough.jpg, leather_white_Diffuse.jpg, leather_white_Rough.jpg, metal_plate_02_Diffuse.jpg, wood_floor_Diffuse.jpg, wood_floor_Rough.jpg, wool_boucle_nor_gl.jpg
+  other images: Beachfront | warm teak grain, Beachfront | whitewashed wood grain, Keepsake_Detail_linen_color, Keepsake_Detail_linen_normal, Keepsake_Detail_linen_roughness, Keepsake_Detail_plaster_color, Keepsake_Detail_plaster_normal, Keepsake_Detail_plaster_roughness, Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal, Keepsake_Detail_wood_roughness, Keepsake_Oatmeal_Weave, boat-study, coral-study, metal_plate_02_Metal-metal_plate_02_Rough
+public/room/cyberpunk/cyberpunk.glb
+  Poly Haven: ash_veneer_Diffuse.jpg, ash_veneer_Rough.jpg, ash_veneer_nor_dx.jpg, beige_wall_002_Diffuse.jpg, beige_wall_002_Rough.jpg, brown_leather_Diffuse.jpg, brown_leather_Rough.jpg, leather_white_Diffuse.jpg, leather_white_Rough.jpg, wood_cabinet_worn_long_Diffuse.jpg, wood_cabinet_worn_long_Rough.jpg, wood_floor_Diffuse.jpg, wood_floor_Rough.jpg
+  other images: Keepsake_Detail_linen_color, Keepsake_Detail_linen_normal, Keepsake_Detail_linen_roughness, Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal, Keepsake_Detail_wood_roughness
+public/room/furniture/beanbag-1.glb
+  Poly Haven: none
+  other images: sketchfab-beanbag-1623275853344, sketchfab-beanbag-1623275856928, sketchfab-beanbag-1623275860512
+public/room/furniture/beanbag-2.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: none
+public/room/furniture/bookshelf-1.glb
+  Poly Haven: none
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/bookshelf-2.glb
+  Poly Haven: none
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/cabinet-1.glb
+  Poly Haven: none
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/cabinet-2.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: Keepsake_Detail_wood_normal
+public/room/furniture/chair-1.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: none
+public/room/furniture/chair-2.glb
+  Poly Haven: none
+  other images: SchoolChair_01_arm_1k, SchoolChair_01_diff_1k, SchoolChair_01_nor_gl_1k
+public/room/furniture/chair-3.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/crt-1.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: Keepsake_Detail_wood_normal
+public/room/furniture/crt-2.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/curtains-1.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/curtains-2.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: none
+public/room/furniture/desk-1.glb
+  Poly Haven: none
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/desk-2.glb
+  Poly Haven: none
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/desk-3.glb
+  Poly Haven: none
+  other images: Bentwood walnut grain, Keepsake_Detail_wood_normal
+public/room/furniture/display-case.glb
+  Poly Haven: none
+  other images: none
+public/room/furniture/guestbook-stand-1.glb
+  Poly Haven: none
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/guestbook-stand-2.glb
+  Poly Haven: none
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/lamp-1.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: none
+public/room/furniture/lamp-2.glb
+  Poly Haven: none
+  other images: sketchfab-lamp-1623280136736, sketchfab-lamp-1623280156960, sketchfab-lamp-1623280160544, sketchfab-lamp-1623280164128
+public/room/furniture/lamp-3.glb
+  Poly Haven: none
+  other images: none
+public/room/furniture/printer-1.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/printer-2.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal
+public/room/furniture/prop-refinements.glb
+  Poly Haven: none
+  other images: none
+public/room/furniture/rug-1.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: none
+public/room/furniture/rug-2.glb
+  Poly Haven: fabric_pattern_07_nor_gl.jpg
+  other images: none
+public/room/furniture/time-capsule-metal.glb
+  Poly Haven: none
+  other images: none
+public/room/furniture/time-capsule.glb
+  Poly Haven: none
+  other images: Attic oak grain
+public/room/shared/scrapbook.glb
+  Poly Haven: book_pattern_nor_gl.jpg
+  other images: none
+public/room/woodland/woodland.glb
+  Poly Haven: ash_veneer_Diffuse.jpg, ash_veneer_Rough.jpg, ash_veneer_nor_dx.jpg, beige_wall_001_Diffuse.jpg, beige_wall_001_Rough.jpg, beige_wall_002_Diffuse.jpg, beige_wall_002_Rough.jpg, brown_leather_Diffuse.jpg, brown_leather_Rough.jpg, leather_white_Diffuse.jpg, leather_white_Rough.jpg, metal_plate_02_Diffuse.jpg, wood_cabinet_worn_long_Diffuse.jpg, wood_cabinet_worn_long_Rough.jpg, wood_floor_Diffuse.jpg, wood_floor_Rough.jpg, wool_boucle_nor_gl.jpg
+  other images: Keepsake_Detail_linen_color, Keepsake_Detail_linen_normal, Keepsake_Detail_linen_roughness, Keepsake_Detail_plaster_color, Keepsake_Detail_plaster_normal, Keepsake_Detail_plaster_roughness, Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal, Keepsake_Detail_wood_roughness, Keepsake_Oatmeal_Weave, metal_plate_02_Metal-metal_plate_02_Rough, woodland-fern-v1
+public/room/woodland/woodland.high.glb
+  Poly Haven: ash_veneer_Diffuse.jpg, ash_veneer_Rough.jpg, ash_veneer_nor_dx.jpg, beige_wall_001_Diffuse.jpg, beige_wall_001_Rough.jpg, beige_wall_002_Diffuse.jpg, beige_wall_002_Rough.jpg, brown_leather_Diffuse.jpg, brown_leather_Rough.jpg, leather_white_Diffuse.jpg, leather_white_Rough.jpg, metal_plate_02_Diffuse.jpg, wood_cabinet_worn_long_Diffuse.jpg, wood_cabinet_worn_long_Rough.jpg, wood_floor_Diffuse.jpg, wood_floor_Rough.jpg, wool_boucle_nor_gl.jpg
+  other images: Keepsake_Detail_linen_color, Keepsake_Detail_linen_normal, Keepsake_Detail_linen_roughness, Keepsake_Detail_plaster_color, Keepsake_Detail_plaster_normal, Keepsake_Detail_plaster_roughness, Keepsake_Detail_wood_color, Keepsake_Detail_wood_normal, Keepsake_Detail_wood_roughness, Keepsake_Oatmeal_Weave, metal_plate_02_Metal-metal_plate_02_Rough, woodland-fern-v1
+public/room/woodland-study/woodland-study.glb
+  Poly Haven: none
+  other images: floor-color, floor-normal, floor-orm, linen-62715b-color, linen-718466-color, linen-b37d61-color, linen-e4d3b5-color, linen-fff4da-color, linen-normal, linen-orm, oak-b7a18d-color, oak-color, oak-normal, oak-orm, stone-color, stone-normal, stone-orm, timber-color, timber-normal, timber-orm

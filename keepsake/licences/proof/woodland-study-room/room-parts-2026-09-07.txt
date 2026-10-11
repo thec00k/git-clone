@@ -1,0 +1,222 @@
+generator: Khronos glTF Blender I/O v3.4.50
+
+Desk: 12 parts, 11 are 24-vertex boxes
+  Accent_Mug                     1060  M_MugGlaze
+  Desk_Apron_B                     24  wood_furniture_oak
+  Desk_Apron_L                     24  wood_furniture_oak
+  Desk_Apron_R                     24  wood_furniture_oak
+  Desk_Drawer                      24  wood_furniture_oak
+  Desk_DrawerFront                 24  wood_furniture_oak
+  Desk_HandleBar                   24  wood_cabinet_worn_long
+  Desk_Leg_BL                      24  wood_furniture_oak
+  Desk_Leg_BR                      24  wood_furniture_oak
+  Desk_Leg_FL                      24  wood_furniture_oak
+  Desk_Leg_FR                      24  wood_furniture_oak
+  Desk_Top                         24  wood_furniture_oak
+
+ks_book: 2 parts, 2 are 24-vertex boxes
+  ks_book                          24  brown_leather
+  Book_Pages                       24  leather_white
+
+ks_crt: 8 parts, 6 are 24-vertex boxes
+  CRT_Back                         24  M_CRTDark
+  CRT_Base                         24  M_CRTPlastic
+  CRT_Bezel                        24  M_CRTDark
+  CRT_Body                         24  M_CRTPlastic
+  CRT_Knob_1                       48  M_Terracotta
+  CRT_Knob_2                       48  M_Terracotta
+  CRT_Screen                       24  M_CRTScreen
+  CRT_Toggle                       24  M_Terracotta
+
+ks_archive: 28 parts, 23 are 24-vertex boxes
+  Accent_Leaf1                     24  M_Leaf
+  Accent_Leaf2                     24  M_Leaf
+  Accent_Pot                       48  M_Terracotta
+  Archive_Back                     24  wood_furniture_oak
+  Archive_Deck                     24  wood_furniture_oak
+  Archive_Header                   24  wood_furniture_oak
+  Archive_Inlay                    24  M_Terracotta
+  Archive_Plinth                   24  wood_furniture_oak
+  Archive_SideL                    24  wood_furniture_oak
+  Archive_SideR                    24  wood_furniture_oak
+  Archive_Top                      24  wood_furniture_oak
+  ks_archive_drawer               120  wood_furniture_oak
+  Archive_Handle                   24  wood_furniture_oak
+  Archive_HandlePostL              24  M_FanBrass
+  Archive_HandlePostR              24  M_FanBrass
+  Archive_Tab_0                    24  M_FileTab
+  Archive_Tab_1                    24  M_FileTab
+  Archive_Tab_2                    24  M_FileTab
+  Archive_Tab_3                    24  M_FileTab
+  Archive_TabEar_0                 24  M_FileTab
+  Archive_TabEar_1                 24  M_FileTab
+  Archive_TabEar_2                 24  M_FileTab
+  Archive_TabEar_3                 24  M_FileTab
+  ks_archive_rail                  72  M_FanBrass
+  ks_archive_frame                 96  wood_furniture_oak
+  ks_archive_frame_mat             24  M_FrameMat
+  ks_archive_frame_hinge           24  M_FanBrass
+  ks_archive_frame_stand          120  wood_cabinet_worn_long
+
+ks_guestbook: 5 parts, 4 are 24-vertex boxes
+  Guest_Pedestal                   48  wood_furniture_oak
+  Guest_Top                        24  wood_furniture_oak
+  Guestbook_Cover                  24  brown_leather
+  Guestbook_Pages                  24  leather_white
+  Guestbook_Ribbon                 24  M_Terracotta
+
+ks_map: 7 parts, 7 are 24-vertex boxes
+  Map_Cork                         24  brown_leather
+  Map_Frame                        24  M_Oak
+  Map_Pin_0                        24  M_Pin
+  Map_Pin_1                        24  M_Pin
+  Map_Pin_2                        24  M_Pin
+  Map_Pin_3                        24  M_Pin
+  Map_Sheet                        24  M_Map
+
+ks_shelf: 54 parts, 54 are 24-vertex boxes
+  ks_shelf_board_0                 24  wood_furniture_oak
+  ks_shelf_board_1                 24  wood_furniture_oak
+  ks_shelf_board_2                 24  wood_furniture_oak
+  ks_shelf_book_0                  24  M_Book
+  ks_shelf_book_1                  24  M_Guestbook
+  ks_shelf_book_10                 24  M_TerracottaDark
+  ks_shelf_book_11                 24  M_Book
+  ks_shelf_book_12                 24  M_Guestbook
+  ks_shelf_book_13                 24  M_Book
+  ks_shelf_book_14                 24  M_Guestbook
+  ks_shelf_book_15                 24  M_Terracotta
+  ks_shelf_book_16                 24  M_TerracottaDark
+  ks_shelf_book_17                 24  M_OakDark
+  ks_shelf_book_18                 24  M_Book
+  ks_shelf_book_19                 24  M_Guestbook
+  ks_shelf_book_2                  24  M_Terracotta
+  ks_shelf_book_20                 24  M_Book
+  ks_shelf_book_21                 24  M_Guestbook
+  ks_shelf_book_22                 24  M_Terracotta
+  ks_shelf_book_23                 24  M_OakDark
+  ks_shelf_book_24                 24  M_Book
+  ks_shelf_book_25                 24  M_Guestbook
+  ks_shelf_book_26                 24  M_Book
+  ks_shelf_book_27                 24  M_Guestbook
+  ks_shelf_book_28                 24  M_Terracotta
+  ks_shelf_book_29                 24  M_TerracottaDark
+  ks_shelf_book_3                  24  M_TerracottaDark
+  ks_shelf_book_30                 24  M_OakDark
+  ks_shelf_book_31                 24  M_Book
+  ks_shelf_book_32                 24  M_Guestbook
+  ks_shelf_book_33                 24  M_Book
+  ks_shelf_book_34                 24  M_Guestbook
+  ks_shelf_book_35                 24  M_TerracottaDark
+  ks_shelf_book_36                 24  M_Book
+  ks_shelf_book_37                 24  M_Guestbook
+  ks_shelf_book_38                 24  M_TerracottaDark
+  ks_shelf_book_39                 24  M_Book
+  ks_shelf_book_4                  24  M_OakDark
+  ks_shelf_book_40                 24  M_Guestbook
+  ks_shelf_book_41                 24  M_Book
+  ks_shelf_book_42                 24  M_Guestbook
+  ks_shelf_book_43                 24  M_Terracotta
+  ks_shelf_book_44                 24  M_TerracottaDark
+  ks_shelf_book_5                  24  M_Book
+  ks_shelf_book_6                  24  M_Guestbook
+  ks_shelf_book_7                  24  M_Book
+  ks_shelf_book_8                  24  M_Guestbook
+  ks_shelf_book_9                  24  M_Terracotta
+  Shelf_Back                       24  wood_furniture_oak
+  Shelf_Bot                        24  wood_furniture_oak
+  Shelf_Kick                       24  wood_furniture_oak
+  Shelf_SideL                      24  wood_furniture_oak
+  Shelf_SideR                      24  wood_furniture_oak
+  Shelf_Top                        24  wood_furniture_oak
+
+ks_chair: 10 parts, 10 are 24-vertex boxes
+  Chair_Back                       24  wood_furniture_oak
+  Chair_BackPost_L                 24  wood_furniture_oak
+  Chair_BackPost_R                 24  wood_furniture_oak
+  Chair_Leg_BL                     24  wood_furniture_oak
+  Chair_Leg_BR                     24  wood_furniture_oak
+  Chair_Leg_FL                     24  wood_furniture_oak
+  Chair_Leg_FR                     24  wood_furniture_oak
+  Chair_Rail_B                     24  wood_furniture_oak
+  Chair_Rail_F                     24  wood_furniture_oak
+  Chair_Seat                       24  wood_furniture_oak
+
+ks_lamp: 6 parts, 0 are 24-vertex boxes
+  ks_lamp_bulb                    210  M_LampBulb
+  Lamp_Base                        80  wood_furniture_oak
+  Lamp_Foot                        56  wood_furniture_oak
+  Lamp_Neck                        46  M_FanBrass
+  Lamp_Pole                        48  M_FanBrass
+  Lamp_Shade                      205  M_LampShade
+
+ks_door: 10 parts, 8 are 24-vertex boxes
+  Door_Head                        24  wood_furniture_oak
+  Door_Jamb_L                      24  wood_furniture_oak
+  Door_Jamb_R                      24  wood_furniture_oak
+  Door_Knob                        72  metal_plate_02
+  Door_KnobStem                    60  metal_plate_02
+  Door_Leaf                        24  wood_furniture_oak
+  Door_Panel_L                     24  wood_furniture_oak
+  Door_Panel_U                     24  wood_furniture_oak
+  Door_Plate                       24  metal_plate_02
+  Door_Sill                        24  wood_furniture_oak
+
+ks_clock: 10 parts, 8 are 24-vertex boxes
+  Clock_Back                       24  wood_cabinet_worn_long
+  Clock_Bottom                     24  wood_cabinet_worn_long
+  Clock_BrassLip                   24  M_FanBrass
+  Clock_Inlay                      24  M_Terracotta
+  Clock_Left                       24  wood_cabinet_worn_long
+  Clock_Right                      24  wood_cabinet_worn_long
+  Clock_Top                        24  wood_cabinet_worn_long
+  Clock_Well                       24  M_ClockWell
+  ks_clock_digits                   4  M_ClockDigits
+  ks_clock_glass                    4  M_Glass
+
+ks_ceiling_switch: not in this file
+
+ks_window: 9 parts, 9 are 24-vertex boxes
+  Win_Glass                        24  M_Glass
+  Win_Head                         24  wood_furniture_oak
+  Win_Jamb_L                       24  wood_furniture_oak
+  Win_Jamb_R                       24  wood_furniture_oak
+  Win_Lip_L                        24  wood_furniture_oak
+  Win_Lip_R                        24  wood_furniture_oak
+  Win_Muntin_H                     24  wood_furniture_oak
+  Win_Muntin_V                     24  wood_furniture_oak
+  Win_Sill                         24  wood_furniture_oak
+
+Beanbag: 1 parts, 0 are 24-vertex boxes
+  Beanbag                         228  fabric_pattern_05
+
+ks_ceiling_fan: 29 parts, 8 are 24-vertex boxes
+  Fan_Bowl                        460  M_FanBowl
+  Fan_Canopy                      168  M_FanBronze
+  Fan_Chain_0                      48  M_FanIron
+  Fan_Chain_1                      48  M_FanIron
+  Fan_ChainWeight                 176  M_FanIron
+  Fan_Finial                      300  M_FanIron
+  Fan_Housing                     192  M_FanBronze
+  Fan_Ring                        120  M_FanBronze
+  Fan_Rod                          72  M_FanBronze
+  Fan_Blade_0                      72  ash_veneer
+  Fan_Iron_0                       24  M_FanIron
+  Fan_Plate_0                      24  M_FanBrass
+  Fan_Screw_0_0                    48  M_FanIron
+  Fan_Screw_0_1                    48  M_FanIron
+  Fan_Blade_1                      70  ash_veneer
+  Fan_Iron_1                       24  M_FanIron
+  Fan_Plate_1                      24  M_FanBrass
+  Fan_Screw_1_0                    48  M_FanIron
+  Fan_Screw_1_1                    48  M_FanIron
+  Fan_Blade_2                      72  ash_veneer
+  Fan_Iron_2                       24  M_FanIron
+  Fan_Plate_2                      24  M_FanBrass
+  Fan_Screw_2_0                    48  M_FanIron
+  Fan_Screw_2_1                    48  M_FanIron
+  Fan_Blade_3                      70  ash_veneer
+  Fan_Iron_3                       24  M_FanIron
+  Fan_Plate_3                      24  M_FanBrass
+  Fan_Screw_3_0                    48  M_FanIron
+  Fan_Screw_3_1                    48  M_FanIron
