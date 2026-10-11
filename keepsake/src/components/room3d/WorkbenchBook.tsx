@@ -25,6 +25,15 @@ const loadBook = () =>
     bookAsset = undefined;
     throw error;
   }));
+const TURN_TARGETS = [1, 2, 3, 4].map(i => `Turn_${String(i * 25).padStart(3, '0')}`);
+// Per-frame scratch: useFrame must not allocate.
+const frame = {
+  pose: {rotation: 0, x: 0, y: 0},
+  weights: [0, 0, 0, 0] as [number, number, number, number],
+  resting: new THREE.Vector3(),
+  seat: new THREE.Vector3(),
+  facing: new THREE.Quaternion(),
+};
 
 function EditorSurface({
   header,
@@ -147,6 +156,13 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
   const leftPages = model.getObjectByName('Book_Left_Pages');
   const coverNormal = materials.find(m => m.name === 'Book_Linen') as THREE.MeshStandardMaterial | undefined;
   const leaf = model.getObjectByName('Book_Turning_Page');
+  const leafMeshes = useMemo(() => {
+    const meshes: THREE.Mesh[] = [];
+    leaf?.traverse(o => {
+      if (o instanceof THREE.Mesh && o.morphTargetInfluences) meshes.push(o);
+    });
+    return meshes;
+  }, [leaf]);
   const maps = useMemo(
     () =>
       turn
@@ -202,7 +218,7 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
       // The left stack rides the inside of the cover instead of expanding
       // horizontally through it. At rest its top matches the editor surface.
       const angle = hinge.rotation.z;
-      const pose = leftStackPose(angle, hinge.position.y);
+      const pose = leftStackPose(angle, hinge.position.y, frame.pose);
       leftPages.rotation.z = pose.rotation;
       leftPages.position.set(pose.x, pose.y, 0);
       leftPages.scale.x = 1;
@@ -212,23 +228,20 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
       group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, opened ? -0.15 : -0.31, t);
     if (chair) {
       const active = phase !== 'room' && phase !== 'leaving';
-      const resting = chair.position.clone();
+      const resting = frame.resting.copy(chair.position);
       resting.y += Number(chair.object.userData.floorLift ?? 0);
-      chair.object.position.lerp(active ? new THREE.Vector3(-0.15, resting.y, -0.78) : resting, t);
-      chair.object.quaternion.slerp(active ? new THREE.Quaternion() : chair.rotation, t);
+      chair.object.position.lerp(active ? frame.seat.set(-0.15, resting.y, -0.78) : resting, t);
+      chair.object.quaternion.slerp(active ? frame.facing.identity() : chair.rotation, t);
     }
     if (turn && leaf && !turnFinished.current) {
       turnTime.current += Math.min(delta, 0.05);
       const progress = smootherstep(Math.min(1, turnTime.current / 0.95));
-      const weights = pageTurnWeights(turn.direction === 'next' ? progress : 1 - progress);
-      leaf.traverse(o => {
-        if (o instanceof THREE.Mesh && o.morphTargetInfluences)
-          weights.forEach((w, i) => {
-            const name = `Turn_${String((i + 1) * 25).padStart(3, '0')}`;
-            const index = o.morphTargetDictionary?.[name];
-            if (index !== undefined) o.morphTargetInfluences![index] = w;
-          });
-      });
+      const weights = pageTurnWeights(turn.direction === 'next' ? progress : 1 - progress, frame.weights);
+      for (const o of leafMeshes)
+        for (let i = 0; i < weights.length; i++) {
+          const index = o.morphTargetDictionary?.[TURN_TARGETS[i]];
+          if (index !== undefined) o.morphTargetInfluences![index] = weights[i];
+        }
       if (turnTime.current >= 0.95) {
         turnFinished.current = true;
         turn.done();
