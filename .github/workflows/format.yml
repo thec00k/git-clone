@@ -30,8 +30,12 @@ jobs:
         run: npm install --save-dev --no-audit --no-fund prettier@^3 fake-indexeddb@^6
       - name: Format
         run: npx prettier --write .
-      - name: Build, lint and checks still pass
-        run: npm run build && npm run lint && npm run check:acceptance
+      - name: Build still passes
+        run: bash ../.github/scripts/run-step.sh build npm run build
+      - name: Lint still passes
+        run: bash ../.github/scripts/run-step.sh lint npm run lint
+      - name: Checks still pass
+        run: bash ../.github/scripts/run-step.sh acceptance npm run check:acceptance
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
