@@ -102,6 +102,10 @@ export function AppProvider({children}: {children: ReactNode}) {
   const [retry, setRetry] = useState(0);
   const savedRef = useRef<AppState | null>(null);
   const blockedRef = useRef(false);
+  // Restores bump the epoch; saves carry the epoch they were made in and are dropped if it moved on, so an
+  // autosave of the room as it was before a restore can never overwrite the restored room.
+  const epochRef = useRef(0);
+  const restoringRef = useRef(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
   const loadedRef = useRef(false);
@@ -162,10 +166,11 @@ export function AppProvider({children}: {children: ReactNode}) {
     };
   }, [retry]);
 
-  const persist = useCallback(async (snapshot: AppState) => {
-    if (blockedRef.current) return false;
+  const persist = useCallback(async (snapshot: AppState, epoch = epochRef.current, restoring = false) => {
+    if (blockedRef.current || epoch !== epochRef.current || (restoringRef.current && !restoring))
+      return false;
     try {
-      await saveState(snapshot);
+      if (!(await saveState(snapshot, () => epoch === epochRef.current))) return false;
       savedRef.current = snapshot;
       if (stateRef.current === snapshot) setSaveStatus('saved');
       return true;
@@ -226,22 +231,29 @@ export function AppProvider({children}: {children: ReactNode}) {
     }
     setSaveStatus('saving');
     window.clearTimeout(saveTimer.current);
+    const epoch = epochRef.current;
     saveTimer.current = window.setTimeout(() => {
-      void persist(state);
+      void persist(state, epoch);
     }, 450);
     return () => window.clearTimeout(saveTimer.current);
   }, [state, persist]);
 
   const restoreRoom = useCallback(
     async (next: AppState) => {
-      next = await restoreOriginalFiles(next);
-      next = {
-        ...next,
-        achievementBaseline: next.achievementBaseline ?? baseline(next),
-        environment: {...next.environment, tidiedAt: Date.now()},
-      };
+      const epoch = ++epochRef.current;
+      restoringRef.current = true;
       window.clearTimeout(saveTimer.current);
-      if (!(await persist(next))) throw new Error('The restored room could not be saved.');
+      try {
+        next = await restoreOriginalFiles(next);
+        next = {
+          ...next,
+          achievementBaseline: next.achievementBaseline ?? baseline(next),
+          environment: {...next.environment, tidiedAt: Date.now()},
+        };
+        if (!(await persist(next, epoch, true))) throw new Error('The restored room could not be saved.');
+      } finally {
+        if (epoch === epochRef.current) restoringRef.current = false;
+      }
       stateRef.current = next;
       setState(next);
       setNewlyUnlocked([]);

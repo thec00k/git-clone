@@ -53,6 +53,18 @@ const keys = await new Promise(resolve => {
   };
 });
 assert.equal(keys.length, 2, 'photo and card art remain; the removed model is deleted');
+// An autosave of the room as it was before a restore can be queued behind the restore (its timer fired while
+// the restore was saving). It is dropped when its turn comes, so the restored room is what stays saved.
+let epoch = 2;
+const restored = saveState({...state, environment: {label: 'restored'}}, () => epoch === 2);
+const older = saveState({...state, environment: {label: 'older autosave'}}, () => epoch === 1);
+assert.equal(await restored, true, 'the restore is written');
+assert.equal(await older, false, 'the stale autosave is not written');
+assert.equal(
+  (await loadState()).environment.label,
+  'restored',
+  'an older autosave cannot overwrite a restore',
+);
 console.log(
-  'Storage: photos, card art and 3D scans stored once by hash outside the room record; removed files are deleted.',
+  'Storage: photos, card art and 3D scans stored once by hash outside the room record; removed files are deleted; stale autosaves cannot overwrite a restore.',
 );
