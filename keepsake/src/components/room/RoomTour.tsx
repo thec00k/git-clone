@@ -4,6 +4,7 @@ import {useNav} from '../../store/nav';
 import {markTourFinished, TOUR_STEPS} from '../../lib/tour';
 import {faceForHotspot, roomLayoutFromSearch, YAW_MS} from '../../lib/roomLayout';
 import {DialogueBubble} from './DialogueBubble';
+import {KEY_OWNING_TARGETS} from '../../lib/keyTargets';
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -104,11 +105,17 @@ export function RoomTour() {
   useEffect(() => {
     if (!touring) return;
     const onKey = (e: KeyboardEvent) => {
+      // The tour bubble is itself a modal dialog, so only skip keys a field or widget owns.
+      if (e.defaultPrevented || (e.target instanceof Element && e.target.closest(KEY_OWNING_TARGETS))) {
+        return;
+      }
       if (e.key === 'Escape') {
         e.preventDefault();
         finish();
       }
-      if (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') {
+      // Enter and Space on a focused button already press that button.
+      const onControl = e.target instanceof Element && e.target.closest('button, a[href], summary');
+      if (e.key === 'ArrowRight' || (!onControl && (e.key === 'Enter' || e.key === ' '))) {
         e.preventDefault();
         if (step >= TOUR_STEPS.length - 1) finish();
         else setStep(s => s + 1);

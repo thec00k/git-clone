@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import type {RoomFace} from '../../lib/roomLayout';
 import {useActiveRoom} from './useActiveRoom';
 import {DISPLAY_CASE_VIEW} from './ArtifactDisplayCase';
+import {ignorePageKey} from '../../lib/keyTargets';
 const EYE_Y = 1.32;
 const WORKBENCH_VIEW = {
   position: new THREE.Vector3(-0.15, 1.55, -1.12),
@@ -248,20 +249,8 @@ export function EyeCamera({
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (
-        touringRef.current ||
-        objectControls.current ||
-        seated ||
-        document.querySelector('[aria-modal="true"]')
-      )
-        return;
+      if (touringRef.current || objectControls.current || seated || ignorePageKey(e)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (
-        e.target instanceof HTMLElement &&
-        e.target.closest("input, textarea, select, [contenteditable='true'], [aria-modal='true']")
-      ) {
-        return;
-      }
       const intent = walkIntent(e);
       if (!intent) return;
       e.preventDefault();

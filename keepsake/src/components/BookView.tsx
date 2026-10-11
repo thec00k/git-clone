@@ -157,18 +157,8 @@ export function BookView({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
-      if (
-        e.defaultPrevented ||
-        showPrint ||
-        showKeys ||
-        printerOpen ||
-        showPhotos ||
-        showShop ||
-        showNotes ||
-        document.querySelector('[aria-modal=true]')
-      )
-        return;
-      if (t?.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')) return;
+      if (showPrint || showKeys || printerOpen || showPhotos || showShop || showNotes) return;
+      if (ignorePageKey(e) || t?.closest('[role="dialog"]')) return;
       const mod = e.metaKey || e.ctrlKey;
       if (!isVisitor && !turn && mod && e.key.toLowerCase() === 'z') {
         e.preventDefault();
@@ -698,3 +688,4 @@ function Row({k, v}: {k: string; v: string}) {
 }
 import {KeepsakeGlyph} from './KeepsakeGlyph';
 import {discoveryState, REWARDS} from '../lib/discoveries';
+import {ignorePageKey} from '../lib/keyTargets';
