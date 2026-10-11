@@ -175,12 +175,20 @@ function store(data: {access_token: string; refresh_token?: string; expires_in: 
     refresh_token: data.refresh_token,
     expires_at: Date.now() + (data.expires_in - 60) * 1000,
   };
-  localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+  sessionStorage.setItem(TOKEN_KEY, JSON.stringify(token));
 }
 
+/** Tokens live in sessionStorage, so the long-lived refresh token is gone when the browser closes instead of
+ * sitting in localStorage indefinitely (the CSP is still report-only). Older builds kept it in localStorage:
+ * move it over once and delete the old copy. */
 function read(): StoredToken | null {
   try {
-    return JSON.parse(localStorage.getItem(TOKEN_KEY) || 'null');
+    const legacy = localStorage.getItem(TOKEN_KEY);
+    if (legacy) {
+      localStorage.removeItem(TOKEN_KEY);
+      if (!sessionStorage.getItem(TOKEN_KEY)) sessionStorage.setItem(TOKEN_KEY, legacy);
+    }
+    return JSON.parse(sessionStorage.getItem(TOKEN_KEY) || 'null');
   } catch {
     return null;
   }
@@ -191,6 +199,7 @@ export function isConnected(): boolean {
 }
 
 export function logout(): void {
+  sessionStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(TOKEN_KEY);
 }
 

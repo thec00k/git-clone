@@ -1,8 +1,31 @@
 import assert from 'node:assert/strict';
-import {getPlaybackDevice, setPlaybackVolume} from '../src/lib/spotify.ts';
+import {getPlaybackDevice, isConnected, setPlaybackVolume} from '../src/lib/spotify.ts';
 // Synthetic storage and HTTP responses only: no account or playback is touched.
+const memory = () => {
+  const items = new Map();
+  return {
+    getItem: k => items.get(k) ?? null,
+    setItem: (k, v) => items.set(k, String(v)),
+    removeItem: k => items.delete(k),
+  };
+};
+globalThis.localStorage = memory();
+globalThis.sessionStorage = memory();
 let token = JSON.stringify({access_token: 'test-only', expires_at: Date.now() + 60000});
-globalThis.localStorage = {getItem: () => token};
+// A token saved by an older build in localStorage moves to sessionStorage and leaves localStorage.
+localStorage.setItem('ks-spotify-token', token);
+assert.equal(isConnected(), true);
+assert.equal(localStorage.getItem('ks-spotify-token'), null, 'no Spotify token is left in localStorage');
+assert.equal(
+  sessionStorage.getItem('ks-spotify-token'),
+  token,
+  'the token lasts only for this browser session',
+);
+const session = globalThis.sessionStorage;
+globalThis.sessionStorage = {
+  ...session,
+  getItem: k => (k === 'ks-spotify-token' ? token : session.getItem(k)),
+};
 let calls = [];
 globalThis.fetch = async (url, init) => {
   calls.push({url, init});
