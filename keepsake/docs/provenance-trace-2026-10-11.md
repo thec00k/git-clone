@@ -11,19 +11,19 @@ Goal: find a source page (Poly Haven, Poly Pizza or Sketchfab) for the 13 Woodla
 | Entry | Before | After | Why |
 | --- | --- | --- | --- |
 | original-furniture | unverified | documented | Wood maps proven original; fabric normal is CC0 Poly Haven. A dated copy of the fabric_pattern_07 page moves it to verified. |
-| legacy-woodland | unverified | unverified | Textures now named (Poly Haven CC0); geometry waits on the owner's confirmation. |
-| beachfront-room | unverified | unverified | Same as above. |
-| neon-city-room | unverified | unverified | Same as above. |
-| woodland-study-room | unverified | unverified | Textures all original; the kept objects wait on the owner's confirmation. |
+| legacy-woodland | unverified | ai-generated | Textures Poly Haven CC0, geometry confirmed original; it still embeds the AI-generated fern print, so it follows room-prints-ai. Not loaded at runtime. |
+| beachfront-room | unverified | documented | Textures Poly Haven CC0; geometry confirmed original. |
+| neon-city-room | unverified | documented | Same as above. |
+| woodland-study-room | unverified | documented | Textures generated; geometry confirmed original; the beanbag keeps its CC BY credit. |
 | scrapbook-model | original | original | Note added: its cover normal map is Poly Haven `book_pattern` (CC0). |
 
-## Needs the owner
-1. **Confirm the furniture was built in your own Blender sessions** (with the Blender MCP assistant), not downloaded. If yes, `woodland-study-room` becomes original and the other three rooms become documented, with no remodel needed for licensing.
+## Owner decisions and what is left
+1. **Confirmed (October 11):** the owner built the shared furniture in their own Blender sessions with the Blender MCP assistant. The room entries moved as shown above, and no remodel is needed for licensing.
 2. **Proof copies.** This cloud session could not reach Poly Haven, Poly Pizza or Sketchfab to save pages, so nothing was marked verified. A dated screenshot or PDF of each page in [polyhaven-pages-2026-10-11.md](../licences/proof/polyhaven-textures/polyhaven-pages-2026-10-11.md), plus fabric_pattern_07, book_pattern, School Chair 01, the Kenney Desk Chair and the two Sketchfab models, saved into `licences/proof/<entry-id>/`, moves those entries to verified. The Blender session on the owner's computer can do this from its browser.
 3. **Non-commercial or credit-required items:** none found. Every traced texture is CC0. The two CC BY models (Sketchfab beanbag and lamp) were already credited in the app.
 
-## Remodel list (only if the owner does not confirm)
-For the Blender session (`docs/handoff-blender-tasks.md`, added in pull request #7): Desk (with `Desk_Drawer`), ks_book, ks_crt, ks_archive, ks_guestbook, ks_map, ks_shelf, ks_chair, ks_lamp, ks_door, ks_clock, ks_ceiling_switch (an empty anchor, no geometry), ks_window. The Beanbag keeps its CC BY credit or is replaced. The Illustrated Nostalgia pass remodels these objects anyway, which settles the question either way.
+## Remodel list
+None needed for licensing. The Illustrated Nostalgia pass (`docs/handoff-blender-tasks.md`, added in pull request #7) still remodels Desk (with `Desk_Drawer`), ks_book, ks_crt, ks_archive, ks_guestbook, ks_map, ks_shelf, ks_chair, ks_lamp, ks_door, ks_clock and ks_window for art reasons; keep `ks_ceiling_switch` as an anchor.
 
 ## Not covered here
 Sample photos, `public/textures/*` and the world maps stay unverified; they are images, not models, and their replacements are listed in the [licence report](licence-report.md).
