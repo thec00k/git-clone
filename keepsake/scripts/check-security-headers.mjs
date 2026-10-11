@@ -15,6 +15,7 @@ const ALLOWED = new Set([
   'sdk.scdn.co',
   'w.soundcloud.com',
   'i.scdn.co',
+  '*.supabase.co', // account sign-in and backup, only once signed in (docs/backend-design.md)
   '*.sndcdn.com',
   '127.0.0.1',
   'localhost',

@@ -22,6 +22,7 @@ import type {CoverStyle, SaveStatus, Scrapbook, Visibility} from '../types/scrap
 import {uid} from '../lib/id';
 import {createSeed} from '../data/seed';
 import {loadState, saveState, SaveConflict} from '../lib/storage';
+import {syncAfterSave} from '../lib/sync';
 import {recordPhotoActivity} from '../lib/photoActivity';
 import {restoreOriginalFiles} from '../lib/originalPhotos';
 import {downloadRoom} from '../lib/roomBackup';
@@ -152,6 +153,7 @@ export function AppProvider({children}: {children: ReactNode}) {
       if (!initial.achievementBaseline) initial.achievementBaseline = baseline(initial);
       normalizeLegacyRooms(initial);
       setState(musicOnEntry(initial));
+      if (stored) syncAfterSave(stored);
       loadedRef.current = true;
     })().catch(error => {
       if (!cancelled)
@@ -167,6 +169,8 @@ export function AppProvider({children}: {children: ReactNode}) {
     try {
       await saveState(snapshot);
       savedRef.current = snapshot;
+      // Backup to the account (when signed in) only ever follows a successful save on this device.
+      syncAfterSave(snapshot);
       if (stateRef.current === snapshot) setSaveStatus('saved');
       return true;
     } catch (error) {

@@ -20,6 +20,7 @@ const scripts = [
   'check-room-music.mjs',
   'check-seasons.mjs',
   'check-storage.mjs',
+  'check-sync.mjs',
   'check-limits.mjs',
   'check-moderation.mjs',
   'check-licences.mjs',

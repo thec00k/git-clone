@@ -8,7 +8,7 @@ Written for the next agent (for example the Claude desktop agent) picking this u
 
 ## Done in this stretch
 - Fire and sound, free room swapping, stamps (30 to start, daily grant), seasons and holidays, room ageing, caption lettering, Beachfront seasonal grade.
-- Supabase design (schema, row level security, teen rules, silent blocks, tag consent, rate limits, server-owned stamps, storage, trash), tested on every push (CI job "database"). Not deployed; the app does not talk to a server.
+- Supabase design (schema, row level security, teen rules, silent blocks, tag consent, rate limits, server-owned stamps, storage, trash), tested on every push (CI job "database"). Not deployed. Oct 11: sign-in and a sync client with an outbox (`src/lib/sync/`, `check-sync`), hidden until a project is configured.
 - Shared size limits (`src/lib/limits.ts`): 4 photos a page, 10 pages, 40 a book, 12 books, 100 pins, 500 photos, 25 MB, 2048 px. Page cap changed from 6 to 4.
 - Photos, card art and 3D scans stored once by hash outside the room record. GPS/EXIF stripped from originals.
 - Moderation decision logic (tested); the edge function is a stub.
@@ -19,7 +19,7 @@ Model guide: Opus 5.5 for database permissions, safety, data-loss and audits; So
 
 | Task | Model |
 | --- | --- |
-| Connect the app to Supabase (project, auth, sync client with outbox) | Opus 5.5 |
+| Connect the app to Supabase: sign-in and sync client with outbox are built (PR into this branch); still to do: create the project (waiting on the owner), image processing in `moderate-photo`, bringing a room down to a new device and the "changed elsewhere" choice. See `backend-design.md` → Sync | Opus 5.5 |
 | Load images on demand (blob URLs) before archives near 500 photos | Opus 5.5 |
 | Remaining audit findings (below) | Opus 5.5 |
 | Moderation vendors, image processing, moderator screen, in-app safety links, Terms/Privacy, account deletion/export | Opus 5.5 (legal review by a lawyer) |

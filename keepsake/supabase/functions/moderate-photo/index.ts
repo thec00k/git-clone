@@ -1,6 +1,6 @@
 // Supabase Edge Function (Deno): processes one raw upload. NOT DEPLOYED AND NOT YET RUN: vendor calls are
 // placeholders until a moderation provider and hash-matching service are chosen (docs/safety-model.md).
-// Trigger: a Storage webhook on inserts into the 'uploads' bucket, or a call from the client after upload.
+// Trigger: the app calls it after each upload (src/lib/sync/supabaseBackend.ts) with {path}.
 //
 // Steps: check limits -> decode -> resize to max 2048 px and re-encode as WebP (re-encoding drops all EXIF,
 // GPS and other metadata) -> hash-match and classify -> store the processed copy in 'photos' ->
@@ -29,8 +29,14 @@ async function toWebp(_raw: Uint8Array): Promise<{webp: Uint8Array; width: numbe
 }
 
 Deno.serve(async req => {
-  const {path, owner} = (await req.json()) as {path: string; owner: string};
-  if (!path.startsWith(owner + '/')) return new Response('bad path', {status: 400});
+  // The owner is whoever is signed in (from their access token), never a value the caller sends.
+  const token = req.headers.get('Authorization')?.replace(/^Bearer /, '') ?? '';
+  const {data: auth} = await admin.auth.getUser(token);
+  if (!auth?.user) return new Response('sign in first', {status: 401});
+  const owner = auth.user.id;
+  const {path} = (await req.json()) as {path: string};
+  if (typeof path !== 'string' || !path.startsWith(owner + '/') || path.includes('..'))
+    return new Response('bad path', {status: 400});
   const {data: file, error} = await admin.storage.from('uploads').download(path);
   if (error || !file) return new Response('missing upload', {status: 404});
   const {count} = await admin
@@ -48,6 +54,19 @@ Deno.serve(async req => {
   const sha256 = [...new Uint8Array(await crypto.subtle.digest('SHA-256', webp))]
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
+  // The same picture uploaded twice (a retry, a second device, or added again) keeps its first copy.
+  const {data: existing} = await admin
+    .from('photos')
+    .select('id, moderation')
+    .eq('owner_id', owner)
+    .eq('sha256', sha256)
+    .maybeSingle();
+  if (existing) {
+    // Added again after being deleted: take it back out of the trash.
+    await admin.from('photos').update({deleted_at: null}).eq('id', existing.id);
+    await admin.storage.from('uploads').remove([path]);
+    return Response.json({id: existing.id, state: existing.moderation});
+  }
   const decision = decide(await signalsFor(webp));
   const id = crypto.randomUUID(),
     storagePath = `${owner}/${id}.webp`;
