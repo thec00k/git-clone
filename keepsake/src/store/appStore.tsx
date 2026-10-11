@@ -23,7 +23,7 @@ import {uid} from '../lib/id';
 import {createSeed} from '../data/seed';
 import {loadState, saveState, SaveConflict} from '../lib/storage';
 import {recordPhotoActivity} from '../lib/photoActivity';
-import {restoreOriginalFiles} from '../lib/originalPhotos';
+import {pruneOriginals, restoreOriginalFiles} from '../lib/originalPhotos';
 import {downloadRoom} from '../lib/roomBackup';
 import {evaluate} from '../lib/achievements';
 import {baseline} from '../lib/discoveries';
@@ -157,6 +157,8 @@ export function AppProvider({children}: {children: ReactNode}) {
       normalizeLegacyRooms(initial);
       setState(musicOnEntry(initial));
       loadedRef.current = true;
+      // Free full-size originals of photos deleted (or replaced by a restore) in earlier visits.
+      if (stored) void pruneOriginals(stored).catch(() => {});
     })().catch(error => {
       if (!cancelled)
         setLoadError(error instanceof Error ? error.message : 'Your saved room could not be read.');
