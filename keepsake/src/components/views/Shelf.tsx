@@ -1,4 +1,4 @@
-import {LIMITS} from '../../lib/limits';
+import {LIMITS, bookPhotoCount, canSetVisibility, shareHint} from '../../lib/limits';
 import {useWorkbench} from '../../store/workbench';
 import {newCardBinder} from '../../lib/cardBinders';
 import {RoomBackup} from '../RoomBackup';
@@ -79,7 +79,8 @@ export function Shelf() {
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
         {books.map(b => {
           const cover = COVER_STYLES[b.coverStyle];
-          const photos = b.pages.reduce((n, p) => n + p.elements.filter(e => e.type === 'photo').length, 0);
+          const photos = bookPhotoCount(b);
+          const hint = shareHint(b);
           return (
             <div key={b.id} className="ks-panel overflow-hidden">
               <button
@@ -142,12 +143,19 @@ export function Shelf() {
                           <button
                             key={v.key}
                             className={`ks-tool ${b.visibility === v.key ? 'ks-tool--accent' : ''}`}
+                            disabled={b.visibility !== v.key && !canSetVisibility(b, v.key)}
+                            aria-describedby={hint && v.key !== 'private' ? `share-hint-${b.id}` : undefined}
                             onClick={() => setBookVisibility(b.id, v.key)}
                           >
                             <v.icon size={13} /> {v.label}
                           </button>
                         ))}
                       </div>
+                      {hint && (
+                        <small id={`share-hint-${b.id}`} role="status" className="block text-paper/60">
+                          {hint}
+                        </small>
+                      )}
                       {state.books.length > 1 && (
                         <button className="ks-tool hover:!bg-seal" onClick={() => deleteBook(b.id)}>
                           <Trash2 size={14} /> Delete book

@@ -27,7 +27,7 @@ Storage buckets: `uploads/<user>/…` (raw, owner-only, deleted after processing
 
 ## Who can see what
 - **Room:** owner always. Others never across a block. Invite rooms: invited friends. Friends rooms: friends. Open rooms (adults only): any signed-in person. Signed-out visitors: nothing.
-- **Book:** owner, or friends who can see the room when the book is set to friends. A book needs 5 photos before it is shared (`canShareBook`, enforced in the app).
+- **Book:** owner, or friends who can see the room when the book is set to friends. A book needs 5 photos on its pages before it is shared (`canShareBook`/`canSetVisibility`, enforced in the app's store and bookshelf). The database does not check this yet; add it when the sync client lands.
 - **Photo:** owner, or someone who can see a book it is in, and only after moderation approved it.
 - **Profile:** yourself, friends, people with a pending request with you, owners of rooms you may visit.
 
