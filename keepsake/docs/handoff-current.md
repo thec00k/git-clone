@@ -1,6 +1,6 @@
 # Keepsake project handoff
 
-> **New agent? Read [start-here.md](start-here.md) first, then the latest dated handoff, [handoff-2026-10-11.md](handoff-2026-10-11.md).** Continue on branch [`codex/foundations-and-seasons`](https://github.com/thec00k/git-clone/tree/codex/foundations-and-seasons) (head `933b5fe` on October 11), not `codex/woodland-composition-proof`.
+> **New agent? Read [start-here.md](start-here.md) first, then the latest dated handoff, [handoff-2026-10-11.md](handoff-2026-10-11.md).** Continue on branch [`codex/foundations-and-seasons`](https://github.com/thec00k/git-clone/tree/codex/foundations-and-seasons), not `codex/woodland-composition-proof`.
 
 > **Update, October 10, 2026 — branch [`codex/foundations-and-seasons`](https://github.com/thec00k/git-clone/tree/codex/foundations-and-seasons)** (branched from `codex/woodland-composition-proof`; `main` untouched). This branch is now the place to continue. What changed:
 > - **Season engine** (`src/lib/seasons.ts`, `useSeasonal`, Room settings > Season): automatic by date and hemisphere (guessed from the time zone, never geolocation), manual override or freeze, per-holiday opt-out. Four seasons plus Valentine's, Easter, 4th of July, Halloween, Christmas (the engine reports the holiday; holiday dressing art is not built yet). Tidy up keeps the chosen season. Backups round-trip the new fields. Tests: `scripts/check-seasons.mjs`.

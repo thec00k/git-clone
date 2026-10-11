@@ -3,7 +3,7 @@
 Paste-ready brief for a Claude Code session on the owner's computer, where Blender runs. Cloud sessions cannot reach Blender. Everything else in the open-work list ([handoff-2026-10-11.md](handoff-2026-10-11.md)) can be done from the cloud.
 
 ## Goal
-Remodel the 14 inherited objects in the default Woodland cabin so it has no inherited geometry and fits the **Illustrated Nostalgia** art direction, and replace assets whose provenance is unverified. The Beachfront remodel comes after.
+Polish the 14 furniture objects in the default Woodland cabin so they fit the **Illustrated Nostalgia** art direction. Since PR #8 this is art work only: the owner confirmed these objects were built in their own Blender sessions, so they are not a licensing problem ([provenance-trace-2026-10-11.md](provenance-trace-2026-10-11.md)). The Beachfront remodel comes after.
 
 ## Repo and branch
 `thec00k/git-clone`, app in `keepsake/`. Work from `codex/foundations-and-seasons` and open a PR into it, not `main`.
@@ -16,11 +16,10 @@ From the `woodland-study-room` entry in [licence-report.md](licence-report.md) (
 
 Desk, ks_book, ks_crt, ks_archive, ks_guestbook, ks_map, ks_shelf, ks_chair, ks_lamp, ks_door, ks_clock, ks_ceiling_switch, ks_window, Beanbag.
 
-Thirteen are of unknown origin (`licences/README.md` counts these as "the 13 inherited objects"). The Beanbag has a known CC BY licence (`sketchfab-beanbag` entry), so it needs attribution kept or a replacement, not a provenance search.
+The Beanbag has a known CC BY licence (`sketchfab-beanbag` entry), so it needs attribution kept or a replacement, not a provenance search.
 
 ## Where they live
-- The default cabin ("Woodland Retreat 2.0") is built by `art/woodland-study/build.py` on top of the inherited `art/woodland/woodland.blend`, and ships as `public/room/woodland-study/woodland-study.glb`. That build keeps these 14 objects from the inherited scene; walls, hearth, floor, materials and textures are already original.
-- Related, same session: `original-furniture` (the drawer-shop pieces in `public/room/furniture/`) reuses the inherited `Keepsake_Detail_wood_*` normal maps. Replace them with generated ones (like `art/woodland-study/generate-textures.py`) and re-export.
+- The default cabin ("Woodland Retreat 2.0") is built by `art/woodland-study/build.py` on top of the earlier `art/woodland/woodland.blend`, and ships as `public/room/woodland-study/woodland-study.glb`. That build keeps these 14 objects from that scene; walls, hearth, floor, materials and textures are already original.
 - `art/woodland/woodland.blend` and `public/room/woodland/*.glb` stay until nothing loads from them (`legacy-woodland` entry).
 
 ## Rules
@@ -34,4 +33,4 @@ Thirteen are of unknown origin (`licences/README.md` counts these as "the 13 inh
 Confirm Blender MCP is connected to Blender 5.1 (it was last seen attached to an older 3.4.1 window) before modeling.
 
 ## Report back
-Which objects are done, which licence entries were added or changed, and anything that still needs an owner decision (for example the original Woodland model and texture provenance).
+Which objects are done, which licence entries were added or changed, and anything that still needs an owner decision.
