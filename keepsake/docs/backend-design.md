@@ -51,7 +51,7 @@ Still to build:
 ## The live project (October 11, 2026)
 Supabase project `keepsake` in the KeepsakeOG organization, free plan, region us-east-1 (ref `sbmodgninaqphtadoban`, URL `https://sbmodgninaqphtadoban.supabase.co`). Migrations were applied through the Supabase connector in smaller pieces than the files (the connector asks the owner to approve any step containing `delete` or `drop`); `list_migrations` on the project shows the pieces. The security advisor's remaining notes are expected: `moderation_log` and `rate_events` have no policies on purpose (service role only), the helper functions listed are meant to be callable, and `citext` sits in `public`.
 
-Not applied yet: the last database step (block rule that unfriends and clears follows, the 30-day trash purge, the 0-10 page positions and `save_book()`). It contains `delete`, so it waits for the owner to approve the prompt. Until it is applied, backing up a book fails and retries; the room itself and photos back up.
+The last step (block rule, 30-day trash purge, 0-10 page positions and `save_book()`) was run by the owner in the SQL editor on October 11, because the connector's approval prompt kept timing out. Every migration file in this folder is now on the project.
 
 `moderate-photo` is deployed (JWT required). To point the app at the project, put these public values in `keepsake/.env.local` for local runs and in the host's build settings for the live site:
 ```
