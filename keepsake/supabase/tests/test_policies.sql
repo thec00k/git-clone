@@ -164,3 +164,13 @@ select pg_temp.act_as(null); set role anon;
 select pg_temp.expect_error($$select * from profiles$$, 'permission denied');
 reset role;
 \echo policy tests passed
+
+-- Trash: only items deleted more than 30 days ago are purged, and only by the service role.
+select pg_temp.act_as(null);
+insert into photos (id, owner_id, storage_path, width, height, bytes, sha256, deleted_at) values
+  ('10000000-0000-0000-0000-000000000003', :ada, :ada || '/old.webp', 10, 10, 10, repeat('d', 64), now() - interval '31 days'),
+  ('10000000-0000-0000-0000-000000000004', :ada, :ada || '/new.webp', 10, 10, 10, repeat('e', 64), now() - interval '2 days');
+select pg_temp.ok(purge_trash() >= 1, 'purge ran');
+select pg_temp.ok(not exists (select 1 from photos where id = '10000000-0000-0000-0000-000000000003') and exists (select 1 from photos where id = '10000000-0000-0000-0000-000000000004'), 'only old trash purged');
+select pg_temp.act_as(:ada); select pg_temp.expect_error($$select purge_trash()$$, 'permission denied');
+\echo trash tests passed
