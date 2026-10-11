@@ -51,6 +51,15 @@ Still to build:
 ## The live project (October 11, 2026)
 Supabase project `keepsake` in the KeepsakeOG organization, free plan, region us-east-1 (ref `sbmodgninaqphtadoban`, URL `https://sbmodgninaqphtadoban.supabase.co`). Migrations were applied through the Supabase connector in smaller pieces than the files (the connector asks the owner to approve any step containing `delete` or `drop`); `list_migrations` on the project shows the pieces. The security advisor's remaining notes are expected: `moderation_log` and `rate_events` have no policies on purpose (service role only), the helper functions listed are meant to be callable, and `citext` sits in `public`.
 
+Not applied yet: the last database step (block rule that unfriends and clears follows, the 30-day trash purge, the 0-10 page positions and `save_book()`). It contains `delete`, so it waits for the owner to approve the prompt. Until it is applied, backing up a book fails and retries; the room itself and photos back up.
+
+`moderate-photo` is deployed (JWT required). To point the app at the project, put these public values in `keepsake/.env.local` for local runs and in the host's build settings for the live site:
+```
+VITE_SUPABASE_URL=https://sbmodgninaqphtadoban.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_BcBtgyihsINH-W7m0XzhJA_uW07H-p8
+```
+Then, in the Supabase dashboard under Authentication → URL Configuration, set the Site URL to the live site and add `http://localhost:5174/` and `http://127.0.0.1:5174/` as redirect URLs, or the emailed sign-in link will not come back to the app. The built-in email sender is limited to a few emails an hour; a real email provider (SMTP) is needed before launch.
+
 ## Local storage changes (done and next)
 - Done: photos, card art and 3D scans (`src`, `photoSrc`, `coverSrc`, `backSrc`, `modelSrc`) are stored once by hash in the `images` store, so an edit no longer rewrites every model; the hash cache no longer grows for the whole session.
 - Next: **load images on demand.** `loadState` still reads every image into memory at start. Plan: keep `keepsake-asset:<hash>` references in state and resolve them through a small cache that returns `blob:` URLs when an image is about to be shown (archive grid, page, map). This is needed before archives approach the 500-photo limit, and it is the same shape the server sync needs (references, not data).
