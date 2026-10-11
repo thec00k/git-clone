@@ -9,6 +9,8 @@ Owner decisions (October 2026): Keepsake is for everyone aged 13+. No likes, str
 | New rooms are invite-only | `complete_signup()` | DB tests |
 | Under-18s can never open their room to everyone | trigger `enforce_room_rules` | DB tests |
 | Birth dates visible only to their owner | `profile_private` policy | DB tests |
+| A room's private details (archive, notes, time capsules, preferences) visible only to their owner, even to visitors of an open room | `room_private` policies; `rooms.settings` holds only the room's look | DB tests (sync) |
+| A sync never overwrites another device's save or anything on the device | `save_room()` revision check; sync client never writes the room | DB tests (sync), `check-sync` |
 | Friends found only by exact username; no search, no suggestions | `find_profile()`; profiles policy | DB tests |
 | Only the other person can accept a friend request | trigger `check_friendship` | DB tests |
 | Only friends can be invited; invites end with a block | `invites_insert` policy, `after_block` | DB tests |

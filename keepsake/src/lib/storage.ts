@@ -50,6 +50,24 @@ function mapStrings(value: unknown, map: (s: string) => string, key = ''): unkno
     return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, mapStrings(v, map, k)]));
   return value;
 }
+/** The key a file is stored under: its SHA-256. The sync client uses the same key (src/lib/sync/). */
+export async function assetKey(src: string): Promise<string> {
+  const digest = crypto.subtle
+    ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(src))
+    : crypto.getRandomValues(new Uint8Array(32)).buffer;
+  return PREFIX + Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+}
+export const isAssetKey = (s: string) => s.startsWith(PREFIX);
+/** One stored file by key, or undefined when the room no longer holds it. Read-only. */
+export async function readAsset(key: string): Promise<string | undefined> {
+  const db = await openDb();
+  try {
+    return (await request(db.transaction('images', 'readonly').objectStore('images').get(key))) as
+      string | undefined;
+  } finally {
+    db.close();
+  }
+}
 /** Read errors propagate: only an absent record means a new room. Legacy inline images hydrate unchanged. */
 export async function loadState(): Promise<AppState | null> {
   await queue.catch(() => {});
@@ -89,16 +107,7 @@ async function persist(state: AppState): Promise<void> {
     if (isFileData(s)) images.add(s);
     return s;
   });
-  for (const src of images)
-    if (!hashes.has(src)) {
-      const digest = crypto.subtle
-        ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(src))
-        : crypto.getRandomValues(new Uint8Array(32)).buffer;
-      hashes.set(
-        src,
-        PREFIX + Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join(''),
-      );
-    }
+  for (const src of images) if (!hashes.has(src)) hashes.set(src, await assetKey(src));
   const packed = mapStrings(state, s => hashes.get(s) ?? s);
   const referenced = new Set([...images].map(src => hashes.get(src)!));
   const db = await openDb();
