@@ -52,27 +52,23 @@ Deno.serve(async req => {
   const id = crypto.randomUUID(),
     storagePath = `${owner}/${id}.webp`;
   await admin.storage.from('photos').upload(storagePath, webp, {contentType: 'image/webp'});
-  await admin
-    .from('photos')
-    .insert({
-      id,
-      owner_id: owner,
-      storage_path: storagePath,
-      width,
-      height,
-      bytes: webp.length,
-      sha256,
-      moderation: decision.state,
-    });
-  await admin
-    .from('moderation_log')
-    .insert({
-      actor: 'pipeline',
-      target_type: 'photo',
-      target_id: id,
-      action: decision.state,
-      reason: 'reason' in decision ? decision.reason : null,
-    });
+  await admin.from('photos').insert({
+    id,
+    owner_id: owner,
+    storage_path: storagePath,
+    width,
+    height,
+    bytes: webp.length,
+    sha256,
+    moderation: decision.state,
+  });
+  await admin.from('moderation_log').insert({
+    actor: 'pipeline',
+    target_type: 'photo',
+    target_id: id,
+    action: decision.state,
+    reason: 'reason' in decision ? decision.reason : null,
+  });
   // TODO(legal): for 'removed' + 'ncmec-report', preserve the file and metadata as required and file the CyberTipline report.
   await admin.storage.from('uploads').remove([path]);
   return Response.json({id, state: decision.state});

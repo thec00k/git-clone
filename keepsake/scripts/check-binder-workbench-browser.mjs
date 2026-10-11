@@ -65,15 +65,13 @@ try {
       .setInputFiles({name: 'chosen-pocket.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64')});
     await p.getByText(/1 image added/).waitFor({state: 'attached'});
     await p.getByRole('button', {name: 'Inspect card 5: chosen-pocket', exact: true}).waitFor();
-    await p
-      .getByLabel('Upload card images', {exact: true})
-      .setInputFiles(
-        Array.from({length: 19}, (_, i) => ({
-          name: `card-${i}.png`,
-          mimeType: 'image/png',
-          buffer: Buffer.from(png, 'base64'),
-        })),
-      );
+    await p.getByLabel('Upload card images', {exact: true}).setInputFiles(
+      Array.from({length: 19}, (_, i) => ({
+        name: `card-${i}.png`,
+        mimeType: 'image/png',
+        buffer: Buffer.from(png, 'base64'),
+      })),
+    );
     await p
       .getByText(/19 images added/)
       .waitFor({state: 'attached'})

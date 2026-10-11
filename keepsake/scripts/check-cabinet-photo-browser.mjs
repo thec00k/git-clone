@@ -56,16 +56,14 @@ try {
     await p.getByRole('button', {name: 'Remove framed photo'}).waitFor();
     await p.getByRole('button', {name: 'Remove framed photo'}).click();
     await p.getByRole('button', {name: 'Add framed photo'}).waitFor();
-    await p
-      .getByLabel('Choose framed photo')
-      .setInputFiles({
-        name: 'test.png',
-        mimeType: 'image/png',
-        buffer: Buffer.from(
-          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOioAAAAASUVORK5CYII=',
-          'base64',
-        ),
-      });
+    await p.getByLabel('Choose framed photo').setInputFiles({
+      name: 'test.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOioAAAAASUVORK5CYII=',
+        'base64',
+      ),
+    });
     await p.waitForFunction(() => !document.querySelector('[aria-label="Remove framed photo"]')?.disabled);
     await p.screenshot({path: `art/demo-work/frame-${room}.png`});
     await p.getByRole('button', {name: 'Return to room from photo'}).click();
