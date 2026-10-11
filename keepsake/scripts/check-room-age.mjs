@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {freshState} from './fixtures/room-state.mjs';
 import {readFileSync} from 'node:fs';
 import {roomAgeLevel,DAY_MS} from '../src/lib/roomAge.ts';
 import {parseRoomBackup,serializeRoom} from '../src/lib/roomBackup.ts';
@@ -6,7 +7,7 @@ const now=Date.UTC(2026,9,10);
 assert.equal(roomAgeLevel(undefined,now),0,'unknown means clean');
 for(const [days,level] of [[0,0],[2.9,0],[3,1],[9.9,1],[10,2],[24,2],[25,3],[400,3]])assert.equal(roomAgeLevel(now-days*DAY_MS,now),level,days+' days');
 assert.equal(roomAgeLevel(now+DAY_MS,now),0,'a clock set backwards never makes dust');
-const state=eval('('+readFileSync(new URL('./check-room-themes.mjs',import.meta.url),'utf8').split('\n')[3].replace(/^const state=/,'').replace(/;$/,'')+')');
+const state=freshState();
 const aged={...state,environment:{...state.environment,tidiedAt:now}};
 assert.equal(parseRoomBackup(serializeRoom(aged)).environment.tidiedAt,now);
 assert.throws(()=>parseRoomBackup(serializeRoom({...aged,environment:{...aged.environment,tidiedAt:'long ago'}})));

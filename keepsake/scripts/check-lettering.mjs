@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
+import {freshState} from './fixtures/room-state.mjs';
 import {readFileSync} from 'node:fs';
 import {parseRoomBackup,serializeRoom} from '../src/lib/roomBackup.ts';
-const text=readFileSync(new URL('./check-room-themes.mjs',import.meta.url),'utf8').split('\n')[3].replace(/^const state=/,'').replace(/;$/,'');
-const state=eval('('+text+')');
+const state=freshState();
 const withLook=look=>{const s=structuredClone(state);s.books[0].pages[0].elements=[{id:'c',type:'caption',x:50,y:50,w:40,rotation:0,z:1,text:'Summer 2004',fontSize:6,color:'#222',look}];return s;};
 for(const look of ['chrome','glow','rhinestone','bubble','fire','ice','ransom',undefined])assert.equal(parseRoomBackup(serializeRoom(withLook(look))).books[0].pages[0].elements[0].look,look,String(look)+' survives backup');
 assert.throws(()=>parseRoomBackup(serializeRoom(withLook('comic-sans'))));
