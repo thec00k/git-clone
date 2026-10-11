@@ -36,6 +36,10 @@ jobs:
       - name: Lint
         if: always()
         run: bash ../.github/scripts/run-step.sh lint npm run lint
+      - name: Formatting
+        if: always()
+        # Enforced once the format workflow has added Prettier to the project.
+        run: if grep -q '"prettier"' package.json; then bash ../.github/scripts/run-step.sh format npx prettier --check .; else echo "Prettier not installed yet"; fi
       - name: Automated acceptance checks
         if: always()
         run: bash ../.github/scripts/run-step.sh acceptance npm run check:acceptance

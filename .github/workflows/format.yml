@@ -1,0 +1,46 @@
+name: Format code
+
+# One-off and occasional: installs the formatter (and test helpers), formats the code, and commits the
+# result as a separate, purely mechanical commit recorded in .git-blame-ignore-revs.
+# Starts when .github/requests/format changes.
+on:
+  push:
+    paths: ['.github/requests/format']
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: keepsake
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Add dev tools
+        run: npm install --save-dev --no-audit --no-fund prettier@^3 fake-indexeddb@^6
+      - name: Format
+        run: npx prettier --write .
+      - name: Build, lint and checks still pass
+        run: npm run build && npm run lint && npm run check:acceptance
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          remote="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git add -A .
+          git commit -q -m "Format code with Prettier (mechanical, no behaviour change)" || { echo "Nothing to format"; exit 0; }
+          sha=$(git rev-parse HEAD)
+          printf '# Prettier formatting (mechanical)\n%s\n' "$sha" >> ../.git-blame-ignore-revs
+          git add ../.git-blame-ignore-revs
+          git commit -q -m "Ignore the formatting commit in git blame"
+          git push "$remote" HEAD:${{ github.ref_name }}

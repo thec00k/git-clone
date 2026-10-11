@@ -22,7 +22,11 @@
     "check:discoveries": "node scripts/check-discoveries.mjs && node scripts/check-discovery-geometry.mjs",
     "check:workbench": "node scripts/check-workbench.mjs && node scripts/check-furniture.mjs",
     "check:workbench:browser": "node scripts/check-workbench-browser.mjs",
-    "scanner:receive": "node scripts/scanner-receiver.mjs"
+    "scanner:receive": "node scripts/scanner-receiver.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:db": "bash supabase/tests/run.sh",
+    "check:licences": "node scripts/check-licences.mjs --report"
   },
   "dependencies": {
     "@paper-design/shaders": "0.0.81",
