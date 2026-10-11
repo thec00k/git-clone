@@ -1,17 +1,17 @@
 import {SoundCloudDock} from './components/SoundCloudDock';
-import { useNav } from "./store/nav";
-import { Room } from "./components/room/Room";
-import { BookView } from "./components/BookView";
-import { Shelf } from "./components/views/Shelf";
-import { Archive } from "./components/views/Archive";
-import { ArchiveDrawer } from "./components/views/ArchiveDrawer";
-import { Atlas } from "./components/views/Atlas";
-import { Guestbook } from "./components/views/Guestbook";
-import { AmbientAudio } from "./components/AmbientAudio";
-import { SpotifyDock } from "./components/SpotifyDock";
-import { PhotoPrinter } from "./components/PhotoPrinter";
+import {useNav} from './store/nav';
+import {Room} from './components/room/Room';
+import {BookView} from './components/BookView';
+import {Shelf} from './components/views/Shelf';
+import {Archive} from './components/views/Archive';
+import {ArchiveDrawer} from './components/views/ArchiveDrawer';
+import {Atlas} from './components/views/Atlas';
+import {Guestbook} from './components/views/Guestbook';
+import {AmbientAudio} from './components/AmbientAudio';
+import {SpotifyDock} from './components/SpotifyDock';
+import {PhotoPrinter} from './components/PhotoPrinter';
 import {DiscoverySystem} from './components/Discoveries';
-import { CrtPlayerSlotProvider } from "./store/spotifyUi";
+import {CrtPlayerSlotProvider} from './store/spotifyUi';
 import {DoorLanding} from './components/room/DoorLanding';
 import {WorkbenchProvider} from './store/workbench';
 import {roomLayoutFromSearch} from './lib/roomLayout';
@@ -19,19 +19,19 @@ import {useEffect} from 'react';
 import {useApp} from './store/appStore';
 
 function CurrentView() {
-  const { view } = useNav();
+  const {view} = useNav();
   switch (view) {
-    case "book":
-      return roomLayoutFromSearch()==='glb'?<Room />:<BookView />;
-    case "shelf":
+    case 'book':
+      return roomLayoutFromSearch() === 'glb' ? <Room /> : <BookView />;
+    case 'shelf':
       return <Shelf />;
-    case "archive":
+    case 'archive':
       return <ArchiveDrawer />;
-    case "archiveFolder":
+    case 'archiveFolder':
       return <Archive />;
-    case "atlas":
+    case 'atlas':
       return <Atlas />;
-    case "guestbook":
+    case 'guestbook':
       return <Guestbook />;
     default:
       return <Room />;
@@ -39,16 +39,24 @@ function CurrentView() {
 }
 
 export default function App() {
-  const {environment}=useApp();
-  useEffect(()=>{document.documentElement.dataset.keepsakeTheme=environment.roomTheme??'woodland';return()=>{delete document.documentElement.dataset.keepsakeTheme;};},[environment.roomTheme]);
-  const { printerOpen, setPrinterOpen, isVisitor, view } = useNav();
-  if (view === 'closed' || view === 'friends') return <DoorLanding friends={view === 'friends'}/>;
+  const {environment} = useApp();
+  useEffect(() => {
+    document.documentElement.dataset.keepsakeTheme = environment.roomTheme ?? 'woodland';
+    return () => {
+      delete document.documentElement.dataset.keepsakeTheme;
+    };
+  }, [environment.roomTheme]);
+  const {printerOpen, setPrinterOpen, isVisitor, view} = useNav();
+  if (view === 'closed' || view === 'friends') return <DoorLanding friends={view === 'friends'} />;
   return (
     <CrtPlayerSlotProvider>
       <AmbientAudio />
-      <SpotifyDock /><SoundCloudDock/>
-      <WorkbenchProvider><CurrentView /></WorkbenchProvider>
-      <DiscoverySystem/>
+      <SpotifyDock />
+      <SoundCloudDock />
+      <WorkbenchProvider>
+        <CurrentView />
+      </WorkbenchProvider>
+      <DiscoverySystem />
       {printerOpen && !isVisitor && <PhotoPrinter onClose={() => setPrinterOpen(false)} />}
     </CrtPlayerSlotProvider>
   );

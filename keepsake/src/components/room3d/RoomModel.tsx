@@ -10,16 +10,26 @@ import {useNav} from '../../store/nav';
 import {useApp} from '../../store/appStore';
 import {CoastalInteractions} from './CoastalInteractions';
 import {useActiveRoom} from './useActiveRoom';
-import { MemoryObjects } from './MemoryObjects';
-import { Suspense, useMemo } from "react";
-import { RoomWorldMap } from "./RoomWorldMap";
-import type { HotspotId } from "../../lib/hotspots";
-import type { Environment } from "../../types/app";
-import type { Phase } from "../room/RoomFurniture";
-import { collectHotspotRoots, HotspotAnchor, type HotspotAction } from "./RoomInteractions";
-import { RoomLights } from "./RoomLighting";
-import { DeskDrawer, ArchiveCabinet, DeskAssembly, LampFixture, DeskClock, CeilingSwitch, ChairSit, RoomDoor, DrawerPrompt } from "./RoomProps";
-import { useRoomAsset } from "./useRoomAsset";
+import {MemoryObjects} from './MemoryObjects';
+import {Suspense, useMemo} from 'react';
+import {RoomWorldMap} from './RoomWorldMap';
+import type {HotspotId} from '../../lib/hotspots';
+import type {Environment} from '../../types/app';
+import type {Phase} from '../room/RoomFurniture';
+import {collectHotspotRoots, HotspotAnchor, type HotspotAction} from './RoomInteractions';
+import {RoomLights} from './RoomLighting';
+import {
+  DeskDrawer,
+  ArchiveCabinet,
+  DeskAssembly,
+  LampFixture,
+  DeskClock,
+  CeilingSwitch,
+  ChairSit,
+  RoomDoor,
+  DrawerPrompt,
+} from './RoomProps';
+import {useRoomAsset} from './useRoomAsset';
 import {WorkbenchBook} from './WorkbenchBook';
 import {useWorkbench} from '../../store/workbench';
 import {FurnitureModels} from './FurnitureModels';
@@ -55,40 +65,74 @@ export function RoomModel({
   onToggleLamp: () => void;
   onToggleCeiling: () => void;
 }) {
-  const {isVisitor}=useNav();
-  const {phase:workbenchPhase,binderId}=useWorkbench();
-  const {setEnvironment,activeBook}=useApp();
-  const hasDeskBook=!!binderId||!!activeBook;
-  const study=useActiveRoom().study===true;
-  const coastal=useActiveRoom().id==='beachfront';
-  const neon=useActiveRoom().id==='cyberpunk';
+  const {isVisitor} = useNav();
+  const {phase: workbenchPhase, binderId} = useWorkbench();
+  const {setEnvironment, activeBook} = useApp();
+  const hasDeskBook = !!binderId || !!activeBook;
+  const study = useActiveRoom().study === true;
+  const coastal = useActiveRoom().id === 'beachfront';
+  const neon = useActiveRoom().id === 'cyberpunk';
   const cloned = useRoomAsset(phase, environment);
-  const hearthPosition = useMemo(() => cloned.getObjectByName('Hearth_Light')?.getWorldPosition(new Vector3()), [cloned]);
+  const hearthPosition = useMemo(
+    () => cloned.getObjectByName('Hearth_Light')?.getWorldPosition(new Vector3()),
+    [cloned],
+  );
   const roots = useMemo(() => collectHotspotRoots(cloned), [cloned]);
 
   return (
     <group>
-      <primitive object={cloned} onClick={coastal ? (e:import('@react-three/fiber').ThreeEvent<MouseEvent>)=>{
-        if(coastal && e.object.name.startsWith('Beachfront_Casement_') && e.delta<=4){e.stopPropagation();setEnvironment({coastalWindowOpen:environment.coastalWindowOpen===false});}
-      } : undefined} />
-      {coastal&&<CoastalInteractions scene={cloned} open={environment.coastalWindowOpen!==false}/>}
-      <MemoryObjects scene={cloned} onBook={() => onActivate("book")} />
-      <CabinetPhoto scene={cloned}/>
-      {neon&&<><NeonAtmosphere scene={cloned}/><NeonExtras/></>}
-      {!study&&<><FurnitureModels scene={cloned}/><PropRefinements scene={cloned}/></>}
-      <Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
-      <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
-      {!study&&<ChairFloorContact scene={cloned}/>}
-      {study&&<HolidayDecor/>}
-      {coastal&&<HolidayDecor coastal/>}
-      {(study||coastal)&&<DustBunnies/>}
-      {study&&hearthPosition&&(environment.season==='winter'||environment.season==='autumn')&&<HearthFire phase={phase}/>}
-      <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
+      <primitive
+        object={cloned}
+        onClick={
+          coastal
+            ? (e: import('@react-three/fiber').ThreeEvent<MouseEvent>) => {
+                if (coastal && e.object.name.startsWith('Beachfront_Casement_') && e.delta <= 4) {
+                  e.stopPropagation();
+                  setEnvironment({coastalWindowOpen: environment.coastalWindowOpen === false});
+                }
+              }
+            : undefined
+        }
+      />
+      {coastal && <CoastalInteractions scene={cloned} open={environment.coastalWindowOpen !== false} />}
+      <MemoryObjects scene={cloned} onBook={() => onActivate('book')} />
+      <CabinetPhoto scene={cloned} />
+      {neon && (
+        <>
+          <NeonAtmosphere scene={cloned} />
+          <NeonExtras />
+        </>
+      )}
+      {!study && (
+        <>
+          <FurnitureModels scene={cloned} />
+          <PropRefinements scene={cloned} />
+        </>
+      )}
+      <Suspense fallback={null}>
+        <ArtifactDisplayCase />
+      </Suspense>
+      <Suspense fallback={null}>
+        <TimeCapsuleChest />
+      </Suspense>
+      <Suspense fallback={null}>
+        <WorkbenchBook roomScene={cloned} />
+      </Suspense>
+      {!study && <ChairFloorContact scene={cloned} />}
+      {study && <HolidayDecor />}
+      {coastal && <HolidayDecor coastal />}
+      {(study || coastal) && <DustBunnies />}
+      {study && hearthPosition && (environment.season === 'winter' || environment.season === 'autumn') && (
+        <HearthFire phase={phase} />
+      )}
+      <Suspense fallback={null}>
+        <RoomWorldMap scene={cloned} onOpen={() => onActivate('map')} />
+      </Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />
       <ArchiveCabinet
         scene={cloned}
         open={cabinetOpen}
-        active={tourFocus === "archive"}
+        active={tourFocus === 'archive'}
         onOpen={onOpenArchive}
       />
       <DeskAssembly scene={cloned} timeMode={environment.timeMode} />
@@ -98,21 +142,23 @@ export function RoomModel({
       <ChairSit scene={cloned} seated={seated} onSit={onSit} />
       <RoomDoor scene={cloned} onOpen={onOpenDoor} />
       <RoomLights phase={phase} environment={environment} scene={cloned} />
-      {!isVisitor && !drawerOpen && workbenchPhase==='room' && <DrawerPrompt scene={cloned} onOpen={onOpenDrawer} />}
-      {workbenchPhase==='room'&&roots
-        .filter(({ id }) => id !== "archive" && id !== "shelf" && (id!=="book"||hasDeskBook))
-        .map(({ id, object }) => (
-        <HotspotAnchor
-          key={id}
-          id={id}
-          object={object}
-          active={tourFocus === id}
-          onActivate={() => onActivate(id)}
-          prompt={seated && !drawerOpen && id === "book" ? "Open the scrapbook" : undefined}
-          ariaLabel={neon && id === "map" ? "Holographic world map" : undefined}
-        />
-      ))}
+      {!isVisitor && !drawerOpen && workbenchPhase === 'room' && (
+        <DrawerPrompt scene={cloned} onOpen={onOpenDrawer} />
+      )}
+      {workbenchPhase === 'room' &&
+        roots
+          .filter(({id}) => id !== 'archive' && id !== 'shelf' && (id !== 'book' || hasDeskBook))
+          .map(({id, object}) => (
+            <HotspotAnchor
+              key={id}
+              id={id}
+              object={object}
+              active={tourFocus === id}
+              onActivate={() => onActivate(id)}
+              prompt={seated && !drawerOpen && id === 'book' ? 'Open the scrapbook' : undefined}
+              ariaLabel={neon && id === 'map' ? 'Holographic world map' : undefined}
+            />
+          ))}
     </group>
   );
 }
-

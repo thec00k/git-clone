@@ -1,10 +1,10 @@
-import { Component, type ReactNode } from "react";
+import {Component, type ReactNode} from 'react';
 
-export class WebGLGuard extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+export class WebGLGuard extends Component<{fallback: ReactNode; children: ReactNode}, {failed: boolean}> {
+  state = {failed: false};
 
   static getDerivedStateFromError() {
-    return { failed: true };
+    return {failed: true};
   }
 
   render() {

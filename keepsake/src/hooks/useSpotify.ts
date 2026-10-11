@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
-import * as spotify from "../lib/spotify";
-import type { SpotifyPlaylist, SpotifyProfile } from "../lib/spotify";
+import {useCallback, useEffect, useState} from 'react';
+import * as spotify from '../lib/spotify';
+import type {SpotifyPlaylist, SpotifyProfile} from '../lib/spotify';
 
 /** Manages the Spotify connection lifecycle for the music panel. */
 export function useSpotify() {
-  const [clientId, setClientId] = useState(() => spotify.getClientId() ?? "");
+  const [clientId, setClientId] = useState(() => spotify.getClientId() ?? '');
   const configured = !!clientId;
   const [profile, setProfile] = useState<SpotifyProfile | null>(null);
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);

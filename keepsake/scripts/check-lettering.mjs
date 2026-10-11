@@ -1,13 +1,39 @@
 import assert from 'node:assert/strict';
 import {freshState} from './fixtures/room-state.mjs';
 import {readFileSync} from 'node:fs';
-import {parseRoomBackup,serializeRoom} from '../src/lib/roomBackup.ts';
-const state=freshState();
-const withLook=look=>{const s=structuredClone(state);s.books[0].pages[0].elements=[{id:'c',type:'caption',x:50,y:50,w:40,rotation:0,z:1,text:'Summer 2004',fontSize:6,color:'#222',look}];return s;};
-for(const look of ['chrome','glow','rhinestone','bubble','fire','ice','ransom',undefined])assert.equal(parseRoomBackup(serializeRoom(withLook(look))).books[0].pages[0].elements[0].look,look,String(look)+' survives backup');
-assert.throws(()=>parseRoomBackup(serializeRoom(withLook('comic-sans'))));
-const css=readFileSync(new URL('../src/lettering.css',import.meta.url),'utf8');
-for(const look of ['chrome','glow','rhinestone','bubble','fire','ice','ransom'])assert.match(css,new RegExp('\\.ks-look-'+look+'\\s*\\{'),look+' has styles');
-assert.match(css,/prefers-reduced-motion:\s*reduce/,'animated looks stop for reduced motion');
-assert.ok(!/url\(/.test(css),'lettering uses no external or image resources');
-console.log('Caption lettering looks: backup round trip, rejection of unknown looks, reduced motion, no external resources.');
+import {parseRoomBackup, serializeRoom} from '../src/lib/roomBackup.ts';
+const state = freshState();
+const withLook = look => {
+  const s = structuredClone(state);
+  s.books[0].pages[0].elements = [
+    {
+      id: 'c',
+      type: 'caption',
+      x: 50,
+      y: 50,
+      w: 40,
+      rotation: 0,
+      z: 1,
+      text: 'Summer 2004',
+      fontSize: 6,
+      color: '#222',
+      look,
+    },
+  ];
+  return s;
+};
+for (const look of ['chrome', 'glow', 'rhinestone', 'bubble', 'fire', 'ice', 'ransom', undefined])
+  assert.equal(
+    parseRoomBackup(serializeRoom(withLook(look))).books[0].pages[0].elements[0].look,
+    look,
+    String(look) + ' survives backup',
+  );
+assert.throws(() => parseRoomBackup(serializeRoom(withLook('comic-sans'))));
+const css = readFileSync(new URL('../src/lettering.css', import.meta.url), 'utf8');
+for (const look of ['chrome', 'glow', 'rhinestone', 'bubble', 'fire', 'ice', 'ransom'])
+  assert.match(css, new RegExp('\\.ks-look-' + look + '\\s*\\{'), look + ' has styles');
+assert.match(css, /prefers-reduced-motion:\s*reduce/, 'animated looks stop for reduced motion');
+assert.ok(!/url\(/.test(css), 'lettering uses no external or image resources');
+console.log(
+  'Caption lettering looks: backup round trip, rejection of unknown looks, reduced motion, no external resources.',
+);

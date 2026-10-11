@@ -7,10 +7,18 @@ export function wantsWoodlandStudy(search: string) {
   return new URLSearchParams(search).get('study') === 'woodland';
 }
 export function woodlandStudyPose(view: WoodlandStudyView, portrait: boolean) {
-  const key = portrait ? ({establishing:'portraitEstablishing',desk:'portraitDesk',window:'portraitWindow',hearth:'portraitHearth'} as const)[view] : view;
+  const key = portrait
+    ? (
+        {
+          establishing: 'portraitEstablishing',
+          desk: 'portraitDesk',
+          window: 'portraitWindow',
+          hearth: 'portraitHearth',
+        } as const
+      )[view]
+    : view;
   return poses[key];
 }
-
 
 /** Screenshot-only camera: ?view=hearth places the camera without turning on the review controls or overrides. */
 export function queryStudyView(search: string): WoodlandStudyView | null {

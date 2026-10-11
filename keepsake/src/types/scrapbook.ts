@@ -6,11 +6,11 @@
  * screen sizes (a stated Bible requirement).
  */
 
-export type PhotoFrame = "polaroid" | "tape" | "flush";
+export type PhotoFrame = 'polaroid' | 'tape' | 'flush';
 
-export type ElementType = "photo" | "caption" | "sticker" | "stroke";
+export type ElementType = 'photo' | 'caption' | 'sticker' | 'stroke';
 
-export type Visibility = "private" | "friends" | "public";
+export type Visibility = 'private' | 'friends' | 'public';
 
 interface BaseElement {
   id: string;
@@ -27,7 +27,7 @@ interface BaseElement {
 }
 
 export interface PhotoElement extends BaseElement {
-  type: "photo";
+  type: 'photo';
   /** image data URL or asset path (denormalised for simple rendering) */
   src: string;
   /** reference to an archive photo (so pages reference, not duplicate) */
@@ -39,18 +39,18 @@ export interface PhotoElement extends BaseElement {
 
 /** Early-2000s lettering for captions (src/lettering.css). Undefined is the handwritten default. */
 export const CAPTION_LOOKS = [
-  { id: "chrome", label: "Chrome" },
-  { id: "glow", label: "Glow" },
-  { id: "rhinestone", label: "Rhinestone" },
-  { id: "bubble", label: "Bubble" },
-  { id: "fire", label: "Fire" },
-  { id: "ice", label: "Ice" },
-  { id: "ransom", label: "Magazine cut-outs" },
+  {id: 'chrome', label: 'Chrome'},
+  {id: 'glow', label: 'Glow'},
+  {id: 'rhinestone', label: 'Rhinestone'},
+  {id: 'bubble', label: 'Bubble'},
+  {id: 'fire', label: 'Fire'},
+  {id: 'ice', label: 'Ice'},
+  {id: 'ransom', label: 'Magazine cut-outs'},
 ] as const;
-export type CaptionLook = (typeof CAPTION_LOOKS)[number]["id"];
+export type CaptionLook = (typeof CAPTION_LOOKS)[number]['id'];
 
 export interface CaptionElement extends BaseElement {
-  type: "caption";
+  type: 'caption';
   text: string;
   /** font size in container-query width units (cqw) so it scales with the page */
   fontSize: number;
@@ -59,7 +59,7 @@ export interface CaptionElement extends BaseElement {
 }
 
 export interface StickerElement extends BaseElement {
-  type: "sticker";
+  type: 'sticker';
   /** emoji glyph or SVG sticker id */
   glyph: string;
   finish?: import('../lib/materials').StickerFinish;
@@ -68,20 +68,20 @@ export interface StickerElement extends BaseElement {
 
 /** Marker ink on the page. Points are percentages of the page. */
 export interface StrokeElement extends BaseElement {
-  type: "stroke";
+  type: 'stroke';
   color: string;
   /** stroke width in page-percent units */
   width: number;
-  points: { x: number; y: number }[];
+  points: {x: number; y: number}[];
 }
 
 export type PageElement = PhotoElement | CaptionElement | StickerElement | StrokeElement;
 
 export const MARKER_INKS = {
-  blue: "#347dc1",
-  terracotta: "#c45c3e",
-  ink: "#2c221c",
-  moss: "#4a7c59",
+  blue: '#347dc1',
+  terracotta: '#c45c3e',
+  ink: '#2c221c',
+  moss: '#4a7c59',
 } as const;
 
 export interface Page {
@@ -113,30 +113,48 @@ export interface Scrapbook {
   shelfX?: number;
 }
 
-export type CoverStyle = "cocoa" | "forest" | "wine" | "midnight" | "ochre";
+export type CoverStyle = 'cocoa' | 'forest' | 'wine' | 'midnight' | 'ochre';
 
-export const COVER_STYLES: Record<CoverStyle, { label: string; leather: string; ink: string }> = {
-  cocoa: { label: "Cocoa", leather: "#4a3224", ink: "#f3e9d8" },
-  forest: { label: "Forest", leather: "#2f4a3c", ink: "#eef0e6" },
-  wine: { label: "Wine", leather: "#5b2733", ink: "#f4e6df" },
-  midnight: { label: "Midnight", leather: "#20293f", ink: "#e6ebf4" },
-  ochre: { label: "Ochre", leather: "#7a5320", ink: "#fbf1dc" },
+export const COVER_STYLES: Record<CoverStyle, {label: string; leather: string; ink: string}> = {
+  cocoa: {label: 'Cocoa', leather: '#4a3224', ink: '#f3e9d8'},
+  forest: {label: 'Forest', leather: '#2f4a3c', ink: '#eef0e6'},
+  wine: {label: 'Wine', leather: '#5b2733', ink: '#f4e6df'},
+  midnight: {label: 'Midnight', leather: '#20293f', ink: '#e6ebf4'},
+  ochre: {label: 'Ochre', leather: '#7a5320', ink: '#fbf1dc'},
 };
 
-export type SaveStatus = "idle" | "saving" | "saved" | "error";
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 /** Owner decision: 4 photos per page (see src/lib/limits.ts). */
 export const MAX_PHOTOS_PER_PAGE = 4;
 
 export const SHARPIE_COLORS = [
-  "#2c2418", // ink
-  "#9b2e2e", // red
-  "#1e3a5f", // navy
-  "#2f4a3c", // forest
-  "#b55245", // terracotta
+  '#2c2418', // ink
+  '#9b2e2e', // red
+  '#1e3a5f', // navy
+  '#2f4a3c', // forest
+  '#b55245', // terracotta
 ] as const;
 
 export const STICKER_GLYPHS = [
-  "★", "✿", "❤", "☀", "☁", "☾", "✈", "☕", "🎞", "📷",
-  "🍂", "🌊", "⛰", "🎈", "🕯", "🔑", "✉", "🎵", "🌻", "🐚",
+  '★',
+  '✿',
+  '❤',
+  '☀',
+  '☁',
+  '☾',
+  '✈',
+  '☕',
+  '🎞',
+  '📷',
+  '🍂',
+  '🌊',
+  '⛰',
+  '🎈',
+  '🕯',
+  '🔑',
+  '✉',
+  '🎵',
+  '🌻',
+  '🐚',
 ] as const;

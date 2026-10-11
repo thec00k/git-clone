@@ -1,5 +1,5 @@
-import { COVER_STYLES } from "../types/scrapbook";
-import type { CoverStyle } from "../types/scrapbook";
+import {COVER_STYLES} from '../types/scrapbook';
+import type {CoverStyle} from '../types/scrapbook';
 
 /** Title, subtitle, and leather colour — used on the shelf and the open book. */
 export function BookIdentityEditor({
@@ -19,56 +19,66 @@ export function BookIdentityEditor({
 }) {
   const cover = COVER_STYLES[coverStyle];
   return (
-    <div className="ks-identity-layout"><div className="ks-cover-preview" style={{backgroundColor:cover.leather,color:cover.ink}} aria-label="Scrapbook cover preview"><strong>{title||'Your title here'}</strong><span>{subtitle}</span></div><div className="space-y-3">
-      <label className="block text-sm text-paper/60">
-        Title
-        <input
-          name="bookTitle"
-          aria-label="Book title"
-          className="mt-1 w-full rounded bg-black/25 px-2 py-1.5 text-sm text-paper outline-none"
-          maxLength={120}
-          value={title}
-          onChange={(e) => onTitle(e.target.value)}
-        />
-      </label>
-      <label className="block text-sm text-paper/60">
-        Subtitle · optional
-        <input
-          name="bookSubtitle"
-          aria-label="Book subtitle"
-          className="mt-1 w-full rounded bg-black/25 px-2 py-1.5 text-sm text-paper outline-none"
-          value={subtitle}
-          onChange={(e) => onSubtitle(e.target.value)}
-        />
-      </label>
-      <div>
-        <p className="mb-1.5 text-sm text-paper/60">Cover leather</p>
-        <div className="flex flex-wrap items-center gap-2">
-          <div
-            className="flex h-14 w-10 items-center justify-center rounded-sm text-center text-[0.55rem] leading-tight"
-            style={{
-              background: `linear-gradient(90deg, rgb(0 0 0 /.35), transparent 14%), url('/textures/leather.jpg') center/cover`,
-              backgroundColor: cover.leather,
-              color: cover.ink,
-            }}
-            aria-hidden="true"
-          >
-            {title.slice(0, 8) || "book"}
+    <div className="ks-identity-layout">
+      <div
+        className="ks-cover-preview"
+        style={{backgroundColor: cover.leather, color: cover.ink}}
+        aria-label="Scrapbook cover preview"
+      >
+        <strong>{title || 'Your title here'}</strong>
+        <span>{subtitle}</span>
+      </div>
+      <div className="space-y-3">
+        <label className="block text-sm text-paper/60">
+          Title
+          <input
+            name="bookTitle"
+            aria-label="Book title"
+            className="mt-1 w-full rounded bg-black/25 px-2 py-1.5 text-sm text-paper outline-none"
+            maxLength={120}
+            value={title}
+            onChange={e => onTitle(e.target.value)}
+          />
+        </label>
+        <label className="block text-sm text-paper/60">
+          Subtitle · optional
+          <input
+            name="bookSubtitle"
+            aria-label="Book subtitle"
+            className="mt-1 w-full rounded bg-black/25 px-2 py-1.5 text-sm text-paper outline-none"
+            value={subtitle}
+            onChange={e => onSubtitle(e.target.value)}
+          />
+        </label>
+        <div>
+          <p className="mb-1.5 text-sm text-paper/60">Cover leather</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              className="flex h-14 w-10 items-center justify-center rounded-sm text-center text-[0.55rem] leading-tight"
+              style={{
+                background: `linear-gradient(90deg, rgb(0 0 0 /.35), transparent 14%), url('/textures/leather.jpg') center/cover`,
+                backgroundColor: cover.leather,
+                color: cover.ink,
+              }}
+              aria-hidden="true"
+            >
+              {title.slice(0, 8) || 'book'}
+            </div>
+            {(Object.keys(COVER_STYLES) as CoverStyle[]).map(c => (
+              <button
+                key={c}
+                type="button"
+                title={COVER_STYLES[c].label}
+                aria-label={`Cover colour ${COVER_STYLES[c].label}`}
+                aria-pressed={coverStyle === c}
+                onClick={() => onCover(c)}
+                className={`h-6 w-6 rounded-full border ${coverStyle === c ? 'border-accent' : 'border-white/20'}`}
+                style={{background: COVER_STYLES[c].leather}}
+              />
+            ))}
           </div>
-          {(Object.keys(COVER_STYLES) as CoverStyle[]).map((c) => (
-            <button
-              key={c}
-              type="button"
-              title={COVER_STYLES[c].label}
-              aria-label={`Cover colour ${COVER_STYLES[c].label}`}
-              aria-pressed={coverStyle === c}
-              onClick={() => onCover(c)}
-              className={`h-6 w-6 rounded-full border ${coverStyle === c ? "border-accent" : "border-white/20"}`}
-              style={{ background: COVER_STYLES[c].leather }}
-            />
-          ))}
         </div>
       </div>
     </div>
-  </div>);
+  );
 }

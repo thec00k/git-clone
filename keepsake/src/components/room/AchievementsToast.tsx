@@ -1,12 +1,12 @@
-import { useEffect } from "react";
-import { Sparkles } from "lucide-react";
-import { ACHIEVEMENTS } from "../../types/app";
+import {useEffect} from 'react';
+import {Sparkles} from 'lucide-react';
+import {ACHIEVEMENTS} from '../../types/app';
 
 /**
  * A quiet, non-blocking toast for newly found keepsakes — environmental
  * storytelling over a modal (Bible §21). Auto-dismisses.
  */
-export function AchievementsToast({ ids, onDone }: { ids: string[]; onDone: () => void }) {
+export function AchievementsToast({ids, onDone}: {ids: string[]; onDone: () => void}) {
   useEffect(() => {
     if (ids.length === 0) return;
     const t = window.setTimeout(onDone, 3600);
@@ -14,7 +14,7 @@ export function AchievementsToast({ ids, onDone }: { ids: string[]; onDone: () =
   }, [ids, onDone]);
 
   if (ids.length === 0) return null;
-  const latest = ACHIEVEMENTS.find((a) => a.id === ids[ids.length - 1]);
+  const latest = ACHIEVEMENTS.find(a => a.id === ids[ids.length - 1]);
   if (!latest) return null;
 
   return (

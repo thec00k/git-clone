@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from 'react';
 
 /*
  * Bottom-of-scene dialogue, laid out like messenger.abeto.co:
@@ -24,10 +24,10 @@ export function DialogueBubble({
   onSkip?: () => void;
   last?: boolean;
 }) {
-  const [shown, setShown] = useState("");
+  const [shown, setShown] = useState('');
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce) {
       setShown(text);
       return;
@@ -49,7 +49,7 @@ export function DialogueBubble({
       role="dialog"
       aria-modal="true"
       aria-label={`${speaker} says`}
-      data-complete={complete ? "true" : "false"}
+      data-complete={complete ? 'true' : 'false'}
     >
       <div className="ks-say-name">{speaker}</div>
       <div className="ks-say-box">
@@ -73,11 +73,18 @@ export function DialogueBubble({
         type="button"
         className="ks-say-next"
         onClick={complete ? onNext : () => setShown(text)}
-        aria-label={last ? "Finish the tour" : complete ? "Next" : "Show the rest"}
+        aria-label={last ? 'Finish the tour' : complete ? 'Next' : 'Show the rest'}
       >
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
           {last ? (
-            <path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M5 12h14M13 6l6 6-6 6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           ) : (
             <path d="M8 5l10 7-10 7z" fill="currentColor" />
           )}

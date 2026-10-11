@@ -1,4 +1,4 @@
-import type { AppState } from '../types/app';
+import type {AppState} from '../types/app';
 
 const PREFIX = 'keepsake-asset:';
 let revision = 0;
@@ -6,21 +6,37 @@ let queue: Promise<unknown> = Promise.resolve();
 const hashes = new Map<string, string>();
 let knownAssets = new Set<string>();
 export class SaveConflict extends Error {
-  constructor() { super('Another tab saved this room. Reload its latest changes before editing.'); }
+  constructor() {
+    super('Another tab saved this room. Reload its latest changes before editing.');
+  }
 }
 function request<T>(req: IDBRequest<T>): Promise<T> {
-  return new Promise((resolve, reject) => { req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error); });
+  return new Promise((resolve, reject) => {
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
 }
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     let blocked = false;
     const req = indexedDB.open('keepsake', 3);
     req.onupgradeneeded = () => {
-      for (const name of ['app', 'images']) if (!req.result.objectStoreNames.contains(name)) req.result.createObjectStore(name);
+      for (const name of ['app', 'images'])
+        if (!req.result.objectStoreNames.contains(name)) req.result.createObjectStore(name);
     };
-    req.onsuccess = () => { if (blocked) { req.result.close(); return; } req.result.onversionchange = () => req.result.close(); resolve(req.result); };
+    req.onsuccess = () => {
+      if (blocked) {
+        req.result.close();
+        return;
+      }
+      req.result.onversionchange = () => req.result.close();
+      resolve(req.result);
+    };
     req.onerror = () => reject(req.error);
-    req.onblocked = () => { blocked = true; reject(new Error('Close other Keepsake tabs, then retry opening your room.')); };
+    req.onblocked = () => {
+      blocked = true;
+      reject(new Error('Close other Keepsake tabs, then retry opening your room.'));
+    };
   });
 }
 /** Fields that hold file content (photos, card art, 3D scans). Their data: values are stored once, by hash,
@@ -30,7 +46,8 @@ const isFileData = (s: string) => s.startsWith('data:image/') || s.startsWith('d
 function mapStrings(value: unknown, map: (s: string) => string, key = ''): unknown {
   if (typeof value === 'string') return FILE_KEYS.has(key) ? map(value) : value;
   if (Array.isArray(value)) return value.map(v => mapStrings(v, map));
-  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k,v]) => [k,mapStrings(v,map,k)]));
+  if (value && typeof value === 'object')
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, mapStrings(v, map, k)]));
   return value;
 }
 /** Read errors propagate: only an absent record means a new room. Legacy inline images hydrate unchanged. */
@@ -38,59 +55,91 @@ export async function loadState(): Promise<AppState | null> {
   await queue.catch(() => {});
   const db = await openDb();
   try {
-    const tx = db.transaction(['app','images'], 'readonly');
+    const tx = db.transaction(['app', 'images'], 'readonly');
     const [state, rev, keys, values] = await Promise.all([
-      request(tx.objectStore('app').get('state')), request(tx.objectStore('app').get('revision')),
-      request(tx.objectStore('images').getAllKeys()), request(tx.objectStore('images').getAll()),
+      request(tx.objectStore('app').get('state')),
+      request(tx.objectStore('app').get('revision')),
+      request(tx.objectStore('images').getAllKeys()),
+      request(tx.objectStore('images').getAll()),
     ]);
-    const images = new Map(keys.map((key,i) => [String(key), values[i] as string]));
-    if (state != null && (typeof state !== 'object' || Array.isArray(state))) throw new Error('The saved room could not be read. Your save has not been changed.');
-    const result = state == null ? null : mapStrings(state, s => {
-      if (!s.startsWith(PREFIX)) return s;
-      const image = images.get(s);
-      if (!image) throw new Error('A saved photograph could not be read. Your save has not been changed.');
-      hashes.set(image,s); return image;
-    }) as AppState;
-    revision = rev ?? 0; knownAssets = new Set(images.keys());
+    const images = new Map(keys.map((key, i) => [String(key), values[i] as string]));
+    if (state != null && (typeof state !== 'object' || Array.isArray(state)))
+      throw new Error('The saved room could not be read. Your save has not been changed.');
+    const result =
+      state == null
+        ? null
+        : (mapStrings(state, s => {
+            if (!s.startsWith(PREFIX)) return s;
+            const image = images.get(s);
+            if (!image)
+              throw new Error('A saved photograph could not be read. Your save has not been changed.');
+            hashes.set(image, s);
+            return image;
+          }) as AppState);
+    revision = rev ?? 0;
+    knownAssets = new Set(images.keys());
     return result;
-  } finally { db.close(); }
+  } finally {
+    db.close();
+  }
 }
 async function persist(state: AppState): Promise<void> {
   const images = new Set<string>();
-  mapStrings(state, s => { if (isFileData(s)) images.add(s); return s; });
-  for (const src of images) if (!hashes.has(src)) {
-    const digest = crypto.subtle ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(src)) : crypto.getRandomValues(new Uint8Array(32)).buffer;
-    hashes.set(src, PREFIX + Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,'0')).join(''));
-  }
+  mapStrings(state, s => {
+    if (isFileData(s)) images.add(s);
+    return s;
+  });
+  for (const src of images)
+    if (!hashes.has(src)) {
+      const digest = crypto.subtle
+        ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(src))
+        : crypto.getRandomValues(new Uint8Array(32)).buffer;
+      hashes.set(
+        src,
+        PREFIX + Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join(''),
+      );
+    }
   const packed = mapStrings(state, s => hashes.get(s) ?? s);
   const referenced = new Set([...images].map(src => hashes.get(src)!));
   const db = await openDb();
   try {
-    await new Promise<void>((resolve,reject) => {
-      const tx = db.transaction(['app','images'], 'readwrite');
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(['app', 'images'], 'readwrite');
       let conflict = false;
       const check = tx.objectStore('app').get('revision');
       check.onsuccess = () => {
-        if ((check.result ?? 0) !== revision) { conflict = true; tx.abort(); return; }
-        for (const src of images) { const key = hashes.get(src)!; if (!knownAssets.has(key)) tx.objectStore('images').put(src,key); }
+        if ((check.result ?? 0) !== revision) {
+          conflict = true;
+          tx.abort();
+          return;
+        }
+        for (const src of images) {
+          const key = hashes.get(src)!;
+          if (!knownAssets.has(key)) tx.objectStore('images').put(src, key);
+        }
         // Photos no longer in the room are removed so deleting something really frees it (and its privacy).
         for (const key of knownAssets) if (!referenced.has(key)) tx.objectStore('images').delete(key);
-        tx.objectStore('app').put(packed,'state');
-        tx.objectStore('app').put(revision + 1,'revision');
+        tx.objectStore('app').put(packed, 'state');
+        tx.objectStore('app').put(revision + 1, 'revision');
       };
       tx.oncomplete = () => {
-        revision++; knownAssets = new Set(referenced);
+        revision++;
+        knownAssets = new Set(referenced);
         // Forget hashes of files no longer in the room so the cache does not grow for the whole session.
         for (const [src, key] of hashes) if (!referenced.has(key)) hashes.delete(src);
         resolve();
       };
-      tx.onabort = () => reject(conflict ? new SaveConflict() : tx.error ?? new Error('Saving was interrupted.'));
+      tx.onabort = () =>
+        reject(conflict ? new SaveConflict() : (tx.error ?? new Error('Saving was interrupted.')));
       tx.onerror = () => reject(tx.error);
     });
-  } finally { db.close(); }
+  } finally {
+    db.close();
+  }
 }
 /** Serialize writes within a tab; compare revisions atomically across tabs. */
 export function saveState(state: AppState): Promise<void> {
   const next = queue.catch(() => {}).then(() => persist(state));
-  queue = next; return next;
+  queue = next;
+  return next;
 }

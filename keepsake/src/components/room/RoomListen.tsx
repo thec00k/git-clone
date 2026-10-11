@@ -1,37 +1,33 @@
-import { useMemo } from "react";
-import { Volume2, X } from "lucide-react";
-import { useListen } from "../../store/listen";
-import { useNav } from "../../store/nav";
-import { listenThings, LISTEN_INTRO, type ListenId } from "../../lib/roomListen";
-import { roomLayoutFromSearch } from "../../lib/roomLayout";
-import { useApp } from "../../store/appStore";
+import {useMemo} from 'react';
+import {Volume2, X} from 'lucide-react';
+import {useListen} from '../../store/listen';
+import {useNav} from '../../store/nav';
+import {listenThings, LISTEN_INTRO, type ListenId} from '../../lib/roomListen';
+import {roomLayoutFromSearch} from '../../lib/roomLayout';
+import {useApp} from '../../store/appStore';
 
-export function RoomListen({
-  onAct,
-}: {
-  onAct: (id: ListenId) => void;
-}) {
-  const { preview, setPreview, announcement, announce, scene } = useListen();
-  const { touring, setRoomFace } = useNav();
-  const { environment } = useApp();
-  const neon = environment.roomTheme === "cyberpunk";
+export function RoomListen({onAct}: {onAct: (id: ListenId) => void}) {
+  const {preview, setPreview, announcement, announce, scene} = useListen();
+  const {touring, setRoomFace} = useNav();
+  const {environment} = useApp();
+  const neon = environment.roomTheme === 'cyberpunk';
   const layout = useMemo(() => roomLayoutFromSearch(), []);
   const things = listenThings({
     layout,
     seated: scene?.seated ?? false,
     shopOpen: scene?.shopOpen ?? false,
-  }).map((thing) =>
-    neon && thing.id === "map"
+  }).map(thing =>
+    neon && thing.id === 'map'
       ? {
           ...thing,
-          name: "The holographic map",
-          hint: "A living neon world map. Open it to revisit memories and pin new places.",
+          name: 'The holographic map',
+          hint: 'A living neon world map. Open it to revisit memories and pin new places.',
         }
       : thing,
   );
 
   const speak = (text: string) => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.rate = 0.92;
@@ -46,9 +42,9 @@ export function RoomListen({
       <nav
         id="ks-room-things"
         tabIndex={-1}
-        className={`ks-listen${preview ? " is-open" : ""}`}
+        className={`ks-listen${preview ? ' is-open' : ''}`}
         data-room-listen
-        data-listen-preview={preview ? "1" : "0"}
+        data-listen-preview={preview ? '1' : '0'}
         aria-label="Things in the room"
       >
         <div className="ks-listen-card">
@@ -60,13 +56,18 @@ export function RoomListen({
                 <p className="mt-1 text-sm text-ink/65">{LISTEN_INTRO}</p>
               </div>
               {preview && (
-                <button type="button" className="ks-chip" aria-label="Hide the spoken list" onClick={() => setPreview(false)}>
+                <button
+                  type="button"
+                  className="ks-chip"
+                  aria-label="Hide the spoken list"
+                  onClick={() => setPreview(false)}
+                >
                   <X size={16} />
                 </button>
               )}
             </div>
             <ol className="ks-listen-list">
-              {things.map((thing) => (
+              {things.map(thing => (
                 <li key={thing.id}>
                   <div className="ks-listen-row">
                     <button

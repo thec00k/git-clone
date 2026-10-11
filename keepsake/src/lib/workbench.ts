@@ -1,7 +1,7 @@
 /** Transient interaction state. Never stored with the user's scrapbook data. */
 export type WorkbenchPhase = 'room' | 'arriving' | 'cover' | 'opening' | 'editing' | 'closing' | 'leaving';
 export type WorkbenchEvent = 'inspect' | 'settled' | 'open' | 'close' | 'leave';
-export const WORKBENCH_DURATION = { arriving: 1200, opening: 1050, closing: 850, leaving: 950 } as const;
+export const WORKBENCH_DURATION = {arriving: 1200, opening: 1050, closing: 850, leaving: 950} as const;
 
 /** Repeated clicks cannot skip an animation or open a second editing session. */
 export function transitionWorkbench(phase: WorkbenchPhase, event: WorkbenchEvent): WorkbenchPhase {
@@ -14,7 +14,10 @@ export function transitionWorkbench(phase: WorkbenchPhase, event: WorkbenchEvent
   }
   if (event === 'settled') {
     const next: Partial<Record<WorkbenchPhase, WorkbenchPhase>> = {
-      arriving: 'cover', opening: 'editing', closing: 'cover', leaving: 'room',
+      arriving: 'cover',
+      opening: 'editing',
+      closing: 'cover',
+      leaving: 'room',
     };
     return next[phase] ?? phase;
   }
@@ -28,12 +31,17 @@ export function smootherstep(progress: number) {
 }
 
 /** Left stack stays on the inner face of the moving cover, in metres. */
-export function leftStackPose(angle:number,hingeY:number){
-  return {rotation:angle-Math.PI,x:-Math.sin(angle)*.004,y:hingeY+Math.cos(angle)*.004};
+export function leftStackPose(angle: number, hingeY: number) {
+  return {rotation: angle - Math.PI, x: -Math.sin(angle) * 0.004, y: hingeY + Math.cos(angle) * 0.004};
 }
 
 /** Four authored Blender targets describe a complete physical page turn. */
 export function pageTurnWeights(progress: number): [number, number, number, number] {
   const p = Math.max(0, Math.min(1, progress)) * 4;
-  return [1, 2, 3, 4].map(target => Math.max(0, 1 - Math.abs(p - target))) as [number, number, number, number];
+  return [1, 2, 3, 4].map(target => Math.max(0, 1 - Math.abs(p - target))) as [
+    number,
+    number,
+    number,
+    number,
+  ];
 }

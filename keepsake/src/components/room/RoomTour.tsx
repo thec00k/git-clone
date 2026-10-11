@@ -1,24 +1,26 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useApp } from "../../store/appStore";
-import { useNav } from "../../store/nav";
-import { markTourFinished, TOUR_STEPS } from "../../lib/tour";
-import { faceForHotspot, roomLayoutFromSearch, YAW_MS } from "../../lib/roomLayout";
-import { DialogueBubble } from "./DialogueBubble";
+import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
+import {useApp} from '../../store/appStore';
+import {useNav} from '../../store/nav';
+import {markTourFinished, TOUR_STEPS} from '../../lib/tour';
+import {faceForHotspot, roomLayoutFromSearch, YAW_MS} from '../../lib/roomLayout';
+import {DialogueBubble} from './DialogueBubble';
 
 function prefersReducedMotion() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 export function RoomTour() {
-  const { touring, endTour, setTourFocus, setRoomFace, roomFace } = useNav();
-  const { recordProgress } = useApp();
+  const {touring, endTour, setTourFocus, setRoomFace, roomFace} = useNav();
+  const {recordProgress} = useApp();
   const [step, setStep] = useState(0);
-  const [cutout, setCutout] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [cutout, setCutout] = useState<{top: number; left: number; width: number; height: number} | null>(
+    null,
+  );
   const faceRef = useRef(roomFace);
 
   const finish = useCallback(() => {
     markTourFinished();
-    recordProgress({ completedTour: true });
+    recordProgress({completedTour: true});
     setTourFocus(null);
     endTour();
   }, [endTour, recordProgress, setTourFocus]);
@@ -28,7 +30,7 @@ export function RoomTour() {
 
   useEffect(() => {
     setTourFocus(current?.focus ?? null);
-    if (roomLayoutFromSearch() !== "flat") setRoomFace(targetFace);
+    if (roomLayoutFromSearch() !== 'flat') setRoomFace(targetFace);
     return () => setTourFocus(null);
   }, [current, setTourFocus, setRoomFace, targetFace]);
 
@@ -65,24 +67,25 @@ export function RoomTour() {
 
     const waitThenMeasure = async () => {
       setCutout(null);
-      const yaw = document.querySelector(".ks-yaw");
+      const yaw = document.querySelector('.ks-yaw');
       const needsTurn = yaw instanceof HTMLElement && prevFace !== targetFace && !prefersReducedMotion();
       if (!needsTurn && prevFace !== targetFace && !prefersReducedMotion()) {
-        await new Promise((r) => window.setTimeout(r, 480));
+        await new Promise(r => window.setTimeout(r, 480));
       }
       if (needsTurn) {
-        await new Promise<void>((resolve) => {
+        await new Promise<void>(resolve => {
           let done = false;
           const finishWait = () => {
             if (done) return;
             done = true;
-            yaw.removeEventListener("transitionend", onEnd);
+            yaw.removeEventListener('transitionend', onEnd);
             resolve();
           };
           const onEnd = (e: TransitionEvent) => {
-            if (e.target === yaw && (e.propertyName === "transform" || e.propertyName === "--yaw")) finishWait();
+            if (e.target === yaw && (e.propertyName === 'transform' || e.propertyName === '--yaw'))
+              finishWait();
           };
-          yaw.addEventListener("transitionend", onEnd);
+          yaw.addEventListener('transitionend', onEnd);
           window.setTimeout(finishWait, YAW_MS + 80);
         });
       }
@@ -90,33 +93,33 @@ export function RoomTour() {
     };
 
     void waitThenMeasure();
-    window.addEventListener("resize", apply);
+    window.addEventListener('resize', apply);
     return () => {
       cancelled = true;
       ro?.disconnect();
-      window.removeEventListener("resize", apply);
+      window.removeEventListener('resize', apply);
     };
   }, [touring, current, step, targetFace]);
 
   useEffect(() => {
     if (!touring) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         e.preventDefault();
         finish();
       }
-      if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") {
+      if (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         if (step >= TOUR_STEPS.length - 1) finish();
-        else setStep((s) => s + 1);
+        else setStep(s => s + 1);
       }
-      if (e.key === "ArrowLeft") {
+      if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setStep((s) => Math.max(0, s - 1));
+        setStep(s => Math.max(0, s - 1));
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [touring, step, finish]);
 
   if (!touring) return null;
@@ -125,12 +128,12 @@ export function RoomTour() {
 
   const next = () => {
     if (last) finish();
-    else setStep((s) => s + 1);
+    else setStep(s => s + 1);
   };
 
   return (
     <div className="ks-tour" aria-live="polite">
-      <div className="ks-tour-veil" style={{ background: cutout ? "transparent" : "rgb(12 8 6 / 0.42)" }} />
+      <div className="ks-tour-veil" style={{background: cutout ? 'transparent' : 'rgb(12 8 6 / 0.42)'}} />
       {cutout && (
         <button
           type="button"

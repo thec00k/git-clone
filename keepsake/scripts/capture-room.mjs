@@ -26,15 +26,30 @@ const ALL_SHOTS = [
   ['woodland-hearth-winter-night', '2027-01-15T12:00:00', {timeMode: 'night'}, '?view=hearth'],
 ];
 // The quick set runs on every code push; the full set on request (see .github/workflows/browser-checks.yml).
-const QUICK_SHOTS = ALL_SHOTS.filter(([name]) => ['woodland-autumn-dusk', 'beachfront-summer-day'].includes(name));
+const QUICK_SHOTS = ALL_SHOTS.filter(([name]) =>
+  ['woodland-autumn-dusk', 'beachfront-summer-day'].includes(name),
+);
 const SHOTS = JSON.parse(process.env.SHOTS_JSON || 'null') ?? (process.env.QUICK ? QUICK_SHOTS : ALL_SHOTS);
 
-const browser = await chromium.launch({headless: true, channel: process.env.TEST_CHANNEL || undefined, args: ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader', '--ignore-gpu-blocklist']});
+const browser = await chromium.launch({
+  headless: true,
+  channel: process.env.TEST_CHANNEL || undefined,
+  args: [
+    '--enable-unsafe-swiftshader',
+    '--use-gl=angle',
+    '--use-angle=swiftshader',
+    '--ignore-gpu-blocklist',
+  ],
+});
 const errors = [];
 try {
   for (const [name, date, env, query] of SHOTS) {
     // Software rendering is slow: a smaller frame and reduced motion keep the page responsive.
-    const context = await browser.newContext({viewport: {width: 960, height: 600}, deviceScaleFactor: 1, reducedMotion: 'reduce'});
+    const context = await browser.newContext({
+      viewport: {width: 960, height: 600},
+      deviceScaleFactor: 1,
+      reducedMotion: 'reduce',
+    });
     const page = await context.newPage();
     page.setDefaultTimeout(120000);
     page.on('pageerror', e => errors.push(`${name}: ${e.message}`));
@@ -44,7 +59,8 @@ try {
     await page.addInitScript(() => {
       const getContext = HTMLCanvasElement.prototype.getContext;
       HTMLCanvasElement.prototype.getContext = function (type, attributes) {
-        if (typeof type === 'string' && type.includes('webgl')) attributes = {...(attributes || {}), preserveDrawingBuffer: true};
+        if (typeof type === 'string' && type.includes('webgl'))
+          attributes = {...(attributes || {}), preserveDrawingBuffer: true};
         return getContext.call(this, type, attributes);
       };
       const raf = window.requestAnimationFrame.bind(window);
@@ -52,13 +68,19 @@ try {
     });
     await page.routeWebSocket('**', () => {});
     await page.clock.setFixedTime(new Date(date));
-    await page.route('**/capture-fixture.html', r => r.fulfill({contentType: 'text/html', body: '<!doctype html><title>fixture</title>'}));
+    await page.route('**/capture-fixture.html', r =>
+      r.fulfill({contentType: 'text/html', body: '<!doctype html><title>fixture</title>'}),
+    );
     await page.goto(base + '/capture-fixture.html');
     await page.evaluate(async patch => {
       const {createSeed} = await import('/src/data/seed.ts');
       const {saveState} = await import('/src/lib/storage.ts');
       const s = createSeed();
-      Object.assign(s.environment, {roomTheme: 'woodland', entryMusic: 'off', musicOn: false, musicProvider: 'ambient', timeMode: 'day'}, patch);
+      Object.assign(
+        s.environment,
+        {roomTheme: 'woodland', entryMusic: 'off', musicOn: false, musicProvider: 'ambient', timeMode: 'day'},
+        patch,
+      );
       s.progress.completedTour = true;
       await saveState(s);
       sessionStorage.setItem('ks-tour-done', '1');
@@ -74,4 +96,7 @@ try {
 } finally {
   await browser.close();
 }
-if (errors.length) { console.error('Page errors:\n' + errors.join('\n')); process.exitCode = 1; }
+if (errors.length) {
+  console.error('Page errors:\n' + errors.join('\n'));
+  process.exitCode = 1;
+}

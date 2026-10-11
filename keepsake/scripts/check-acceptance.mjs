@@ -2,21 +2,49 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 const scripts = [
-  'check-card-binders.mjs', 'check-neon-assets.mjs',
-  'check-then-now.mjs', 'check-memory-expansion.mjs',
-  'check-workbench.mjs', 'check-furniture.mjs',
-  'check-woodland.mjs', 'check-room-assets.mjs', 'check-editor.mjs', 'check-photo-batch.mjs', 'check-import-limits.mjs', 'check-friend-notes.mjs', 'check-memory-features.mjs',
-  'check-discoveries.mjs', 'check-discovery-geometry.mjs', 'check-room-music.mjs',
-  'check-seasons.mjs', 'check-storage.mjs', 'check-limits.mjs', 'check-moderation.mjs', 'check-licences.mjs', 'check-strip-metadata.mjs', 'check-stamps.mjs', 'check-room-age.mjs', 'check-lettering.mjs', 'check-security-headers.mjs', 'check-asset-credits.mjs', 'check-room-shop.mjs', 'check-soundcloud.mjs', 'check-spotify.mjs', 'check-room-themes.mjs',
+  'check-card-binders.mjs',
+  'check-neon-assets.mjs',
+  'check-then-now.mjs',
+  'check-memory-expansion.mjs',
+  'check-workbench.mjs',
+  'check-furniture.mjs',
+  'check-woodland.mjs',
+  'check-room-assets.mjs',
+  'check-editor.mjs',
+  'check-photo-batch.mjs',
+  'check-import-limits.mjs',
+  'check-friend-notes.mjs',
+  'check-memory-features.mjs',
+  'check-discoveries.mjs',
+  'check-discovery-geometry.mjs',
+  'check-room-music.mjs',
+  'check-seasons.mjs',
+  'check-storage.mjs',
+  'check-limits.mjs',
+  'check-moderation.mjs',
+  'check-licences.mjs',
+  'check-strip-metadata.mjs',
+  'check-stamps.mjs',
+  'check-room-age.mjs',
+  'check-lettering.mjs',
+  'check-security-headers.mjs',
+  'check-asset-credits.mjs',
+  'check-room-shop.mjs',
+  'check-soundcloud.mjs',
+  'check-spotify.mjs',
+  'check-room-themes.mjs',
 ];
 for (const script of scripts) {
   process.stdout.write(`\nChecking ${script}\n`);
   const result = spawnSync(process.execPath, [fileURLToPath(new URL(script, import.meta.url))], {
-    cwd: fileURLToPath(new URL('..', import.meta.url)), stdio: 'inherit',
+    cwd: fileURLToPath(new URL('..', import.meta.url)),
+    stdio: 'inherit',
   });
   if (result.error || result.status !== 0) {
     if (result.error) console.error(result.error.message);
     process.exit(result.status ?? 1);
   }
 }
-console.log('\nAll automated acceptance checks passed. Browser and real-device checks are tracked in docs/project-status.md.');
+console.log(
+  '\nAll automated acceptance checks passed. Browser and real-device checks are tracked in docs/project-status.md.',
+);

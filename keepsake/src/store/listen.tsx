@@ -1,6 +1,6 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { ReactNode } from "react";
-import { LISTEN_PREVIEW_KEY, listenPreviewFromSearch } from "../lib/roomListen";
+import {createContext, useCallback, useContext, useMemo, useState} from 'react';
+import type {ReactNode} from 'react';
+import {LISTEN_PREVIEW_KEY, listenPreviewFromSearch} from '../lib/roomListen';
 
 export interface SceneHandle {
   sit: () => void;
@@ -25,38 +25,38 @@ interface ListenContextValue {
 const ListenContext = createContext<ListenContextValue | null>(null);
 
 function readPreview(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === 'undefined') return false;
   if (listenPreviewFromSearch()) {
     try {
-      sessionStorage.setItem(LISTEN_PREVIEW_KEY, "1");
+      sessionStorage.setItem(LISTEN_PREVIEW_KEY, '1');
     } catch {
       /* private mode */
     }
     return true;
   }
   try {
-    return sessionStorage.getItem(LISTEN_PREVIEW_KEY) === "1";
+    return sessionStorage.getItem(LISTEN_PREVIEW_KEY) === '1';
   } catch {
     return false;
   }
 }
 
-export function ListenProvider({ children }: { children: ReactNode }) {
+export function ListenProvider({children}: {children: ReactNode}) {
   const [preview, setPreviewState] = useState(readPreview);
-  const [announcement, setAnnouncement] = useState("");
+  const [announcement, setAnnouncement] = useState('');
   const [scene, setScene] = useState<SceneHandle | null>(null);
 
   const setPreview = useCallback((v: boolean) => {
     setPreviewState(v);
     try {
-      sessionStorage.setItem(LISTEN_PREVIEW_KEY, v ? "1" : "0");
+      sessionStorage.setItem(LISTEN_PREVIEW_KEY, v ? '1' : '0');
     } catch {
       /* private mode */
     }
   }, []);
 
   const announce = useCallback((text: string) => {
-    setAnnouncement("");
+    setAnnouncement('');
     window.setTimeout(() => setAnnouncement(text), 20);
   }, []);
 
@@ -65,7 +65,7 @@ export function ListenProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<ListenContextValue>(
-    () => ({ preview, setPreview, announcement, announce, scene, bindScene }),
+    () => ({preview, setPreview, announcement, announce, scene, bindScene}),
     [preview, setPreview, announcement, announce, scene, bindScene],
   );
 
@@ -74,6 +74,6 @@ export function ListenProvider({ children }: { children: ReactNode }) {
 
 export function useListen(): ListenContextValue {
   const ctx = useContext(ListenContext);
-  if (!ctx) throw new Error("useListen must be used within ListenProvider");
+  if (!ctx) throw new Error('useListen must be used within ListenProvider');
   return ctx;
 }

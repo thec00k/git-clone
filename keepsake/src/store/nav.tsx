@@ -1,33 +1,25 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { ReactNode } from "react";
-import type { ViewAs } from "../types/app";
-import type { HotspotId } from "../lib/hotspots";
-import type { RoomFace } from "../lib/roomLayout";
+import {createContext, useCallback, useContext, useMemo, useState} from 'react';
+import type {ReactNode} from 'react';
+import type {ViewAs} from '../types/app';
+import type {HotspotId} from '../lib/hotspots';
+import type {RoomFace} from '../lib/roomLayout';
 
-export type { RoomFace };
+export type {RoomFace};
 
-export type ArchiveFolderKey = "all" | "favorites" | string;
+export type ArchiveFolderKey = 'all' | 'favorites' | string;
 
 export type View =
-  | "room"
-  | "closed"
-  | "friends"
-  | "book"
-  | "shelf"
-  | "archive"
-  | "archiveFolder"
-  | "atlas"
-  | "guestbook";
+  'room' | 'closed' | 'friends' | 'book' | 'shelf' | 'archive' | 'archiveFolder' | 'atlas' | 'guestbook';
 
 interface NavContextValue {
   closeRoom: () => void;
   enterRoom: () => void;
   discoveryOpen: string | null;
-  setDiscoveryOpen: (id:string|null)=>void;
+  setDiscoveryOpen: (id: string | null) => void;
   printerOpen: boolean;
   setPrinterOpen: (open: boolean) => void;
-  pendingPrint: { src: string; photoId?: string } | null;
-  setPendingPrint: (photo: { src: string; photoId?: string } | null) => void;
+  pendingPrint: {src: string; photoId?: string} | null;
+  setPendingPrint: (photo: {src: string; photoId?: string} | null) => void;
   bookPageId: string | null;
   setBookPageId: (id: string | null) => void;
   view: View;
@@ -53,66 +45,88 @@ interface NavContextValue {
 
 export const NavContext = createContext<NavContextValue | null>(null);
 
-export function NavProvider({ children }: { children: ReactNode }) {
-  const [discoveryOpen,setDiscoveryOpen]=useState<string|null>(null);
+export function NavProvider({children}: {children: ReactNode}) {
+  const [discoveryOpen, setDiscoveryOpen] = useState<string | null>(null);
   const [printerOpen, setPrinterOpen] = useState(false);
-  const [pendingPrint, setPendingPrint] = useState<{ src: string; photoId?: string } | null>(null);
+  const [pendingPrint, setPendingPrint] = useState<{src: string; photoId?: string} | null>(null);
   const [bookPageId, setBookPageId] = useState<string | null>(null);
   const [stack, setStack] = useState<View[]>(() => {
-    try { return [sessionStorage.getItem('keepsake-room-closed') === '1' ? 'closed' : 'room']; }
-    catch { return ['room']; }
+    try {
+      return [sessionStorage.getItem('keepsake-room-closed') === '1' ? 'closed' : 'room'];
+    } catch {
+      return ['room'];
+    }
   });
-  const [viewAs, setViewAs] = useState<ViewAs>("owner");
+  const [viewAs, setViewAs] = useState<ViewAs>('owner');
   const [touring, setTouring] = useState(false);
   const [tourFocus, setTourFocus] = useState<HotspotId | null>(null);
-  const [roomFace, setRoomFace] = useState<RoomFace>("front");
-  const [archiveFolder, setArchiveFolder] = useState<ArchiveFolderKey>("all");
+  const [roomFace, setRoomFace] = useState<RoomFace>('front');
+  const [archiveFolder, setArchiveFolder] = useState<ArchiveFolderKey>('all');
 
-  const go = useCallback((v: View) => setStack((s) => [...s, v]), []);
+  const go = useCallback((v: View) => setStack(s => [...s, v]), []);
   const closeRoom = useCallback(() => {
-    try { sessionStorage.setItem('keepsake-room-closed', '1'); } catch { /* Tab storage may be unavailable. */ }
-    setPrinterOpen(false); setDiscoveryOpen(null); setTouring(false); setTourFocus(null);
-    setViewAs('owner'); setStack(['closed']);
+    try {
+      sessionStorage.setItem('keepsake-room-closed', '1');
+    } catch {
+      /* Tab storage may be unavailable. */
+    }
+    setPrinterOpen(false);
+    setDiscoveryOpen(null);
+    setTouring(false);
+    setTourFocus(null);
+    setViewAs('owner');
+    setStack(['closed']);
   }, []);
   const enterRoom = useCallback(() => {
-    try { sessionStorage.removeItem('keepsake-room-closed'); } catch { /* Still allow returning. */ }
+    try {
+      sessionStorage.removeItem('keepsake-room-closed');
+    } catch {
+      /* Still allow returning. */
+    }
     setStack(['room']);
   }, []);
   const openArchiveFolder = useCallback((tab: ArchiveFolderKey) => {
     setArchiveFolder(tab);
-    setStack((s) => [...s, "archiveFolder"]);
+    setStack(s => [...s, 'archiveFolder']);
   }, []);
   const back = useCallback(() => {
-    setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
+    setStack(s => (s.length > 1 ? s.slice(0, -1) : s));
   }, []);
   const goDesk = useCallback(() => {
-    setStack(["room"]);
-    setRoomFace("front");
+    setStack(['room']);
+    setRoomFace('front');
   }, []);
   const goWall = useCallback((face: RoomFace) => {
-    setStack(["room"]);
+    setStack(['room']);
     setRoomFace(face);
   }, []);
   const startTour = useCallback(() => {
-    setStack(["room"]);
-    setRoomFace("front");
+    setStack(['room']);
+    setRoomFace('front');
     setTouring(true);
   }, []);
   const endTour = useCallback(() => {
     setTouring(false);
     setTourFocus(null);
-    setRoomFace("front");
+    setRoomFace('front');
   }, []);
 
   const view = stack[stack.length - 1];
-  const backAria = "Return to the desk";
-  const backLabel = "return to desk";
+  const backAria = 'Return to the desk';
+  const backLabel = 'return to desk';
 
   const value = useMemo<NavContextValue>(
     () => ({
-      closeRoom, enterRoom,
-      discoveryOpen,setDiscoveryOpen,
-      printerOpen, setPrinterOpen, pendingPrint, setPendingPrint, bookPageId, setBookPageId,
+      closeRoom,
+      enterRoom,
+      discoveryOpen,
+      setDiscoveryOpen,
+      printerOpen,
+      setPrinterOpen,
+      pendingPrint,
+      setPendingPrint,
+      bookPageId,
+      setBookPageId,
       view,
       go,
       back,
@@ -122,7 +136,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
       goWall,
       viewAs,
       setViewAs,
-      isVisitor: viewAs !== "owner",
+      isVisitor: viewAs !== 'owner',
       touring,
       tourFocus,
       startTour,
@@ -133,18 +147,38 @@ export function NavProvider({ children }: { children: ReactNode }) {
       backAria,
       backLabel,
     }),
-    [view, go, back, archiveFolder, openArchiveFolder, goDesk, goWall, viewAs, touring, tourFocus, startTour, endTour, roomFace, printerOpen, pendingPrint, bookPageId,discoveryOpen,closeRoom,enterRoom],
+    [
+      view,
+      go,
+      back,
+      archiveFolder,
+      openArchiveFolder,
+      goDesk,
+      goWall,
+      viewAs,
+      touring,
+      tourFocus,
+      startTour,
+      endTour,
+      roomFace,
+      printerOpen,
+      pendingPrint,
+      bookPageId,
+      discoveryOpen,
+      closeRoom,
+      enterRoom,
+    ],
   );
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;
 }
 
-export function returnLabel(_view?: View, _face?: RoomFace): { aria: string; label: string } {
-  return { aria: "Return to the desk", label: "return to desk" };
+export function returnLabel(_view?: View, _face?: RoomFace): {aria: string; label: string} {
+  return {aria: 'Return to the desk', label: 'return to desk'};
 }
 
 export function useNav(): NavContextValue {
   const ctx = useContext(NavContext);
-  if (!ctx) throw new Error("useNav must be used within NavProvider");
+  if (!ctx) throw new Error('useNav must be used within NavProvider');
   return ctx;
 }

@@ -1,5 +1,5 @@
-import * as THREE from "three";
-import { DESK_OBJECT, LAMP_OBJECT } from "../../lib/roomHotspots";
+import * as THREE from 'three';
+import {DESK_OBJECT, LAMP_OBJECT} from '../../lib/roomHotspots';
 const STAND_IN_TOP_Y = 0.7645;
 export function worldPos(scene: THREE.Object3D, names: string | string[], fallback: THREE.Vector3) {
   for (const name of Array.isArray(names) ? names : [names]) {
@@ -15,7 +15,7 @@ export function worldPos(scene: THREE.Object3D, names: string | string[], fallba
 export function hasGeometry(object: THREE.Object3D | undefined) {
   if (!object) return false;
   let found = false;
-  object.traverse((child) => {
+  object.traverse(child => {
     const mesh = child as THREE.Mesh;
     if (mesh.isMesh && mesh.geometry) found = true;
   });
@@ -35,7 +35,7 @@ export function findDeskObject(scene: THREE.Object3D) {
   const named = scene.getObjectByName(DESK_OBJECT);
   if (isDeskSized(named)) return named;
   let found: THREE.Object3D | undefined;
-  scene.traverse((obj) => {
+  scene.traverse(obj => {
     if (found || !/desk/i.test(obj.name)) return;
     if (isDeskSized(obj)) found = obj;
   });
@@ -44,7 +44,7 @@ export function findDeskObject(scene: THREE.Object3D) {
 
 /** Underside of `ks_book` — the plane the pages rest on. */
 export function bookContactY(scene: THREE.Object3D): number | null {
-  const book = scene.getObjectByName("ks_book");
+  const book = scene.getObjectByName('ks_book');
   if (!book || !hasGeometry(book)) return null;
   const box = new THREE.Box3().setFromObject(book);
   if (box.isEmpty()) return null;
@@ -70,19 +70,19 @@ export const STAND_IN_DESK: DeskMeasure = {
 export function measureDesk(scene: THREE.Object3D): DeskMeasure {
   // The desk root includes props and drawer handles above the oak surface.
   // Measure the actual tabletop so clutter never inherits their height.
-  const top = scene.getObjectByName("Desk_Top");
+  const top = scene.getObjectByName('Desk_Top');
   if (top && hasGeometry(top)) {
     const box = new THREE.Box3().setFromObject(top);
-    return { minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z, y: box.max.y };
+    return {minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z, y: box.max.y};
   }
   const desk = findDeskObject(scene);
   const bookY = bookContactY(scene);
   if (desk && isDeskSized(desk)) {
     const box = new THREE.Box3().setFromObject(desk);
     const y = bookY != null && Math.abs(bookY - box.max.y) < 0.08 ? bookY : box.max.y;
-    return { minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z, y };
+    return {minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z, y};
   }
-  return { ...STAND_IN_DESK, y: bookY ?? STAND_IN_TOP_Y };
+  return {...STAND_IN_DESK, y: bookY ?? STAND_IN_TOP_Y};
 }
 
 /** Left-back corner of the desktop — where the lamp belongs. */
@@ -91,8 +91,8 @@ export function deskLampCorner(desk: DeskMeasure) {
 }
 
 export function lampShadePos(scene: THREE.Object3D) {
-  const replacement=scene.getObjectByName('Light_Anchor');
-  if(replacement)return replacement.getWorldPosition(new THREE.Vector3());
+  const replacement = scene.getObjectByName('Light_Anchor');
+  if (replacement) return replacement.getWorldPosition(new THREE.Vector3());
   const lamp = scene.getObjectByName(LAMP_OBJECT);
   if (lamp && hasGeometry(lamp)) {
     const box = new THREE.Box3().setFromObject(lamp);

@@ -1,11 +1,11 @@
-import type { ReactNode } from "react";
-import { DoorOpen } from "lucide-react";
-import { RoomFrame } from "../RoomFrame";
-import { useNav } from "../../store/nav";
+import type {ReactNode} from 'react';
+import {DoorOpen} from 'lucide-react';
+import {RoomFrame} from '../RoomFrame';
+import {useNav} from '../../store/nav';
 
 /** Home control — always returns to the desk, in the original top-left spot. */
-export function HomeChip({ onClick }: { onClick?: () => void } = {}) {
-  const { goDesk, backAria, backLabel } = useNav();
+export function HomeChip({onClick}: {onClick?: () => void} = {}) {
+  const {goDesk, backAria, backLabel} = useNav();
   return (
     <button
       className="ks-chip ks-chip--home"
@@ -46,7 +46,7 @@ export function ViewShell({
             <div className="leading-tight">
               <p className="font-display font-semibold text-ink">{title}</p>
               {subtitle && (
-                <p className="ks-caption text-ink/70" style={{ fontSize: "1.05rem" }}>
+                <p className="ks-caption text-ink/70" style={{fontSize: '1.05rem'}}>
                   {subtitle}
                 </p>
               )}
@@ -59,8 +59,8 @@ export function ViewShell({
       <div
         className={
           fill
-            ? "flex min-h-0 flex-1 flex-col"
-            : `mx-auto w-full max-w-4xl px-4 pb-8 ${scroll ? "overflow-y-auto" : ""}`
+            ? 'flex min-h-0 flex-1 flex-col'
+            : `mx-auto w-full max-w-4xl px-4 pb-8 ${scroll ? 'overflow-y-auto' : ''}`
         }
       >
         {children}

@@ -1,15 +1,15 @@
-import { useEffect, type RefObject } from "react";
-import { useEscapeClose } from "./useEscapeClose";
+import {useEffect, type RefObject} from 'react';
+import {useEscapeClose} from './useEscapeClose';
 
 const SELECTOR = [
-  "button:not([disabled])",
-  "a[href]",
-  "input:not([disabled])",
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  "summary",
+  'button:not([disabled])',
+  'a[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  'summary',
   "[tabindex]:not([tabindex='-1'])",
-].join(",");
+].join(',');
 
 /** Keep Tab inside a dialog and restore focus on close. */
 export function useFocusTrap(ref: RefObject<HTMLElement | null>, onClose: () => void) {
@@ -20,14 +20,16 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, onClose: () => 
     if (!root) return;
     const prev = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const list = () =>
-      [...root.querySelectorAll<HTMLElement>(SELECTOR)].filter((el) =>
-        !el.closest("[aria-hidden='true'], [hidden], [inert]") &&
-        el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden"
+      [...root.querySelectorAll<HTMLElement>(SELECTOR)].filter(
+        el =>
+          !el.closest("[aria-hidden='true'], [hidden], [inert]") &&
+          el.getClientRects().length > 0 &&
+          getComputedStyle(el).visibility !== 'hidden',
       );
     list()[0]?.focus();
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return;
+      if (e.key !== 'Tab') return;
       const items = list();
       if (items.length === 0) return;
       const first = items[0];
@@ -40,9 +42,9 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, onClose: () => 
         first.focus();
       }
     };
-    root.addEventListener("keydown", onKey);
+    root.addEventListener('keydown', onKey);
     return () => {
-      root.removeEventListener("keydown", onKey);
+      root.removeEventListener('keydown', onKey);
       prev?.focus();
     };
   }, [ref]);

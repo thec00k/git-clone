@@ -1,47 +1,68 @@
-import { LIMITS, checkArchiveRoom } from '../../lib/limits';
-import { useEffect, useRef, useState } from "react";
+import {LIMITS, checkArchiveRoom} from '../../lib/limits';
+import {useEffect, useRef, useState} from 'react';
 import {PinPageLink} from '../PinPageLink';
-import type { CSSProperties, PointerEvent as ReactPointerEvent, RefObject } from "react";
-import { ImagePlus, Lock, MapPin, Pencil, Trash2, Unlock, X } from "lucide-react";
-import { useApp } from "../../store/appStore";
-import { useNav } from "../../store/nav";
-import { loadImageFile } from "../../lib/image";
-import { clamp } from "../../lib/clamp";
-import { canLeavePinNote, VIEW_AS_LABEL } from "../../lib/permissions";
-import { ViewShell } from "./ViewShell";
-import type { MemoryPin, PinNote, ViewAs } from "../../types/app";
-import { PIN_NOTE_MAX } from "../../types/app";
-import {CRT_COLORS,CRT_LIGHT_COLORS} from "../../lib/roomMusic";
+import type {CSSProperties, PointerEvent as ReactPointerEvent, RefObject} from 'react';
+import {ImagePlus, Lock, MapPin, Pencil, Trash2, Unlock, X} from 'lucide-react';
+import {useApp} from '../../store/appStore';
+import {useNav} from '../../store/nav';
+import {loadImageFile} from '../../lib/image';
+import {clamp} from '../../lib/clamp';
+import {canLeavePinNote, VIEW_AS_LABEL} from '../../lib/permissions';
+import {ViewShell} from './ViewShell';
+import type {MemoryPin, PinNote, ViewAs} from '../../types/app';
+import {PIN_NOTE_MAX} from '../../types/app';
+import {CRT_COLORS, CRT_LIGHT_COLORS} from '../../lib/roomMusic';
 
 export function Atlas() {
-  const { state, environment, setEnvironment, addArchivePhoto, addPin, updatePin, removePin, addPinNote, updatePinNote, deletePinNote, recordProgress } =
-    useApp();
-  const { isVisitor, viewAs, setViewAs, pendingPrint, setPendingPrint } = useNav();
-  const [draft, setDraft] = useState<{ x: number; y: number } | null>(pendingPrint ? { x: 50, y: 50 } : null);
+  const {
+    state,
+    environment,
+    setEnvironment,
+    addArchivePhoto,
+    addPin,
+    updatePin,
+    removePin,
+    addPinNote,
+    updatePinNote,
+    deletePinNote,
+    recordProgress,
+  } = useApp();
+  const {isVisitor, viewAs, setViewAs, pendingPrint, setPendingPrint} = useNav();
+  const [draft, setDraft] = useState<{x: number; y: number} | null>(pendingPrint ? {x: 50, y: 50} : null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [peekId, setPeekId] = useState<string | null>(null);
-  const [label, setLabel] = useState("");
-  const [caption, setCaption] = useState("");
+  const [label, setLabel] = useState('');
+  const [caption, setCaption] = useState('');
   const [photoSrc, setPhotoSrc] = useState<string | undefined>(pendingPrint?.src);
   const photoRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
   const locked = environment.pinsLocked || isVisitor;
-  const editing = editingId ? state.pins.find((p) => p.id === editingId) : null;
-  const peeking = peekId ? state.pins.find((p) => p.id === peekId) : null;
+  const editing = editingId ? state.pins.find(p => p.id === editingId) : null;
+  const peeking = peekId ? state.pins.find(p => p.id === peekId) : null;
   const formOpen = !!(draft || editing);
   const canNote = canLeavePinNote(viewAs);
   const author = VIEW_AS_LABEL[viewAs];
-  const peekNotes = peeking ? (state.pinNotes ?? []).filter((n) => n.pinId === peeking.id) : [];
-  const neon=environment.roomTheme==='cyberpunk',crt=environment.crtColor??'blue';
-  const atlasStyle=neon?{'--ks-holo':CRT_LIGHT_COLORS[crt],'--ks-holo-bg':CRT_COLORS[crt].background,'--ks-holo-ink':CRT_COLORS[crt].ink} as CSSProperties:undefined;
+  const peekNotes = peeking ? (state.pinNotes ?? []).filter(n => n.pinId === peeking.id) : [];
+  const neon = environment.roomTheme === 'cyberpunk',
+    crt = environment.crtColor ?? 'blue';
+  const atlasStyle = neon
+    ? ({
+        '--ks-holo': CRT_LIGHT_COLORS[crt],
+        '--ks-holo-bg': CRT_COLORS[crt].background,
+        '--ks-holo-ink': CRT_COLORS[crt].ink,
+      } as CSSProperties)
+    : undefined;
 
   const beginNew = (x: number, y: number) => {
     if (isVisitor) return;
     setPeekId(null);
     setEditingId(null);
-    setDraft({ x, y });
-    if (!pendingPrint) { setLabel(""); setCaption(""); }
+    setDraft({x, y});
+    if (!pendingPrint) {
+      setLabel('');
+      setCaption('');
+    }
     setPhotoSrc(pendingPrint?.src);
   };
 
@@ -76,7 +97,7 @@ export function Atlas() {
 
   const commitNew = () => {
     if (!draft || !label.trim()) return;
-    addPin({ x: draft.x, y: draft.y, label: label.trim(), caption: caption.trim(), photoSrc });
+    addPin({x: draft.x, y: draft.y, label: label.trim(), caption: caption.trim(), photoSrc});
     setPendingPrint(null);
     setDraft(null);
     setPhotoSrc(undefined);
@@ -84,7 +105,7 @@ export function Atlas() {
 
   const commitEdit = () => {
     if (!editingId || !label.trim()) return;
-    updatePin(editingId, { label: label.trim(), caption: caption.trim(), photoSrc });
+    updatePin(editingId, {label: label.trim(), caption: caption.trim(), photoSrc});
     setEditingId(null);
     setPhotoSrc(undefined);
   };
@@ -94,8 +115,8 @@ export function Atlas() {
     if (!file) return;
     try {
       checkArchiveRoom(state.archive.length, 1);
-      const image = await loadImageFile(file,state.profile.preserveOriginals!==false);
-      addArchivePhoto(image.src,image.aspect,[],image.original);
+      const image = await loadImageFile(file, state.profile.preserveOriginals !== false);
+      addArchivePhoto(image.src, image.aspect, [], image.original);
       setPhotoSrc(image.src);
     } catch {
       /* ignore */
@@ -106,24 +127,24 @@ export function Atlas() {
     setPendingPrint(null);
     setDraft(null);
     setEditingId(null);
-    setLabel("");
-    setCaption("");
+    setLabel('');
+    setCaption('');
     setPhotoSrc(undefined);
   };
 
   useEffect(() => {
     if (!peeking) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPeekId(null);
+      if (e.key === 'Escape') setPeekId(null);
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [peeking]);
 
   return (
     <ViewShell
       title="The map"
-      subtitle={neon?'a living hologram of the world':'a corkboard of the world'}
+      subtitle={neon ? 'a living hologram of the world' : 'a corkboard of the world'}
       fill
       scroll={false}
       actions={
@@ -135,13 +156,13 @@ export function Atlas() {
               aria-label="View the room as"
               className="bg-transparent text-ink outline-none"
               value={viewAs}
-              onChange={(e) => {
+              onChange={e => {
                 const v = e.target.value as ViewAs;
                 setViewAs(v);
-                if (v !== "owner") recordProgress({ previewedAsVisitor: true });
+                if (v !== 'owner') recordProgress({previewedAsVisitor: true});
               }}
             >
-              {(["owner", "close", "friend", "public"] as ViewAs[]).map((v) => (
+              {(['owner', 'close', 'friend', 'public'] as ViewAs[]).map(v => (
                 <option key={v} value={v} className="text-ink">
                   {VIEW_AS_LABEL[v]}
                 </option>
@@ -153,34 +174,67 @@ export function Atlas() {
               type="button"
               className="ks-tool"
               aria-pressed={environment.pinsLocked}
-              aria-label={environment.pinsLocked ? "Unlock pins so they can be moved" : "Lock pins so they cannot be moved"}
-              onClick={() => setEnvironment({ pinsLocked: !environment.pinsLocked })}
+              aria-label={
+                environment.pinsLocked
+                  ? 'Unlock pins so they can be moved'
+                  : 'Lock pins so they cannot be moved'
+              }
+              onClick={() => setEnvironment({pinsLocked: !environment.pinsLocked})}
             >
               {environment.pinsLocked ? <Lock size={15} /> : <Unlock size={15} />}
-              {environment.pinsLocked ? "Pins locked" : "Pins unlocked"}
+              {environment.pinsLocked ? 'Pins locked' : 'Pins unlocked'}
             </button>
           )}
         </div>
       }
     >
-      <div className={`ks-atlas${neon?' ks-atlas--hologram':''}`} style={atlasStyle}>
-        {state.pins.length >= LIMITS.pins && <div className="ks-print-map-hint" role="status">Your map holds {LIMITS.pins} pins. Remove one to add another.</div>}
-        {pendingPrint && <div className="ks-print-map-hint" role="status">Your photo is ready to pin. Click a place on the map, add a name, then save the pin. <button onClick={closeForm}>Cancel print</button></div>}
+      <div className={`ks-atlas${neon ? ' ks-atlas--hologram' : ''}`} style={atlasStyle}>
+        {state.pins.length >= LIMITS.pins && (
+          <div className="ks-print-map-hint" role="status">
+            Your map holds {LIMITS.pins} pins. Remove one to add another.
+          </div>
+        )}
+        {pendingPrint && (
+          <div className="ks-print-map-hint" role="status">
+            Your photo is ready to pin. Click a place on the map, add a name, then save the pin.{' '}
+            <button onClick={closeForm}>Cancel print</button>
+          </div>
+        )}
         <div className="ks-atlas-board">
-          <div className={neon?'ks-atlas-holo-frame':'ks-cork ks-atlas-cork'}>
+          <div className={neon ? 'ks-atlas-holo-frame' : 'ks-cork ks-atlas-cork'}>
             <div
               ref={mapRef}
-              className={`${neon?'ks-atlas-holo-map':'ks-cork-map'} ks-atlas-map`}
-              style={{ cursor: isVisitor || locked || peeking ? "default" : "crosshair" }}
+              className={`${neon ? 'ks-atlas-holo-map' : 'ks-cork-map'} ks-atlas-map`}
+              style={{cursor: isVisitor || locked || peeking ? 'default' : 'crosshair'}}
               onClick={onMapClick}
               data-atlas-map
             >
-              {neon?<><img src="/maps/world.svg" alt="Holographic world map" className="ks-world-map ks-holo-map-source pointer-events-none absolute inset-0 h-full w-full object-cover"/><div className="ks-holo-landmass pointer-events-none absolute inset-0"/><div className="ks-holo-grid pointer-events-none absolute inset-0"/><div className="ks-holo-scan pointer-events-none absolute inset-x-0"/><div className="ks-holo-vignette pointer-events-none absolute inset-0"/></>:<img src="/maps/world.svg" alt="World map" className="ks-world-map pointer-events-none absolute inset-0 h-full w-full object-cover" />}
-              {!neon&&<div
-                className="pointer-events-none absolute inset-0"
-                style={{ backgroundImage: "url('/textures/grain.png')", opacity: 0.12 }}
-              />}
-              {state.pins.map((p) => (
+              {neon ? (
+                <>
+                  <img
+                    src="/maps/world.svg"
+                    alt="Holographic world map"
+                    className="ks-world-map ks-holo-map-source pointer-events-none absolute inset-0 h-full w-full object-cover"
+                  />
+                  <div className="ks-holo-landmass pointer-events-none absolute inset-0" />
+                  <div className="ks-holo-grid pointer-events-none absolute inset-0" />
+                  <div className="ks-holo-scan pointer-events-none absolute inset-x-0" />
+                  <div className="ks-holo-vignette pointer-events-none absolute inset-0" />
+                </>
+              ) : (
+                <img
+                  src="/maps/world.svg"
+                  alt="World map"
+                  className="ks-world-map pointer-events-none absolute inset-0 h-full w-full object-cover"
+                />
+              )}
+              {!neon && (
+                <div
+                  className="pointer-events-none absolute inset-0"
+                  style={{backgroundImage: "url('/textures/grain.png')", opacity: 0.12}}
+                />
+              )}
+              {state.pins.map(p => (
                 <MapPinMarker
                   key={p.id}
                   pin={p}
@@ -189,11 +243,14 @@ export function Atlas() {
                   mapRef={mapRef}
                   onSelect={() => openEdit(p)}
                   onPeek={() => openPeek(p)}
-                  onMove={(x, y) => updatePin(p.id, { x, y })}
+                  onMove={(x, y) => updatePin(p.id, {x, y})}
                 />
               ))}
               {draft && (
-                <div className="pointer-events-none absolute -translate-x-1/2 -translate-y-full" style={{ left: `${draft.x}%`, top: `${draft.y}%` }}>
+                <div
+                  className="pointer-events-none absolute -translate-x-1/2 -translate-y-full"
+                  style={{left: `${draft.x}%`, top: `${draft.y}%`}}
+                >
                   <MapPin size={26} className="text-paper drop-shadow" />
                 </div>
               )}
@@ -206,9 +263,9 @@ export function Atlas() {
 
         <aside
           className="ks-atlas-editor"
-          data-pin-editor={peeking ? "fridge" : editing ? "edit" : draft ? "new" : "idle"}
+          data-pin-editor={peeking ? 'fridge' : editing ? 'edit' : draft ? 'new' : 'idle'}
         >
-          {(peeking||editing)&&<PinPageLink pin={(peeking||editing)!}/>}
+          {(peeking || editing) && <PinPageLink pin={(peeking || editing)!} />}
           {peeking ? (
             <FridgeNotePanel
               pin={peeking}
@@ -216,7 +273,7 @@ export function Atlas() {
               author={author}
               canNote={canNote}
               isVisitor={isVisitor}
-              onStick={(text) => addPinNote(peeking.id, author, text)}
+              onStick={text => addPinNote(peeking.id, author, text)}
               onSave={(id, text) => updatePinNote(id, text)}
               onRemove={deletePinNote}
               onEditPin={
@@ -294,15 +351,17 @@ function OwnerPinPanel({
     <>
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
-          <p className="font-display text-lg text-paper">{editing ? "Edit this pin" : formOpen ? "Pin a memory" : "A place"}</p>
+          <p className="font-display text-lg text-paper">
+            {editing ? 'Edit this pin' : formOpen ? 'Pin a memory' : 'A place'}
+          </p>
           <p className="mt-1 text-sm text-paper/55">
             {isVisitor
-              ? "Click a photograph to hold it up, like a print on the fridge."
+              ? 'Click a photograph to hold it up, like a print on the fridge.'
               : locked
-                ? "Pins are locked. Click a pin to edit, or a photo to hold it up."
+                ? 'Pins are locked. Click a pin to edit, or a photo to hold it up.'
                 : formOpen
-                  ? "Name the place, write a caption, add a photo."
-                  : "Click the map to drop a pin. Click a photo to hold it up."}
+                  ? 'Name the place, write a caption, add a photo.'
+                  : 'Click the map to drop a pin. Click a photo to hold it up.'}
           </p>
         </div>
         {formOpen && !isVisitor && (
@@ -322,7 +381,7 @@ function OwnerPinPanel({
               className="mt-1 block w-full rounded-lg bg-black/25 px-3 py-2 text-paper outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
               placeholder="where…"
               value={label}
-              onChange={(e) => onLabel(e.target.value)}
+              onChange={e => onLabel(e.target.value)}
               disabled={!formOpen}
               autoFocus={formOpen}
             />
@@ -336,10 +395,10 @@ function OwnerPinPanel({
               className="mt-1 block w-full resize-none rounded-lg bg-black/25 px-3 py-2 text-paper outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
               placeholder="a memory…"
               value={caption}
-              onChange={(e) => onCaption(e.target.value)}
+              onChange={e => onCaption(e.target.value)}
               disabled={!formOpen}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   onCommit();
                 }
@@ -353,20 +412,29 @@ function OwnerPinPanel({
               accept="image/*"
               hidden
               aria-label="Photograph for this pin"
-              onChange={(e) => {
+              onChange={e => {
                 onPhoto(e.target.files);
-                e.target.value = "";
+                e.target.value = '';
               }}
             />
-            <button type="button" className="ks-tool w-full justify-center" onClick={() => photoRef.current?.click()} disabled={!formOpen}>
+            <button
+              type="button"
+              className="ks-tool w-full justify-center"
+              onClick={() => photoRef.current?.click()}
+              disabled={!formOpen}
+            >
               <ImagePlus size={15} />
-              {photoSrc ? "Change photo" : "Add a photo"}
+              {photoSrc ? 'Change photo' : 'Add a photo'}
             </button>
             {photoSrc && <img src={photoSrc} alt="" className="mt-2 h-28 w-full rounded object-cover" />}
           </div>
           <div className="mt-auto flex flex-col gap-2 pt-4">
-            <button className="ks-tool ks-tool--accent w-full justify-center disabled:opacity-40" onClick={onCommit} disabled={!formOpen || !label.trim()}>
-              {editing ? "Save" : "Pin it"}
+            <button
+              className="ks-tool ks-tool--accent w-full justify-center disabled:opacity-40"
+              onClick={onCommit}
+              disabled={!formOpen || !label.trim()}
+            >
+              {editing ? 'Save' : 'Pin it'}
             </button>
             {onRemove && (
               <button type="button" className="ks-tool w-full justify-center" onClick={onRemove}>
@@ -403,11 +471,11 @@ function FridgeNotePanel({
   onEditPin?: () => void;
   onClose: () => void;
 }) {
-  const mine = notes.find((n) => n.author === author);
-  const [draft, setDraft] = useState(mine?.message ?? "");
+  const mine = notes.find(n => n.author === author);
+  const [draft, setDraft] = useState(mine?.message ?? '');
 
   useEffect(() => {
-    setDraft(mine?.message ?? "");
+    setDraft(mine?.message ?? '');
   }, [mine?.id, mine?.message, pin.id]);
 
   const commit = () => {
@@ -423,7 +491,9 @@ function FridgeNotePanel({
         <div>
           <p className="font-display text-lg text-paper">{pin.label}</p>
           <p className="mt-1 text-sm text-paper/55">
-            {canNote ? "A short sticky, twenty characters or fewer — like a note on the fridge." : "A print on the fridge."}
+            {canNote
+              ? 'A short sticky, twenty characters or fewer — like a note on the fridge.'
+              : 'A print on the fridge.'}
           </p>
         </div>
         <button className="ks-chip h-8 w-8 shrink-0" onClick={onClose} aria-label="Close photograph">
@@ -433,7 +503,7 @@ function FridgeNotePanel({
       {pin.caption && <p className="ks-caption mb-3 text-paper/70">{pin.caption}</p>}
       {canNote && (
         <label className="block text-sm text-paper/60" htmlFor="ks-fridge-note">
-          {mine ? "Your sticky" : "Leave a sticky"}
+          {mine ? 'Your sticky' : 'Leave a sticky'}
           <input
             id="ks-fridge-note"
             name="fridge-note"
@@ -441,9 +511,9 @@ function FridgeNotePanel({
             placeholder="missed this light"
             maxLength={PIN_NOTE_MAX}
             value={draft}
-            onChange={(e) => setDraft(e.target.value.slice(0, PIN_NOTE_MAX))}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
+            onChange={e => setDraft(e.target.value.slice(0, PIN_NOTE_MAX))}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
                 e.preventDefault();
                 commit();
               }
@@ -457,8 +527,14 @@ function FridgeNotePanel({
       )}
       <div className="mt-3 flex flex-col gap-2">
         {canNote && (
-          <button type="button" data-stick-note className="ks-tool ks-tool--accent w-full justify-center disabled:opacity-40" onClick={commit} disabled={!draft.trim()}>
-            {mine ? "Save sticky" : "Stick it"}
+          <button
+            type="button"
+            data-stick-note
+            className="ks-tool ks-tool--accent w-full justify-center disabled:opacity-40"
+            onClick={commit}
+            disabled={!draft.trim()}
+          >
+            {mine ? 'Save sticky' : 'Stick it'}
           </button>
         )}
         {mine && (
@@ -477,18 +553,29 @@ function FridgeNotePanel({
 }
 
 const STICKY_LOOKS = [
-  { bg: "#f6e27a", rot: -4, side: "right" as const, top: "8%" },
-  { bg: "#f4b4c4", rot: 3, side: "left" as const, top: "22%" },
-  { bg: "#b8e0d2", rot: -3, side: "right" as const, top: "46%" },
-  { bg: "#f3c27a", rot: 4, side: "left" as const, top: "58%" },
-  { bg: "#d7c4f0", rot: -4, side: "right" as const, top: "74%" },
-  { bg: "#c9e4a8", rot: 3, side: "left" as const, top: "78%" },
+  {bg: '#f6e27a', rot: -4, side: 'right' as const, top: '8%'},
+  {bg: '#f4b4c4', rot: 3, side: 'left' as const, top: '22%'},
+  {bg: '#b8e0d2', rot: -3, side: 'right' as const, top: '46%'},
+  {bg: '#f3c27a', rot: 4, side: 'left' as const, top: '58%'},
+  {bg: '#d7c4f0', rot: -4, side: 'right' as const, top: '74%'},
+  {bg: '#c9e4a8', rot: 3, side: 'left' as const, top: '78%'},
 ];
 
-function FridgePeek({ pin, notes, onClose }: { pin: MemoryPin; notes: PinNote[]; onClose: () => void }) {
+function FridgePeek({pin, notes, onClose}: {pin: MemoryPin; notes: PinNote[]; onClose: () => void}) {
   return (
-    <div className="ks-fridge" data-fridge role="dialog" aria-modal="true" aria-label={`Photograph: ${pin.label}`}>
-      <button type="button" className="ks-fridge-dim" aria-label="Put the photograph back" onClick={onClose} />
+    <div
+      className="ks-fridge"
+      data-fridge
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Photograph: ${pin.label}`}
+    >
+      <button
+        type="button"
+        className="ks-fridge-dim"
+        aria-label="Put the photograph back"
+        onClick={onClose}
+      />
       <div className="ks-fridge-door">
         <div className="ks-fridge-well">
           <div className="ks-fridge-polaroid">
@@ -583,7 +670,7 @@ function MapPinMarker({
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
     drag.current = null;
     if (!s.moved) {
-      if (pin.photoSrc && (e.target as HTMLElement).closest("[data-pin-photo]")) onPeek();
+      if (pin.photoSrc && (e.target as HTMLElement).closest('[data-pin-photo]')) onPeek();
       else onSelect();
     }
   };
@@ -591,11 +678,16 @@ function MapPinMarker({
   return (
     <button
       type="button"
-      className={`absolute z-10 -translate-x-1/2 -translate-y-[85%] border-0 bg-transparent p-0${selected ? " z-20" : ""}`}
-      style={{ left: `${pin.x}%`, top: `${pin.y}%`, cursor: locked ? "pointer" : "grab" }}
-      aria-label={pin.photoSrc ? `Open photograph: ${pin.label}` : `${selected ? "Editing" : "Edit"} pin: ${pin.label}`}
+      className={`absolute z-10 -translate-x-1/2 -translate-y-[85%] border-0 bg-transparent p-0${selected ? ' z-20' : ''}`}
+      style={{left: `${pin.x}%`, top: `${pin.y}%`, cursor: locked ? 'pointer' : 'grab'}}
+      aria-label={
+        pin.photoSrc ? `Open photograph: ${pin.label}` : `${selected ? 'Editing' : 'Edit'} pin: ${pin.label}`
+      }
       data-pin-id={pin.id}
-      onClick={(e) => {e.stopPropagation();if(e.detail===0)onSelect();}}
+      onClick={e => {
+        e.stopPropagation();
+        if (e.detail === 0) onSelect();
+      }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
@@ -607,10 +699,14 @@ function MapPinMarker({
           alt=""
           data-pin-photo
           className="mb-0.5 h-10 w-10 rounded-[2px] border-2 border-[#fffef8] object-cover shadow-md"
-          style={{ transform: "rotate(-4deg)" }}
+          style={{transform: 'rotate(-4deg)'}}
         />
       ) : null}
-      <MapPin size={26} className="mx-auto text-[#b55245] drop-shadow" fill={selected ? "#d46a5c" : "#b55245"} />
+      <MapPin
+        size={26}
+        className="mx-auto text-[#b55245] drop-shadow"
+        fill={selected ? '#d46a5c' : '#b55245'}
+      />
       <span className="mt-0.5 flex items-center justify-center gap-0.5 text-[0.7rem] text-paper/80">
         <Pencil size={10} />
         {pin.label}

@@ -1,12 +1,12 @@
-import { RansomText } from "./RansomText";
-import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
-import { RotateCw } from "lucide-react";
-import type { CaptionElement, PageElement, PhotoElement } from "../types/scrapbook";
-import { clamp } from "../lib/clamp";
+import {RansomText} from './RansomText';
+import {useEffect, useRef, useState} from 'react';
+import type {CSSProperties, PointerEvent as ReactPointerEvent} from 'react';
+import {RotateCw} from 'lucide-react';
+import type {CaptionElement, PageElement, PhotoElement} from '../types/scrapbook';
+import {clamp} from '../lib/clamp';
 import {pagePixelPoint} from '../lib/pageCoordinates';
-import { usePointerDrag } from "../hooks/usePointerDrag";
-import { useElementGesture } from "../hooks/useElementGesture";
+import {usePointerDrag} from '../hooks/usePointerDrag';
+import {useElementGesture} from '../hooks/useElementGesture';
 import {StickerSurface} from './StickerSurface';
 import {useReducedMotion} from '../hooks/useReducedMotion';
 
@@ -35,32 +35,43 @@ export function ElementView(props: Props) {
     pending.current = null;
     setPreview(null);
   };
-  return <div style={{display: 'contents'}}
-    onPointerDownCapture={e => { if (!(e.target as HTMLElement).closest("textarea")) pointers.current.add(e.pointerId); }}
-    onPointerUpCapture={finish} onPointerCancelCapture={finish}>
-    <ElementContent {...props} element={{...props.element, ...preview} as PageElement}
-      onTransform={transform} onMove={(id, x, y) => transform(id, {x, y})}/>
-  </div>;
+  return (
+    <div
+      style={{display: 'contents'}}
+      onPointerDownCapture={e => {
+        if (!(e.target as HTMLElement).closest('textarea')) pointers.current.add(e.pointerId);
+      }}
+      onPointerUpCapture={finish}
+      onPointerCancelCapture={finish}
+    >
+      <ElementContent
+        {...props}
+        element={{...props.element, ...preview} as PageElement}
+        onTransform={transform}
+        onMove={(id, x, y) => transform(id, {x, y})}
+      />
+    </div>
+  );
 }
 
-function ElementContent({ element, selected, onSelect, onMove, onTransform, onEditText }: Props) {
+function ElementContent({element, selected, onSelect, onMove, onTransform, onEditText}: Props) {
   const positionStyle: CSSProperties = {
-    position: "absolute",
+    position: 'absolute',
     left: `${element.x}%`,
     top: `${element.y}%`,
     width: `${element.w}cqw`,
     transform: `translate(-50%, -50%) rotate(${element.rotation}deg)`,
     zIndex: element.z,
-    touchAction: "none",
-    outline: selected ? "2px dashed var(--color-accent)" : "none",
-    outlineOffset: "6px",
+    touchAction: 'none',
+    outline: selected ? '2px dashed var(--color-accent)' : 'none',
+    outlineOffset: '6px',
   };
 
-  if (element.type === "stroke") return null;
+  if (element.type === 'stroke') return null;
 
   // Photos and stickers get full drag + pinch-to-resize + twist-to-rotate,
   // plus rotate and corner-resize handles when selected.
-  if (element.type === "photo" || element.type === "sticker") {
+  if (element.type === 'photo' || element.type === 'sticker') {
     return (
       <TransformableElement
         element={element}
@@ -92,26 +103,33 @@ function TransformableElement({
   onSelect,
   onTransform,
 }: {
-  element: PhotoElement | Extract<PageElement, { type: "sticker" }>;
+  element: PhotoElement | Extract<PageElement, {type: 'sticker'}>;
   selected: boolean;
   positionStyle: CSSProperties;
   onSelect: (id: string) => void;
   onTransform: (id: string, patch: Partial<PageElement>) => void;
 }) {
   const gesture = useElementGesture(
-    () => ({ x: element.x, y: element.y, w: element.w, rotation: element.rotation }),
-    (patch) => onTransform(element.id, patch),
+    () => ({x: element.x, y: element.y, w: element.w, rotation: element.rotation}),
+    patch => onTransform(element.id, patch),
   );
 
-  const reduced=useReducedMotion();
-  const [light,setLight]=useState({x:.35,y:.25});
-  const held=useRef(new Set<number>());
-  const [lifted,setLifted]=useState(false);
-  const release=(e:ReactPointerEvent<HTMLElement>)=>{held.current.delete(e.pointerId);setLifted(held.current.size>0);gesture.onPointerUp(e);};
+  const reduced = useReducedMotion();
+  const [light, setLight] = useState({x: 0.35, y: 0.25});
+  const held = useRef(new Set<number>());
+  const [lifted, setLifted] = useState(false);
+  const release = (e: ReactPointerEvent<HTMLElement>) => {
+    held.current.delete(e.pointerId);
+    setLifted(held.current.size > 0);
+    gesture.onPointerUp(e);
+  };
   const onDown = (e: ReactPointerEvent<HTMLElement>) => {
     e.stopPropagation();
     onSelect(element.id);
-    if(!(e.target as HTMLElement).closest('[data-no-drag]')){held.current.add(e.pointerId);setLifted(true);}
+    if (!(e.target as HTMLElement).closest('[data-no-drag]')) {
+      held.current.add(e.pointerId);
+      setLifted(true);
+    }
     gesture.onPointerDown(e);
   };
 
@@ -120,41 +138,65 @@ function TransformableElement({
       className="ks-el"
       style={positionStyle}
       onPointerDown={onDown}
-      onPointerMove={e=>{gesture.onPointerMove(e);if(element.type==='sticker'&&!reduced){const r=e.currentTarget.getBoundingClientRect();setLight({x:clamp((e.clientX-r.left)/r.width,0,1),y:clamp((e.clientY-r.top)/r.height,0,1)});}}}
-      onPointerLeave={()=>{if(!lifted)setLight({x:.35,y:.25});}}
+      onPointerMove={e => {
+        gesture.onPointerMove(e);
+        if (element.type === 'sticker' && !reduced) {
+          const r = e.currentTarget.getBoundingClientRect();
+          setLight({
+            x: clamp((e.clientX - r.left) / r.width, 0, 1),
+            y: clamp((e.clientY - r.top) / r.height, 0, 1),
+          });
+        }
+      }}
+      onPointerLeave={() => {
+        if (!lifted) setLight({x: 0.35, y: 0.25});
+      }}
       onPointerUp={release}
       onPointerCancel={release}
-      onLostPointerCapture={e=>{held.current.delete(e.pointerId);setLifted(held.current.size>0);}}
-      onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect(element.id);}}}
+      onLostPointerCapture={e => {
+        held.current.delete(e.pointerId);
+        setLifted(held.current.size > 0);
+      }}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(element.id);
+        }
+      }}
       role="button"
       tabIndex={0}
-      aria-label={element.type === "photo" ? "Photograph" : "Sticker"}
+      aria-label={element.type === 'photo' ? 'Photograph' : 'Sticker'}
     >
-      {element.type === "photo" ? (
+      {element.type === 'photo' ? (
         <PhotoInner element={element} />
       ) : (
         <div
           className="ks-sticker-lift"
-          data-lifted={lifted&&!reduced}
+          data-lifted={lifted && !reduced}
           style={{
             lineHeight: 1,
-            textAlign: "center",
-            userSelect: "none",
+            textAlign: 'center',
+            userSelect: 'none',
           }}
         >
-          <StickerSurface glyph={element.glyph} finish={element.finish} strength={element.finishStrength} light={light}/>
+          <StickerSurface
+            glyph={element.glyph}
+            finish={element.finish}
+            strength={element.finishStrength}
+            light={light}
+          />
         </div>
       )}
 
       {selected && (
         <>
-          <RotateHandle onRotate={(deg) => onTransform(element.id, { rotation: deg })} />
-          {(["nw", "ne", "sw", "se"] as const).map((corner) => (
+          <RotateHandle onRotate={deg => onTransform(element.id, {rotation: deg})} />
+          {(['nw', 'ne', 'sw', 'se'] as const).map(corner => (
             <ResizeHandle
               key={corner}
               corner={corner}
               size={element.w}
-              onResize={(w) => onTransform(element.id, { w })}
+              onResize={w => onTransform(element.id, {w})}
             />
           ))}
         </>
@@ -163,22 +205,22 @@ function TransformableElement({
   );
 }
 
-function RotateHandle({ onRotate }: { onRotate: (deg: number) => void }) {
+function RotateHandle({onRotate}: {onRotate: (deg: number) => void}) {
   const active = useRef(false);
-  const center = useRef({ x: 0, y: 0 });
+  const center = useRef({x: 0, y: 0});
 
   const down = (e: ReactPointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    const el = (e.currentTarget as HTMLElement).closest(".ks-el") as HTMLElement | null;
+    const el = (e.currentTarget as HTMLElement).closest('.ks-el') as HTMLElement | null;
     if (!el) return;
-    center.current = {x:el.offsetLeft,y:el.offsetTop};
+    center.current = {x: el.offsetLeft, y: el.offsetTop};
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     active.current = true;
   };
 
   const move = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!active.current) return;
-    const p=pagePixelPoint(e.currentTarget,e.clientX,e.clientY);
+    const p = pagePixelPoint(e.currentTarget, e.clientX, e.clientY);
     const dx = p.x - center.current.x;
     const dy = p.y - center.current.y;
     let deg = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
@@ -201,34 +243,34 @@ function RotateHandle({ onRotate }: { onRotate: (deg: number) => void }) {
       onPointerCancel={up}
       title="Drag to rotate (hold Shift to snap to 15°)"
       style={{
-        position: "absolute",
-        left: "50%",
+        position: 'absolute',
+        left: '50%',
         top: 0,
-        transform: "translate(-50%, -100%)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        touchAction: "none",
-        cursor: "grab",
+        transform: 'translate(-50%, -100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        touchAction: 'none',
+        cursor: 'grab',
         zIndex: 5,
       }}
     >
       <span
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           height: 22,
           width: 22,
           borderRadius: 999,
-          background: "var(--color-accent)",
-          color: "var(--color-accent-fg)",
-          boxShadow: "0 2px 6px rgb(0 0 0 / 0.4)",
+          background: 'var(--color-accent)',
+          color: 'var(--color-accent-fg)',
+          boxShadow: '0 2px 6px rgb(0 0 0 / 0.4)',
         }}
       >
         <RotateCw size={13} />
       </span>
-      <span style={{ width: 2, height: 16, background: "var(--color-accent)" }} />
+      <span style={{width: 2, height: 16, background: 'var(--color-accent)'}} />
     </div>
   );
 }
@@ -238,21 +280,21 @@ function ResizeHandle({
   size,
   onResize,
 }: {
-  corner: "nw" | "ne" | "sw" | "se";
+  corner: 'nw' | 'ne' | 'sw' | 'se';
   size: number;
   onResize: (w: number) => void;
 }) {
   const active = useRef(false);
-  const start = useRef({ x: 0, y: 0, dist: 1, w: size });
+  const start = useRef({x: 0, y: 0, dist: 1, w: size});
 
   const down = (e: ReactPointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    const el = (e.currentTarget as HTMLElement).closest(".ks-el") as HTMLElement | null;
+    const el = (e.currentTarget as HTMLElement).closest('.ks-el') as HTMLElement | null;
     if (!el) return;
     const cx = el.offsetLeft;
     const cy = el.offsetTop;
-    const p=pagePixelPoint(el,e.clientX,e.clientY);
+    const p = pagePixelPoint(el, e.clientX, e.clientY);
     start.current = {
       x: cx,
       y: cy,
@@ -267,7 +309,7 @@ function ResizeHandle({
     if (!active.current) return;
     e.preventDefault();
     e.stopPropagation();
-    const p=pagePixelPoint(e.currentTarget,e.clientX,e.clientY);
+    const p = pagePixelPoint(e.currentTarget, e.clientX, e.clientY);
     const dist = Math.hypot(p.x - start.current.x, p.y - start.current.y);
     onResize(clamp((start.current.w * dist) / start.current.dist, 8, 92));
   };
@@ -296,27 +338,23 @@ function ResizeHandle({
   );
 }
 
-function PhotoInner({ element }: { element: PhotoElement }) {
+function PhotoInner({element}: {element: PhotoElement}) {
   const frameClass =
-    element.frame === "polaroid"
-      ? "ks-polaroid"
-      : element.frame === "tape"
-        ? "ks-tape"
-        : "ks-flush";
+    element.frame === 'polaroid' ? 'ks-polaroid' : element.frame === 'tape' ? 'ks-tape' : 'ks-flush';
   return (
-    <div className={`relative ${frameClass}`} style={{ borderRadius: 2 }}>
+    <div className={`relative ${frameClass}`} style={{borderRadius: 2}}>
       <img
         src={element.src}
         alt=""
         draggable={false}
         style={{
-          display: "block",
-          width: "100%",
-          height: "auto",
+          display: 'block',
+          width: '100%',
+          height: 'auto',
           aspectRatio: element.cropAspect,
-          objectFit: element.cropAspect ? "cover" : undefined,
-          userSelect: "none",
-          pointerEvents: "none",
+          objectFit: element.cropAspect ? 'cover' : undefined,
+          userSelect: 'none',
+          pointerEvents: 'none',
         }}
       />
     </div>
@@ -341,7 +379,7 @@ function CaptionView({
   onEditText: (id: string, text: string) => void;
 }) {
   const drag = usePointerDrag(
-    () => ({ x: element.x, y: element.y }),
+    () => ({x: element.x, y: element.y}),
     (x, y) => onMove(element.id, x, y),
   );
   const [editing, setEditing] = useState(false);
@@ -360,16 +398,16 @@ function CaptionView({
   }, [selected]);
 
   const captionStyle: CSSProperties = {
-    fontFamily: element.look ? undefined : "var(--font-script)",
+    fontFamily: element.look ? undefined : 'var(--font-script)',
     fontSize: `${element.fontSize}cqw`,
     color: element.color,
     lineHeight: 1.12,
-    textAlign: "center",
-    width: "100%",
+    textAlign: 'center',
+    width: '100%',
   };
 
   const handleSelect = (e: ReactPointerEvent<HTMLElement>) => {
-    if ((e.target as HTMLElement).closest("textarea")) return;
+    if ((e.target as HTMLElement).closest('textarea')) return;
     e.preventDefault();
     e.stopPropagation();
     setEditing(false);
@@ -380,21 +418,37 @@ function CaptionView({
   return (
     <div
       className="ks-el"
-      style={{...style, padding: 8, userSelect: "none", cursor: "move"}}
+      style={{...style, padding: 8, userSelect: 'none', cursor: 'move'}}
       onPointerDown={handleSelect}
       onPointerMove={drag.onPointerMove}
       onPointerUp={drag.onPointerUp}
       onPointerCancel={drag.onPointerCancel}
-      onDoubleClick={e => { if (!(e.target as HTMLElement).closest("[data-no-drag]")) setEditing(true); }}
-      onKeyDown={e => { if (e.target === e.currentTarget && e.key === "Enter") { onSelect(element.id); setEditing(true); } }}
+      onDoubleClick={e => {
+        if (!(e.target as HTMLElement).closest('[data-no-drag]')) setEditing(true);
+      }}
+      onKeyDown={e => {
+        if (e.target === e.currentTarget && e.key === 'Enter') {
+          onSelect(element.id);
+          setEditing(true);
+        }
+      }}
       role="button"
       tabIndex={0}
       aria-label={`Caption: ${element.text}`}
     >
-      {selected && <>
-        <RotateHandle onRotate={rotation => onTransform(element.id, {rotation})}/>
-        {(["nw", "ne", "sw", "se"] as const).map(corner => <ResizeHandle key={corner} corner={corner} size={element.w} onResize={w => onTransform(element.id, {w})}/>)}
-      </>}
+      {selected && (
+        <>
+          <RotateHandle onRotate={rotation => onTransform(element.id, {rotation})} />
+          {(['nw', 'ne', 'sw', 'se'] as const).map(corner => (
+            <ResizeHandle
+              key={corner}
+              corner={corner}
+              size={element.w}
+              onResize={w => onTransform(element.id, {w})}
+            />
+          ))}
+        </>
+      )}
       {editing ? (
         <textarea
           ref={textareaRef}
@@ -402,25 +456,32 @@ function CaptionView({
           data-no-drag
           value={element.text}
           maxLength={140}
-          onChange={(e) => onEditText(element.id, e.target.value)}
+          onChange={e => onEditText(element.id, e.target.value)}
           onBlur={() => setEditing(false)}
           rows={2}
           style={{
             ...captionStyle,
-            fontFamily: "var(--font-script)",
-            userSelect: "text",
-            cursor: "text",
-            background: "rgba(255,255,255,0.5)",
-            border: "1px solid var(--color-accent)",
+            fontFamily: 'var(--font-script)',
+            userSelect: 'text',
+            cursor: 'text',
+            background: 'rgba(255,255,255,0.5)',
+            border: '1px solid var(--color-accent)',
             borderRadius: 6,
-            resize: "none",
-            outline: "none",
-            padding: "2px 6px",
+            resize: 'none',
+            outline: 'none',
+            padding: '2px 6px',
           }}
         />
       ) : (
-        <div className={element.look ? `ks-caption ks-look ks-look-${element.look}` : "ks-caption"} style={captionStyle}>
-          {element.look === "ransom" && element.text ? <RansomText text={element.text} /> : (element.text || "…")}
+        <div
+          className={element.look ? `ks-caption ks-look ks-look-${element.look}` : 'ks-caption'}
+          style={captionStyle}
+        >
+          {element.look === 'ransom' && element.text ? (
+            <RansomText text={element.text} />
+          ) : (
+            element.text || '…'
+          )}
         </div>
       )}
     </div>
