@@ -28,6 +28,8 @@ create table public.room_private (
   updated_at timestamptz not null default now()
 );
 alter table public.room_private enable row level security;
+-- Supabase grants new tables to anon and authenticated by default; start from nothing, as the policies migration does.
+revoke all on public.room_private from anon, authenticated;
 grant select, insert, update (data) on public.room_private to authenticated;
 create policy room_private_read on public.room_private for select to authenticated using (owner_id = auth.uid());
 create policy room_private_insert on public.room_private for insert to authenticated with check (owner_id = auth.uid());

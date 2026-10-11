@@ -19,4 +19,13 @@ do $$ declare f record; begin
     raise exception 'security definer function % has no fixed search_path', f.proname;
   end loop;
 end $$;
+-- Signed-out visitors hold no privilege on any of our tables (Supabase grants new tables to anon by default).
+do $$ declare t record; begin
+  for t in select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+           where n.nspname = 'public' and c.relkind = 'r'
+             and (has_table_privilege('anon', c.oid, 'select') or has_table_privilege('anon', c.oid, 'insert')
+               or has_table_privilege('anon', c.oid, 'update') or has_table_privilege('anon', c.oid, 'delete')) loop
+    raise exception 'anon has access to table public.%', t.relname;
+  end loop;
+end $$;
 \echo guard tests passed
