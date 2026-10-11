@@ -3,7 +3,7 @@
 Written for the next agent (for example the Claude desktop agent) picking this up. Read this first, then `handoff-current.md`.
 
 ## Where things are
-- Repo `thec00k/git-clone`, app in `keepsake/`. Work branch: **`codex/foundations-and-seasons`** (from `codex/woodland-composition-proof`). Latest commit when this was written: `82afe07` plus this note. CI was green. `main` is intentionally unchanged. Scanner branch `codex/scanner-texture-pipeline` is on hold. Snowy Mountain and Sky Castle branches are not integrated.
+- Repo `thec00k/git-clone`, app in `keepsake/`. Work branch: **`codex/foundations-and-seasons`** (from `codex/woodland-composition-proof`). Latest commit when this was written: `82afe07` plus this note. CI was green. `main` is intentionally unchanged. Scanner branch `codex/scanner-texture-pipeline` is on hold. Snowy Mountain is not integrated. Sky Castle is ported onto `claude/sky-castle-port` (draft PR into this branch), keeping the real-world map and glass furniture; see `docs/sky-castle-room.md`.
 - Read in this order: `README.md`, `keepsake/README.md`, `docs/handoff-current.md`, `docs/code-map.md`, `CONTRIBUTING.md`, then `docs/backend-design.md`, `docs/safety-model.md`, `docs/roadmap-2026-10-10.md`, `licences/README.md`. Owner decisions are in the Project doc `claude/owner-decisions-2026-10-09.md`.
 
 ## Done in this stretch

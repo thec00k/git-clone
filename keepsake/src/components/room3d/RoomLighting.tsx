@@ -38,6 +38,7 @@ export function RoomLights({
     environment.memoryLighting && bookPhase === 'editing' ? activeBook?.memoryMood : undefined;
   const coastal = useActiveRoom().id === 'beachfront';
   const neon = useActiveRoom().id === 'cyberpunk';
+  const skyCastle = useActiveRoom().id === 'sky-castle';
   const night = phase === 'night';
   const dusk = phase === 'dusk';
   const ceiling = useMemo(() => {
@@ -57,11 +58,25 @@ export function RoomLights({
   const lampRef = useRef<THREE.PointLight>(null);
 
   const lightColor = useMemo(() => {
-    const color = new THREE.Color(neon ? '#939cff' : night ? '#c8d4f0' : dusk ? '#ffb070' : '#ffe6b8');
+    const color = new THREE.Color(
+      neon
+        ? '#939cff'
+        : skyCastle
+          ? night
+            ? '#9bc5e8'
+            : dusk
+              ? '#efcbd8'
+              : '#eff5ff'
+          : night
+            ? '#c8d4f0'
+            : dusk
+              ? '#ffb070'
+              : '#ffe6b8',
+    );
     if (memoryMood && memoryMood !== 'neutral' && MEMORY_MOODS[memoryMood])
       color.lerp(new THREE.Color(MEMORY_MOODS[memoryMood].light), 0.22);
     return color;
-  }, [night, dusk, memoryMood, neon]);
+  }, [night, dusk, memoryMood, neon, skyCastle]);
   const ambientColor = useMemo(() => new THREE.Color(night ? '#8a9bb8' : '#fff4e6'), [night]);
   useFrame((_, dt) => {
     const t = motionFactor(dt, MOTION.light, reduced);
@@ -73,11 +88,16 @@ export function RoomLights({
       [THREE.Light | null, number],
     ] = [
       [ambientRef.current, night ? 0.16 : dusk ? 0.24 : 0.34],
-      [sunRef.current, neon ? 0.65 : night ? 0.55 : dusk ? 1.35 : 2.1],
-      [ceilingRef.current, environment.ceilingOn !== false ? (coastal ? 2.3 : 3.2) : 0],
+      [
+        sunRef.current,
+        neon ? 0.65 : skyCastle ? (night ? 0.35 : dusk ? 0.9 : 1.4) : night ? 0.55 : dusk ? 1.35 : 2.1,
+      ],
+      [ceilingRef.current, environment.ceilingOn !== false ? (skyCastle ? 1.25 : coastal ? 2.3 : 3.2) : 0],
       [
         lampRef.current,
-        environment.lampOn && !neon ? (night ? 3.8 : dusk ? 2.8 : 1.6) * (coastal ? 0.28 : 1) : 0,
+        environment.lampOn && !neon
+          ? (night ? 3.8 : dusk ? 2.8 : 1.6) * (coastal || skyCastle ? 0.28 : 1)
+          : 0,
       ],
       [skyRef.current, night ? 0.25 : 0.55],
     ];
@@ -99,7 +119,10 @@ export function RoomLights({
   return (
     <>
       <ambientLight ref={ambientRef} intensity={0.25} color="#fff4e6" />
-      <hemisphereLight ref={skyRef} args={['#bac4ba', '#3f4931', 0.4]} />
+      <hemisphereLight
+        ref={skyRef}
+        args={[skyCastle ? '#c2dbf1' : '#bac4ba', skyCastle ? '#9c97b3' : '#3f4931', 0.4]}
+      />
       <directionalLight
         position={windowSun.toArray()}
         ref={sunRef}

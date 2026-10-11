@@ -22,6 +22,7 @@ import {RoomModel} from './RoomModel';
 import type {HotspotAction} from './RoomInteractions';
 import {useRoomRenderProfile} from './useRoomRenderProfile';
 import {WoodlandScenery} from './WoodlandScenery';
+import {SkyCastleScenery} from './SkyCastleScenery';
 import {OutdoorWeather} from './OutdoorWeather';
 import {RoomControls} from './RoomControls';
 import {RoomLoading} from './RoomLoading';
@@ -273,6 +274,7 @@ export function RoomScene3D({
             {activeRoom.id === 'beachfront' && (
               <BeachfrontScenery phase={phase} environment={environment} particles={profile.particles} />
             )}
+            {activeRoom.id === 'sky-castle' && <SkyCastleScenery phase={phase} environment={environment} />}
             {activeRoom.id === 'cyberpunk' && environment.weather !== 'clear' && (
               <OutdoorWeather kind={environment.weather} count={profile.particles} room="cyberpunk" />
             )}

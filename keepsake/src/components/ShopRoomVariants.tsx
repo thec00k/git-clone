@@ -9,6 +9,8 @@ const descriptions = {
   cyberpunk: 'A neon skyline, holographic keepsakes and softly glowing lamps.',
   woodland: 'Moss-painted wood, layered forest views and warm lamplight.',
   beachfront: 'An arched window, pale plaster, sea-glass details and a quiet ocean view.',
+  'sky-castle':
+    'Pearl-white stone, a circular sky window, crystal furniture and waterfalls above the clouds.',
 };
 export function ShopRoomVariants() {
   const {environment, flushSave} = useApp();
@@ -57,7 +59,7 @@ export function ShopRoomVariants() {
         nothing is lost.
       </p>
       <ul className="ks-sticker-shop-list">
-        {(['woodland', 'beachfront', 'cyberpunk'] as const).map(id => (
+        {(['woodland', 'beachfront', 'cyberpunk', 'sky-castle'] as const).map(id => (
           <li key={id} className="ks-sticker-pack">
             <div className="flex-1">
               <p className="font-display">{roomThemes[id].title}</p>
@@ -83,7 +85,7 @@ export function ShopRoomVariants() {
         >
           <img
             className="w-full rounded-md mb-3"
-            src={`/room/${preview}/preview.svg`}
+            src={`/room/${preview}/preview.${preview === 'sky-castle' ? 'png' : 'svg'}`}
             alt={`${roomThemes[preview].title} illustrated style preview`}
             onError={e => {
               e.currentTarget.hidden = true;

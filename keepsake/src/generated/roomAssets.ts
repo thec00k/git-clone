@@ -8,5 +8,9 @@ export const roomAssets = {
   "beachfront": {
     "balanced": "/room/beachfront/beachfront.glb?v=ef5d69506828",
     "high": "/room/beachfront/beachfront.high.glb?v=3c5740f7a1cc"
+  },
+  "sky-castle": {
+    "balanced": "/room/sky-castle/sky-castle.glb?v=af3242fe141d",
+    "high": "/room/sky-castle/sky-castle.glb?v=af3242fe141d"
   }
 } as const;

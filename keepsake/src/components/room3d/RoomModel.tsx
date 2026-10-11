@@ -5,6 +5,7 @@ import {Vector3} from 'three';
 import {TimeCapsuleChest} from './TimeCapsuleChest';
 import {CabinetPhoto} from './CabinetPhoto';
 import {NeonAtmosphere} from './NeonAtmosphere';
+import {SkyCastleFinish} from './SkyCastleFinish';
 import {NeonExtras} from './NeonExtras';
 import {useNav} from '../../store/nav';
 import {useApp} from '../../store/appStore';
@@ -72,6 +73,7 @@ export function RoomModel({
   const study = useActiveRoom().study === true;
   const coastal = useActiveRoom().id === 'beachfront';
   const neon = useActiveRoom().id === 'cyberpunk';
+  const skyCastle = useActiveRoom().id === 'sky-castle';
   const cloned = useRoomAsset(phase, environment);
   const hearthPosition = useMemo(
     () => cloned.getObjectByName('Hearth_Light')?.getWorldPosition(new Vector3()),
@@ -103,6 +105,7 @@ export function RoomModel({
           <NeonExtras />
         </>
       )}
+      {skyCastle && <SkyCastleFinish scene={cloned} phase={phase} />}
       {!study && (
         <>
           <FurnitureModels scene={cloned} />

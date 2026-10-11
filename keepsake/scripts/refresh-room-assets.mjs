@@ -192,7 +192,7 @@ for (const room of rooms) {
   );
 }
 const runtime = {};
-for (const room of ['woodland', 'beachfront', 'cyberpunk']) {
+for (const room of ['woodland', 'beachfront', 'cyberpunk', 'sky-castle']) {
   const manifest = path.join(root, 'public/room', room, 'asset-manifest.json');
   if (!fs.existsSync(manifest)) continue;
   const data = JSON.parse(fs.readFileSync(manifest, 'utf8'));

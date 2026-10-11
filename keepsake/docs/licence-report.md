@@ -4,11 +4,11 @@ Generated from licences/ledger.json (2026-10-10) by `node scripts/check-licences
 
 | Status | Entries | Files |
 | --- | --- | --- |
-| unverified | 8 | 95 |
-| ai-generated | 1 | 2 |
+| unverified | 9 | 98 |
+| ai-generated | 2 | 3 |
 | documented | 6 | 25 |
 | verified | 2 | 15 |
-| original | 6 | 137 |
+| original | 6 | 158 |
 
 Status meanings: **unverified**: Origin or licence unknown, or contains such parts. Replace or remodel before public launch. **ai-generated**: Made with an image generator. Check the tool's terms; may not be protectable by copyright. **documented**: Licence known from the source, but no saved proof yet. Save a dated copy to move it to verified. **verified**: Licence known and a copy of the licence or receipt is stored (licences/proof/ or a file shipped with the asset). **original**: Made for Keepsake; the source files or scripts are in this repository.
 
@@ -55,6 +55,14 @@ Status meanings: **unverified**: Origin or licence unknown, or contains such par
 - **Why:** Retains shared interaction anchors from the inherited room; needs the same object check as Woodland.
 - **Next action:** Audit which inherited objects remain when Neon City is next built.
 
+### sky-castle-room
+
+- **Files:** 2 (1 shipped, 1.4 MB shipped)
+- **Author / origin:** Keepsake project (art/sky-castle/build.py) built from an imported copy of the Woodland room, keeping the shared room anchors (mixed)
+- **Licence:** Mixed
+- **Why:** build.py imports public/room/woodland/woodland.glb and keeps its shared interaction anchors, so it inherits the Woodland provenance question.
+- **Next action:** Audit which inherited Woodland objects remain when Sky Castle is next built.
+
 ### sample-photos
 
 - **Files:** 7 (7 shipped, 1.8 MB shipped)
@@ -72,12 +80,19 @@ Status meanings: **unverified**: Origin or licence unknown, or contains such par
 
 ### world-maps
 
-- **Files:** 3 (3 shipped, 0.2 MB shipped)
+- **Files:** 4 (4 shipped, 3.8 MB shipped)
 - **Author / origin:** Unknown ('inherited map provenance') (unknown)
 - **Licence:** Unknown
 - **Next action:** Replace with Natural Earth (public domain) outlines; record the download here.
 
 ## ai-generated
+
+### sky-castle-atlas-parchment
+
+- **Files:** 1 (0 shipped, 0.0 MB shipped)
+- **Author / origin:** Image-generation tool (prompt recorded in docs/sky-castle-room.md); embedded in public/maps/world-sky-castle.svg (ai-generated)
+- **Licence:** Depends on the tool's terms; likely not copyrightable in the US
+- **Next action:** Owner to decide: confirm the tool's terms allow commercial use, or commission a replacement with the window scenery.
 
 ### room-prints-ai
 
