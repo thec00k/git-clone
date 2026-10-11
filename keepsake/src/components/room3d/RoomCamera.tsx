@@ -191,6 +191,8 @@ export function EyeCamera({
               : authored
                 ? studyCamera!
                 : FACE_VIEW[face]);
+  // The display-case pose is authored above eye height to frame all four shelves.
+  const framed = view === DISPLAY_CASE_VIEW;
 
   useEffect(() => {
     userMoved.current = false;
@@ -299,7 +301,7 @@ export function EyeCamera({
       camera.position.lerp(view.position, t);
       if (overhead) {
         camera.position.copy(view.position);
-      } else if (!seated && !workbench && !photoView && !authored) {
+      } else if (!seated && !workbench && !photoView && !authored && !framed) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }
@@ -316,7 +318,7 @@ export function EyeCamera({
       }
       if (seated) {
         camera.position.copy(SEATED_VIEW.position);
-      } else {
+      } else if (!framed || keys.current.f || keys.current.r) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }
