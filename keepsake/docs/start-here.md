@@ -25,7 +25,7 @@ Model guide: Opus 5.5 for database permissions, safety, data-loss and audits; So
 | Moderation vendors, image processing, moderator screen, in-app safety links, Terms/Privacy, account deletion/export | Opus 5.5 (legal review by a lawyer) |
 | Remodel the 14 inherited Woodland objects, replace unverified assets, Beachfront remodel (needs Blender on the owner's computer) | Sonnet 5.5 |
 | Save proof copies of licence pages into `licences/proof/` (5 entries known but unproven) | Sonnet 5.5 |
-| Enforce the 5-photo minimum before sharing a book (`canShareBook` exists, not enforced) | Sonnet 5.5 |
+| Enforce the 5-photo share minimum on the server too (the app enforces it since October 11; the database does not check it yet) | Opus 5.5 |
 | Neon City and Sky Castle review against the art direction | Opus 5.5 |
 
 Audit findings still open: restore can be overwritten by an older autosave; originals in `keepsake-originals` never deleted; GPU caches for room/furniture GLTFs never evicted; display-case scan models leak; camera stops mid-turn on click; focus trap misses late content; no keyboard moving of page elements; per-frame allocations (WorkbenchBook, DiscoveryObject); arrow keys captured page-wide; display-case camera pose clamped; all images loaded into memory at startup; flat room buttons hidden from the accessibility tree; CardBinders scan URL fetch unbounded; Spotify refresh token in localStorage while CSP is report-only.

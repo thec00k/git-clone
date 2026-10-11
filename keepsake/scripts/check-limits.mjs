@@ -7,6 +7,8 @@ import {
   canAddPage,
   canShareBook,
   bookPhotoCount,
+  canSetVisibility,
+  shareHint,
 } from '../src/lib/limits.ts';
 import {insertPhotoBatch} from '../src/lib/photoBatch.ts';
 import {UPLOAD_LIMITS} from '../supabase/functions/_shared/moderation.ts';
@@ -51,6 +53,30 @@ assert.equal(
     ]),
   ),
   true,
+);
+// Sharing needs 5 photos on the pages; private is always allowed.
+const four = book([{id: 'a', elements: [0, 1, 2, 3].map(photo)}]);
+const five = book([
+  {id: 'a', elements: [0, 1, 2, 3].map(photo)},
+  {id: 'b', elements: [photo(9)]},
+]);
+assert.equal(canSetVisibility(four, 'private'), true);
+assert.equal(canSetVisibility(four, 'friends'), false);
+assert.equal(canSetVisibility(four, 'public'), false);
+assert.equal(canSetVisibility(five, 'friends'), true);
+assert.equal(canSetVisibility(five, 'public'), true);
+assert.match(shareHint(four), /Add 1 more photo to share/);
+assert.match(shareHint(book([])), /Add 5 more photos/);
+assert.equal(shareHint(five), null);
+// Waiting-stack photos are archive references, not page photos, so they do not count yet.
+assert.equal(canShareBook({...four, pendingPhotoIds: ['x', 'y', 'z']}), false);
+const store = readFileSync(new URL('../src/store/appStore.tsx', import.meta.url), 'utf8');
+assert.match(store, /canSetVisibility\(b, v\)/, 'the store refuses to share a book that is not ready');
+const shelf = readFileSync(new URL('../src/components/views/Shelf.tsx', import.meta.url), 'utf8');
+assert.match(
+  shelf,
+  /disabled=\{b\.visibility !== v\.key && !canSetVisibility/,
+  'the shelf disables sharing early',
 );
 assert.throws(() => checkArchiveRoom(499, 2), /room for 1 more/);
 checkArchiveRoom(499, 1);
