@@ -1,5 +1,7 @@
 # Keepsake project handoff
 
+> **New agent? Read [start-here.md](start-here.md) first.**
+
 > **Update, October 10, 2026 — branch [`codex/foundations-and-seasons`](https://github.com/thec00k/git-clone/tree/codex/foundations-and-seasons)** (branched from `codex/woodland-composition-proof`; `main` untouched). This branch is now the place to continue. What changed:
 > - **Season engine** (`src/lib/seasons.ts`, `useSeasonal`, Room settings > Season): automatic by date and hemisphere (guessed from the time zone, never geolocation), manual override or freeze, per-holiday opt-out. Four seasons plus Valentine's, Easter, 4th of July, Halloween, Christmas (the engine reports the holiday; holiday dressing art is not built yet). Tidy up keeps the chosen season. Backups round-trip the new fields. Tests: `scripts/check-seasons.mjs`.
 > - **Woodland promoted**: the "Woodland Retreat 2.0" model is the default Woodland room; `?study=woodland` is now only a review mode (view/phase/season switcher). The provisional layered exterior has four seasonal palettes, the hearth light shows in autumn and winter, and walking keeps out of the hearth. The old `woodland.glb`, `WoodlandScenery` and the `classic` room are still in the tree and **not yet removed**; Snowy Mountain is not ported (its flame shader, flicker and fireplace audio are candidates).
