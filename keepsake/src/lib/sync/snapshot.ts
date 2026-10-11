@@ -80,7 +80,12 @@ function bookShape(book: Scrapbook, keys: Map<string, string>): BookShape {
         id: page.id,
         elements,
         paper: withKeys(
-          {...page.paper, titlePage: !!page.titlePage, backgroundStyle: page.backgroundStyle},
+          {
+            ...page.paper,
+            pageId: page.id,
+            titlePage: !!page.titlePage,
+            backgroundStyle: page.backgroundStyle,
+          },
           keys,
         ) as Record<string, unknown>,
         photos,

@@ -1,11 +1,22 @@
 import {useEffect, useState, useSyncExternalStore} from 'react';
 import {useNav} from '../store/nav';
-import {completeSignup, getAccount, onAccountChange, sendNow, sendSignInLink, signOut} from '../lib/sync';
+import {useApp} from '../store/appStore';
+import {downloadRoom} from '../lib/roomBackup';
+import {
+  bringAccountRoom,
+  completeSignup,
+  getAccount,
+  keepRoomHere,
+  onAccountChange,
+  sendNow,
+  sendSignInLink,
+  signOut,
+} from '../lib/sync';
 import {onStatusChange, status as readStatus, type SyncStatus} from '../lib/sync/engine';
 
 const PAUSED: Record<NonNullable<SyncStatus['paused']>, string> = {
   'server-has-room':
-    'This account already holds a room from another device, so this room was not sent. It is still saved here.',
+    'Your account already holds a room from another device, so nothing was sent. This room is still saved here.',
   'changed-elsewhere':
     'Your room was changed on another device. Backup is paused so neither copy is overwritten; this room is still saved here.',
   'other-account':
@@ -40,7 +51,9 @@ function when(ms?: number) {
 /** Sign in and back up the room to an account. Hidden unless the site has a Supabase project configured. */
 export function AccountBackup() {
   const {isVisitor} = useNav();
+  const {state, restoreRoom} = useApp();
   const account = useSyncExternalStore(onAccountChange, getAccount);
+  const [choosing, setChoosing] = useState<'account' | 'here' | null>(null);
   const sync = useSyncStatus();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -152,6 +165,73 @@ export function AccountBackup() {
                       }`
                     : `Backed up${sync.lastSyncedAt ? ` ${when(sync.lastSyncedAt)}` : ''}.`}
           </p>
+          {(sync?.paused === 'server-has-room' || sync?.paused === 'changed-elsewhere') && (
+            <div className="ks-restore-preview">
+              <strong>Which room should this device use?</strong>
+              {choosing === null && (
+                <>
+                  <button className="ks-tool" disabled={busy} onClick={() => setChoosing('account')}>
+                    Use the room from my account
+                  </button>
+                  <button className="ks-tool" disabled={busy} onClick={() => setChoosing('here')}>
+                    Keep the room on this device
+                  </button>
+                </>
+              )}
+              {choosing === 'account' && (
+                <>
+                  <p>
+                    This replaces the room on this device with the one in your account. We’ll download a
+                    backup file of this device’s room first, so nothing here is lost.
+                  </p>
+                  <button
+                    className="ks-tool"
+                    disabled={busy}
+                    onClick={() =>
+                      void act(async () => {
+                        await downloadRoom(state);
+                        const {missing} = await bringAccountRoom(restoreRoom);
+                        setChoosing(null);
+                        setMessage(
+                          missing
+                            ? `Your room is here. ${missing} item${missing === 1 ? '' : 's'} could not come over yet (still processing or not backed up); they are still on your other device.`
+                            : 'Your room from your account is here.',
+                        );
+                      })
+                    }
+                  >
+                    Back up this room, then use my account’s room
+                  </button>
+                  <button className="ks-tool" disabled={busy} onClick={() => setChoosing(null)}>
+                    Cancel
+                  </button>
+                </>
+              )}
+              {choosing === 'here' && (
+                <>
+                  <p>
+                    This device’s room becomes the one in your account: its look and settings replace the
+                    account’s. Books and photos that are only in your account stay there.
+                  </p>
+                  <button
+                    className="ks-tool"
+                    disabled={busy}
+                    onClick={() =>
+                      void act(async () => {
+                        await keepRoomHere();
+                        setChoosing(null);
+                      }, 'Backing up the room on this device.')
+                    }
+                  >
+                    Back up this device’s room
+                  </button>
+                  <button className="ks-tool" disabled={busy} onClick={() => setChoosing(null)}>
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
+          )}
           {!!sync?.problems.length && (
             <ul className="text-sm">
               {sync.problems.slice(-3).map((p, i) => (

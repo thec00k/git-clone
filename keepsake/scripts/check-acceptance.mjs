@@ -23,6 +23,7 @@ const scripts = [
   'check-sync.mjs',
   'check-limits.mjs',
   'check-moderation.mjs',
+  'check-image-processing.mjs',
   'check-licences.mjs',
   'check-strip-metadata.mjs',
   'check-stamps.mjs',

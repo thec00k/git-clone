@@ -1,7 +1,7 @@
 import type {AppState} from '../../types/app';
 import {assetKey, readAsset} from '../storage.ts';
 import {syncConfigured} from './config.ts';
-import {flush, link, record, type Local} from './engine.ts';
+import {flush, keepThisRoom, link, record, adoptAccountRoom, type Local} from './engine.ts';
 
 // The Supabase library loads only when a project is configured, so the local-only app stays as small as before.
 const api = () => (syncConfigured ? import('./supabaseBackend.ts') : null);
@@ -123,4 +123,26 @@ export async function signOut() {
   active = false;
   await sb.auth.signOut({scope: 'local'});
   setAccount({state: 'signed-out'});
+}
+
+/** Replaces the room on this device with the account's copy. `apply` must save it (after backing up). */
+export async function bringAccountRoom(apply: (state: AppState) => Promise<void>) {
+  const c = await connection();
+  if (!c) throw new Error('Backup is not set up on this site yet.');
+  const result = await adoptAccountRoom(c.backend, local, async state => {
+    await apply(state);
+    latest = state;
+  });
+  active = true;
+  return result;
+}
+
+/** Keeps the room on this device and backs it up to the account. */
+export async function keepRoomHere() {
+  const c = await connection();
+  if (!c) throw new Error('Backup is not set up on this site yet.');
+  await keepThisRoom(c.backend);
+  active = true;
+  if (latest) await record(latest, local);
+  await flush(c.backend, local);
 }

@@ -4,7 +4,15 @@
 import assert from 'node:assert/strict';
 import 'fake-indexeddb/auto';
 import {saveState, loadState, assetKey, readAsset} from '../src/lib/storage.ts';
-import {link, record, flush, status, PermanentError} from '../src/lib/sync/engine.ts';
+import {
+  link,
+  record,
+  flush,
+  status,
+  PermanentError,
+  adoptAccountRoom,
+  keepThisRoom,
+} from '../src/lib/sync/engine.ts';
 
 const local = {keyOf: assetKey, readFile: readAsset};
 const photo = n => 'data:image/jpeg;base64,' + String(n).repeat(400);
@@ -117,6 +125,27 @@ function fakeServer(uid = 'user-1') {
       return s.photos.get(key);
     },
     trashPhoto: async id => (net(), s.trashed.push(id)),
+    download: async () => {
+      net();
+      const last = s.rooms.at(-1) ?? {theme: 'woodland', settings: {}, private: {}};
+      return {
+        revision: s.revision,
+        theme: last.theme,
+        settings: last.settings,
+        private: last.private,
+        books: [...s.books]
+          .filter(([id]) => !s.trashed.includes(id))
+          .map(([id, b]) => ({...b, id, pages: b.pages.map((p, position) => ({...p, position}))})),
+        // The server keeps its own processed copy (WebP), not the device's file.
+        photos: [...s.photos]
+          .filter(([, id]) => !s.trashed.includes(id))
+          .map(([key, id]) => ({
+            id,
+            sourceKey: key.replace('keepsake-asset:', ''),
+            data: 'data:image/webp;base64,' + Buffer.from(key).toString('base64'),
+          })),
+      };
+    },
   };
   return s;
 }
@@ -258,6 +287,100 @@ assert.equal((await status()).paused, 'other-account');
 assert.equal(other.uploads + other.calls.length, 0, 'nothing sent to the other account');
 await link(s.backend);
 assert.equal((await status()).paused, null, 'signing back in with the right account resumes');
+
+// 11. A new device brings the room down from the account: books, pages, photos and private details come back,
+// and the next backup from there sends nothing again (no duplicate photos or books).
+await fresh();
+s = fakeServer();
+await link(s.backend);
+await record(state, local);
+await flush(s.backend, local, now);
+const uploadsBefore = s.uploads;
+await fresh(); // the new device has its own (empty) bookkeeping...
+const newDevice = fakeServer();
+Object.assign(newDevice, {
+  hasContent: true,
+  revision: s.revision,
+  rooms: s.rooms,
+  books: s.books,
+  photos: s.photos,
+  uploads: s.uploads,
+});
+await link(newDevice.backend);
+assert.equal((await status()).paused, 'server-has-room', 'the account already has a room: nothing is sent');
+let applied = null;
+const {missing} = await adoptAccountRoom(newDevice.backend, local, async next => {
+  applied = next;
+  await saveState(next);
+});
+assert.equal(missing, 0);
+assert.equal(applied.books.length, 1);
+assert.equal(applied.books[0].id, 'b1', 'local ids come back');
+assert.equal(applied.books[0].visibility, 'public', 'the book keeps its own sharing setting');
+assert.equal(applied.books[0].pages.length, 2);
+assert.ok(applied.books[0].pages[0].titlePage, 'title page first');
+assert.equal(applied.books[0].pages[1].id, 'p1');
+const els = applied.books[0].pages[1].elements;
+assert.equal(els.filter(e => e.type === 'photo').length, 2, 'page photos are back');
+assert.ok(
+  els.find(e => e.type === 'photo').src.startsWith('data:image/webp'),
+  'with the server copy of the file',
+);
+assert.ok(
+  els.some(e => e.type === 'caption' && e.text === 'lake'),
+  'captions are back',
+);
+assert.equal(applied.archive.length, 3, 'archive is back');
+assert.ok(
+  applied.archive.every(a => a.src.startsWith('data:image/')),
+  'every archive photo has its file',
+);
+assert.equal(applied.guestbook[0].message, 'hi', 'private details are back');
+assert.equal(applied.environment.roomTheme, 'woodland');
+assert.ok(!JSON.stringify(applied).includes('keepsake-asset:'), 'no reference to a missing file is left');
+st = await status();
+assert.equal(st.paused, null);
+assert.equal(st.pending, 0);
+newDevice.calls = [];
+await record(applied, local);
+await flush(newDevice.backend, local, now);
+assert.equal(newDevice.uploads, uploadsBefore, 'no photo uploaded again');
+assert.deepEqual(newDevice.calls, [], 'nothing sent again');
+const renamed = structuredClone(applied);
+renamed.books[0].title = 'From the new device';
+await record(renamed, local);
+await flush(newDevice.backend, local, now);
+assert.equal(newDevice.books.size, 1, 'the same book is updated, not copied');
+assert.equal([...newDevice.books.values()][0].title, 'From the new device');
+
+// 12. A photo that never reached the server is left out (and counted) rather than left broken.
+await fresh();
+const partial = fakeServer();
+Object.assign(partial, {
+  revision: s.revision,
+  rooms: s.rooms,
+  books: s.books,
+  photos: new Map([...s.photos].slice(0, 2)),
+});
+const result = await adoptAccountRoom(partial.backend, local, async next => {
+  applied = next;
+});
+assert.ok(result.missing >= 1, 'missing photo counted');
+assert.equal(applied.archive.length, 2, 'the archive entry without its file is left out');
+assert.ok(!JSON.stringify(applied).includes('keepsake-asset:'));
+
+// 13. Keeping this device's room instead: backup resumes into the account.
+await fresh();
+const kept = fakeServer();
+kept.hasContent = true;
+kept.revision = 4;
+await link(kept.backend);
+assert.equal((await status()).paused, 'server-has-room');
+await keepThisRoom(kept.backend);
+await record(state, local);
+await flush(kept.backend, local, now);
+assert.equal((await status()).pending, 0);
+assert.equal(kept.revision, 5, 'saved on top of the account’s latest revision');
 
 console.log(
   'Sync: outbox sends the room without changing it, survives offline and mid-send edits, never duplicates, pauses on conflicts.',

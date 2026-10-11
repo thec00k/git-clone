@@ -2,6 +2,7 @@ import {createClient, FunctionsHttpError, type SupabaseClient} from '@supabase/s
 import {LIMITS} from '../limits.ts';
 import {SUPABASE_KEY, SUPABASE_URL, syncConfigured} from './config.ts';
 import {PermanentError, type SyncBackend} from './engine.ts';
+import type {ServerRoomData} from './restore.ts';
 
 let client: SupabaseClient | null = null;
 /** The one Supabase client, or null when no project is configured. */
@@ -26,6 +27,13 @@ function dataUrlToBlob(data: string): Blob {
     ? Uint8Array.from(atob(body), c => c.charCodeAt(0))
     : new TextEncoder().encode(decodeURIComponent(body));
   return new Blob([bytes], {type});
+}
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000)
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return `data:${blob.type || 'image/webp'};base64,${btoa(binary)}`;
 }
 const EXT: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -102,6 +110,47 @@ export function supabaseBackend(sb: SupabaseClient): SyncBackend {
         throw new Error(res.error.message);
       }
       return res.data!.id;
+    },
+    async download() {
+      const owner = await uid();
+      const room = check(
+        await sb.from('rooms').select('revision, theme, settings').eq('owner_id', owner).single(),
+      ) as {revision: number; theme: string; settings: Record<string, unknown>};
+      const priv = check(
+        await sb.from('room_private').select('data').eq('owner_id', owner).maybeSingle(),
+      ) as {
+        data: Record<string, unknown>;
+      } | null;
+      const books = check(
+        await sb
+          .from('books')
+          .select(
+            'id, title, subtitle, visibility, cover, pages(id, position, elements, paper, photos:page_photos(photo_id, slot, layout))',
+          )
+          .eq('owner_id', owner)
+          .is('deleted_at', null),
+      ) as ServerRoomData['books'];
+      const rows = check(
+        await sb
+          .from('photos')
+          .select('id, storage_path, source_key')
+          .eq('owner_id', owner)
+          .is('deleted_at', null),
+      ) as {id: string; storage_path: string; source_key: string | null}[];
+      const photos: ServerRoomData['photos'] = [];
+      for (const row of rows) {
+        const file = await sb.storage.from('photos').download(row.storage_path);
+        if (file.error) throw new Error(file.error.message);
+        photos.push({id: row.id, sourceKey: row.source_key, data: await blobToDataUrl(file.data)});
+      }
+      return {
+        revision: room.revision,
+        theme: room.theme,
+        settings: room.settings,
+        private: priv?.data ?? {},
+        books,
+        photos,
+      };
     },
     async trashPhoto(id) {
       check(await sb.from('photos').update({deleted_at: new Date().toISOString()}).eq('id', id));

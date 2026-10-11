@@ -156,3 +156,11 @@ export async function rememberId(name: string, id: string): Promise<void> {
     tx.objectStore('ids').put(id, name);
   });
 }
+
+/** Starts the bookkeeping afresh (after the room here was replaced by the account's copy). */
+export async function resetTo(meta: Partial<Meta>): Promise<void> {
+  await run(['meta', 'outbox'], 'readwrite', tx => {
+    tx.objectStore('outbox').clear();
+    for (const [k, v] of Object.entries(meta)) tx.objectStore('meta').put(v, k);
+  });
+}

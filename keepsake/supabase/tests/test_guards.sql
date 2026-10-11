@@ -28,4 +28,14 @@ do $$ declare t record; begin
     raise exception 'anon has access to table public.%', t.relname;
   end loop;
 end $$;
+-- Signed-in people can call only the functions meant for them.
+do $$ declare f record; begin
+  for f in select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+           where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute')
+             and not exists (select 1 from pg_depend d where d.objid = p.oid and d.deptype = 'e')
+             and p.proname not in ('is_blocked', 'are_friends', 'can_view_room', 'can_view_book', 'can_view_photo',
+               'complete_signup', 'find_profile', 'claim_daily_stamps', 'buy_item', 'save_room', 'save_book') loop
+    raise exception 'signed-in people can execute %', f.proname;
+  end loop;
+end $$;
 \echo guard tests passed
