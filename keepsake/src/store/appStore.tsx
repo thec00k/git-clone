@@ -1,7 +1,7 @@
 import {musicOnEntry} from '../lib/roomMusic';
 import {validFurnitureChoices} from '../lib/furniture';
 import {claimDailyStamps} from '../lib/stamps';
-import {LIMITS} from '../lib/limits';
+import {LIMITS, canSetVisibility} from '../lib/limits';
 import {msUntilNextDay} from '../lib/seasons';
 import {ownsRoomTheme, normalizeLegacyRooms} from '../lib/roomThemes';
 import {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
@@ -358,7 +358,11 @@ export function AppProvider({children}: {children: ReactNode}) {
 
   const setBookVisibility = useCallback(
     (id: string, v: Visibility) =>
-      update(p => ({...p, books: p.books.map(b => (b.id === id ? {...b, visibility: v} : b))})),
+      update(p => ({
+        ...p,
+        // Sharing needs LIMITS.minPhotosToShare photos; an early request leaves the book as it is.
+        books: p.books.map(b => (b.id === id && canSetVisibility(b, v) ? {...b, visibility: v} : b)),
+      })),
     [update],
   );
 
