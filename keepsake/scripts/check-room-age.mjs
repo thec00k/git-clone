@@ -12,5 +12,5 @@ const aged={...state,environment:{...state.environment,tidiedAt:now}};
 assert.equal(parseRoomBackup(serializeRoom(aged)).environment.tidiedAt,now);
 assert.throws(()=>parseRoomBackup(serializeRoom({...aged,environment:{...aged.environment,tidiedAt:'long ago'}})));
 const store=readFileSync(new URL('../src/store/appStore.tsx',import.meta.url),'utf8');
-assert.match(store,/TIDY_ROOM, season: p\.environment\.season, tidiedAt: Date\.now\(\)/,'Tidy up resets the dust clock');
+assert.match(store,/TIDY_ROOM,\s*season:\s*p\.environment\.season,\s*tidiedAt:\s*Date\.now\(\)/,'Tidy up resets the dust clock');
 console.log('Room ageing: coarse dust levels, never from a backwards clock, backup-safe, reset by Tidy up.');

@@ -7,7 +7,7 @@ const withLook=look=>{const s=structuredClone(state);s.books[0].pages[0].element
 for(const look of ['chrome','glow','rhinestone','bubble','fire','ice','ransom',undefined])assert.equal(parseRoomBackup(serializeRoom(withLook(look))).books[0].pages[0].elements[0].look,look,String(look)+' survives backup');
 assert.throws(()=>parseRoomBackup(serializeRoom(withLook('comic-sans'))));
 const css=readFileSync(new URL('../src/lettering.css',import.meta.url),'utf8');
-for(const look of ['chrome','glow','rhinestone','bubble','fire','ice','ransom'])assert.ok(css.includes('.ks-look-'+look+'{'),look+' has styles');
-assert.match(css,/prefers-reduced-motion:reduce/,'animated looks stop for reduced motion');
+for(const look of ['chrome','glow','rhinestone','bubble','fire','ice','ransom'])assert.match(css,new RegExp('\\.ks-look-'+look+'\\s*\\{'),look+' has styles');
+assert.match(css,/prefers-reduced-motion:\s*reduce/,'animated looks stop for reduced motion');
 assert.ok(!/url\(/.test(css),'lettering uses no external or image resources');
 console.log('Caption lettering looks: backup round trip, rejection of unknown looks, reduced motion, no external resources.');
