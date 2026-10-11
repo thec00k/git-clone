@@ -3,7 +3,7 @@ import type {Environment} from '../../types/app';
 import {playRoomSound, startWeather} from '../../lib/audio';
 import type {WeatherSound} from '../../lib/audio';
 import {soundZoneGain} from '../../lib/memoryAtmosphere';
-import {ignorePageKey} from '../../lib/keyTargets';
+import {keyOwnedElsewhere} from '../../lib/keyTargets';
 export function RoomSound({
   environment,
   face,
@@ -42,7 +42,7 @@ export function RoomSound({
       }
     };
     const walk = (e: KeyboardEvent) => {
-      if (ignorePageKey(e)) return;
+      if (keyOwnedElsewhere(e)) return;
       start();
       if (
         ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown'].includes(e.code) &&

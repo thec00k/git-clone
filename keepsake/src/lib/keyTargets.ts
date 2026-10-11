@@ -25,6 +25,12 @@ export function dialogOpen() {
  * already handled it, focus is in a field or arrow-key widget, or a dialog is open.
  */
 export function ignorePageKey(e: KeyboardEvent) {
-  if (e.defaultPrevented || dialogOpen()) return true;
+  return e.defaultPrevented || keyOwnedElsewhere(e);
+}
+
+/** Like ignorePageKey, but for listeners that only react alongside another (footstep sounds follow the walking
+ * camera, which itself calls preventDefault), so an already-handled key still counts. */
+export function keyOwnedElsewhere(e: KeyboardEvent) {
+  if (dialogOpen()) return true;
   return e.target instanceof Element && !!e.target.closest(KEY_OWNING_TARGETS);
 }
