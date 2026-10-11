@@ -1,6 +1,6 @@
 # Asset licences and provenance
 
-Compiled 2026-10-10 from `art/*/asset-ledger.json`, `public/audio/ATTRIBUTION.md`, `public/artwork/README.md` and the code. The ledgers stay the source of truth; this page is the summary to read before anything is published. `scripts/check-asset-credits.mjs` keeps the CC-BY credits in the app in step with the ledger.
+**The source of truth is now [`licences/ledger.json`](../licences/ledger.json)**, checked in CI; the generated [licence report](licence-report.md) lists what still needs proof or replacing. This page remains as background. Compiled 2026-10-10 from `art/*/asset-ledger.json`, `public/audio/ATTRIBUTION.md`, `public/artwork/README.md` and the code. The ledgers stay the source of truth; this page is the summary to read before anything is published. `scripts/check-asset-credits.mjs` keeps the CC-BY credits in the app in step with the ledger.
 
 ## Third-party assets with known licences
 

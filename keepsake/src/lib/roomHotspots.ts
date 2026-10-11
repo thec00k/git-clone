@@ -1,6 +1,5 @@
 import type { HotspotId } from "./hotspots";
 
-export const ROOM_GLB = "/room/keepsake.glb";
 
 /** Sit target in the GLB. The coded placeholder chair is gone. */
 export const CHAIR_OBJECT = "ks_chair";

@@ -1,0 +1,442 @@
+{
+  "version": 1,
+  "updated": "2026-10-10",
+  "statuses": {
+    "verified": "Licence known and a copy of the licence or receipt is stored (licences/proof/ or a file shipped with the asset).",
+    "documented": "Licence known from the source, but no saved proof yet. Save a dated copy to move it to verified.",
+    "original": "Made for Keepsake; the source files or scripts are in this repository.",
+    "ai-generated": "Made with an image generator. Check the tool's terms; may not be protectable by copyright.",
+    "unverified": "Origin or licence unknown, or contains such parts. Replace or remodel before public launch."
+  },
+  "assets": [
+    {
+      "id": "fonts-ofl",
+      "files": [
+        "public/fonts/*.woff2",
+        "public/fonts/LICENSES/*"
+      ],
+      "kind": "font",
+      "status": "verified",
+      "origin": "third-party",
+      "author": "The Inter Project Authors; Undercase Type (Fraunces); Impallari Type (Caveat)",
+      "licence": "OFL-1.1",
+      "source": "https://fontsource.org/",
+      "proof": [
+        "public/fonts/LICENSES/README.txt"
+      ],
+      "attributionRequired": false,
+      "commercialUse": "yes",
+      "notes": "Licence text ships with the files as the OFL requires."
+    },
+    {
+      "id": "draco-decoder",
+      "files": [
+        "public/decoders/draco/*"
+      ],
+      "kind": "code",
+      "status": "verified",
+      "origin": "third-party",
+      "author": "Google",
+      "licence": "Apache-2.0",
+      "source": "https://github.com/google/draco",
+      "proof": [
+        "public/decoders/draco/LICENSE",
+        "public/decoders/draco/NOTICE"
+      ],
+      "commercialUse": "yes"
+    },
+    {
+      "id": "paper-slide-sound",
+      "files": [
+        "public/audio/paper-slide.mp3"
+      ],
+      "kind": "audio",
+      "status": "documented",
+      "origin": "third-party",
+      "author": "Mixkit",
+      "licence": "Mixkit Sound Effects Free License",
+      "source": "https://mixkit.co/free-sound-effects/paper/",
+      "licenceUrl": "https://mixkit.co/license/#sfxFree",
+      "proof": [
+        "public/audio/ATTRIBUTION.md"
+      ],
+      "commercialUse": "yes",
+      "action": "Save a dated copy (PDF or screenshot) of the Mixkit licence page and the item page into licences/proof/ to move this to verified."
+    },
+    {
+      "id": "sketchfab-beanbag",
+      "files": [
+        "art/furniture/sources/sketchfab-beanbag.blend",
+        "art/furniture/beanbag-1.blend",
+        "public/room/furniture/beanbag-1.*"
+      ],
+      "kind": "model",
+      "status": "documented",
+      "origin": "third-party",
+      "author": "Twisty_z",
+      "licence": "CC-BY-4.0",
+      "source": "https://sketchfab.com/3d-models/bean-bag-chair-a79f9f5d8cff4bf9bea23bf72e7b9427",
+      "attributionRequired": true,
+      "creditedInApp": true,
+      "commercialUse": "yes",
+      "modifications": "Reduced from 289k to 18k triangles, textures resized to 1k.",
+      "action": "Save the Sketchfab page showing the CC BY licence (dated) into licences/proof/."
+    },
+    {
+      "id": "sketchfab-lamp",
+      "files": [
+        "art/furniture/sources/sketchfab-lamp.blend",
+        "art/furniture/lamp-2.blend",
+        "public/room/furniture/lamp-2.*"
+      ],
+      "kind": "model",
+      "status": "documented",
+      "origin": "third-party",
+      "author": "Jeff Meunier",
+      "licence": "CC-BY-4.0",
+      "source": "https://sketchfab.com/3d-models/old-vintage-desk-lamp-0fd07d3289ac4b9cbf59465b937ba9a0",
+      "attributionRequired": true,
+      "creditedInApp": true,
+      "commercialUse": "yes",
+      "modifications": "Textures resized to 1k, light anchor added.",
+      "action": "Save the Sketchfab page showing the CC BY licence (dated) into licences/proof/."
+    },
+    {
+      "id": "cc0-chairs",
+      "files": [
+        "art/furniture/sources/chairs.blend",
+        "art/furniture/chair-1.blend",
+        "art/furniture/chair-2.blend",
+        "public/room/furniture/chair-1.*",
+        "public/room/furniture/chair-2.*"
+      ],
+      "kind": "model",
+      "status": "documented",
+      "origin": "third-party",
+      "author": "Kenney (Desk Chair, Poly Pizza); Ethan Place (School Chair 01, Poly Haven)",
+      "licence": "CC0-1.0",
+      "source": "https://poly.pizza/m/CKSz6PB1vO ; https://polyhaven.com/a/SchoolChair_01",
+      "commercialUse": "yes",
+      "action": "CC0 needs no credit; save the source pages for the record."
+    },
+    {
+      "id": "cc0-patterns",
+      "files": [
+        "art/furniture/sources/book-pattern.blend",
+        "art/furniture/sources/fabric-pattern-07.blend"
+      ],
+      "kind": "texture",
+      "status": "documented",
+      "origin": "third-party",
+      "author": "Poly Haven",
+      "licence": "CC0-1.0",
+      "source": "https://polyhaven.com/a/book_pattern ; https://polyhaven.com/a/fabric_pattern_07",
+      "commercialUse": "yes"
+    },
+    {
+      "id": "original-furniture",
+      "files": [
+        "art/furniture/desk-*.blend",
+        "art/furniture/chair-3.blend",
+        "art/furniture/lamp-1.blend",
+        "art/furniture/lamp-3.blend",
+        "art/furniture/beanbag-2.blend",
+        "art/furniture/bookshelf-*.blend",
+        "art/furniture/cabinet-*.blend",
+        "art/furniture/crt-*.blend",
+        "art/furniture/curtains-*.blend",
+        "art/furniture/guestbook-stand-*.blend",
+        "art/furniture/printer-*.blend",
+        "art/furniture/rug-*.blend",
+        "public/room/furniture/desk-*",
+        "public/room/furniture/chair-3.*",
+        "public/room/furniture/lamp-1.*",
+        "public/room/furniture/lamp-3.*",
+        "public/room/furniture/beanbag-2.*",
+        "public/room/furniture/bookshelf-*",
+        "public/room/furniture/cabinet-*",
+        "public/room/furniture/crt-*",
+        "public/room/furniture/curtains-*",
+        "public/room/furniture/guestbook-stand-*",
+        "public/room/furniture/printer-*",
+        "public/room/furniture/rug-*"
+      ],
+      "kind": "model",
+      "status": "unverified",
+      "origin": "mixed",
+      "author": "Keepsake project (scripted in art/pipeline/build-furniture-variants.py)",
+      "licence": "Original geometry; contains inherited wood normal maps of unknown origin",
+      "commercialUse": "unverified",
+      "blocker": "Wood materials reuse the 'Keepsake_Detail_wood_*' normal maps loaded from art/woodland/woodland.blend (inherited, origin unknown).",
+      "action": "Replace those normal maps with generated ones (like art/woodland-study/generate-textures.py) and re-export; the geometry itself is scripted and original."
+    },
+    {
+      "id": "original-props",
+      "files": [
+        "art/furniture/display-case.blend",
+        "art/furniture/time-capsule*",
+        "art/furniture/prop-refinements.blend",
+        "art/cyberpunk/time-capsule-metal.blend",
+        "public/room/furniture/display-case.glb",
+        "public/room/furniture/time-capsule*.glb",
+        "public/room/furniture/prop-refinements.glb",
+        "public/room/furniture/catalog.json"
+      ],
+      "kind": "model",
+      "status": "original",
+      "origin": "original",
+      "author": "Keepsake project (art/pipeline/build-*.py, art/cyberpunk/chest.py)",
+      "licence": "Original project work",
+      "commercialUse": "yes",
+      "proof": [
+        "art/pipeline/build-display-case.py",
+        "art/pipeline/build-time-capsule.py",
+        "art/pipeline/build-prop-refinements.py",
+        "art/cyberpunk/chest.py"
+      ],
+      "notes": "Built from scripts in the repository. Re-check that no inherited texture was used when these are next exported."
+    },
+    {
+      "id": "scrapbook-model",
+      "files": [
+        "art/workbench/scrapbook.blend",
+        "public/room/shared/scrapbook.glb"
+      ],
+      "kind": "model",
+      "status": "original",
+      "origin": "original",
+      "author": "Keepsake project (art/pipeline/build-workbench-book.py)",
+      "licence": "Original project work; book cloth uses CC0 Poly Haven Book Pattern",
+      "commercialUse": "yes",
+      "proof": [
+        "art/pipeline/build-workbench-book.py"
+      ]
+    },
+    {
+      "id": "legacy-woodland",
+      "files": [
+        "public/room/woodland/*.glb",
+        "art/woodland/woodland.blend",
+        "art/woodland/*.py",
+        "art/woodland/*.png"
+      ],
+      "kind": "model",
+      "status": "unverified",
+      "origin": "mixed",
+      "author": "Prior contributors + Keepsake project",
+      "licence": "Inherited parts unknown; added details original",
+      "commercialUse": "unverified",
+      "blocker": "Built on the inherited room. Not used at runtime any more, but feeds the furniture pipeline (wood normals) and the Woodland study build.",
+      "action": "Retire once nothing loads from it.",
+      "notes": "public/room/keepsake.glb (the original inherited base room, 19 MB, unknown origin) was deleted on 2026-10-10; nothing loaded it."
+    },
+    {
+      "id": "woodland-study-room",
+      "files": [
+        "public/room/woodland-study/woodland-study.glb",
+        "art/woodland-study/*.blend"
+      ],
+      "kind": "model",
+      "status": "unverified",
+      "origin": "mixed",
+      "author": "Keepsake project, built by art/woodland-study/build.py on top of the inherited woodland.blend",
+      "licence": "Mixed",
+      "commercialUse": "unverified",
+      "keptInheritedObjects": [
+        "Desk",
+        "ks_book",
+        "ks_crt",
+        "ks_archive",
+        "ks_guestbook",
+        "ks_map",
+        "ks_shelf",
+        "ks_chair",
+        "ks_lamp",
+        "ks_door",
+        "ks_clock",
+        "ks_ceiling_switch",
+        "ks_window",
+        "Beanbag (CC BY, see sketchfab-beanbag)"
+      ],
+      "blocker": "build.py keeps these objects from the inherited scene; the walls, hearth, floor, materials and textures are new and original.",
+      "action": "Remodel the kept objects from scratch (or swap in CC0/original furniture variants) so the default room has no inherited geometry. This is the most important remodel."
+    },
+    {
+      "id": "woodland-study-textures",
+      "files": [
+        "art/woodland-study/textures/*"
+      ],
+      "kind": "texture",
+      "status": "original",
+      "origin": "original",
+      "author": "Keepsake project",
+      "licence": "Original project work (procedural)",
+      "commercialUse": "yes",
+      "proof": [
+        "art/woodland-study/generate-textures.py"
+      ],
+      "notes": "Generated deterministically by script; no third-party images."
+    },
+    {
+      "id": "beachfront-room",
+      "files": [
+        "public/room/beachfront/*.glb",
+        "art/beachfront/beachfront.blend",
+        "art/beachfront/*.png"
+      ],
+      "kind": "model",
+      "status": "unverified",
+      "origin": "mixed",
+      "author": "Keepsake project on top of inherited furniture",
+      "licence": "Mixed",
+      "commercialUse": "unverified",
+      "blocker": "art/beachfront/asset-ledger.json lists inherited furniture with no licence.",
+      "action": "Rebuild on original/CC0 furniture during the Beachfront art pass."
+    },
+    {
+      "id": "neon-city-room",
+      "files": [
+        "public/room/cyberpunk/*.glb",
+        "art/cyberpunk/cyberpunk.blend"
+      ],
+      "kind": "model",
+      "status": "unverified",
+      "origin": "mixed",
+      "author": "Keepsake project (art/cyberpunk/build.py) keeping the shared room anchors",
+      "licence": "Mixed",
+      "commercialUse": "unverified",
+      "blocker": "Retains shared interaction anchors from the inherited room; needs the same object check as Woodland.",
+      "action": "Audit which inherited objects remain when Neon City is next built."
+    },
+    {
+      "id": "room-prints-ai",
+      "files": [
+        "public/artwork/*.png"
+      ],
+      "kind": "image",
+      "status": "ai-generated",
+      "origin": "ai-generated",
+      "author": "Image-generation tool, Sep 8 2026",
+      "licence": "Depends on the tool's terms; likely not copyrightable in the US",
+      "commercialUse": "unverified",
+      "action": "Confirm the tool's terms allow commercial use, or replace with commissioned or hand-made prints."
+    },
+    {
+      "id": "sample-photos",
+      "files": [
+        "public/samples/*.jpg"
+      ],
+      "kind": "image",
+      "status": "unverified",
+      "origin": "unknown",
+      "author": "Unknown (added with the first MVP, Aug 21 2026)",
+      "licence": "Unknown",
+      "commercialUse": "unverified",
+      "blocker": "Seed scrapbook photos with no recorded source.",
+      "action": "Replace with your own photos or CC0 photos and record each one here."
+    },
+    {
+      "id": "legacy-textures",
+      "files": [
+        "public/textures/wood.jpg",
+        "public/textures/leather.jpg",
+        "public/textures/paper.jpg",
+        "public/textures/grain.png"
+      ],
+      "kind": "texture",
+      "status": "unverified",
+      "origin": "unknown",
+      "author": "Unknown (added with the first MVP, Aug 21 2026)",
+      "licence": "Unknown",
+      "commercialUse": "unverified",
+      "action": "Replace with generated textures (see art/woodland-study/generate-textures.py) or CC0 textures from Poly Haven / ambientCG."
+    },
+    {
+      "id": "paper-textures",
+      "files": [
+        "public/textures/paper-*.webp",
+        "art/paper-studies/*.png",
+        "art/paper-studies/*.jpg"
+      ],
+      "kind": "texture",
+      "status": "documented",
+      "origin": "original",
+      "author": "Keepsake project, rendered with @paper-design/shaders-react 0.0.81",
+      "licence": "Original renders; check the shader library licence",
+      "commercialUse": "unverified",
+      "proof": [
+        "art/paper-studies/README.md",
+        "art/paper-studies/renderer/main.jsx"
+      ],
+      "action": "Confirm the @paper-design/shaders licence allows commercial use of rendered output and save it to licences/proof/."
+    },
+    {
+      "id": "world-maps",
+      "files": [
+        "public/maps/*.svg"
+      ],
+      "kind": "image",
+      "status": "unverified",
+      "origin": "unknown",
+      "author": "Unknown ('inherited map provenance')",
+      "licence": "Unknown",
+      "commercialUse": "unverified",
+      "action": "Replace with Natural Earth (public domain) outlines; record the download here."
+    },
+    {
+      "id": "project-graphics",
+      "files": [
+        "public/favicon.svg",
+        "public/room/*/preview.svg"
+      ],
+      "kind": "image",
+      "status": "original",
+      "origin": "original",
+      "author": "Keepsake project",
+      "licence": "Original project work",
+      "commercialUse": "yes"
+    },
+    {
+      "id": "project-files",
+      "files": [
+        "public/_headers",
+        "public/sw.js",
+        "public/manifest.webmanifest",
+        "public/room/*/asset-manifest.json",
+        "public/artwork/README.md",
+        "public/audio/ATTRIBUTION.md",
+        "public/decoders/draco/README.md",
+        "art/**/*.py",
+        "art/**/*.md",
+        "art/**/*.json",
+        "art/paper-studies/renderer/*",
+        "art/cyberpunk/validation.json"
+      ],
+      "kind": "code",
+      "status": "original",
+      "origin": "original",
+      "author": "Keepsake project",
+      "licence": "Original project work",
+      "commercialUse": "yes"
+    },
+    {
+      "id": "review-images",
+      "files": [
+        "art/reviews/*",
+        "art/room-screenshots/**",
+        "art/woodland-study/review/**",
+        "art/woodland-study/*.png",
+        "art/stickers/*",
+        "art/furniture/*.png",
+        "art/demos/*"
+      ],
+      "kind": "image",
+      "status": "original",
+      "origin": "original",
+      "author": "Keepsake project (screenshots and renders of the app)",
+      "licence": "Original project work",
+      "commercialUse": "yes",
+      "notes": "Screenshots and renders; they show assets listed elsewhere, so they inherit those assets' status if published."
+    }
+  ]
+}
