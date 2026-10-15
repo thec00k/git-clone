@@ -15,6 +15,7 @@ repos=(
   iart-ai/webgl-animation-skills        # 5. 3D motion and particles
   LottieFiles/motion-design-skill       # 6. timing and easing
   soilmass/motion-design-agent          # 7. camera moves
+  emalorenzo/three-agent-skills         # 8. three.js / R3F performance rules
 )
 
 for repo in "${repos[@]}"; do

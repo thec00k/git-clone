@@ -1,7 +1,7 @@
 # Agent skills for Keepsake
 
 Third-party skills that help Claude with 3D, Blender and motion work on
-Keepsake. Tom chose these on 2026-10-14. They are guidance for the agent,
+Keepsake. Tom chose these on 2026-10-14 and 2026-10-15. They are guidance for the agent,
 not app code: nothing here ships to users.
 
 | # | Skill pack | What it helps with | License |
@@ -13,6 +13,9 @@ not app code: nothing here ships to users.
 | 5 | [webgl-animation-skills](https://github.com/iart-ai/webgl-animation-skills) | 3D motion, shaders and particles (snow, fireflies, dust). | MIT |
 | 6 | [motion-design-skill](https://github.com/LottieFiles/motion-design-skill) | Timing, easing and choreography for camera moves and page turns. | MIT |
 | 7 | [motion-design-agent](https://github.com/soilmass/motion-design-agent) | Camera moves (dolly, pan, parallax) and depth. | MIT |
+| 8 | [three-agent-skills](https://github.com/emalorenzo/three-agent-skills) | 3D performance rules for three.js and React Three Fiber; fixes the open leak findings. | MIT |
+
+For what each one is for, its cautions, and a ready-to-paste prompt, read [HANDOFF.md](HANDOFF.md).
 
 ## Installing
 
