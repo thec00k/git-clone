@@ -128,5 +128,7 @@ download from github.com. Install with `bash .claude/install-skills.sh` once
 
 ## Not in this set (decided against, 2026-10-15)
 
-tldraw (paid production licence), magic-mcp (API key, no stated licence), stitch-skills (needs Google's Stitch service), shadcn/ui (stock web-app look), the Figma tools (our art goes through Procreate and Blender; the Figma connector is blocked from the cloud sandbox), and everything Unreal, Unity or Godot only.
+tldraw (paid production licence), magic-mcp (API key, no stated licence), stitch-skills (needs Google's Stitch service), shadcn/ui (stock web-app look), the community Figma tools (the official Figma connector is the better route; see the Figma note below), and everything Unreal, Unity or Godot only.
 Maybes if wanted later: Impeccable (Apache 2.0) and Vercel's web-design-guidelines (MIT) for editor and menu polish and the open accessibility findings; ACE-Step 1.5 (MIT) for music, pending Tom's test of the prompts in `/mnt/project-files/keepsake/ace-step-test/prompts.md`.
+
+**Figma note (correction, 2026-10-15):** the art direction and UI design system do live in Figma (file `5RwG3LC2YWU3QOcJ8DTUe9`; see `keepsake/docs/art-direction/README.md` and `keepsake/docs/ui-design-system.md`), and `project-status.md` lists "finish the unified interface in Figma" as open because the Figma tools were unavailable. So the official Figma connector matters. It currently fails from the cloud sandbox (proxy refuses `mcp.figma.com`), so Figma work needs the network allowance above or a session on Tom's computer. The community Figma repos add nothing the official connector lacks.
