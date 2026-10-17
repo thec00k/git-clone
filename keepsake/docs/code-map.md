@@ -5,7 +5,7 @@ Where things live, what tests them, and what to check in an audit. Paths are und
 | Area | Main files | Tests |
 | --- | --- | --- |
 | App shell, navigation | `src/App.tsx`, `src/store/nav.tsx` | browser checks |
-| Room state and saving | `src/store/appStore.tsx` (all state changes), `src/lib/storage.ts` (IndexedDB, files by hash as Blobs, loaded as `blob:` URLs; `inlineFiles` for backups), `src/lib/roomBackup.ts` (backup validation), `src/lib/originalPhotos.ts`, `src/lib/stripMetadata.ts` | `check-storage`, `check-memory-features`, `check-room-themes`, `check-strip-metadata` |
+| Room state and saving | `src/store/appStore.tsx` (all state changes), `src/lib/storage.ts` (IndexedDB, files by hash as Blobs, loaded as `blob:` URLs; `inlineFiles` for backups), `src/lib/roomBackup.ts` (backup validation), `src/lib/originalPhotos.ts`, `src/lib/stripMetadata.ts` | `check-storage`, `check-original-cleanup`, `check-memory-features`, `check-room-themes`, `check-strip-metadata` |
 | Limits | `src/lib/limits.ts`, `src/lib/importLimits.ts` | `check-limits`, `check-import-limits` |
 | Seasons, holidays, ageing, stamps | `src/lib/seasons.ts`, `src/hooks/useSeasonal.ts`, `src/lib/roomAge.ts`, `src/lib/stamps.ts` | `check-seasons`, `check-room-age`, `check-stamps` |
 | Scrapbook editor | `src/components/BookView.tsx`, `ElementView.tsx`, `ScrapbookPage.tsx`, `SelectionToolbar.tsx`, `src/hooks/useScrapbook.ts` (undo, pages, photos), `src/lib/photoBatch.ts`, `src/lib/photoInbox.ts`, `src/lettering.css`, `RansomText.tsx` | `check-editor`, `check-photo-batch`, `check-photo-inbox`, `check-lettering`, book capture |
