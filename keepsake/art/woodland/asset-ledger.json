@@ -81,6 +81,28 @@
         "Balanced and High Draco-compressed GLBs"
       ],
       "optimization": "512px Balanced and 1024px High texture caps; high-precision geometry compression; measured public/room asset manifests"
+    },
+    {
+      "id": "crt-illustrated-nostalgia-remodel",
+      "source": "Modeled directly in Blender 5.1 by art/woodland/remodel-crt.py; replaces the inherited ks_crt cabinet, bezel, hood, plinth and controls",
+      "sourceUrl": null,
+      "creator": "Keepsake project / Claude-assisted modeling",
+      "license": "Original project work; no third-party models, textures, scans or AI-generated meshes",
+      "commercialUse": "No additional third-party asset license introduced",
+      "attribution": "None required for newly authored geometry",
+      "created": "2026-10-17",
+      "original": "art/woodland/woodland.blend (inherited ks_crt; see inherited-room)",
+      "modified": "public/room/woodland/woodland.glb; public/room/woodland/woodland.high.glb",
+      "includes": [
+        "rounded cream enamel cabinet",
+        "tapered tube hood",
+        "rounded warm iron bezel",
+        "brass knobs and rabbit-ear antenna",
+        "walnut plinth"
+      ],
+      "preserved": "ks_crt root transform and interaction properties; CRT_Screen mesh and UVs (runtime radio lettering); inherited screen material M_CRTScreen and brass M_FanBrass",
+      "optimization": "Solid-color materials, no new textures; +2,572 triangles, +1 material and -2 images versus the inherited set",
+      "review": "art/woodland/review/crt-remodel/"
     }
   ]
 }

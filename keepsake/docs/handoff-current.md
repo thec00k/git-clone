@@ -18,6 +18,7 @@ Read [`Keepsake_New_Art_Direction_and_Room_Production_Bible.pdf`](Keepsake_New_A
 - The upload review uses a swipeable photo stack, visible arrow controls, keyboard support, batch grid and scrapbook destination choices. Every upload is first saved in the archive.
 - Photos chosen for a scrapbook are saved as archive references in that book's waiting pile. The pile appears beside the open book next time, and a photo leaves it only after placement. Placement and removal are undoable together. The implementation and current check record are in [`photo-review-stack.md`](photo-review-stack.md).
 - Paper options and texture provenance are summarized in [`art/paper-studies/README.md`](../art/paper-studies/README.md); the local comparison is `material-study.html`.
+- October 17: the inherited desk CRT is the first single-object Illustrated Nostalgia remodel. It was published through `assets:refresh` on draft branch `claude/woodland-remodel-one-object`, and further objects wait for owner feedback. See [`art/woodland/review/crt-remodel/README.md`](../art/woodland/review/crt-remodel/README.md) and the `crt-illustrated-nostalgia-remodel` ledger entry.
 - The original art-direction PDF and the earlier v4/product PDFs are checked into `docs/`; see [`README.md`](../README.md) for the full curated index.
 
 ## Local verification already completed
