@@ -3,7 +3,7 @@ import {useFrame} from '@react-three/fiber';
 import * as THREE from 'three';
 import {useApp} from '../../store/appStore';
 import {FURNITURE_ITEMS, type FurnitureCategory, type FurnitureId} from '../../lib/furniture';
-import {loadFurniture} from './furnitureAssetCache';
+import {holdFurniture, loadFurniture} from './furnitureAssetCache';
 import {useActiveRoom} from './useActiveRoom';
 import {furnitureBounds, fitFurniture} from '../../lib/furnitureGeometry';
 import {motionFactor, MOTION} from '../../lib/motion';
@@ -79,6 +79,20 @@ function FurnitureReplacement({
       pair.last = pair.source.material;
     }
   });
+  // Keep the cached model while it is placed; unused ones may be released.
+  useEffect(() => {
+    let live = true;
+    let release = () => {};
+    loadFurniture(id)
+      .then(() => {
+        if (live) release = holdFurniture(id);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+      release();
+    };
+  }, [id]);
   useEffect(() => {
     let live = true;
     let restore = () => {};

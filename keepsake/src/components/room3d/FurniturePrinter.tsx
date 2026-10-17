@@ -1,6 +1,6 @@
 import {useEffect, useState, type ReactNode} from 'react';
 import * as THREE from 'three';
-import {loadFurniture} from './furnitureAssetCache';
+import {holdFurniture, loadFurniture} from './furnitureAssetCache';
 import {useApp} from '../../store/appStore';
 import {useActiveRoom} from './useActiveRoom';
 
@@ -13,6 +13,21 @@ export function FurniturePrinter({children}: {children: ReactNode}) {
       ? environment.furniture?.[room]?.printer
       : undefined;
   const [model, setModel] = useState<THREE.Object3D | null>(null);
+  // Keep the cached model while it is placed; unused ones may be released.
+  useEffect(() => {
+    let live = true;
+    let release = () => {};
+    if (id)
+      loadFurniture(id)
+        .then(() => {
+          if (live) release = holdFurniture(id);
+        })
+        .catch(() => {});
+    return () => {
+      live = false;
+      release();
+    };
+  }, [id]);
   useEffect(() => {
     let live = true;
     const materials: THREE.Material[] = [];

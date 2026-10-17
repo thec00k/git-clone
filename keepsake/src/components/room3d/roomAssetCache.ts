@@ -1,12 +1,12 @@
 import {GLTFLoader, type GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
+import {createAssetCache} from '../../lib/assetCache';
 const draco = new DRACOLoader().setDecoderPath('/decoders/draco/').setWorkerLimit(2);
-const cache = new Map<string, Promise<GLTF>>();
-/** One parsed asset per room; failed loads can be retried without losing the current room. */
-export function loadRoomAsset(path: string): Promise<GLTF> {
-  let pending = cache.get(path);
-  if (!pending) {
-    pending = new GLTFLoader()
+/** Recent rooms stay parsed so switching back is quick; older unused ones are released. */
+const cache = createAssetCache<string, GLTF>({
+  max: 2,
+  load: path =>
+    new GLTFLoader()
       .setDRACOLoader(draco)
       .loadAsync(path)
       .then(asset => {
@@ -14,12 +14,9 @@ export function loadRoomAsset(path: string): Promise<GLTF> {
           if (!asset.scene.getObjectByName(anchor)) throw new Error(`Room is missing ${anchor}`);
         }
         return asset;
-      })
-      .catch(error => {
-        cache.delete(path);
-        throw error;
-      });
-    cache.set(path, pending);
-  }
-  return pending;
-}
+      }),
+});
+/** One parsed asset per room; failed loads can be retried without losing the current room. */
+export const loadRoomAsset = (path: string): Promise<GLTF> => cache.get(path);
+/** Pin the room on screen so it is never released while visible. */
+export const holdRoomAsset = (path: string) => cache.hold(path);

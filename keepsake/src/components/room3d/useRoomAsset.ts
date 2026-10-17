@@ -1,5 +1,5 @@
 import {use, useEffect, useMemo} from 'react';
-import {loadRoomAsset} from './roomAssetCache';
+import {holdRoomAsset, loadRoomAsset} from './roomAssetCache';
 import * as THREE from 'three';
 import {LAMP_BULB} from '../../lib/roomHotspots';
 import type {Environment} from '../../types/app';
@@ -11,6 +11,8 @@ import {BOOKSHELF_WINDOW_SHIFT} from './furnitureLayout';
 export function useRoomAsset(phase: Phase, environment: Environment) {
   const activeRoom = useActiveRoom();
   const {scene} = use(loadRoomAsset(activeRoom.asset));
+  // The room on screen is never released from the cache.
+  useEffect(() => holdRoomAsset(activeRoom.asset), [activeRoom.asset]);
   const {cloned, materials} = useMemo(() => {
     const cloned = scene.clone(true);
     const materials: THREE.Material[] = [];
