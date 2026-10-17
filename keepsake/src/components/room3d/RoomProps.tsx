@@ -1,27 +1,44 @@
 import {useWorkbench} from '../../store/workbench';
-import { PhotoSurface } from './MemoryObjects';
-import {motionFactor,MOTION} from '../../lib/motion';
+import {PhotoSurface} from './MemoryObjects';
+import {motionFactor, MOTION} from '../../lib/motion';
 import {FurniturePrinter} from './FurniturePrinter';
 import {useActiveRoom} from './useActiveRoom';
-import { useApp } from '../../store/appStore';
-import { useNav } from "../../store/nav";
-import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Html, RoundedBox } from "@react-three/drei";
-import { LAMP_OBJECT } from "../../lib/roomHotspots";
-import * as THREE from "three";
-import { ARCHIVE_DRAWER, ARCHIVE_OBJECT, DESK_DRAWER, CLOCK_OBJECT, CLOCK_DIGITS, CEILING_SWITCH, CHAIR_OBJECT, DOOR_OBJECT, HOTSPOT_LABEL } from "../../lib/roomHotspots";
-import type { TimeMode } from "../../types/app";
-import { RollingClock } from "./RollingClock";
-import { ClickHit, FacedHtml } from "./RoomInteractions";
-import { hasGeometry, measureDesk, findDeskObject, isDeskSized, lampShadePos, objectAnchor } from "./sceneGeometry";
+import {useApp} from '../../store/appStore';
+import {useNav} from '../../store/nav';
+import {useEffect, useMemo, useRef} from 'react';
+import {useFrame} from '@react-three/fiber';
+import {Html, RoundedBox} from '@react-three/drei';
+import {LAMP_OBJECT} from '../../lib/roomHotspots';
+import * as THREE from 'three';
+import {
+  ARCHIVE_DRAWER,
+  ARCHIVE_OBJECT,
+  DESK_DRAWER,
+  CLOCK_OBJECT,
+  CLOCK_DIGITS,
+  CEILING_SWITCH,
+  CHAIR_OBJECT,
+  DOOR_OBJECT,
+  HOTSPOT_LABEL,
+} from '../../lib/roomHotspots';
+import type {TimeMode} from '../../types/app';
+import {RollingClock} from './RollingClock';
+import {ClickHit, FacedHtml} from './RoomInteractions';
+import {
+  hasGeometry,
+  measureDesk,
+  findDeskObject,
+  isDeskSized,
+  lampShadePos,
+  objectAnchor,
+} from './sceneGeometry';
 const DRAWER_OPEN_Z = 0.26;
 /** Local +Z of `ks_archive_drawer` — toward the chair, into the room. */
 const ARCHIVE_DRAWER_OPEN_Z = 0.34;
 const ARCHIVE_FALLBACK = new THREE.Vector3(1.22, 0, -1.805);
 
-import { useReducedMotion } from "../../hooks/useReducedMotion";
-export function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boolean }) {
+import {useReducedMotion} from '../../hooks/useReducedMotion';
+export function DeskDrawer({scene, open}: {scene: THREE.Object3D; open: boolean}) {
   const reduced = useReducedMotion();
   const drawer = useMemo(() => scene.getObjectByName(DESK_DRAWER), [scene]);
   const restZ = useRef<number | null>(null);
@@ -29,9 +46,13 @@ export function DeskDrawer({ scene, open }: { scene: THREE.Object3D; open: boole
   useFrame((_, dt) => {
     if (!drawer) return;
     if (restZ.current == null) restZ.current = drawer.position.z;
-    drawer.userData.ksDrawerRestZ=restZ.current;
+    drawer.userData.ksDrawerRestZ = restZ.current;
     const target = restZ.current + (open ? DRAWER_OPEN_Z : 0);
-    drawer.position.z = THREE.MathUtils.lerp(drawer.position.z, target, motionFactor(dt,MOTION.drawer,reduced));
+    drawer.position.z = THREE.MathUtils.lerp(
+      drawer.position.z,
+      target,
+      motionFactor(dt, MOTION.drawer, reduced),
+    );
   });
   return null;
 }
@@ -70,15 +91,19 @@ export function ArchiveCabinet({
   useFrame((_, dt) => {
     if (drawer) {
       if (restZ.current == null) restZ.current = drawer.position.z;
-    drawer.userData.ksDrawerRestZ=restZ.current;
+      drawer.userData.ksDrawerRestZ = restZ.current;
       const target = restZ.current + (open ? ARCHIVE_DRAWER_OPEN_Z : 0);
-      drawer.position.z = THREE.MathUtils.lerp(drawer.position.z, target, motionFactor(dt,MOTION.drawer,reduced));
+      drawer.position.z = THREE.MathUtils.lerp(
+        drawer.position.z,
+        target,
+        motionFactor(dt, MOTION.drawer, reduced),
+      );
     }
     if (standInDrawer.current) {
       standInDrawer.current.position.z = THREE.MathUtils.lerp(
         standInDrawer.current.position.z,
         open ? ARCHIVE_DRAWER_OPEN_Z : 0,
-        motionFactor(dt,MOTION.drawer,reduced),
+        motionFactor(dt, MOTION.drawer, reduced),
       );
     }
   });
@@ -118,10 +143,10 @@ export function ArchiveCabinet({
             </mesh>
             {(
               [
-                [-0.16, "#c45c3e"],
-                [-0.02, "#8b3a32"],
-                [0.12, "#d8c4a8"],
-                [0.22, "#eadcc8"],
+                [-0.16, '#c45c3e'],
+                [-0.02, '#8b3a32'],
+                [0.12, '#d8c4a8'],
+                [0.22, '#eadcc8'],
               ] as const
             ).map(([x, color]) => (
               <mesh key={`${x}:${color}`} position={[x, 0.265, 0.06]} rotation={[0.08, 0, 0]}>
@@ -134,19 +159,19 @@ export function ArchiveCabinet({
       )}
       <group position={labelAt.toArray()}>
         {/* A small grip target, clear of the cabinet top and framed photo. */}
-        <ClickHit size={[0.22, 0.12, 0.10]} onClick={onOpen} />
+        <ClickHit size={[0.22, 0.12, 0.1]} onClick={onOpen} />
       </group>
       <group position={labelAt.toArray()}>
         <FacedHtml point={labelAt}>
           <button
             type="button"
-            className={`ks-hot3d${active ? " is-tour" : ""} ks-hot3d--label`}
+            className={`ks-hot3d${active ? ' is-tour' : ''} ks-hot3d--label`}
             data-tour="archive"
             data-open-archive
             aria-hidden="true"
             tabIndex={-1}
             aria-label={HOTSPOT_LABEL.archive}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               onOpen();
             }}
@@ -159,30 +184,45 @@ export function ArchiveCabinet({
   );
 }
 
-export function DrawerPrompt({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void }) {
+export function DrawerPrompt({scene, onOpen}: {scene: THREE.Object3D; onOpen: () => void}) {
   const at = useMemo(() => {
     const desk = measureDesk(scene);
-    const drawer=scene.getObjectByName(DESK_DRAWER);if(drawer){const b=new THREE.Box3().setFromObject(drawer);return new THREE.Vector3((b.min.x+b.max.x)/2,(b.min.y+b.max.y)/2,b.max.z-(drawer.position.z-(drawer.userData.ksDrawerRestZ??drawer.position.z))+.015);}return new THREE.Vector3((desk.minX + desk.maxX) / 2, desk.y - 0.1, desk.maxZ + 0.04);
+    const drawer = scene.getObjectByName(DESK_DRAWER);
+    if (drawer) {
+      const b = new THREE.Box3().setFromObject(drawer);
+      return new THREE.Vector3(
+        (b.min.x + b.max.x) / 2,
+        (b.min.y + b.max.y) / 2,
+        b.max.z - (drawer.position.z - (drawer.userData.ksDrawerRestZ ?? drawer.position.z)) + 0.015,
+      );
+    }
+    return new THREE.Vector3((desk.minX + desk.maxX) / 2, desk.y - 0.1, desk.maxZ + 0.04);
   }, [scene]);
   return (
     <group position={at.toArray()}>
       <mesh
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation();
           onOpen();
         }}
         onPointerOver={() => {
-          document.body.style.cursor = "pointer";
+          document.body.style.cursor = 'pointer';
         }}
         onPointerOut={() => {
-          document.body.style.cursor = "";
+          document.body.style.cursor = '';
         }}
       >
         <boxGeometry args={[0.42, 0.16, 0.12]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       <FacedHtml point={at}>
-        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" aria-label="Open desk drawer shop" data-open-drawer onClick={onOpen}>
+        <button
+          type="button"
+          className="ks-sit-prompt ks-sit-prompt--seat"
+          aria-label="Open desk drawer shop"
+          data-open-drawer
+          onClick={onOpen}
+        >
           Open drawer · shop
         </button>
       </FacedHtml>
@@ -197,13 +237,13 @@ const STAND_IN_TOP_W = 1.78;
 const STAND_IN_TOP_D = 0.7;
 const CLOCK_FACE_PX = 168;
 
-type BookOnDesk = { x: number; z: number; halfW: number; halfD: number };
+type BookOnDesk = {x: number; z: number; halfW: number; halfD: number};
 
 /**
  * Group origin is the oak face (y = 0). The slab hangs below that, and every
  * prop's y is only its half-height, so bottoms cannot leave the wood.
  */
-export function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeMode }) {
+export function DeskAssembly({scene, timeMode}: {scene: THREE.Object3D; timeMode: TimeMode}) {
   const desk = useMemo(() => findDeskObject(scene), [scene]);
   const clockSolid = hasGeometry(scene.getObjectByName(CLOCK_OBJECT));
   const surface = useMemo(() => {
@@ -221,9 +261,9 @@ export function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeM
   }, [scene, desk]);
 
   const book = useMemo<BookOnDesk>(() => {
-    const mesh = scene.getObjectByName("ks_book");
+    const mesh = scene.getObjectByName('ks_book');
     if (!mesh || !hasGeometry(mesh)) {
-      return { x: 0, z: 0.08, halfW: 0.09, halfD: 0.12 };
+      return {x: 0, z: 0.08, halfW: 0.09, halfD: 0.12};
     }
     const box = new THREE.Box3().setFromObject(mesh);
     const c = box.getCenter(new THREE.Vector3());
@@ -231,7 +271,7 @@ export function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeM
     return {
       x: c.x - surface.x,
       z: c.z - surface.z,
-        halfW: Math.max(s.x / 2, .34),
+      halfW: Math.max(s.x / 2, 0.34),
       halfD: s.z / 2,
     };
   }, [scene, surface.x, surface.z]);
@@ -239,10 +279,10 @@ export function DeskAssembly({ scene, timeMode }: { scene: THREE.Object3D; timeM
   const legH = Math.max(0.2, surface.y - STAND_IN_TOP_THICK);
 
   useEffect(() => {
-    const host = document.querySelector(".ks-room3d");
+    const host = document.querySelector('.ks-room3d');
     if (host instanceof HTMLElement) {
       host.dataset.deskSurface = `${surface.x.toFixed(3)},${surface.y.toFixed(3)},${surface.z.toFixed(3)}`;
-      host.dataset.deskSolid = surface.solid ? "1" : "0";
+      host.dataset.deskSolid = surface.solid ? '1' : '0';
     }
   }, [surface]);
 
@@ -280,26 +320,39 @@ function clampOnTop(n: number, limit: number) {
 }
 
 /** Markers / printer / camera. y = 0 is the oak; sit() is only half-height. */
-export function OakDeskClutter({ book }: { book: BookOnDesk }) {
-  const {setPrinterOpen,isVisitor}=useNav();
-  const {state}=useApp();
-  const {phase}=useWorkbench();const reduced=useReducedMotion();
-  const cameraRef=useRef<THREE.Group>(null),printerRef=useRef<THREE.Group>(null);
-  const travel=useRef(0);const parentPosition=useMemo(()=>new THREE.Vector3(),[]);
-  useFrame((_,dt)=>{
+export function OakDeskClutter({book}: {book: BookOnDesk}) {
+  const {setPrinterOpen, isVisitor} = useNav();
+  const {state} = useApp();
+  const {phase} = useWorkbench();
+  const reduced = useReducedMotion();
+  const cameraRef = useRef<THREE.Group>(null),
+    printerRef = useRef<THREE.Group>(null);
+  const travel = useRef(0);
+  const parentPosition = useMemo(() => new THREE.Vector3(), []);
+  useFrame((_, dt) => {
     // Clear the book during arrival, before the cover can open. Stay parked
     // through closing; return only after the user leaves the workbench.
-    const target=phase==='room'?0:1;
-    travel.current=reduced?target:THREE.MathUtils.clamp(travel.current+(target?1:-1)*Math.min(dt,.05)/.9,0,1);
-    const p=travel.current,smooth=(n:number)=>{n=THREE.MathUtils.clamp(n,0,1);return n*n*(3-2*n);};
+    const target = phase === 'room' ? 0 : 1;
+    travel.current = reduced
+      ? target
+      : THREE.MathUtils.clamp(travel.current + ((target ? 1 : -1) * Math.min(dt, 0.05)) / 0.9, 0, 1);
+    const p = travel.current,
+      smooth = (n: number) => {
+        n = THREE.MathUtils.clamp(n, 0, 1);
+        return n * n * (3 - 2 * n);
+      };
     printerRef.current?.parent?.getWorldPosition(parentPosition);
-    if(printerRef.current){
+    if (printerRef.current) {
       // Go around the front of the CRT, never through its housing.
-      const x=THREE.MathUtils.lerp(.18,.46,smooth((p-.45)/.55));
-      const z=-1.73+.26*smooth(p/.45);
-      printerRef.current.position.x=x-parentPosition.x;printerRef.current.position.z=z-parentPosition.z;
+      const x = THREE.MathUtils.lerp(0.18, 0.46, smooth((p - 0.45) / 0.55));
+      const z = -1.73 + 0.26 * smooth(p / 0.45);
+      printerRef.current.position.x = x - parentPosition.x;
+      printerRef.current.position.z = z - parentPosition.z;
     }
-    if(cameraRef.current){cameraRef.current.position.x=THREE.MathUtils.lerp(-.53,-.65,smooth(p*3))-parentPosition.x;cameraRef.current.position.z=-1.83-parentPosition.z;}
+    if (cameraRef.current) {
+      cameraRef.current.position.x = THREE.MathUtils.lerp(-0.53, -0.65, smooth(p * 3)) - parentPosition.x;
+      cameraRef.current.position.z = -1.83 - parentPosition.z;
+    }
   });
   const sit = (half: number) => half;
   const insetX = STAND_IN_TOP_W / 2 - 0.14;
@@ -307,8 +360,8 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
   const markerX = clampOnTop(book.x - book.halfW - 0.1, insetX);
   // Tuck the printer just left of the CRT and beyond the open book's right
   // page. The previous placement grazed the scrapbook as its cover unfolded.
-  const printerX = clampOnTop(book.x + book.halfW + .24, insetX);
-  const printerZ = clampOnTop(book.z, insetZ) + .20;
+  const printerX = clampOnTop(book.x + book.halfW + 0.24, insetX);
+  const printerZ = clampOnTop(book.z, insetZ) + 0.2;
   // Nudge the camera back and toward the book so it reads as a deliberate
   // desk arrangement without entering the open-page footprint.
   const cameraX = clampOnTop(book.x - book.halfW - 0.02, insetX);
@@ -316,29 +369,72 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
 
   return (
     <group>
-      <group name="Desk_Markers_Assembly" position={[markerX, sit(0.008), rowZ + 0.18]} rotation={[0, 0.35, 0]}>
+      <group
+        name="Desk_Markers_Assembly"
+        position={[markerX, sit(0.008), rowZ + 0.18]}
+        rotation={[0, 0.35, 0]}
+      >
         {[
-          { z: 0, color: "#c45c3e", yaw: -0.08 },
-          { z: 0.018, color: "#2c221c", yaw: 0.04 },
-          { z: 0.036, color: "#4a7c59", yaw: 0.12 },
-        ].map((m) => (
+          {z: 0, color: '#c45c3e', yaw: -0.08},
+          {z: 0.018, color: '#2c221c', yaw: 0.04},
+          {z: 0.036, color: '#4a7c59', yaw: 0.12},
+        ].map(m => (
           <mesh key={m.color} position={[0, 0, m.z]} rotation={[0, m.yaw, Math.PI / 2]}>
             <cylinderGeometry args={[0.008, 0.008, 0.13, 8]} />
             <meshStandardMaterial color={m.color} roughness={0.42} />
           </mesh>
         ))}
       </group>
-      <group ref={printerRef} name="Desk_Printer_Assembly" position={[printerX, 0.023, printerZ]} rotation={[0, 0, 0]} onClick={e=>{e.stopPropagation();if(!isVisitor)setPrinterOpen(true);}}>
+      <group
+        ref={printerRef}
+        name="Desk_Printer_Assembly"
+        position={[printerX, 0.023, printerZ]}
+        rotation={[0, 0, 0]}
+        onClick={e => {
+          e.stopPropagation();
+          if (!isVisitor) setPrinterOpen(true);
+        }}
+      >
         <FurniturePrinter>
-        <RoundedBox args={[0.135,0.046,0.17]} radius={0.012} smoothness={3}><meshStandardMaterial color="#e5dbc7" roughness={0.82}/></RoundedBox>
-        <mesh position={[0,0.003,0.086]}><boxGeometry args={[0.103,0.008,0.003]}/><meshStandardMaterial color="#26392f"/></mesh>
+          <RoundedBox args={[0.135, 0.046, 0.17]} radius={0.012} smoothness={3}>
+            <meshStandardMaterial color="#e5dbc7" roughness={0.82} />
+          </RoundedBox>
+          <mesh position={[0, 0.003, 0.086]}>
+            <boxGeometry args={[0.103, 0.008, 0.003]} />
+            <meshStandardMaterial color="#26392f" />
+          </mesh>
         </FurniturePrinter>
-        <mesh position={[0,0.004,0.12]}><boxGeometry args={[0.085,0.0015,0.07]}/><meshStandardMaterial color="#fffef4"/></mesh>
-        <group position={[0,0.0057,0.115]} rotation={[-Math.PI/2,0,0]}>{!isVisitor && state.latestPrint ? <PhotoSurface src={state.latestPrint.src} width={.07} height={.046}/> : <mesh><planeGeometry args={[.07,.046]}/><meshStandardMaterial color="#668777"/></mesh>}</group>
-        <mesh position={[0.043,0.024,-0.048]}><sphereGeometry args={[0.003,8,6]}/><meshStandardMaterial color="#a6ce97" emissive="#82b76e" emissiveIntensity={0.5}/></mesh>
-        {['#b56c4a','#c7a86b','#6d8a6c'].map((color,i)=><mesh key={color} position={[-0.009+i*0.009,0.0235,-0.058]}><boxGeometry args={[0.008,0.001,0.025]}/><meshStandardMaterial color={color}/></mesh>)}
+        <mesh position={[0, 0.004, 0.12]}>
+          <boxGeometry args={[0.085, 0.0015, 0.07]} />
+          <meshStandardMaterial color="#fffef4" />
+        </mesh>
+        <group position={[0, 0.0057, 0.115]} rotation={[-Math.PI / 2, 0, 0]}>
+          {!isVisitor && state.latestPrint ? (
+            <PhotoSurface src={state.latestPrint.src} width={0.07} height={0.046} />
+          ) : (
+            <mesh>
+              <planeGeometry args={[0.07, 0.046]} />
+              <meshStandardMaterial color="#668777" />
+            </mesh>
+          )}
+        </group>
+        <mesh position={[0.043, 0.024, -0.048]}>
+          <sphereGeometry args={[0.003, 8, 6]} />
+          <meshStandardMaterial color="#a6ce97" emissive="#82b76e" emissiveIntensity={0.5} />
+        </mesh>
+        {['#b56c4a', '#c7a86b', '#6d8a6c'].map((color, i) => (
+          <mesh key={color} position={[-0.009 + i * 0.009, 0.0235, -0.058]}>
+            <boxGeometry args={[0.008, 0.001, 0.025]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+        ))}
       </group>
-      <group ref={cameraRef} name="Desk_Camera_Assembly" position={[cameraX, sit(0.025), rowZ - .13]} rotation={[0, 0.32, 0]}>
+      <group
+        ref={cameraRef}
+        name="Desk_Camera_Assembly"
+        position={[cameraX, sit(0.025), rowZ - 0.13]}
+        rotation={[0, 0.32, 0]}
+      >
         <mesh>
           <boxGeometry args={[0.12, 0.05, 0.064]} />
           <meshStandardMaterial color="#ad7852" roughness={0.78} />
@@ -361,7 +457,7 @@ export function OakDeskClutter({ book }: { book: BookOnDesk }) {
 }
 
 /** Retro case on the oak; digits live on the +Z face (toward the chair). */
-export function StandInClock({ book, timeMode }: { book: BookOnDesk; timeMode: TimeMode }) {
+export function StandInClock({book, timeMode}: {book: BookOnDesk; timeMode: TimeMode}) {
   const caseH = 0.05;
   const x = clampOnTop(book.x - book.halfW - 0.36, STAND_IN_TOP_W / 2 - 0.12);
   const z = clampOnTop(book.z - 0.22, STAND_IN_TOP_D / 2 - 0.1);
@@ -382,7 +478,7 @@ export function StandInClock({ book, timeMode }: { book: BookOnDesk; timeMode: T
         position={[0, 0.006, 0.038]}
         rotation={[-0.12, 0, 0]}
         scale={0.125 / CLOCK_FACE_PX}
-        style={{ pointerEvents: "none", backfaceVisibility: "hidden" }}
+        style={{pointerEvents: 'none', backfaceVisibility: 'hidden'}}
       >
         <div data-clock-locked="1">
           <RollingClock timeMode={timeMode} />
@@ -401,11 +497,13 @@ export function LampFixture({
   on: boolean;
   onToggle: () => void;
 }) {
-  const {environment}=useApp();
-  const lampChoice=environment.furniture?.[environment.roomTheme??'woodland']?.lamp;
-  const ownBulb=environment.roomTheme==='cyberpunk'||lampChoice==='lamp-2'||lampChoice==='lamp-3';
-  const fixture=useRef<THREE.Group>(null);
-  useFrame(()=>{fixture.current?.position.copy(lampShadePos(scene));});
+  const {environment} = useApp();
+  const lampChoice = environment.furniture?.[environment.roomTheme ?? 'woodland']?.lamp;
+  const ownBulb = environment.roomTheme === 'cyberpunk' || lampChoice === 'lamp-2' || lampChoice === 'lamp-3';
+  const fixture = useRef<THREE.Group>(null);
+  useFrame(() => {
+    fixture.current?.position.copy(lampShadePos(scene));
+  });
   const lamp = useMemo(() => scene.getObjectByName(LAMP_OBJECT), [scene]);
   const solid = hasGeometry(lamp);
   const shade = useMemo(() => lampShadePos(scene), [scene]);
@@ -433,18 +531,26 @@ export function LampFixture({
         </group>
       )}
       <group ref={fixture} position={shade.toArray()}>
-      <mesh position={[0,-.01,.02]} visible={!ownBulb}>
-        <sphereGeometry args={[0.028, 12, 10]} />
-        {on ? (
-          <meshBasicMaterial color="#fff1c2" />
-        ) : (
-          <meshStandardMaterial color="#c4b089" roughness={0.4} />
-        )}
-      </mesh>
+        <mesh position={[0, -0.01, 0.02]} visible={!ownBulb}>
+          <sphereGeometry args={[0.028, 12, 10]} />
+          {on ? (
+            <meshBasicMaterial color="#fff1c2" />
+          ) : (
+            <meshStandardMaterial color="#c4b089" roughness={0.4} />
+          )}
+        </mesh>
         <ClickHit size={[0.22, 0.42, 0.22]} onClick={onToggle} />
         <FacedHtml point={shade} position={[0, 0.16, 0]}>
-          <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" aria-label={on ? "Turn desk lamp off" : "Turn desk lamp on"} data-lamp-toggle aria-hidden="true" tabIndex={-1} onClick={onToggle}>
-            {on ? "Lamp on" : "Lamp off"}
+          <button
+            type="button"
+            className="ks-sit-prompt ks-sit-prompt--seat"
+            aria-label={on ? 'Turn desk lamp off' : 'Turn desk lamp on'}
+            data-lamp-toggle
+            aria-hidden="true"
+            tabIndex={-1}
+            onClick={onToggle}
+          >
+            {on ? 'Lamp on' : 'Lamp off'}
           </button>
         </FacedHtml>
       </group>
@@ -452,7 +558,7 @@ export function LampFixture({
   );
 }
 
-export function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode: TimeMode }) {
+export function DeskClock({scene, timeMode}: {scene: THREE.Object3D; timeMode: TimeMode}) {
   const room = useActiveRoom();
   const clock = useMemo(() => scene.getObjectByName(CLOCK_OBJECT), [scene]);
   const digits = useMemo(() => scene.getObjectByName(CLOCK_DIGITS), [scene]);
@@ -467,13 +573,20 @@ export function DeskClock({ scene, timeMode }: { scene: THREE.Object3D; timeMode
     const width = Math.max(size.x, size.z, 0.1);
     const quat = new THREE.Quaternion();
     face.getWorldQuaternion(quat);
-    return { pos, quat, scale: width / CLOCK_FACE_PX };
+    return {pos, quat, scale: width / CLOCK_FACE_PX};
   }, [clock, digits]);
 
   if (!pose) return null;
   return (
     <group position={pose.pos.toArray()} quaternion={pose.quat}>
-      <Html transform occlude={false} distanceFactor={400} position={[0, 0, 0]} scale={pose.scale} style={{ pointerEvents: "none" }}>
+      <Html
+        transform
+        occlude={false}
+        distanceFactor={400}
+        position={[0, 0, 0]}
+        scale={pose.scale}
+        style={{pointerEvents: 'none'}}
+      >
         <div data-clock-locked="1" className={room.id === 'beachfront' ? 'ks-coastal-clock' : undefined}>
           <RollingClock timeMode={timeMode} />
         </div>
@@ -520,8 +633,16 @@ export function CeilingSwitch({
       )}
       <ClickHit size={[0.16, 0.2, 0.1]} onClick={onToggle} />
       <FacedHtml point={center} position={[0, 0.12, 0.02]}>
-        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" aria-label={on ? "Turn ceiling light off" : "Turn ceiling light on"} data-ceiling-switch aria-hidden="true" tabIndex={-1} onClick={onToggle}>
-          {on ? "Ceiling on" : "Ceiling off"}
+        <button
+          type="button"
+          className="ks-sit-prompt ks-sit-prompt--seat"
+          aria-label={on ? 'Turn ceiling light off' : 'Turn ceiling light on'}
+          data-ceiling-switch
+          aria-hidden="true"
+          tabIndex={-1}
+          onClick={onToggle}
+        >
+          {on ? 'Ceiling on' : 'Ceiling off'}
         </button>
       </FacedHtml>
     </group>
@@ -529,7 +650,7 @@ export function CeilingSwitch({
 }
 
 /** Door on the wall opposite the window. Uses `ks_door` when the GLB has one. */
-export function RoomDoor({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () => void }) {
+export function RoomDoor({scene, onOpen}: {scene: THREE.Object3D; onOpen: () => void}) {
   const fromGlb = useMemo(() => {
     const obj = scene.getObjectByName(DOOR_OBJECT);
     return hasGeometry(obj) ? obj : undefined;
@@ -559,22 +680,30 @@ export function RoomDoor({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () 
       )}
       <mesh
         position={fromGlb ? [0, 0, 0] : [0, 1.08, 0]}
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation();
           onOpen();
         }}
         onPointerOver={() => {
-          document.body.style.cursor = "pointer";
+          document.body.style.cursor = 'pointer';
         }}
         onPointerOut={() => {
-          document.body.style.cursor = "";
+          document.body.style.cursor = '';
         }}
       >
         <boxGeometry args={[0.95, 2.2, 0.28]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       <FacedHtml point={center} position={fromGlb ? [0, 0.2, 0] : [0, 0.42, -0.08]}>
-        <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" aria-label="Open the door" data-room-door aria-hidden="true" tabIndex={-1} onClick={onOpen}>
+        <button
+          type="button"
+          className="ks-sit-prompt ks-sit-prompt--seat"
+          aria-label="Open the door"
+          data-room-door
+          aria-hidden="true"
+          tabIndex={-1}
+          onClick={onOpen}
+        >
           The door
         </button>
       </FacedHtml>
@@ -583,7 +712,15 @@ export function RoomDoor({ scene, onOpen }: { scene: THREE.Object3D; onOpen: () 
 }
 
 /** Sit prompt on the Blender chair. Hidden until `ks_chair` is in the GLB. */
-export function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seated: boolean; onSit: () => void }) {
+export function ChairSit({
+  scene,
+  seated,
+  onSit,
+}: {
+  scene: THREE.Object3D;
+  seated: boolean;
+  onSit: () => void;
+}) {
   const chair = useMemo(() => scene.getObjectByName(CHAIR_OBJECT), [scene]);
   const center = useMemo(() => (chair ? objectAnchor(chair, 0.48) : null), [chair]);
 
@@ -592,15 +729,15 @@ export function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seat
   return (
     <group position={center}>
       <mesh
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation();
           onSit();
         }}
         onPointerOver={() => {
-          document.body.style.cursor = "pointer";
+          document.body.style.cursor = 'pointer';
         }}
         onPointerOut={() => {
-          document.body.style.cursor = "";
+          document.body.style.cursor = '';
         }}
       >
         <boxGeometry args={[0.5, 0.72, 0.5]} />
@@ -608,7 +745,15 @@ export function ChairSit({ scene, seated, onSit }: { scene: THREE.Object3D; seat
       </mesh>
       {!seated && (
         <FacedHtml point={center} position={[0, 0.04, 0]}>
-          <button type="button" className="ks-sit-prompt ks-sit-prompt--seat" aria-label="Take a seat" data-sit-down aria-hidden="true" tabIndex={-1} onClick={onSit}>
+          <button
+            type="button"
+            className="ks-sit-prompt ks-sit-prompt--seat"
+            aria-label="Take a seat"
+            data-sit-down
+            aria-hidden="true"
+            tabIndex={-1}
+            onClick={onSit}
+          >
             Sit down
           </button>
         </FacedHtml>

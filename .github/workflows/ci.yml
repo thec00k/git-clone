@@ -1,0 +1,67 @@
+name: Keepsake CI
+
+on:
+  push:
+    paths: ['keepsake/**', '.github/**']
+  pull_request:
+    paths: ['keepsake/**', '.github/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: keepsake
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: keepsake/package-lock.json
+      - name: Install
+        run: bash ../.github/scripts/run-step.sh install npm ci
+      - name: Type-check and build
+        if: always()
+        run: bash ../.github/scripts/run-step.sh build npm run build
+      - name: Lint
+        if: always()
+        run: bash ../.github/scripts/run-step.sh lint npm run lint
+      - name: Formatting
+        if: always()
+        # Enforced once the format workflow has added Prettier to the project.
+        run: if grep -q '"prettier"' package.json; then bash ../.github/scripts/run-step.sh format npx prettier --check .; else echo "Prettier not installed yet"; fi
+      - name: Automated acceptance checks
+        if: always()
+        run: bash ../.github/scripts/run-step.sh acceptance npm run check:acceptance
+
+  # Applies the Supabase migrations to a throwaway Postgres and runs the permission and safety tests.
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Migrations and policy tests
+        run: bash .github/scripts/run-step.sh database keepsake/supabase/tests/run.sh

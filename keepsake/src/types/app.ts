@@ -4,7 +4,7 @@
  * server concern in production (accounts, real storage, multi-user, privacy
  * enforcement) is simulated locally and clearly labelled in the UI/docs.
  */
-import type { Scrapbook, Visibility } from "./scrapbook";
+import type {Scrapbook, Visibility} from './scrapbook';
 
 export const STICKY_NOTE_MAX = 20;
 
@@ -22,8 +22,8 @@ export interface ArchiveTab {
 }
 
 export interface ArchivePhoto {
-  ticket?: {event:string;venue:string;date:string;style:string;provenance:'commemorative-template'};
-  activity?: {lastMeaningfulAt?:number;dismissed?:boolean};
+  ticket?: {event: string; venue: string; date: string; style: string; provenance: 'commemorative-template'};
+  activity?: {lastMeaningfulAt?: number; dismissed?: boolean};
   original?: import('../lib/originalPhotos').OriginalPhoto;
   id: string;
   src: string;
@@ -34,11 +34,14 @@ export interface ArchivePhoto {
   favorite: boolean;
 }
 
-export type TimeMode = "auto" | "day" | "dusk" | "night";
-export type Season = "spring" | "summer" | "autumn" | "winter";
-export type Weather = "clear" | "rain" | "snow";
+export type TimeMode = 'auto' | 'day' | 'dusk' | 'night';
+export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
+/** Which half of the year the room follows. "auto" is a best guess from the device's time zone. */
+export type Hemisphere = 'north' | 'south';
+export type HolidayId = 'valentines' | 'easter' | 'independence-day' | 'halloween' | 'christmas';
+export type Weather = 'clear' | 'rain' | 'snow';
 
-export type MusicProvider = "ambient" | "spotify" | "lofi" | "soundcloud";
+export type MusicProvider = 'ambient' | 'spotify' | 'lofi' | 'soundcloud';
 
 export interface Environment {
   /** Optional artifact-case LEDs follow the CRT palette; old saves default on. */
@@ -48,12 +51,21 @@ export interface Environment {
   memoryLighting?: boolean;
   soundGeography?: boolean;
   furniture?: import('../lib/furniture').RoomFurnitureChoices;
-  roomTheme?: "woodland" | "beachfront" | "cyberpunk";
-  roomQuality?: "balanced" | "high";
+  roomTheme?: 'woodland' | 'beachfront' | 'cyberpunk';
+  roomQuality?: 'balanced' | 'high';
   /** Beachfront casements; old rooms default to open. */
   coastalWindowOpen?: boolean;
   timeMode: TimeMode;
+  /**
+   * The season the room is frozen at. Used only when `seasonMode` is "fixed";
+   * otherwise the room follows the calendar (see src/lib/seasons.ts).
+   */
   season: Season;
+  /** Defaults to "auto": the room follows the date and the user's hemisphere. */
+  seasonMode?: 'auto' | 'fixed';
+  hemisphere?: 'auto' | Hemisphere;
+  /** Holidays the user has switched off. All five are on by default. */
+  holidaysOff?: HolidayId[];
   weather: Weather;
   lampOn: boolean;
   /** Ceiling fan light. On/off only — day, dusk, and night stay on the window. */
@@ -63,10 +75,14 @@ export interface Environment {
   musicOn: boolean;
   musicProvider: MusicProvider;
   soundCloudUrl?: string;
-  entryMusic?: "off" | "mellow" | "spotify" | "soundcloud";
-  crtColor?: "blue" | "green" | "purple" | "pink" | "orange" | "red" | "coastal";
+  entryMusic?: 'off' | 'mellow' | 'spotify' | 'soundcloud';
+  crtColor?: 'blue' | 'green' | 'purple' | 'pink' | 'orange' | 'red' | 'coastal';
   volume: number; // 0..1
   ambienceVolume: number; // 0..1
+  /** Hearth crackle in Woodland's fall and winter. Undefined means on. */
+  fireplaceSound?: boolean;
+  /** When the room was last tidied (ms). Drives cosmetic dust only. Missing means a freshly started clock. */
+  tidiedAt?: number;
   /** When true, map pins cannot be dragged (click still opens edit). */
   pinsLocked: boolean;
 }
@@ -74,11 +90,11 @@ export interface Environment {
 /** Lights, weather, and hour the door's "tidy up" restores. Memories and decorations stay. */
 export const TIDY_ROOM: Pick<
   Environment,
-  "timeMode" | "season" | "weather" | "lampOn" | "ceilingOn" | "shelfLit" | "pinsLocked"
+  'timeMode' | 'season' | 'weather' | 'lampOn' | 'ceilingOn' | 'shelfLit' | 'pinsLocked'
 > = {
-  timeMode: "auto",
-  season: "autumn",
-  weather: "clear",
+  timeMode: 'auto',
+  season: 'autumn',
+  weather: 'clear',
   lampOn: true,
   ceilingOn: true,
   shelfLit: true,
@@ -104,7 +120,7 @@ export interface PageNote {
 }
 
 /** Whose eyes are we previewing the room through (local "View as"). */
-export type ViewAs = "owner" | "close" | "friend" | "public";
+export type ViewAs = 'owner' | 'close' | 'friend' | 'public';
 
 export interface MemoryPin {
   bookId?: string;
@@ -139,17 +155,17 @@ export interface Progress {
 }
 
 export interface AppState {
-  timeCapsules?: import("../components/TimeCapsule").Capsule[];
-  displayCaseScans?: Array<{id:string;title:string;modelSrc:string;shelf:number;slot:number}>;
+  timeCapsules?: import('../components/TimeCapsule').Capsule[];
+  displayCaseScans?: Array<{id: string; title: string; modelSrc: string; shelf: number; slot: number}>;
   cardBinders?: import('../lib/cardBinders').CardBinder[];
   /** The card binder currently left on the writing desk. Omitted when a scrapbook or nothing is there. */
   deskBinderId?: string;
   /** Portable backup payload only; never hydrated into the normal room. */
-  originalFiles?: Record<string,string>;
+  originalFiles?: Record<string, string>;
   framePhotoId?: string;
   discoveries?: import('../lib/discoveries').DiscoveryState;
-  achievementBaseline?: { elements: string[]; books: string[]; pins: string[]; guests: string[] };
-  latestPrint?: { src: string; photoId?: string; printedAt: number };
+  achievementBaseline?: {elements: string[]; books: string[]; pins: string[]; guests: string[]};
+  latestPrint?: {src: string; photoId?: string; printedAt: number};
   version: number;
   profile: Profile;
   books: Scrapbook[];
@@ -157,8 +173,21 @@ export interface AppState {
   archive: ArchivePhoto[];
   archiveTabs: ArchiveTab[];
   environment: Environment;
-  ownedRoomThemes?: ("woodland" | "beachfront" | "cyberpunk")[];
-  roomDecor?: {owned:string[];sillItem?:string;posterItem?:string;neonCherry?:boolean;neonSign?:'neon-cherries'|'neon-heart'|null;snakePaused?:boolean;layouts?:Partial<Record<"woodland"|"beachfront"|"cyberpunk",{sillItem?:string;posterItem?:string;crtColor?:Environment['crtColor']}>>};
+  ownedRoomThemes?: ('woodland' | 'beachfront' | 'cyberpunk')[];
+  roomDecor?: {
+    owned: string[];
+    sillItem?: string;
+    posterItem?: string;
+    neonCherry?: boolean;
+    neonSign?: 'neon-cherries' | 'neon-heart' | null;
+    snakePaused?: boolean;
+    layouts?: Partial<
+      Record<
+        'woodland' | 'beachfront' | 'cyberpunk',
+        {sillItem?: string; posterItem?: string; crtColor?: Environment['crtColor']}
+      >
+    >;
+  };
   guestbook: GuestEntry[];
   notes: PageNote[];
   pinNotes: PinNote[];
@@ -170,6 +199,8 @@ export interface AppState {
   receipts: Record<string, number>; // curated-RNG opportunity id -> last shown at
   /** Local drawer-shop currency. No real money. */
   stamps: number;
+  /** Local calendar day (YYYY-MM-DD) the daily stamps were last granted. No streak is kept. */
+  stampsClaimedOn?: string;
   /** Sticker pack ids the drawer has already sold you. Always includes everyday. */
   ownedStickerPacks: string[];
 }
@@ -181,21 +212,25 @@ export interface AchievementDef {
 }
 
 export const ACHIEVEMENTS: AchievementDef[] = [
-  { id: "correspondence", title: "A Little Correspondence", hint: "Keep a discovered letter." },
-  { id: "between-lines", title: "Between the Lines", hint: "Read a note tucked among the books." },
-  { id: "story-kept", title: "A Story Kept", hint: "Read the three letters of a woodland story." },
-  { id: "printed-memory", title: "From Here to There", hint: "Print a photograph and place it in a scrapbook." },
-  { id: "first-photo", title: "First Light", hint: "Place your first photograph." },
-  { id: "full-spread", title: "A Full Page", hint: "Put several photos on one page." },
-  { id: "wordsmith", title: "In Your Own Hand", hint: "Write a caption." },
-  { id: "storyteller", title: "Storyteller", hint: "Write a few captions." },
-  { id: "decorator", title: "A Light Touch", hint: "Add a sticker to a page." },
-  { id: "collector", title: "The Collector", hint: "Keep a good many photographs." },
-  { id: "librarian", title: "The Librarian", hint: "Keep more than one book." },
-  { id: "cartographer", title: "Cartographer", hint: "Pin a memory to the map." },
-  { id: "night-owl", title: "Night Owl", hint: "Visit the room after dark." },
-  { id: "host", title: "A Good Host", hint: "Preview your room as a visitor." },
-  { id: "keeper", title: "Keeper of Days", hint: "Sign the guest book." },
+  {id: 'correspondence', title: 'A Little Correspondence', hint: 'Keep a discovered letter.'},
+  {id: 'between-lines', title: 'Between the Lines', hint: 'Read a note tucked among the books.'},
+  {id: 'story-kept', title: 'A Story Kept', hint: 'Read the three letters of a woodland story.'},
+  {
+    id: 'printed-memory',
+    title: 'From Here to There',
+    hint: 'Print a photograph and place it in a scrapbook.',
+  },
+  {id: 'first-photo', title: 'First Light', hint: 'Place your first photograph.'},
+  {id: 'full-spread', title: 'A Full Page', hint: 'Put several photos on one page.'},
+  {id: 'wordsmith', title: 'In Your Own Hand', hint: 'Write a caption.'},
+  {id: 'storyteller', title: 'Storyteller', hint: 'Write a few captions.'},
+  {id: 'decorator', title: 'A Light Touch', hint: 'Add a sticker to a page.'},
+  {id: 'collector', title: 'The Collector', hint: 'Keep a good many photographs.'},
+  {id: 'librarian', title: 'The Librarian', hint: 'Keep more than one book.'},
+  {id: 'cartographer', title: 'Cartographer', hint: 'Pin a memory to the map.'},
+  {id: 'night-owl', title: 'Night Owl', hint: 'Visit the room after dark.'},
+  {id: 'host', title: 'A Good Host', hint: 'Preview your room as a visitor.'},
+  {id: 'keeper', title: 'Keeper of Days', hint: 'Sign the guest book.'},
 ];
 
-export type { Visibility };
+export type {Visibility};

@@ -1,7 +1,7 @@
 import {pagePixelPoint} from '../lib/pageCoordinates';
-import { useRef } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
-import { clamp } from "../lib/clamp";
+import {useRef} from 'react';
+import type {PointerEvent as ReactPointerEvent} from 'react';
+import {clamp} from '../lib/clamp';
 
 export interface ElementTransform {
   x: number;
@@ -21,7 +21,7 @@ export function useElementGesture(
   get: () => ElementTransform,
   onChange: (patch: Partial<ElementTransform>) => void,
 ) {
-  const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pointers = useRef<Map<number, {x: number; y: number}>>(new Map());
   const start = useRef<{
     rect: DOMRect;
     base: ElementTransform;
@@ -34,8 +34,8 @@ export function useElementGesture(
   } | null>(null);
 
   function pageRect(node: HTMLElement): DOMRect | null {
-    const page = node.closest(".ks-page") as HTMLElement | null;
-    return page ? new DOMRect(0,0,page.offsetWidth,page.offsetHeight) : null;
+    const page = node.closest('.ks-page') as HTMLElement | null;
+    return page ? new DOMRect(0, 0, page.offsetWidth, page.offsetHeight) : null;
   }
 
   function begin(node: HTMLElement) {
@@ -44,7 +44,7 @@ export function useElementGesture(
     const pts = [...pointers.current.values()];
     const base = get();
     if (pts.length === 1) {
-      start.current = { rect, base, px: pts[0].x, py: pts[0].y, dist: 0, angle: 0, mx: 0, my: 0 };
+      start.current = {rect, base, px: pts[0].x, py: pts[0].y, dist: 0, angle: 0, mx: 0, my: 0};
     } else if (pts.length >= 2) {
       const [a, b] = pts;
       start.current = {
@@ -62,15 +62,15 @@ export function useElementGesture(
 
   const onPointerDown = (e: ReactPointerEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
-    if (target.closest("[data-no-drag]")) return;
+    if (target.closest('[data-no-drag]')) return;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    pointers.current.set(e.pointerId, pagePixelPoint(e.currentTarget,e.clientX,e.clientY));
+    pointers.current.set(e.pointerId, pagePixelPoint(e.currentTarget, e.clientX, e.clientY));
     begin(e.currentTarget as HTMLElement);
   };
 
   const onPointerMove = (e: ReactPointerEvent<HTMLElement>) => {
     if (!pointers.current.has(e.pointerId)) return;
-    pointers.current.set(e.pointerId, pagePixelPoint(e.currentTarget,e.clientX,e.clientY));
+    pointers.current.set(e.pointerId, pagePixelPoint(e.currentTarget, e.clientX, e.clientY));
     const s = start.current;
     if (!s) return;
     const pts = [...pointers.current.values()];
@@ -78,7 +78,7 @@ export function useElementGesture(
     if (pts.length === 1) {
       const dx = ((pts[0].x - s.px) / s.rect.width) * 100;
       const dy = ((pts[0].y - s.py) / s.rect.height) * 100;
-      onChange({ x: clamp(s.base.x + dx, 2, 98), y: clamp(s.base.y + dy, 2, 98) });
+      onChange({x: clamp(s.base.x + dx, 2, 98), y: clamp(s.base.y + dy, 2, 98)});
     } else if (pts.length >= 2) {
       const [a, b] = pts;
       const dist = Math.hypot(b.x - a.x, b.y - a.y);
@@ -106,5 +106,5 @@ export function useElementGesture(
     else start.current = null;
   };
 
-  return { onPointerDown, onPointerMove, onPointerUp: end, onPointerCancel: end };
+  return {onPointerDown, onPointerMove, onPointerUp: end, onPointerCancel: end};
 }

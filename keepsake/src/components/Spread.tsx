@@ -1,5 +1,5 @@
-import type { Page, PageElement } from "../types/scrapbook";
-import { ScrapbookPage } from "./ScrapbookPage";
+import type {Page, PageElement} from '../types/scrapbook';
+import {ScrapbookPage} from './ScrapbookPage';
 
 interface Props {
   leftPage: Page | null;
@@ -16,7 +16,7 @@ interface Props {
   onEditText: (id: string, text: string) => void;
   drawColor?: string | null;
   drawWidth?: number;
-  onDrawStroke?: (pageId: string, color: string, points: { x: number; y: number }[]) => void;
+  onDrawStroke?: (pageId: string, color: string, points: {x: number; y: number}[]) => void;
 }
 
 export function Spread({
@@ -53,16 +53,8 @@ export function Spread({
   return (
     <div className="ks-stage">
       <div className="ks-spread">
-        <ScrapbookPage
-          page={leftPage}
-          active={!!leftPage && activePageId === leftPage.id}
-          {...shared}
-        />
-        <ScrapbookPage
-          page={rightPage}
-          active={!!rightPage && activePageId === rightPage.id}
-          {...shared}
-        />
+        <ScrapbookPage page={leftPage} active={!!leftPage && activePageId === leftPage.id} {...shared} />
+        <ScrapbookPage page={rightPage} active={!!rightPage && activePageId === rightPage.id} {...shared} />
       </div>
     </div>
   );

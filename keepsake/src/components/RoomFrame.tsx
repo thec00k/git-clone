@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type {ReactNode} from 'react';
 
 interface Props {
   header?: ReactNode;
@@ -8,16 +8,16 @@ interface Props {
 }
 
 /** The warm room shell that wraps every screen. */
-export function RoomFrame({ header, footer, children, className }: Props) {
+export function RoomFrame({header, footer, children, className}: Props) {
   return (
-    <div className={`ks-room relative flex h-dvh flex-col overflow-hidden${className ? ` ${className}` : ""}`}>
+    <div
+      className={`ks-room relative flex h-dvh flex-col overflow-hidden${className ? ` ${className}` : ''}`}
+    >
       <a className="ks-skip" href="#ks-main">
         Skip to the page
       </a>
       {header && (
-        <header className="flex shrink-0 items-center justify-between px-4 py-3 sm:px-6">
-          {header}
-        </header>
+        <header className="flex shrink-0 items-center justify-between px-4 py-3 sm:px-6">{header}</header>
       )}
       <main id="ks-main" className="relative flex min-h-0 flex-1 flex-col">
         {children}

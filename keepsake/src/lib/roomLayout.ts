@@ -1,37 +1,39 @@
-import type { HotspotId } from "./hotspots";
+import type {HotspotId} from './hotspots';
 
-export type RoomFace = "front" | "left" | "right";
+export type RoomFace = 'front' | 'left' | 'right';
 
-export type RoomLayout = "glb" | "chamber" | "flat";
+export type RoomLayout = 'glb' | 'chamber' | 'flat';
 
 /** How long the chamber yaw transition runs (keep in sync with `.ks-yaw`). */
 export const YAW_MS = 820;
 
-export function roomLayoutFromSearch(search: string = typeof window === "undefined" ? "" : window.location.search): RoomLayout {
-  const room = new URLSearchParams(search).get("room");
-  if (room === "flat") return "flat";
-  if (room === "chamber") return "chamber";
-  return "glb";
+export function roomLayoutFromSearch(
+  search: string = typeof window === 'undefined' ? '' : window.location.search,
+): RoomLayout {
+  const room = new URLSearchParams(search).get('room');
+  if (room === 'flat') return 'flat';
+  if (room === 'chamber') return 'chamber';
+  return 'glb';
 }
 
 /** Which wall the tour (and the side rails) should face for a given object. */
 export function faceForHotspot(id: HotspotId | null | undefined): RoomFace {
-  if (id === "shelf") return "right";
-  if (id === "map") return "left";
-  return "front";
+  if (id === 'shelf') return 'right';
+  if (id === 'map') return 'left';
+  return 'front';
 }
 
 export function yawDegrees(face: RoomFace): number {
-  if (face === "left") return -90;
-  if (face === "right") return 90;
+  if (face === 'left') return -90;
+  if (face === 'right') return 90;
   return 0;
 }
 
-export function nextFace(face: RoomFace, dir: "left" | "right"): RoomFace {
-  if (dir === "left") {
-    if (face === "right") return "front";
-    return "left";
+export function nextFace(face: RoomFace, dir: 'left' | 'right'): RoomFace {
+  if (dir === 'left') {
+    if (face === 'right') return 'front';
+    return 'left';
   }
-  if (face === "left") return "front";
-  return "right";
+  if (face === 'left') return 'front';
+  return 'right';
 }

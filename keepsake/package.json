@@ -17,13 +17,18 @@
     "preview": "vite preview",
     "check:storage": "node scripts/check-storage-browser.mjs",
     "check:room": "node scripts/check-woodland.mjs",
+    "check:start-camera": "node scripts/check-start-camera.mjs",
     "check:acceptance": "node scripts/check-acceptance.mjs",
     "check:editor": "node scripts/check-editor.mjs",
     "check:memories": "node scripts/check-memory-features.mjs",
     "check:discoveries": "node scripts/check-discoveries.mjs && node scripts/check-discovery-geometry.mjs",
     "check:workbench": "node scripts/check-workbench.mjs && node scripts/check-furniture.mjs",
     "check:workbench:browser": "node scripts/check-workbench-browser.mjs",
-    "scanner:receive": "node scripts/scanner-receiver.mjs"
+    "scanner:receive": "node scripts/scanner-receiver.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:db": "bash supabase/tests/run.sh",
+    "check:licences": "node scripts/check-licences.mjs --report"
   },
   "dependencies": {
     "@paper-design/shaders": "0.0.81",
@@ -43,7 +48,9 @@
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^6.0.4",
+    "fake-indexeddb": "^6.2.5",
     "oxlint": "^1.75.0",
+    "prettier": "^3.9.10",
     "typescript": "~6.0.2",
     "vite": "^8.2.0"
   }

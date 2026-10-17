@@ -1,0 +1,12 @@
+# Not code, generated, or third-party.
+public/
+art/
+dist/
+node_modules/
+src/generated/
+licences/
+supabase/migrations/
+supabase/tests/
+*.md
+*.html
+package-lock.json

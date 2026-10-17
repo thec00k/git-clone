@@ -1,17 +1,17 @@
-import { use, useEffect, useMemo } from "react";
-import {loadRoomAsset} from "./roomAssetCache";
-import * as THREE from "three";
-import { LAMP_BULB } from "../../lib/roomHotspots";
-import type { Environment } from "../../types/app";
-import type { Phase } from "../room/RoomFurniture";
-import {useActiveRoom} from "./useActiveRoom";
+import {use, useEffect, useMemo} from 'react';
+import {loadRoomAsset, releaseRoomAssetsExcept} from './roomAssetCache';
+import * as THREE from 'three';
+import {LAMP_BULB} from '../../lib/roomHotspots';
+import type {Environment} from '../../types/app';
+import type {Phase} from '../room/RoomFurniture';
+import {useActiveRoom} from './useActiveRoom';
 import {BOOKSHELF_WINDOW_SHIFT} from './furnitureLayout';
 
 /** Clone materials once. The GLTF cache retains ownership of geometry/textures. */
 export function useRoomAsset(phase: Phase, environment: Environment) {
   const activeRoom = useActiveRoom();
   const {scene} = use(loadRoomAsset(activeRoom.asset));
-  const { cloned, materials } = useMemo(() => {
+  const {cloned, materials} = useMemo(() => {
     const cloned = scene.clone(true);
     const materials: THREE.Material[] = [];
     const staticMaterials = new Map<THREE.Material, THREE.Material>();
@@ -20,11 +20,12 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
       obj.castShadow = true;
       obj.receiveShadow = true;
       // Tiny trim receives light but does not need its own shadow-map pass.
-      if (activeRoom.study && obj.name.startsWith("Quality_")) obj.castShadow = false;
+      if (activeRoom.study && obj.name.startsWith('Quality_')) obj.castShadow = false;
       const copy = (material: THREE.Material) => {
         const share = activeRoom.study && obj.userData.quality_static_batch === true;
         if (share && staticMaterials.has(material)) return staticMaterials.get(material)!;
-        const local = material.clone(); materials.push(local);
+        const local = material.clone();
+        materials.push(local);
         if (share) staticMaterials.set(material, local);
         return local;
       };
@@ -33,65 +34,92 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
       // frame (with its own shader variants). Small glass pieces read the same as alpha glass.
       for (const mat of Array.isArray(obj.material) ? obj.material : [obj.material]) {
         if (mat instanceof THREE.MeshPhysicalMaterial && mat.transmission > 0) {
-          mat.opacity = Math.min(mat.opacity, Math.max(.18, 1 - mat.transmission * .85));
-          mat.transmission = 0; mat.transparent = true; mat.depthWrite = false;
+          mat.opacity = Math.min(mat.opacity, Math.max(0.18, 1 - mat.transmission * 0.85));
+          mat.transmission = 0;
+          mat.transparent = true;
+          mat.depthWrite = false;
           obj.castShadow = false;
         }
       }
-      if (/Beachfront_Prop_(Fishbowl|Bowl_Rim|Bowl_Water|Waterline)|Beachfront_Casement_.*_Glass/.test(obj.name)) {
+      if (
+        /Beachfront_Prop_(Fishbowl|Bowl_Rim|Bowl_Water|Waterline)|Beachfront_Casement_.*_Glass/.test(obj.name)
+      ) {
         obj.castShadow = false;
         obj.receiveShadow = false;
         const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
-        mats.forEach(mat => { mat.depthWrite = false; mat.side = THREE.DoubleSide; });
+        mats.forEach(mat => {
+          mat.depthWrite = false;
+          mat.side = THREE.DoubleSide;
+        });
       }
       if (/Beachfront_Prop_Fish_(Tail|Fin)/.test(obj.name)) {
         const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
-        mats.forEach(mat => { mat.side = THREE.DoubleSide; });
+        mats.forEach(mat => {
+          mat.side = THREE.DoubleSide;
+        });
       }
-      if(obj.name==='Semantic_Rug_terracotta'){
-        const mats=Array.isArray(obj.material)?obj.material:[obj.material];
-        mats.forEach(mat=>{if(mat instanceof THREE.MeshStandardMaterial)mat.color.set(activeRoom.id==='beachfront'?'#b5b49b':activeRoom.id==='cyberpunk'?'#554166':'#909577');});
+      if (obj.name === 'Semantic_Rug_terracotta') {
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        mats.forEach(mat => {
+          if (mat instanceof THREE.MeshStandardMaterial)
+            mat.color.set(
+              activeRoom.id === 'beachfront'
+                ? '#b5b49b'
+                : activeRoom.id === 'cyberpunk'
+                  ? '#554166'
+                  : '#909577',
+            );
+        });
       }
-      if (obj.name === "Outside_View" || obj.name === "Win_Glass") {
+      if (obj.name === 'Outside_View' || obj.name === 'Win_Glass') {
         const material = new THREE.MeshBasicMaterial();
-        materials.push(material); obj.material = material;
-        if (activeRoom.id !== "classic") obj.visible = false;
+        materials.push(material);
+        obj.material = material;
+        obj.visible = false;
       }
     });
-    const shelf=cloned.getObjectByName('ks_shelf');
-    if(shelf&&!activeRoom.study) shelf.position.z += BOOKSHELF_WINDOW_SHIFT;
-    const clock=cloned.getObjectByName('ks_clock');
-    if(clock&&!activeRoom.study) clock.position.x -= .06;
+    const shelf = cloned.getObjectByName('ks_shelf');
+    if (shelf && !activeRoom.study) shelf.position.z += BOOKSHELF_WINDOW_SHIFT;
+    const clock = cloned.getObjectByName('ks_clock');
+    if (clock && !activeRoom.study) clock.position.x -= 0.06;
     cloned.updateMatrixWorld(true);
-    const beanbag=cloned.getObjectByName('Beanbag');
-    if(beanbag&&!activeRoom.study){const box=new THREE.Box3().setFromObject(beanbag);const delta=new THREE.Vector3(-2.38-box.min.x,0,2.005-box.max.z);beanbag.position.add(delta);}
-    return { cloned, materials };
+    const beanbag = cloned.getObjectByName('Beanbag');
+    if (beanbag && !activeRoom.study) {
+      const box = new THREE.Box3().setFromObject(beanbag);
+      const delta = new THREE.Vector3(-2.38 - box.min.x, 0, 2.005 - box.max.z);
+      beanbag.position.add(delta);
+    }
+    return {cloned, materials};
   }, [scene, activeRoom.id, activeRoom.study]);
   useEffect(() => () => materials.forEach(material => material.dispose()), [materials]);
+  // Runs after the commit that swapped rooms, so the previous room is off screen.
+  useEffect(() => releaseRoomAssetsExcept(activeRoom.asset), [activeRoom.asset]);
   useEffect(() => {
     cloned.traverse(obj => {
       if (!(obj instanceof THREE.Mesh)) return;
       const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
       for (const mat of mats) {
-        if (obj.name === "Outside_View" && mat instanceof THREE.MeshBasicMaterial) {
-          mat.color.set(phase === "night" ? "#1a2230" : phase === "dusk" ? "#5a4034" : "#5c666e");
+        if (obj.name === 'Outside_View' && mat instanceof THREE.MeshBasicMaterial) {
+          mat.color.set(phase === 'night' ? '#1a2230' : phase === 'dusk' ? '#5a4034' : '#5c666e');
         }
-        if (obj.name === "Win_Glass" && mat instanceof THREE.MeshBasicMaterial) {
-          mat.color.set(phase === "night" ? "#243040" : "#6e7a82");
-          mat.transparent = true; mat.opacity = .25; mat.depthWrite = false;
+        if (obj.name === 'Win_Glass' && mat instanceof THREE.MeshBasicMaterial) {
+          mat.color.set(phase === 'night' ? '#243040' : '#6e7a82');
+          mat.transparent = true;
+          mat.opacity = 0.25;
+          mat.depthWrite = false;
         }
         if (!(mat instanceof THREE.MeshStandardMaterial)) continue;
         if (obj.name === 'Beachfront_Prop_Lamp_Shade') {
           mat.emissive.set('#ffe5bb');
-          mat.emissiveIntensity = environment.lampOn ? .3 : 0;
+          mat.emissiveIntensity = environment.lampOn ? 0.3 : 0;
         }
-        if (obj.name === "CRT_Screen") {
-          mat.emissive.set(environment.musicOn ? "#3ec8c8" : "#102428");
-          mat.emissiveIntensity = environment.musicOn ? 1.4 : .15;
+        if (obj.name === 'CRT_Screen') {
+          mat.emissive.set(environment.musicOn ? '#3ec8c8' : '#102428');
+          mat.emissiveIntensity = environment.musicOn ? 1.4 : 0.15;
         }
         if (obj.name === LAMP_BULB || /lamp.*bulb/i.test(obj.name)) {
-          mat.emissive.set(environment.lampOn ? "#ffe6b0" : "#3a3228");
-          mat.emissiveIntensity = environment.lampOn ? 2.4 : .08;
+          mat.emissive.set(environment.lampOn ? '#ffe6b0' : '#3a3228');
+          mat.emissiveIntensity = environment.lampOn ? 2.4 : 0.08;
         }
       }
     });

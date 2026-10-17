@@ -1,19 +1,20 @@
 import {useApp} from '../../store/appStore';
-import { useEffect, useRef, useState } from "react";
-import { CHAMBER_HOTSPOTS } from "../../lib/hotspots";
-import type { HotspotId } from "../../lib/hotspots";
-import { nextFace, yawDegrees, YAW_MS } from "../../lib/roomLayout";
-import type { RoomFace } from "../../lib/roomLayout";
-import { canSee } from "../../lib/permissions";
-import { COVER_STYLES } from "../../types/scrapbook";
-import type { Scrapbook } from "../../types/scrapbook";
-import type { Environment, MemoryPin } from "../../types/app";
-import type { ViewAs } from "../../types/app";
-import { BookshelfWall, CorkboardWall, SEASON_TINT, WALL_PAINT, type Phase } from "./RoomFurniture";
-import { DeskLayer, WindowPane } from "./RoomFlat";
+import {useEffect, useRef, useState} from 'react';
+import {CHAMBER_HOTSPOTS} from '../../lib/hotspots';
+import type {HotspotId} from '../../lib/hotspots';
+import {nextFace, yawDegrees, YAW_MS} from '../../lib/roomLayout';
+import type {RoomFace} from '../../lib/roomLayout';
+import {canSee} from '../../lib/permissions';
+import {COVER_STYLES} from '../../types/scrapbook';
+import type {Scrapbook} from '../../types/scrapbook';
+import type {Environment, MemoryPin} from '../../types/app';
+import type {ViewAs} from '../../types/app';
+import {BookshelfWall, CorkboardWall, SEASON_TINT, WALL_PAINT, type Phase} from './RoomFurniture';
+import {DeskLayer, WindowPane} from './RoomFlat';
+import {ignorePageKey} from '../../lib/keyTargets';
 
 function prefersReducedMotion() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 export function RoomChamber({
@@ -47,22 +48,24 @@ export function RoomChamber({
   viewAs: ViewAs;
   touring: boolean;
   tourFocus: HotspotId | null;
-  layer: (depth: number) => { transform: string };
+  layer: (depth: number) => {transform: string};
   onOpenWindow: () => void;
   onOpenMusic: () => void;
   onSetEnvironment: (patch: Partial<Environment>) => void;
-  onGo: (view: "shelf" | "atlas" | "archive" | "book" | "guestbook") => void;
+  onGo: (view: 'shelf' | 'atlas' | 'archive' | 'book' | 'guestbook') => void;
   onOpenBook: (id: string) => void;
   onRenameBook: (id: string, title: string) => void;
-  onPlaceBook: (id: string, pos: { shelfRow: number; shelfX: number }) => void;
+  onPlaceBook: (id: string, pos: {shelfRow: number; shelfX: number}) => void;
   onNewBook: () => void;
 }) {
-  const {state}=useApp();
-  const cover = COVER_STYLES[activeBook?.coverStyle ?? "cocoa"];
-  const tourClass = (id: HotspotId) => (tourFocus === id ? " ks-obj--tour" : "");
-  const visibleBooks = books.filter((b) => canSee(b.visibility, viewAs, state.profile.allowFriendScrapbooks===true));
+  const {state} = useApp();
+  const cover = COVER_STYLES[activeBook?.coverStyle ?? 'cocoa'];
+  const tourClass = (id: HotspotId) => (tourFocus === id ? ' ks-obj--tour' : '');
+  const visibleBooks = books.filter(b =>
+    canSee(b.visibility, viewAs, state.profile.allowFriendScrapbooks === true),
+  );
   const yaw = yawDegrees(roomFace);
-  const par = roomFace === "front" && !touring;
+  const par = roomFace === 'front' && !touring;
   const [flat, setFlat] = useState(true);
   const faceRef = useRef(roomFace);
 
@@ -81,37 +84,35 @@ export function RoomChamber({
   useEffect(() => {
     if (touring) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLElement && e.target.closest("input, textarea, select, [contenteditable='true']")) {
-        return;
-      }
-      if (e.key === "ArrowLeft") {
+      if (ignorePageKey(e)) return;
+      if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setRoomFace(nextFace(roomFace, "left"));
+        setRoomFace(nextFace(roomFace, 'left'));
       }
-      if (e.key === "ArrowRight") {
+      if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setRoomFace(nextFace(roomFace, "right"));
+        setRoomFace(nextFace(roomFace, 'right'));
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [touring, roomFace, setRoomFace]);
 
   return (
     <div className="ks-chamber" data-room-face={roomFace} aria-label="The scrapbook room">
       <div
-        className={`ks-yaw${flat ? " is-flat" : " is-turning"}`}
-        style={{ ["--yaw" as string]: `${yaw}deg` }}
+        className={`ks-yaw${flat ? ' is-flat' : ' is-turning'}`}
+        style={{['--yaw' as string]: `${yaw}deg`}}
       >
         <div
-          className={`ks-wall ks-wall-front${roomFace === "front" ? " is-facing" : ""}`}
+          className={`ks-wall ks-wall-front${roomFace === 'front' ? ' is-facing' : ''}`}
           data-wall="front"
-          aria-hidden={roomFace !== "front"}
+          aria-hidden={roomFace !== 'front'}
         >
           <WallPaint phase={phase} season={environment.season} />
           <div className="pointer-events-none absolute inset-0" style={par ? layer(6) : undefined}>
             <button
-              className={`ks-obj${tourClass("window")}`}
+              className={`ks-obj${tourClass('window')}`}
               data-tour="window"
               style={CHAMBER_HOTSPOTS.window}
               onClick={onOpenWindow}
@@ -129,7 +130,7 @@ export function RoomChamber({
             activeBook={activeBook}
             cover={cover}
             tourClass={tourClass}
-            layer={par ? layer : () => ({ transform: "none" })}
+            layer={par ? layer : () => ({transform: 'none'})}
             onOpenMusic={onOpenMusic}
             onGo={onGo}
             hotspots={{
@@ -142,17 +143,17 @@ export function RoomChamber({
         </div>
 
         <div
-          className={`ks-wall ks-wall-left${roomFace === "left" ? " is-facing" : ""}`}
+          className={`ks-wall ks-wall-left${roomFace === 'left' ? ' is-facing' : ''}`}
           data-wall="left"
-          aria-hidden={roomFace !== "left"}
+          aria-hidden={roomFace !== 'left'}
         >
           <WallPaint phase={phase} season={environment.season} />
           <div className="ks-wall-stage">
             <button
               type="button"
-              className={`ks-obj ks-wall-piece${tourClass("map")}`}
+              className={`ks-obj ks-wall-piece${tourClass('map')}`}
               data-tour="map"
-              onClick={() => onGo("atlas")}
+              onClick={() => onGo('atlas')}
               aria-hidden="true"
               tabIndex={-1}
               aria-label="Open the memory map"
@@ -164,18 +165,18 @@ export function RoomChamber({
         </div>
 
         <div
-          className={`ks-wall ks-wall-right${roomFace === "right" ? " is-facing" : ""}`}
+          className={`ks-wall ks-wall-right${roomFace === 'right' ? ' is-facing' : ''}`}
           data-wall="right"
-          aria-hidden={roomFace !== "right"}
+          aria-hidden={roomFace !== 'right'}
         >
           <WallPaint phase={phase} season={environment.season} />
           <div className="ks-wall-stage">
-            <div className={`ks-wall-piece${tourClass("shelf")}`} data-tour="shelf">
+            <div className={`ks-wall-piece${tourClass('shelf')}`} data-tour="shelf">
               <BookshelfWall
                 books={visibleBooks}
-                canEdit={viewAs === "owner"}
+                canEdit={viewAs === 'owner'}
                 lit={environment.shelfLit}
-                onToggleLit={() => onSetEnvironment({ shelfLit: !environment.shelfLit })}
+                onToggleLit={() => onSetEnvironment({shelfLit: !environment.shelfLit})}
                 onOpenBook={onOpenBook}
                 onRename={onRenameBook}
                 onPlace={onPlaceBook}
@@ -191,46 +192,61 @@ export function RoomChamber({
   );
 }
 
-function WallPaint({ phase, season }: { phase: Phase; season: string }) {
+function WallPaint({phase, season}: {phase: Phase; season: string}) {
   return (
     <>
       <div
         className="absolute inset-0"
         style={{
-          background:
-            WALL_PAINT[phase],
+          background: WALL_PAINT[phase],
         }}
       />
-      <div className="absolute inset-0" style={{ background: SEASON_TINT[season] }} />
+      <div className="absolute inset-0" style={{background: SEASON_TINT[season]}} />
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ background: "linear-gradient(120deg, rgb(255 236 210 / 0.16), transparent 46%)" }}
+        style={{background: 'linear-gradient(120deg, rgb(255 236 210 / 0.16), transparent 46%)'}}
       />
       <div className="ks-wall-skirting" aria-hidden="true" />
     </>
   );
 }
 
-function WallReturns({ face, onTurn }: { face: RoomFace; onTurn: (f: RoomFace) => void }) {
+function WallReturns({face, onTurn}: {face: RoomFace; onTurn: (f: RoomFace) => void}) {
   return (
     <nav className="ks-returns" aria-label="Turn the room">
-      {face === "front" && (
+      {face === 'front' && (
         <>
-          <button type="button" className="ks-return ks-return--left ks-return--map" onClick={() => onTurn("left")}>
+          <button
+            type="button"
+            className="ks-return ks-return--left ks-return--map"
+            onClick={() => onTurn('left')}
+          >
             <span className="ks-return-label">Corkboard map</span>
           </button>
-          <button type="button" className="ks-return ks-return--right ks-return--shelf" onClick={() => onTurn("right")}>
+          <button
+            type="button"
+            className="ks-return ks-return--right ks-return--shelf"
+            onClick={() => onTurn('right')}
+          >
             <span className="ks-return-label">Bookshelf</span>
           </button>
         </>
       )}
-      {face === "left" && (
-        <button type="button" className="ks-return ks-return--right ks-return--desk" onClick={() => onTurn("front")}>
+      {face === 'left' && (
+        <button
+          type="button"
+          className="ks-return ks-return--right ks-return--desk"
+          onClick={() => onTurn('front')}
+        >
           <span className="ks-return-label">Desk</span>
         </button>
       )}
-      {face === "right" && (
-        <button type="button" className="ks-return ks-return--left ks-return--desk" onClick={() => onTurn("front")}>
+      {face === 'right' && (
+        <button
+          type="button"
+          className="ks-return ks-return--left ks-return--desk"
+          onClick={() => onTurn('front')}
+        >
           <span className="ks-return-label">Desk</span>
         </button>
       )}

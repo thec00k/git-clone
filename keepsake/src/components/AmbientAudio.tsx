@@ -1,13 +1,15 @@
-import { useEffect } from "react";
-import { useApp } from "../store/appStore";
-import { setMusic, setVolume,preloadPageSound } from "../lib/audio";
+import {useEffect} from 'react';
+import {useApp} from '../store/appStore';
+import {setMusic, setVolume, preloadPageSound} from '../lib/audio';
 
 /** Mounts once; drives the generative ambient pad from room settings. */
 export function AmbientAudio() {
-  useEffect(()=>{void preloadPageSound().catch(()=>{});},[]);
-  const { environment } = useApp();
+  useEffect(() => {
+    void preloadPageSound().catch(() => {});
+  }, []);
+  const {environment} = useApp();
 
-  const ambientActive = environment.musicOn && environment.musicProvider === "ambient";
+  const ambientActive = environment.musicOn && environment.musicProvider === 'ambient';
 
   useEffect(() => {
     setMusic(ambientActive, environment.volume);

@@ -1,34 +1,37 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Settings2, Sparkles } from "lucide-react";
-import { useApp } from "../../store/appStore";
-import { useNav } from "../../store/nav";
-import { VIEW_AS_LABEL } from "../../lib/permissions";
-import type { ViewAs } from "../../types/app";
-import { ACHIEVEMENTS } from "../../types/app";
-import { roomLayoutFromSearch } from "../../lib/roomLayout";
-import { tourAlreadyFinished } from "../../lib/tour";
-import { EnvironmentPanel } from "./EnvironmentPanel";
-import { LeavePanel } from "./LeavePanel";
-import { AchievementsToast } from "./AchievementsToast";
-import { RoomTour } from "./RoomTour";
-import { RoomCurator } from "./RoomCurator";
+import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Settings2, Sparkles} from 'lucide-react';
+import {useApp} from '../../store/appStore';
+import {useNav} from '../../store/nav';
+import {VIEW_AS_LABEL} from '../../lib/permissions';
+import type {ViewAs} from '../../types/app';
+import {ACHIEVEMENTS} from '../../types/app';
+import {roomLayoutFromSearch} from '../../lib/roomLayout';
+import {tourAlreadyFinished} from '../../lib/tour';
+import {EnvironmentPanel} from './EnvironmentPanel';
+import {LeavePanel} from './LeavePanel';
+import {AchievementsToast} from './AchievementsToast';
+import {RoomTour} from './RoomTour';
+import {RoomCurator} from './RoomCurator';
 
-import { useFocusTrap } from "../../hooks/useFocusTrap";
-import { PhaseBadge, phaseOf } from "./RoomFurniture";
-import { RoomFlat } from "./RoomFlat";
+import {useFocusTrap} from '../../hooks/useFocusTrap';
+import {useSeasonal} from '../../hooks/useSeasonal';
+import {PhaseBadge, phaseOf} from './RoomFurniture';
+import {RoomFlat} from './RoomFlat';
 import {useActiveRoom} from '../room3d/useActiveRoom';
-import { RoomChamber } from "./RoomChamber";
-const RoomScene3D = lazy(() => import("../room3d/RoomScene3D").then(module => ({ default: module.RoomScene3D })));
-import { WebGLGuard } from "../room3d/WebGLGuard";
-import { HomeChip } from "../views/ViewShell";
-import { RoomListen } from "./RoomListen";
-import { useListen } from "../../store/listen";
-import type { ListenId } from "../../lib/roomListen";
+import {RoomChamber} from './RoomChamber';
+const RoomScene3D = lazy(() =>
+  import('../room3d/RoomScene3D').then(module => ({default: module.RoomScene3D})),
+);
+import {WebGLGuard} from '../room3d/WebGLGuard';
+import {HomeChip} from '../views/ViewShell';
+import {RoomListen} from './RoomListen';
+import {useListen} from '../../store/listen';
+import type {ListenId} from '../../lib/roomListen';
 
 export function Room() {
   const {
     state,
-    environment,
+    environment: storedEnvironment,
     activeBook,
     recordProgress,
     newlyUnlocked,
@@ -40,61 +43,73 @@ export function Room() {
     addBook,
     setEnvironment,
   } = useApp();
-  const { go, viewAs, setViewAs, touring, tourFocus, startTour, roomFace, setRoomFace } = useNav();
-  const { scene } = useListen();
+  // The room shows the season the calendar (or the user's override) says it is.
+  const seasonal = useSeasonal();
+  const environment = useMemo(
+    () => ({...storedEnvironment, season: seasonal.season}),
+    [storedEnvironment, seasonal.season],
+  );
+  const {go, viewAs, setViewAs, touring, tourFocus, startTour, roomFace, setRoomFace} = useNav();
+  const {scene} = useListen();
   const [envOpen, setEnvOpen] = useState(false);
   const [achOpen, setAchOpen] = useState(false);
-  const [settingsSection, setSettingsSection] = useState<'appearance'|'music'>('appearance');
-  const setMusicOpen = (_open: boolean) => { setSettingsSection('music'); setEnvOpen(true); };
+  const [settingsSection, setSettingsSection] = useState<'appearance' | 'music'>('appearance');
+  const setMusicOpen = (_open: boolean) => {
+    setSettingsSection('music');
+    setEnvOpen(true);
+  };
   const [doorOpen, setDoorOpen] = useState(false);
   // The scene registers this callback with ListenProvider; keep it stable across context updates.
   const openDoor = useCallback(() => setDoorOpen(true), []);
   const sceneRef = useRef<HTMLDivElement>(null);
-  const [par, setPar] = useState({ x: 0, y: 0 });
+  const [par, setPar] = useState({x: 0, y: 0});
   const layout = useMemo(() => roomLayoutFromSearch(), []);
   const activeRoom = useActiveRoom();
   const roomAsset = activeRoom.asset;
   useEffect(() => {
     if (layout !== 'glb') return;
     // Start the selected room download while the 3D JavaScript is loading.
-    const preload=document.createElement('link');
-    preload.rel='preload';preload.as='fetch';preload.crossOrigin='anonymous';preload.href=roomAsset;
+    const preload = document.createElement('link');
+    preload.rel = 'preload';
+    preload.as = 'fetch';
+    preload.crossOrigin = 'anonymous';
+    preload.href = roomAsset;
     document.head.appendChild(preload);
     return () => preload.remove();
-  }, [layout,roomAsset]);
+  }, [layout, roomAsset]);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
-    if (q.get("tour") === "1" && !tourAlreadyFinished()) startTour();
-    const time = q.get("time");
-    if (time === "day" || time === "dusk" || time === "night" || time === "auto") {
-      setEnvironment({ timeMode: time });
+    if (q.get('tour') === '1' && !tourAlreadyFinished()) startTour();
+    const time = q.get('time');
+    if (time === 'day' || time === 'dusk' || time === 'night' || time === 'auto') {
+      setEnvironment({timeMode: time});
     }
   }, [startTour, setEnvironment]);
 
   const phase = phaseOf(environment.timeMode);
 
   useEffect(() => {
-    if (phase === "night") recordProgress({ visitedAtNight: true });
+    if (phase === 'night') recordProgress({visitedAtNight: true});
   }, [phase, recordProgress]);
 
   const onMove = (e: React.PointerEvent) => {
-    if(layout === 'glb')return;
+    if (layout === 'glb') return;
     if (touring) return;
-    if (layout === "chamber" && roomFace !== "front") return;
+    if (layout === 'chamber' && roomFace !== 'front') return;
     const r = sceneRef.current?.getBoundingClientRect();
     if (!r) return;
-    setPar({ x: (e.clientX - r.left) / r.width - 0.5, y: (e.clientY - r.top) / r.height - 0.5 });
+    setPar({x: (e.clientX - r.left) / r.width - 0.5, y: (e.clientY - r.top) / r.height - 0.5});
   };
 
   const layer = (depth: number) => {
-    const p = touring ? { x: 0, y: 0 } : par;
-    return { transform: `translate(${-p.x * depth}px, ${-p.y * depth}px)` };
+    const p = touring ? {x: 0, y: 0} : par;
+    return {transform: `translate(${-p.x * depth}px, ${-p.y * depth}px)`};
   };
 
   const motes = useMemo(
     () =>
-      Array.from({ length: 16 }, (_, i) => ({
+      Array.from({length: 16}, (_, i) => ({
         left: `${(i * 61) % 100}%`,
         size: 3 + (i % 3) * 2,
         dur: 9 + (i % 5) * 3,
@@ -107,7 +122,7 @@ export function Room() {
 
   return (
     <div
-      className={`ks-room flex h-dvh flex-col overflow-hidden${layout !== "flat" ? " ks-room--chamber" : ""}`}
+      className={`ks-room flex h-dvh flex-col overflow-hidden${layout !== 'flat' ? ' ks-room--chamber' : ''}`}
       data-room-layout={layout}
     >
       <nav className="ks-skips" aria-label="Skip">
@@ -121,13 +136,13 @@ export function Room() {
       <h1 className="sr-only">{state.profile.displayName}&rsquo;s scrapbook room</h1>
       <header
         data-tour="hud"
-        className={`z-30 flex shrink-0 items-center justify-between px-4 py-3 sm:px-6${tourFocus === "hud" ? " ks-hud--tour" : ""}`}
+        className={`z-30 flex shrink-0 items-center justify-between px-4 py-3 sm:px-6${tourFocus === 'hud' ? ' ks-hud--tour' : ''}`}
       >
         <div className="flex items-center gap-3">
-          {roomFace !== "front" && <HomeChip />}
+          {roomFace !== 'front' && <HomeChip />}
           <div className="leading-tight">
             <p className="font-display text-sm uppercase tracking-[0.22em] text-ink/70">Keepsake</p>
-            <p className="ks-caption text-ink/80" style={{ fontSize: "1.15rem" }}>
+            <p className="ks-caption text-ink/80" style={{fontSize: '1.15rem'}}>
               {state.profile.displayName}&rsquo;s room
             </p>
           </div>
@@ -140,13 +155,13 @@ export function Room() {
               aria-label="View the room as"
               className="bg-transparent text-ink outline-none"
               value={viewAs}
-              onChange={(e) => {
+              onChange={e => {
                 const v = e.target.value as ViewAs;
                 setViewAs(v);
-                if (v !== "owner") recordProgress({ previewedAsVisitor: true });
+                if (v !== 'owner') recordProgress({previewedAsVisitor: true});
               }}
             >
-              {(["owner", "close", "friend", "public"] as ViewAs[]).map((v) => (
+              {(['owner', 'close', 'friend', 'public'] as ViewAs[]).map(v => (
                 <option key={v} value={v} className="text-ink">
                   {VIEW_AS_LABEL[v]}
                 </option>
@@ -158,7 +173,7 @@ export function Room() {
             title="Keepsakes found"
             aria-label="Keepsakes found"
             aria-expanded={achOpen}
-            onClick={() => setAchOpen((v) => !v)}
+            onClick={() => setAchOpen(v => !v)}
           >
             <Sparkles size={16} />
           </button>
@@ -169,54 +184,68 @@ export function Room() {
       </header>
 
       <main id="ks-main" ref={sceneRef} className="ks-scene flex-1" tabIndex={-1} onPointerMove={onMove}>
-        {layout === "glb" ? (
-          <Suspense fallback={<div className="ks-room-loading" role="status">Opening your room…</div>}><WebGLGuard
+        {layout === 'glb' ? (
+          <Suspense
             fallback={
-              <RoomChamber
+              <div className="ks-room-loading" role="status">
+                Opening your room…
+              </div>
+            }
+          >
+            <WebGLGuard
+              fallback={
+                <RoomChamber
+                  roomFace={roomFace}
+                  setRoomFace={setRoomFace}
+                  phase={phase}
+                  environment={environment}
+                  activeBook={activeBook}
+                  books={state.books}
+                  pins={state.pins}
+                  viewAs={viewAs}
+                  touring={touring}
+                  tourFocus={tourFocus}
+                  layer={layer}
+                  onOpenWindow={() => {
+                    setSettingsSection('appearance');
+                    setEnvOpen(true);
+                  }}
+                  onOpenMusic={() => setMusicOpen(true)}
+                  onSetEnvironment={setEnvironment}
+                  onGo={go}
+                  onOpenBook={id => {
+                    setActiveBook(id);
+                    go('book');
+                  }}
+                  onRenameBook={(id, title) => {
+                    const book = state.books.find(b => b.id === id);
+                    if (book) renameBook(id, title, book.subtitle);
+                  }}
+                  onPlaceBook={setBookShelf}
+                  onNewBook={() => {
+                    addBook();
+                  }}
+                />
+              }
+            >
+              <RoomScene3D
                 roomFace={roomFace}
                 setRoomFace={setRoomFace}
                 phase={phase}
                 environment={environment}
-                activeBook={activeBook}
-                books={state.books}
-                pins={state.pins}
-                viewAs={viewAs}
-                touring={touring}
                 tourFocus={tourFocus}
-                layer={layer}
-                onOpenWindow={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
+                touring={touring}
+                onOpenWindow={() => {
+                  setSettingsSection('appearance');
+                  setEnvOpen(true);
+                }}
                 onOpenMusic={() => setMusicOpen(true)}
-                onSetEnvironment={setEnvironment}
+                onOpenDoor={openDoor}
                 onGo={go}
-                onOpenBook={(id) => {
-                  setActiveBook(id);
-                  go("book");
-                }}
-                onRenameBook={(id, title) => {
-                  const book = state.books.find((b) => b.id === id);
-                  if (book) renameBook(id, title, book.subtitle);
-                }}
-                onPlaceBook={setBookShelf}
-                onNewBook={() => {
-                  addBook();
-                }}
               />
-            }
-          >
-            <RoomScene3D
-              roomFace={roomFace}
-              setRoomFace={setRoomFace}
-              phase={phase}
-              environment={environment}
-              tourFocus={tourFocus}
-              touring={touring}
-              onOpenWindow={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
-              onOpenMusic={() => setMusicOpen(true)}
-              onOpenDoor={openDoor}
-              onGo={go}
-            />
-          </WebGLGuard></Suspense>
-        ) : layout === "flat" ? (
+            </WebGLGuard>
+          </Suspense>
+        ) : layout === 'flat' ? (
           <RoomFlat
             phase={phase}
             environment={environment}
@@ -224,7 +253,10 @@ export function Room() {
             bookCount={state.books.length}
             tourFocus={tourFocus}
             layer={layer}
-            onOpenWindow={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
+            onOpenWindow={() => {
+              setSettingsSection('appearance');
+              setEnvOpen(true);
+            }}
             onOpenMusic={() => setMusicOpen(true)}
             onGo={go}
           />
@@ -241,16 +273,19 @@ export function Room() {
             touring={touring}
             tourFocus={tourFocus}
             layer={layer}
-            onOpenWindow={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
+            onOpenWindow={() => {
+              setSettingsSection('appearance');
+              setEnvOpen(true);
+            }}
             onOpenMusic={() => setMusicOpen(true)}
             onSetEnvironment={setEnvironment}
             onGo={go}
-            onOpenBook={(id) => {
+            onOpenBook={id => {
               setActiveBook(id);
-              go("book");
+              go('book');
             }}
             onRenameBook={(id, title) => {
-              const book = state.books.find((b) => b.id === id);
+              const book = state.books.find(b => b.id === id);
               if (book) renameBook(id, title, book.subtitle);
             }}
             onPlaceBook={setBookShelf}
@@ -262,55 +297,56 @@ export function Room() {
 
         <RoomListen
           onAct={(id: ListenId) => {
-            if (id === "book") {
-              go("book");
+            if (id === 'book') {
+              go('book');
               return;
             }
-            if (id === "window") {
-              setSettingsSection('appearance'); setEnvOpen(true);
+            if (id === 'window') {
+              setSettingsSection('appearance');
+              setEnvOpen(true);
               return;
             }
-            if (id === "shelf") {
-              go("shelf");
+            if (id === 'shelf') {
+              go('shelf');
               return;
             }
-            if (id === "archive") {
-              go("archive");
+            if (id === 'archive') {
+              go('archive');
               return;
             }
-            if (id === "map") {
-              go("atlas");
+            if (id === 'map') {
+              go('atlas');
               return;
             }
-            if (id === "guestbook") {
-              go("guestbook");
+            if (id === 'guestbook') {
+              go('guestbook');
               return;
             }
-            if (id === "crt") {
+            if (id === 'crt') {
               setMusicOpen(true);
               return;
             }
-            if (id === "chair") {
+            if (id === 'chair') {
               scene?.sit();
               return;
             }
-            if (id === "drawer") {
+            if (id === 'drawer') {
               scene?.openDrawer();
               return;
             }
-            if (id === "stand") {
+            if (id === 'stand') {
               scene?.stand();
               return;
             }
-            if (id === "door") {
+            if (id === 'door') {
               scene?.openDoor();
               return;
             }
-            if (id === "lamp") {
+            if (id === 'lamp') {
               scene?.toggleLamp();
               return;
             }
-            if (id === "switch") {
+            if (id === 'switch') {
               scene?.toggleCeiling();
             }
           }}
@@ -323,7 +359,7 @@ export function Room() {
               className="ks-mote"
               style={{
                 left: m.left,
-                bottom: "10%",
+                bottom: '10%',
                 width: m.size,
                 height: m.size,
                 animationDuration: `${m.dur}s`,
@@ -339,7 +375,10 @@ export function Room() {
             title="Room settings"
             aria-label="Room settings"
             aria-expanded={envOpen}
-            onClick={() => {setSettingsSection('appearance'); setEnvOpen(true);}}
+            onClick={() => {
+              setSettingsSection('appearance');
+              setEnvOpen(true);
+            }}
           >
             <Settings2 size={16} />
           </button>
@@ -348,7 +387,7 @@ export function Room() {
         {!touring && !activeRoom.study && <PhaseBadge phase={phase} />}
       </main>
 
-      <RoomCurator visible={layout !== "glb" && (layout === "flat" || roomFace === "front") && !touring} />
+      <RoomCurator visible={layout !== 'glb' && (layout === 'flat' || roomFace === 'front') && !touring} />
       {touring && <RoomTour />}
 
       {envOpen && <EnvironmentPanel initialSection={settingsSection} onClose={() => setEnvOpen(false)} />}
@@ -365,8 +404,9 @@ export function Room() {
   );
 }
 
-function AchievementsPanel({ onClose, unlocked }: { onClose: () => void; unlocked: string[] }) {
-  const {setDiscoveryOpen,isVisitor}=useNav();const {state}=useApp();
+function AchievementsPanel({onClose, unlocked}: {onClose: () => void; unlocked: string[]}) {
+  const {setDiscoveryOpen, isVisitor} = useNav();
+  const {state} = useApp();
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, onClose);
   return (
@@ -377,24 +417,39 @@ function AchievementsPanel({ onClose, unlocked }: { onClose: () => void; unlocke
         role="dialog"
         aria-modal="true"
         aria-label="Keepsakes found"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center gap-2">
           <Sparkles size={18} className="text-accent" />
           <h2 className="font-display text-xl">Keepsakes found</h2>
         </div>
-        {!isVisitor&&<button className="ks-tool mb-3" onClick={()=>{onClose();setDiscoveryOpen('collection');}}>Letters and keepsakes</button>}
-        <ul className="space-y-2" style={{maxHeight:'58vh',overflowY:'auto'}}>
-          {ACHIEVEMENTS.map((a) => {
+        {!isVisitor && (
+          <button
+            className="ks-tool mb-3"
+            onClick={() => {
+              onClose();
+              setDiscoveryOpen('collection');
+            }}
+          >
+            Letters and keepsakes
+          </button>
+        )}
+        <ul className="space-y-2" style={{maxHeight: '58vh', overflowY: 'auto'}}>
+          {ACHIEVEMENTS.map(a => {
             const has = unlocked.includes(a.id);
             return (
-              <li key={a.id} className="flex items-center justify-between gap-3 rounded-lg bg-black/20 px-3 py-2">
+              <li
+                key={a.id}
+                className="flex items-center justify-between gap-3 rounded-lg bg-black/20 px-3 py-2"
+              >
                 <div>
-                  <p className={has ? "text-paper" : "text-paper/40"}>{has ? a.title : "???"}</p>
+                  <p className={has ? 'text-paper' : 'text-paper/40'}>{has ? a.title : '???'}</p>
                   <p className="text-sm text-paper/50">{a.hint}</p>
-                  {has&&state.achievementsAt[a.id]&&<small>Found {new Date(state.achievementsAt[a.id]).toLocaleDateString()}</small>}
+                  {has && state.achievementsAt[a.id] && (
+                    <small>Found {new Date(state.achievementsAt[a.id]).toLocaleDateString()}</small>
+                  )}
                 </div>
-                <span className={has ? "text-accent" : "text-paper/30"}>{has ? "✦" : "·"}</span>
+                <span className={has ? 'text-accent' : 'text-paper/30'}>{has ? '✦' : '·'}</span>
               </li>
             );
           })}

@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import type { TimeMode } from "../../types/app";
-import { clockFromMode, clockLabel } from "../../lib/clockTime";
+import {useEffect, useState} from 'react';
+import type {TimeMode} from '../../types/app';
+import {clockFromMode, clockLabel} from '../../lib/clockTime';
 
-function RollingDigit({ value }: { value: number }) {
+function RollingDigit({value}: {value: number}) {
   const digit = ((value % 10) + 10) % 10;
   return (
     <span className="ks-clock-wheel" aria-hidden="true">
-      <span className="ks-clock-reel" style={{ transform: `translateY(${-digit * 10}%)` }}>
-        {Array.from({ length: 10 }, (_, n) => (
+      <span className="ks-clock-reel" style={{transform: `translateY(${-digit * 10}%)`}}>
+        {Array.from({length: 10}, (_, n) => (
           <span key={n} className="ks-clock-num">
             {n}
           </span>
@@ -17,9 +17,9 @@ function RollingDigit({ value }: { value: number }) {
   );
 }
 
-export function RollingClock({ timeMode: _timeMode }: { timeMode: TimeMode }) {
+export function RollingClock({timeMode: _timeMode}: {timeMode: TimeMode}) {
   const [now, setNow] = useState(() => new Date());
-  const { h, m, live } = clockFromMode("auto", now);
+  const {h, m, live} = clockFromMode('auto', now);
   const label = clockLabel(h, m);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export function RollingClock({ timeMode: _timeMode }: { timeMode: TimeMode }) {
   }, [live]);
 
   useEffect(() => {
-    const host = document.querySelector(".ks-room3d");
+    const host = document.querySelector('.ks-room3d');
     if (host instanceof HTMLElement) host.dataset.clock = label;
   }, [label]);
 
@@ -40,14 +40,14 @@ export function RollingClock({ timeMode: _timeMode }: { timeMode: TimeMode }) {
   const onesM = m % 10;
 
   return (
-    <div className="ks-clock-face" data-clock-face data-clock-live={live ? "1" : "0"} aria-hidden="true">
+    <div className="ks-clock-face" data-clock-face data-clock-live={live ? '1' : '0'} aria-hidden="true">
       <span className="sr-only">The hour is {label}</span>
       <RollingDigit value={tensH} />
       <RollingDigit value={onesH} />
-      <span className={`ks-clock-colon${live ? " is-live" : ""}`}>:</span>
+      <span className={`ks-clock-colon${live ? ' is-live' : ''}`}>:</span>
       <RollingDigit value={tensM} />
       <RollingDigit value={onesM} />
-      <span className="ks-clock-period">{h >= 12 ? "PM" : "AM"}</span>
+      <span className="ks-clock-period">{h >= 12 ? 'PM' : 'AM'}</span>
     </div>
   );
 }

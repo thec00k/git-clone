@@ -1,9 +1,15 @@
-import { movePageSpread } from '../lib/spreads';
+import {movePageSpread} from '../lib/spreads';
 import {placeWaitingPhoto} from '../lib/photoInbox';
-import {paperSettings,unitAmount,isStickerFinish,type PaperSettings,type StickerFinish} from '../lib/materials';
-import {isPaperStyle,type PaperStyle} from '../lib/stationery';
-import {insertPhotoBatch,type ImportPhoto} from '../lib/photoBatch';
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  paperSettings,
+  unitAmount,
+  isStickerFinish,
+  type PaperSettings,
+  type StickerFinish,
+} from '../lib/materials';
+import {isPaperStyle, type PaperStyle} from '../lib/stationery';
+import {insertPhotoBatch, type ImportPhoto} from '../lib/photoBatch';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {
   CaptionElement,
   PageElement,
@@ -12,14 +18,16 @@ import type {
   Scrapbook,
   StickerElement,
   StrokeElement,
-} from "../types/scrapbook";
-import { MAX_PHOTOS_PER_PAGE } from "../types/scrapbook";
-import { uid } from "../lib/id";
-import { clamp } from "../lib/clamp";
-import { computeLayout, type LayoutPreset } from "../lib/layout";
-import { thenNowPage } from '../lib/thenNow';
-import { useApp } from "../store/appStore";
-import { photoRows } from "../lib/photoRows";
+} from '../types/scrapbook';
+import {MAX_PHOTOS_PER_PAGE} from '../types/scrapbook';
+import {LIMITS, bookPhotoCount, canAddPage} from '../lib/limits';
+import {uid} from '../lib/id';
+import {clamp} from '../lib/clamp';
+import {nudgedPosition} from '../lib/pageCoordinates';
+import {computeLayout, type LayoutPreset} from '../lib/layout';
+import {thenNowPage} from '../lib/thenNow';
+import {useApp} from '../store/appStore';
+import {photoRows} from '../lib/photoRows';
 
 export interface ElementLocation {
   pageId: string;
@@ -32,7 +40,7 @@ export interface ElementLocation {
  * and exposes the mutation API the scrapbook editor uses.
  */
 export function useScrapbook() {
-  const { activeBook, updateActiveBook, saveStatus, state } = useApp();
+  const {activeBook, updateActiveBook, saveStatus, state} = useApp();
   const book = activeBook;
 
   const [spread, setSpread] = useState(0);
@@ -57,7 +65,7 @@ export function useScrapbook() {
     window.setTimeout(() => {
       burstRef.current = false;
     }, 450);
-    setHistoryTick((n) => n + 1);
+    setHistoryTick(n => n + 1);
   }, []);
 
   const undo = useCallback(() => {
@@ -66,10 +74,12 @@ export function useScrapbook() {
     if (!current || !prev) return;
     futureRef.current.push(current);
     restoringRef.current = true;
-    updateActiveBook(() => prev);
+    // History covers pages and the waiting pile only; title, cover, playlist and links made since stay.
+    updateActiveBook(cur => ({...cur, pages: prev.pages, pendingPhotoIds: prev.pendingPhotoIds}));
+    burstRef.current = false;
     restoringRef.current = false;
     setSelectedId(null);
-    setHistoryTick((n) => n + 1);
+    setHistoryTick(n => n + 1);
   }, [updateActiveBook]);
 
   const redo = useCallback(() => {
@@ -78,10 +88,12 @@ export function useScrapbook() {
     if (!current || !next) return;
     pastRef.current.push(current);
     restoringRef.current = true;
-    updateActiveBook(() => next);
+    // History covers pages and the waiting pile only; title, cover, playlist and links made since stay.
+    updateActiveBook(cur => ({...cur, pages: next.pages, pendingPhotoIds: next.pendingPhotoIds}));
+    burstRef.current = false;
     restoringRef.current = false;
     setSelectedId(null);
-    setHistoryTick((n) => n + 1);
+    setHistoryTick(n => n + 1);
   }, [updateActiveBook]);
 
   const pages = useMemo(() => book?.pages ?? [], [book?.pages]);
@@ -95,7 +107,7 @@ export function useScrapbook() {
     if (!book) return;
     for (const page of book.pages) {
       for (const el of page.elements) {
-        if (el.type === "photo") {
+        if (el.type === 'photo') {
           const img = new Image();
           img.src = el.src;
         }
@@ -107,8 +119,8 @@ export function useScrapbook() {
   const locate = useCallback(
     (elementId: string): ElementLocation | null => {
       for (const page of pages) {
-        const element = page.elements.find((e) => e.id === elementId);
-        if (element) return { pageId: page.id, element };
+        const element = page.elements.find(e => e.id === elementId);
+        if (element) return {pageId: page.id, element};
       }
       return null;
     },
@@ -118,35 +130,72 @@ export function useScrapbook() {
   const mutatePageElements = useCallback(
     (pageId: string, fn: (els: PageElement[]) => PageElement[]) => {
       remember();
-      updateActiveBook((b) => ({
+      updateActiveBook(b => ({
         ...b,
-        pages: b.pages.map((p) => (p.id === pageId ? { ...p, elements: fn(p.elements) } : p)),
+        pages: b.pages.map(p => (p.id === pageId ? {...p, elements: fn(p.elements)} : p)),
       }));
     },
     [updateActiveBook, remember],
   );
 
   const nextZ = (els: PageElement[]) => els.reduce((max, e) => Math.max(max, e.z), 0) + 1;
-  const setStickerFinish=useCallback((id:string,patch:{finish?:StickerFinish;finishStrength?:number})=>{
-    const loc=locate(id);if(loc?.element.type!=='sticker')return;
-    const clean={...(isStickerFinish(patch.finish)?{finish:patch.finish}:{}),...(patch.finishStrength===undefined?{}:{finishStrength:unitAmount(patch.finishStrength,.65)})};
-    remember(true);updateActiveBook(b=>({...b,pages:b.pages.map(p=>p.id===loc.pageId?{...p,elements:p.elements.map(e=>e.id===id?{...e,...clean}:e)}:p)}));
-  },[locate,remember,updateActiveBook]);
-  const setPaperMaterial=useCallback((pageId:string,settings:PaperSettings|undefined)=>{
-    if(!bookRef.current?.pages.some(p=>p.id===pageId))return;
-    remember(true);updateActiveBook(b=>({...b,pages:b.pages.map(p=>p.id===pageId?{...p,paper:settings?paperSettings(settings):undefined}:p)}));
-  },[remember,updateActiveBook]);
-  const setPagePaper=useCallback((pageId:string,style:PaperStyle)=>{
-    if(!isPaperStyle(style)||!bookRef.current?.pages.some(p=>p.id===pageId&&p.backgroundStyle!==style))return;
-    remember(true);updateActiveBook(b=>({...b,pages:b.pages.map(p=>p.id===pageId?{...p,backgroundStyle:style}:p)}));
-  },[remember,updateActiveBook]);
+  const setStickerFinish = useCallback(
+    (id: string, patch: {finish?: StickerFinish; finishStrength?: number}) => {
+      const loc = locate(id);
+      if (loc?.element.type !== 'sticker') return;
+      const clean = {
+        ...(isStickerFinish(patch.finish) ? {finish: patch.finish} : {}),
+        ...(patch.finishStrength === undefined
+          ? {}
+          : {finishStrength: unitAmount(patch.finishStrength, 0.65)}),
+      };
+      remember(true);
+      updateActiveBook(b => ({
+        ...b,
+        pages: b.pages.map(p =>
+          p.id === loc.pageId
+            ? {...p, elements: p.elements.map(e => (e.id === id ? {...e, ...clean} : e))}
+            : p,
+        ),
+      }));
+    },
+    [locate, remember, updateActiveBook],
+  );
+  const setPaperMaterial = useCallback(
+    (pageId: string, settings: PaperSettings | undefined) => {
+      if (!bookRef.current?.pages.some(p => p.id === pageId)) return;
+      remember(true);
+      updateActiveBook(b => ({
+        ...b,
+        pages: b.pages.map(p =>
+          p.id === pageId ? {...p, paper: settings ? paperSettings(settings) : undefined} : p,
+        ),
+      }));
+    },
+    [remember, updateActiveBook],
+  );
+  const setPagePaper = useCallback(
+    (pageId: string, style: PaperStyle) => {
+      if (
+        !isPaperStyle(style) ||
+        !bookRef.current?.pages.some(p => p.id === pageId && p.backgroundStyle !== style)
+      )
+        return;
+      remember(true);
+      updateActiveBook(b => ({
+        ...b,
+        pages: b.pages.map(p => (p.id === pageId ? {...p, backgroundStyle: style} : p)),
+      }));
+    },
+    [remember, updateActiveBook],
+  );
 
   const updateElement = useCallback(
     (elementId: string, patch: Partial<PageElement>) => {
       const loc = locate(elementId);
       if (!loc) return;
-      mutatePageElements(loc.pageId, (els) =>
-        els.map((e) => (e.id === elementId ? ({ ...e, ...patch } as PageElement) : e)),
+      mutatePageElements(loc.pageId, els =>
+        els.map(e => (e.id === elementId ? ({...e, ...patch} as PageElement) : e)),
       );
     },
     [locate, mutatePageElements],
@@ -154,14 +203,15 @@ export function useScrapbook() {
 
   const addPhoto = useCallback(
     (pageId: string, src: string, photoId?: string) => {
-      const page = pages.find((p) => p.id === pageId);
+      const page = pages.find(p => p.id === pageId);
       if (!page) return;
-      const photoCount = page.elements.filter((e) => e.type === "photo").length;
+      const photoCount = page.elements.filter(e => e.type === 'photo').length;
       if (photoCount >= MAX_PHOTOS_PER_PAGE) return;
+      if (bookRef.current && bookPhotoCount(bookRef.current) >= LIMITS.photosPerBook) return;
       const jitter = (photoCount % 3) * 6 - 6;
       const el: PhotoElement = {
-        id: uid("el"),
-        type: "photo",
+        id: uid('el'),
+        type: 'photo',
         src,
         photoId,
         x: clamp(48 + jitter, 20, 80),
@@ -169,41 +219,49 @@ export function useScrapbook() {
         w: 46,
         rotation: (photoCount % 2 === 0 ? -1 : 1) * (3 + photoCount),
         z: nextZ(page.elements),
-        frame: "polaroid",
+        frame: 'polaroid',
       };
-      mutatePageElements(pageId, (els) => [...els, el]);
+      mutatePageElements(pageId, els => [...els, el]);
       setSelectedId(el.id);
     },
     [pages, mutatePageElements],
   );
 
-  const placePendingPhoto=useCallback((pageId:string,photo:import('../types/app').ArchivePhoto)=>{
-    if(!bookRef.current)return;
-    const next=placeWaitingPhoto(bookRef.current,pageId,photo);
-    if(next===bookRef.current)return;
-    remember(true);updateActiveBook(b=>placeWaitingPhoto(b,pageId,photo));
-    setSelectedId(next.pages.find(p=>p.id===pageId)?.elements.at(-1)?.id??null);
-  },[remember,updateActiveBook]);
-  const returnPendingPhoto=useCallback((id:string)=>{
-    remember(true);updateActiveBook(b=>({...b,pendingPhotoIds:(b.pendingPhotoIds??[]).filter(p=>p!==id)}));
-  },[remember,updateActiveBook]);
+  const placePendingPhoto = useCallback(
+    (pageId: string, photo: import('../types/app').ArchivePhoto) => {
+      if (!bookRef.current) return;
+      const next = placeWaitingPhoto(bookRef.current, pageId, photo);
+      if (next === bookRef.current) return;
+      remember(true);
+      updateActiveBook(b => placeWaitingPhoto(b, pageId, photo));
+      setSelectedId(next.pages.find(p => p.id === pageId)?.elements.at(-1)?.id ?? null);
+    },
+    [remember, updateActiveBook],
+  );
+  const returnPendingPhoto = useCallback(
+    (id: string) => {
+      remember(true);
+      updateActiveBook(b => ({...b, pendingPhotoIds: (b.pendingPhotoIds ?? []).filter(p => p !== id)}));
+    },
+    [remember, updateActiveBook],
+  );
   const addCaption = useCallback(
     (pageId: string) => {
-      const page = pages.find((p) => p.id === pageId);
+      const page = pages.find(p => p.id === pageId);
       if (!page) return;
       const el: CaptionElement = {
-        id: uid("el"),
-        type: "caption",
-        text: "write something…",
+        id: uid('el'),
+        type: 'caption',
+        text: 'write something…',
         x: 50,
         y: 55,
         w: 60,
         rotation: -2,
         z: nextZ(page.elements),
         fontSize: 7,
-        color: "#2c2418",
+        color: '#2c2418',
       };
-      mutatePageElements(pageId, (els) => [...els, el]);
+      mutatePageElements(pageId, els => [...els, el]);
       setSelectedId(el.id);
     },
     [pages, mutatePageElements],
@@ -211,11 +269,11 @@ export function useScrapbook() {
 
   const addSticker = useCallback(
     (pageId: string, glyph: string) => {
-      const page = pages.find((p) => p.id === pageId);
+      const page = pages.find(p => p.id === pageId);
       if (!page) return;
       const el: StickerElement = {
-        id: uid("el"),
-        type: "sticker",
+        id: uid('el'),
+        type: 'sticker',
         glyph,
         x: 50,
         y: 50,
@@ -223,24 +281,24 @@ export function useScrapbook() {
         rotation: (Math.random() * 20 - 10) | 0,
         z: nextZ(page.elements),
       };
-      mutatePageElements(pageId, (els) => [...els, el]);
+      mutatePageElements(pageId, els => [...els, el]);
       setSelectedId(el.id);
     },
     [pages, mutatePageElements],
   );
 
   const addStroke = useCallback(
-    (pageId: string, color: string, points: { x: number; y: number }[], width=1.7) => {
+    (pageId: string, color: string, points: {x: number; y: number}[], width = 1.7) => {
       if (points.length < 2) return;
-      const page = pages.find((p) => p.id === pageId);
+      const page = pages.find(p => p.id === pageId);
       if (!page) return;
-      const xs = points.map((p) => p.x);
-      const ys = points.map((p) => p.y);
+      const xs = points.map(p => p.x);
+      const ys = points.map(p => p.y);
       const el: StrokeElement = {
-        id: uid("el"),
-        type: "stroke",
+        id: uid('el'),
+        type: 'stroke',
         color,
-        width: clamp(width,.4,4),
+        width: clamp(width, 0.4, 4),
         points,
         x: (Math.min(...xs) + Math.max(...xs)) / 2,
         y: (Math.min(...ys) + Math.max(...ys)) / 2,
@@ -248,7 +306,7 @@ export function useScrapbook() {
         rotation: 0,
         z: nextZ(page.elements),
       };
-      mutatePageElements(pageId, (els) => [...els, el]);
+      mutatePageElements(pageId, els => [...els, el]);
     },
     [pages, mutatePageElements],
   );
@@ -257,8 +315,8 @@ export function useScrapbook() {
     (elementId: string) => {
       const loc = locate(elementId);
       if (!loc) return;
-      mutatePageElements(loc.pageId, (els) => els.filter((e) => e.id !== elementId));
-      setSelectedId((cur) => (cur === elementId ? null : cur));
+      mutatePageElements(loc.pageId, els => els.filter(e => e.id !== elementId));
+      setSelectedId(cur => (cur === elementId ? null : cur));
     },
     [locate, mutatePageElements],
   );
@@ -267,8 +325,8 @@ export function useScrapbook() {
     (elementId: string) => {
       const loc = locate(elementId);
       if (!loc) return;
-      const page = pages.find((p) => p.id === loc.pageId)!;
-      updateElement(elementId, { z: nextZ(page.elements) });
+      const page = pages.find(p => p.id === loc.pageId)!;
+      updateElement(elementId, {z: nextZ(page.elements)});
     },
     [locate, pages, updateElement],
   );
@@ -277,9 +335,9 @@ export function useScrapbook() {
     (elementId: string) => {
       const loc = locate(elementId);
       if (!loc) return;
-      const page = pages.find((p) => p.id === loc.pageId)!;
+      const page = pages.find(p => p.id === loc.pageId)!;
       const minZ = page.elements.reduce((m, e) => Math.min(m, e.z), Infinity);
-      updateElement(elementId, { z: (Number.isFinite(minZ) ? minZ : 1) - 1 });
+      updateElement(elementId, {z: (Number.isFinite(minZ) ? minZ : 1) - 1});
     },
     [locate, pages, updateElement],
   );
@@ -287,7 +345,17 @@ export function useScrapbook() {
   const rotateBy = useCallback(
     (elementId: string, deg: number) => {
       const loc = locate(elementId);
-      if (loc) updateElement(elementId, { rotation: loc.element.rotation + deg });
+      if (loc) updateElement(elementId, {rotation: loc.element.rotation + deg});
+    },
+    [locate, updateElement],
+  );
+
+  const nudgeElement = useCallback(
+    (elementId: string, delta: {x: number; y: number}) => {
+      const loc = locate(elementId);
+      if (!loc) return;
+      const next = nudgedPosition(loc.element, delta);
+      if (next.x !== loc.element.x || next.y !== loc.element.y) updateElement(elementId, next);
     },
     [locate, updateElement],
   );
@@ -295,26 +363,26 @@ export function useScrapbook() {
   const scaleBy = useCallback(
     (elementId: string, factor: number) => {
       const loc = locate(elementId);
-      if (loc) updateElement(elementId, { w: clamp(loc.element.w * factor, 6, 96) });
+      if (loc) updateElement(elementId, {w: clamp(loc.element.w * factor, 6, 96)});
     },
     [locate, updateElement],
   );
 
   const resetTransform = useCallback(
-    (elementId: string) => updateElement(elementId, { rotation: 0 }),
+    (elementId: string) => updateElement(elementId, {rotation: 0}),
     [updateElement],
   );
 
   const setFrame = useCallback(
-    (elementId: string, frame: PhotoFrame) => updateElement(elementId, { frame }),
+    (elementId: string, frame: PhotoFrame) => updateElement(elementId, {frame}),
     [updateElement],
   );
 
   const cycleFrame = useCallback(
     (elementId: string) => {
       const loc = locate(elementId);
-      if (!loc || loc.element.type !== "photo") return;
-      const order: PhotoFrame[] = ["polaroid", "tape", "flush"];
+      if (!loc || loc.element.type !== 'photo') return;
+      const order: PhotoFrame[] = ['polaroid', 'tape', 'flush'];
       const idx = order.indexOf(loc.element.frame);
       setFrame(elementId, order[(idx + 1) % order.length]);
     },
@@ -323,7 +391,7 @@ export function useScrapbook() {
 
   const arrangePage = useCallback(
     (pageId: string, preset: LayoutPreset) => {
-      const page = pages.find((p) => p.id === pageId);
+      const page = pages.find(p => p.id === pageId);
       if (!page) return;
       if (preset === 'then-now') {
         const comparison = thenNowPage(page);
@@ -331,20 +399,20 @@ export function useScrapbook() {
         mutatePageElements(pageId, () => comparison.elements);
         return true;
       }
-      const photoCount = page.elements.filter((e) => e.type === "photo").length;
+      const photoCount = page.elements.filter(e => e.type === 'photo').length;
       const placements = computeLayout(preset, photoCount);
-      if (preset === "grid") {
+      if (preset === 'grid') {
         const arranged = photoRows(page, state.archive);
         if (!arranged) return false;
         mutatePageElements(pageId, () => arranged.elements);
         return true;
       }
-      mutatePageElements(pageId, (els) => {
+      mutatePageElements(pageId, els => {
         let i = 0;
-        return els.map((e) => {
-          if (e.type !== "photo") return e;
+        return els.map(e => {
+          if (e.type !== 'photo') return e;
           const p = placements[i++];
-          return p ? { ...e, x: p.x, y: p.y, w: p.w, rotation: p.rot } : e;
+          return p ? {...e, x: p.x, y: p.y, w: p.w, rotation: p.rot} : e;
         });
       });
     },
@@ -353,52 +421,68 @@ export function useScrapbook() {
 
   const addSpread = useCallback(() => {
     remember(true);
-    updateActiveBook((b) => ({
+    updateActiveBook(b => ({
       ...b,
-      pages: [...b.pages, { id: uid("page"), elements: [] }, { id: uid("page"), elements: [] }],
+      pages: [...b.pages, {id: uid('page'), elements: []}, {id: uid('page'), elements: []}],
     }));
     setSpread(spreadCount);
     setSelectedId(null);
   }, [updateActiveBook, spreadCount, remember]);
 
-  const addPage=useCallback(()=>{
-    const id=uid('page');remember(true);
-    updateActiveBook(b=>({...b,pages:[...b.pages,{id,elements:[]}]}));
-    setSpread(Math.floor(pages.length/2));setActivePageId(id);setSelectedId(null);
-  },[remember,updateActiveBook,pages.length]);
-  const addPhotoBatch=useCallback((targetId:string,photos:ImportPhoto[])=>{
-    if(!bookRef.current)return;
-    const result=insertPhotoBatch(bookRef.current,targetId,photos);remember(true);
-    updateActiveBook(()=>result.book);setSpread(Math.floor(result.index/2));setActivePageId(result.firstPageId);setSelectedId(null);
-  },[remember,updateActiveBook]);
+  const addPage = useCallback(() => {
+    if (bookRef.current && !canAddPage(bookRef.current)) return;
+    const id = uid('page');
+    remember(true);
+    updateActiveBook(b => ({...b, pages: [...b.pages, {id, elements: []}]}));
+    setSpread(Math.floor(pages.length / 2));
+    setActivePageId(id);
+    setSelectedId(null);
+  }, [remember, updateActiveBook, pages.length]);
+  const addPhotoBatch = useCallback(
+    (targetId: string, photos: ImportPhoto[]) => {
+      if (!bookRef.current) return;
+      const result = insertPhotoBatch(bookRef.current, targetId, photos);
+      remember(true);
+      updateActiveBook(() => result.book);
+      setSpread(Math.floor(result.index / 2));
+      setActivePageId(result.firstPageId);
+      setSelectedId(null);
+    },
+    [remember, updateActiveBook],
+  );
 
   const deleteCurrentSpread = useCallback(() => {
     if (spreadCount <= 1) return;
     const start = currentSpread * 2;
     remember(true);
-    updateActiveBook((b) => ({
+    updateActiveBook(b => ({
       ...b,
       pages: b.pages.filter((_, i) => i !== start && i !== start + 1),
     }));
-    setSpread((s) => Math.max(0, s - 1));
+    setSpread(s => Math.max(0, s - 1));
     setSelectedId(null);
   }, [updateActiveBook, spreadCount, currentSpread, remember]);
 
-  const moveSpread = useCallback((from: number, to: number) => {
-    if(from===to || from<0 || to<0 || from>=spreadCount || to>=spreadCount)return;
-    remember(true);
-    updateActiveBook(b=>({...b,pages:movePageSpread(b.pages,from,to,uid('page'))}));
-    setSpread(to);setSelectedId(null);setActivePageId(null);
-  },[spreadCount,remember,updateActiveBook]);
+  const moveSpread = useCallback(
+    (from: number, to: number) => {
+      if (from === to || from < 0 || to < 0 || from >= spreadCount || to >= spreadCount) return;
+      remember(true);
+      updateActiveBook(b => ({...b, pages: movePageSpread(b.pages, from, to, uid('page'))}));
+      setSpread(to);
+      setSelectedId(null);
+      setActivePageId(null);
+    },
+    [spreadCount, remember, updateActiveBook],
+  );
 
   const goPrev = useCallback(() => {
     setSelectedId(null);
-    setSpread((s) => Math.max(0, s - 1));
+    setSpread(s => Math.max(0, s - 1));
   }, []);
 
   const goNext = useCallback(() => {
     setSelectedId(null);
-    setSpread((s) => Math.min(spreadCount - 1, s + 1));
+    setSpread(s => Math.min(spreadCount - 1, s + 1));
   }, [spreadCount]);
 
   useEffect(() => {
@@ -419,10 +503,7 @@ export function useScrapbook() {
     setHistoryTick(n => n + 1);
   }, [book?.id]);
 
-  const selected = useMemo(
-    () => (selectedId ? locate(selectedId) : null),
-    [selectedId, locate],
-  );
+  const selected = useMemo(() => (selectedId ? locate(selectedId) : null), [selectedId, locate]);
 
   return {
     book: book as Scrapbook | null,
@@ -452,6 +533,7 @@ export function useScrapbook() {
     bringForward,
     sendBackward,
     rotateBy,
+    nudgeElement,
     scaleBy,
     resetTransform,
     cycleFrame,

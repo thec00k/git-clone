@@ -1,10 +1,10 @@
 import {InkGlints} from './InkGlints';
 import {PaperSurface} from './PaperSurface';
 import {PaperDecoration} from './StationeryArt';
-import { useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
-import type { Page, PageElement, StrokeElement } from "../types/scrapbook";
-import { ElementView } from "./ElementView";
+import {useRef, useState} from 'react';
+import type {PointerEvent as ReactPointerEvent} from 'react';
+import type {Page, PageElement, StrokeElement} from '../types/scrapbook';
+import {ElementView} from './ElementView';
 import {pagePoint} from '../lib/pageCoordinates';
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
   onEditText: (id: string, text: string) => void;
   drawColor?: string | null;
   drawWidth?: number;
-  onDrawStroke?: (pageId: string, color: string, points: { x: number; y: number }[]) => void;
+  onDrawStroke?: (pageId: string, color: string, points: {x: number; y: number}[]) => void;
 }
 
 export function ScrapbookPage({
@@ -45,8 +45,8 @@ export function ScrapbookPage({
     return <div className="ks-page opacity-70" aria-hidden="true" />;
   }
 
-  const ink = page.elements.filter((e): e is StrokeElement => e.type === "stroke");
-  const sorted = [...page.elements].filter((e) => e.type !== "stroke").sort((a, b) => a.z - b.z);
+  const ink = page.elements.filter((e): e is StrokeElement => e.type === 'stroke');
+  const sorted = [...page.elements].filter(e => e.type !== 'stroke').sort((a, b) => a.z - b.z);
 
   // Selecting an element also makes its page the active one, so "Add photo",
   // "Add caption", and "Arrange" all target the page the user is working on.
@@ -59,37 +59,56 @@ export function ScrapbookPage({
     <div
       className="ks-page"
       data-active={active}
-      data-paper={page.backgroundStyle??'plain'}
+      data-paper={page.backgroundStyle ?? 'plain'}
       onPointerDown={() => {
         onActivate(page.id);
         onDeselect();
       }}
     >
-      <PaperSurface settings={page.paper}/>
-      <PaperDecoration style={page.backgroundStyle}/>
+      <PaperSurface settings={page.paper} />
+      <PaperDecoration style={page.backgroundStyle} />
       {page.titlePage && (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-[8%] text-center">
-          <p className="ks-caption text-ink-soft" style={{ fontSize: "5cqw" }}>
+          <p className="ks-caption text-ink-soft" style={{fontSize: '5cqw'}}>
             a book of
           </p>
           <h2
             className="text-ink"
-            style={{ fontFamily: "var(--font-display)", fontSize: "13cqw", fontWeight: 600, margin: "1cqw 0" }}
+            style={{fontFamily: 'var(--font-display)', fontSize: '13cqw', fontWeight: 600, margin: '1cqw 0'}}
           >
             {bookTitle}
           </h2>
-          <p className="ks-caption text-ink-soft" style={{ fontSize: "7cqw" }}>
+          <p className="ks-caption text-ink-soft" style={{fontSize: '7cqw'}}>
             {bookSubtitle}
           </p>
           <span
             className="mt-[6cqw] inline-block"
-            style={{ width: "22cqw", height: "2px", background: "var(--color-accent)", opacity: 0.6 }}
+            style={{width: '22cqw', height: '2px', background: 'var(--color-accent)', opacity: 0.6}}
           />
         </div>
       )}
 
-      {[[0,0],[100,0],[100,100],[0,100]].map(([left,top],i)=><span key={i} data-page-corner={i} aria-hidden="true" style={{position:'absolute',left:`${left}%`,top:`${top}%`,width:0,height:0,pointerEvents:'none'}}/>)}
-      {sorted.map((el) => (
+      {[
+        [0, 0],
+        [100, 0],
+        [100, 100],
+        [0, 100],
+      ].map(([left, top], i) => (
+        <span
+          key={i}
+          data-page-corner={i}
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            left: `${left}%`,
+            top: `${top}%`,
+            width: 0,
+            height: 0,
+            pointerEvents: 'none',
+          }}
+        />
+      ))}
+      {sorted.map(el => (
         <ElementView
           key={el.id}
           element={el}
@@ -107,13 +126,13 @@ export function ScrapbookPage({
           color={drawColor}
           width={drawWidth}
           onActivate={() => onActivate(page.id)}
-          onStroke={(points) => onDrawStroke(page.id, drawColor, points)}
+          onStroke={points => onDrawStroke(page.id, drawColor, points)}
         />
       )}
 
       {!page.titlePage && page.elements.length === 0 && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <p className="ks-caption text-ink-soft/70" style={{ fontSize: "6cqw" }}>
+          <p className="ks-caption text-ink-soft/70" style={{fontSize: '6cqw'}}>
             add a photograph…
           </p>
         </div>
@@ -122,20 +141,23 @@ export function ScrapbookPage({
   );
 }
 
-export function PageInk({ strokes }: { strokes: StrokeElement[] }) {
+export function PageInk({strokes}: {strokes: StrokeElement[]}) {
   if (!strokes.length) return null;
   return (
     <svg className="ks-page-ink" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      {strokes.map((s) => (
-        <g key={s.id}><polyline
-          key={s.id}
-          points={s.points.map((p) => `${p.x},${p.y}`).join(" ")}
-          fill="none"
-          stroke={s.color}
-          strokeWidth={s.width}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        /><InkGlints color={s.color} points={s.points}/></g>
+      {strokes.map(s => (
+        <g key={s.id}>
+          <polyline
+            key={s.id}
+            points={s.points.map(p => `${p.x},${p.y}`).join(' ')}
+            fill="none"
+            stroke={s.color}
+            strokeWidth={s.width}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <InkGlints color={s.color} points={s.points} />
+        </g>
       ))}
     </svg>
   );
@@ -150,33 +172,34 @@ function DrawLayer({
   color: string;
   width: number;
   onActivate: () => void;
-  onStroke: (points: { x: number; y: number }[]) => void;
+  onStroke: (points: {x: number; y: number}[]) => void;
 }) {
-  const pts = useRef<{ x: number; y: number }[]>([]);
-  const [live, setLive] = useState<{ x: number; y: number }[]>([]);
+  const pts = useRef<{x: number; y: number}[]>([]);
+  const [live, setLive] = useState<{x: number; y: number}[]>([]);
 
   const point = (e: ReactPointerEvent<HTMLDivElement>) => {
-    return pagePoint(e.currentTarget,e.clientX,e.clientY);
+    return pagePoint(e.currentTarget, e.clientX, e.clientY);
   };
 
   return (
     <div
       className="ks-draw-layer"
       data-drawing
-      onPointerDown={(e) => {
+      onPointerDown={e => {
         e.stopPropagation();
         e.currentTarget.setPointerCapture(e.pointerId);
         onActivate();
         pts.current = [point(e)];
         setLive(pts.current);
       }}
-      onPointerMove={(e) => {
+      onPointerMove={e => {
         if (!pts.current.length) return;
         pts.current = [...pts.current, point(e)];
         setLive(pts.current);
       }}
-      onPointerUp={(e) => {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+      onPointerUp={e => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId))
+          e.currentTarget.releasePointerCapture(e.pointerId);
         onStroke(pts.current);
         pts.current = [];
         setLive([]);
@@ -189,13 +212,14 @@ function DrawLayer({
       {live.length > 1 && (
         <svg className="ks-page-ink" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <polyline
-            points={live.map((p) => `${p.x},${p.y}`).join(" ")}
+            points={live.map(p => `${p.x},${p.y}`).join(' ')}
             fill="none"
             stroke={color}
             strokeWidth={width}
             strokeLinecap="round"
             strokeLinejoin="round"
-          /><InkGlints color={color} points={live}/>
+          />
+          <InkGlints color={color} points={live} />
         </svg>
       )}
     </div>

@@ -1,65 +1,327 @@
 import {UiSwitch} from '../UiSwitch';
 
-import {useEffect,useId,useRef,useState} from 'react';
-import {Archive,Armchair,BookOpen,ChevronDown,Lamp,Lightbulb,Music2,Printer,Library,Home,MapPinned,Settings2, X} from 'lucide-react';
+import {useEffect, useId, useRef, useState} from 'react';
+import {
+  Archive,
+  Armchair,
+  BookOpen,
+  ChevronDown,
+  Lamp,
+  Lightbulb,
+  Music2,
+  Printer,
+  Library,
+  Home,
+  MapPinned,
+  Settings2,
+  X,
+} from 'lucide-react';
 import type {Environment} from '../../types/app';
 import type {RoomFace} from '../../lib/roomLayout';
 import {useActiveRoom} from './useActiveRoom';
 import {useNav} from '../../store/nav';
 import {useApp} from '../../store/appStore';
 import {useWorkbench} from '../../store/workbench';
-function ChestIcon({size=16}:{size?:number}) {return <svg aria-hidden="true" focusable="false" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10V8.5A4.5 4.5 0 0 1 8.5 4h7A4.5 4.5 0 0 1 20 8.5V10"/><path d="M3 10h18v10H3z"/><path d="M3 14h7m4 0h7"/><path d="M10 12h4v5h-4z"/></svg>}
-export function RoomControls({seated,environment,onBook,onFiles,onSeat,onLamp,onCeiling,onLook,onDrawer,onMusic,onReading,onLibrary,onDoor,onDisplayCase,onCardBinders,onSettings}:{
- seated:boolean;environment:Environment;onBook:()=>void;onFiles:()=>void;onSeat:()=>void;onLamp:()=>void;onCeiling:()=>void;onLook:(face:RoomFace)=>void;onDrawer:()=>void;onMusic:()=>void;onReading:()=>void;onLibrary:()=>void;onDoor:()=>void;onDisplayCase:()=>void;onCardBinders:()=>void;onSettings:()=>void;
+function ChestIcon({size = 16}: {size?: number}) {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 10V8.5A4.5 4.5 0 0 1 8.5 4h7A4.5 4.5 0 0 1 20 8.5V10" />
+      <path d="M3 10h18v10H3z" />
+      <path d="M3 14h7m4 0h7" />
+      <path d="M10 12h4v5h-4z" />
+    </svg>
+  );
+}
+export function RoomControls({
+  seated,
+  environment,
+  onBook,
+  onFiles,
+  onSeat,
+  onLamp,
+  onCeiling,
+  onLook,
+  onDrawer,
+  onMusic,
+  onReading,
+  onLibrary,
+  onDoor,
+  onDisplayCase,
+  onCardBinders,
+  onSettings,
+}: {
+  seated: boolean;
+  environment: Environment;
+  onBook: () => void;
+  onFiles: () => void;
+  onSeat: () => void;
+  onLamp: () => void;
+  onCeiling: () => void;
+  onLook: (face: RoomFace) => void;
+  onDrawer: () => void;
+  onMusic: () => void;
+  onReading: () => void;
+  onLibrary: () => void;
+  onDoor: () => void;
+  onDisplayCase: () => void;
+  onCardBinders: () => void;
+  onSettings: () => void;
 }) {
-
- const room=useActiveRoom();const {setEnvironment,activeBook}=useApp();const {binderId}=useWorkbench();
- const {setPrinterOpen,isVisitor,setDiscoveryOpen}=useNav();
- const menu=useRef<HTMLDetailsElement>(null);const [section,setSection]=useState('Places');
- const tabId=useId();const sections=['Places','Collections','Atmosphere'];
- const close=()=>{if(menu.current){menu.current.open=false;menu.current.querySelector('summary')?.focus();}};
- useEffect(()=>{const outside=(e:PointerEvent)=>{if(menu.current?.open&&!menu.current.contains(e.target as Node))menu.current.open=false;};document.addEventListener('pointerdown',outside);return()=>document.removeEventListener('pointerdown',outside);},[]);
- const action=(fn:()=>void)=>()=>{close();fn();};
- return <>
-
-  <div className="ks-room-name"><span>YOUR QUIET CORNER</span><h2>{room.title}</h2></div>
-  <nav className="ks-room-controls" aria-label="Room actions">
-   <button className="ks-room-primary" onClick={binderId||activeBook?onBook:onLibrary}><BookOpen size={17}/>{binderId?'Open binder':activeBook?'Open scrapbook':'Choose a book'}</button>
-   <button onClick={onFiles}><Archive size={17}/>Files</button>
-   <button onClick={onSeat}><Armchair size={17}/>{seated?'Stand up':'Take a seat'}</button>
-   {!isVisitor&&<button onClick={onDrawer}>Drawer shop</button>}
-   <details ref={menu} className="ks-room-menu" onKeyDown={e=>{if(e.key==='Escape'){e.stopPropagation();close();}}}>
-    <summary>Room <ChevronDown size={15}/></summary>
-    <div className="ks-room-menu-panel ks-room-menu-organized">
-     <header><div><strong>Your room</strong><small>{room.title}</small></div><button onClick={close} aria-label="Close room menu"><X size={17}/></button></header>
-     <div className="ks-room-sections" role="tablist" aria-label="Room menu sections">{sections.map((s,i)=><button key={s} role="tab" id={`${tabId}-${s}`} aria-controls={`${tabId}-panel`} aria-selected={section===s} tabIndex={section===s?0:-1} onClick={()=>setSection(s)} onKeyDown={e=>{const next=e.key==='ArrowRight'?(i+1)%3:e.key==='ArrowLeft'?(i+2)%3:e.key==='Home'?0:e.key==='End'?2:null;if(next!==null){e.preventDefault();setSection(sections[next]);document.getElementById(`${tabId}-${sections[next]}`)?.focus();}}}>{s}</button>)}</div>
-     <section id={`${tabId}-panel`} role="tabpanel" aria-labelledby={`${tabId}-${section}`} className="ks-room-section">
-      {section==='Places'&&<>
-       <button onClick={action(()=>onLook('front'))}><Home size={16}/>Writing desk</button>
-       <button onClick={action(()=>onLook('right'))}><Library size={16}/>Bookshelf</button>
-       <button onClick={action(()=>onLook('left'))}><MapPinned size={16}/>Memory wall</button>
-       <button onClick={action(onReading)}><Armchair size={16}/>Reading corner</button>
-       <button onClick={action(onDisplayCase)}><Archive size={16}/>Display case</button>
-       <button onClick={action(onDoor)}>Exit through the door</button>
-      </>}
-      {section==='Collections'&&<>
-       <button onClick={action(onLibrary)}><Library size={16}/>Browse all scrapbooks</button>
-       {!isVisitor&&<><button onClick={action(onCardBinders)}><BookOpen size={16}/>Card binders</button><button onClick={action(()=>setDiscoveryOpen('capsule'))}><ChestIcon/>Time capsule</button><button onClick={action(()=>setPrinterOpen(true))}><Printer size={16}/>Print a photo</button></>}
-      </>}
-      {section==='Atmosphere'&&<>
-       {room.id==='cyberpunk'&&<><label className="flex items-center justify-between gap-3 py-2">Infinity mirror<select aria-label="Infinity mirror" value={environment.cloudPalette??'multicolor'} onChange={e=>setEnvironment({cloudPalette:e.target.value as Environment['cloudPalette']})}><option value="multicolor">Multicolor</option><option value="crt">Match CRT</option><option value="off">Off</option></select></label><label className="flex items-center justify-between gap-3 py-2">Time capsule<select aria-label="Time capsule finish" value={environment.capsuleFinish??'metal'} onChange={e=>setEnvironment({capsuleFinish:e.target.value as Environment['capsuleFinish']})}><option value="metal">Metallic</option><option value="wood">Attic wood</option></select></label></>}
-       <UiSwitch checked={environment.lampOn} onChange={onLamp}><Lamp size={16}/>{room.id==="cyberpunk"?"Lava lamp":"Desk lamp"}</UiSwitch>
-       <UiSwitch checked={environment.ceilingOn!==false} onChange={onCeiling}><Lightbulb size={16}/>Ceiling light</UiSwitch>
-       <UiSwitch checked={environment.shelfLit} onChange={()=>setEnvironment({shelfLit:!environment.shelfLit})}><Library size={16}/>Bookshelf lights</UiSwitch>
-       {!isVisitor&&<UiSwitch checked={environment.displayCaseLit!==false} onChange={()=>setEnvironment({displayCaseLit:environment.displayCaseLit===false})}><Lightbulb size={16}/>Display case</UiSwitch>}
-       <small>{room.id==="cyberpunk"?"Map and case lights follow the CRT color.":"Case lights follow the CRT color."}</small>
-       {room.id==='beachfront'&&<button aria-pressed={environment.coastalWindowOpen!==false} onClick={()=>setEnvironment({coastalWindowOpen:environment.coastalWindowOpen===false})}>Ocean window <span>{environment.coastalWindowOpen!==false?'Open':'Closed'}</span></button>}
-       <button onClick={action(onMusic)}><Music2 size={16}/>Music and sound</button>
-      </>}
-     </section>
-     <footer><button onClick={action(onSettings)}><Settings2 size={16}/>Room settings</button><small>Appearance · graphics · privacy</small></footer>
-    </div>
-   </details>
-  </nav>
- </>;
+  const room = useActiveRoom();
+  const {setEnvironment, activeBook} = useApp();
+  const {binderId} = useWorkbench();
+  const {setPrinterOpen, isVisitor, setDiscoveryOpen} = useNav();
+  const menu = useRef<HTMLDetailsElement>(null);
+  const [section, setSection] = useState('Places');
+  const tabId = useId();
+  const sections = ['Places', 'Collections', 'Atmosphere'];
+  const close = () => {
+    if (menu.current) {
+      menu.current.open = false;
+      menu.current.querySelector('summary')?.focus();
+    }
+  };
+  useEffect(() => {
+    const outside = (e: PointerEvent) => {
+      if (menu.current?.open && !menu.current.contains(e.target as Node)) menu.current.open = false;
+    };
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, []);
+  const action = (fn: () => void) => () => {
+    close();
+    fn();
+  };
+  return (
+    <>
+      <div className="ks-room-name">
+        <span>YOUR QUIET CORNER</span>
+        <h2>{room.title}</h2>
+      </div>
+      <nav className="ks-room-controls" aria-label="Room actions">
+        <button className="ks-room-primary" onClick={binderId || activeBook ? onBook : onLibrary}>
+          <BookOpen size={17} />
+          {binderId ? 'Open binder' : activeBook ? 'Open scrapbook' : 'Choose a book'}
+        </button>
+        <button onClick={onFiles}>
+          <Archive size={17} />
+          Files
+        </button>
+        <button onClick={onSeat}>
+          <Armchair size={17} />
+          {seated ? 'Stand up' : 'Take a seat'}
+        </button>
+        {!isVisitor && <button onClick={onDrawer}>Drawer shop</button>}
+        <details
+          ref={menu}
+          className="ks-room-menu"
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              e.stopPropagation();
+              close();
+            }
+          }}
+        >
+          <summary>
+            Room <ChevronDown size={15} />
+          </summary>
+          <div className="ks-room-menu-panel ks-room-menu-organized">
+            <header>
+              <div>
+                <strong>Your room</strong>
+                <small>{room.title}</small>
+              </div>
+              <button onClick={close} aria-label="Close room menu">
+                <X size={17} />
+              </button>
+            </header>
+            <div className="ks-room-sections" role="tablist" aria-label="Room menu sections">
+              {sections.map((s, i) => (
+                <button
+                  key={s}
+                  role="tab"
+                  id={`${tabId}-${s}`}
+                  aria-controls={`${tabId}-panel`}
+                  aria-selected={section === s}
+                  tabIndex={section === s ? 0 : -1}
+                  onClick={() => setSection(s)}
+                  onKeyDown={e => {
+                    const next =
+                      e.key === 'ArrowRight'
+                        ? (i + 1) % 3
+                        : e.key === 'ArrowLeft'
+                          ? (i + 2) % 3
+                          : e.key === 'Home'
+                            ? 0
+                            : e.key === 'End'
+                              ? 2
+                              : null;
+                    if (next !== null) {
+                      e.preventDefault();
+                      setSection(sections[next]);
+                      document.getElementById(`${tabId}-${sections[next]}`)?.focus();
+                    }
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <section
+              id={`${tabId}-panel`}
+              role="tabpanel"
+              aria-labelledby={`${tabId}-${section}`}
+              className="ks-room-section"
+            >
+              {section === 'Places' && (
+                <>
+                  <button onClick={action(() => onLook('front'))}>
+                    <Home size={16} />
+                    Writing desk
+                  </button>
+                  <button onClick={action(() => onLook('right'))}>
+                    <Library size={16} />
+                    Bookshelf
+                  </button>
+                  <button onClick={action(() => onLook('left'))}>
+                    <MapPinned size={16} />
+                    Memory wall
+                  </button>
+                  <button onClick={action(onReading)}>
+                    <Armchair size={16} />
+                    Reading corner
+                  </button>
+                  <button onClick={action(onDisplayCase)}>
+                    <Archive size={16} />
+                    Display case
+                  </button>
+                  <button onClick={action(onDoor)}>Exit through the door</button>
+                </>
+              )}
+              {section === 'Collections' && (
+                <>
+                  <button onClick={action(onLibrary)}>
+                    <Library size={16} />
+                    Browse all scrapbooks
+                  </button>
+                  {!isVisitor && (
+                    <>
+                      <button onClick={action(onCardBinders)}>
+                        <BookOpen size={16} />
+                        Card binders
+                      </button>
+                      <button onClick={action(() => setDiscoveryOpen('capsule'))}>
+                        <ChestIcon />
+                        Time capsule
+                      </button>
+                      <button onClick={action(() => setPrinterOpen(true))}>
+                        <Printer size={16} />
+                        Print a photo
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+              {section === 'Atmosphere' && (
+                <>
+                  {room.id === 'cyberpunk' && (
+                    <>
+                      <label className="flex items-center justify-between gap-3 py-2">
+                        Infinity mirror
+                        <select
+                          aria-label="Infinity mirror"
+                          value={environment.cloudPalette ?? 'multicolor'}
+                          onChange={e =>
+                            setEnvironment({cloudPalette: e.target.value as Environment['cloudPalette']})
+                          }
+                        >
+                          <option value="multicolor">Multicolor</option>
+                          <option value="crt">Match CRT</option>
+                          <option value="off">Off</option>
+                        </select>
+                      </label>
+                      <label className="flex items-center justify-between gap-3 py-2">
+                        Time capsule
+                        <select
+                          aria-label="Time capsule finish"
+                          value={environment.capsuleFinish ?? 'metal'}
+                          onChange={e =>
+                            setEnvironment({capsuleFinish: e.target.value as Environment['capsuleFinish']})
+                          }
+                        >
+                          <option value="metal">Metallic</option>
+                          <option value="wood">Attic wood</option>
+                        </select>
+                      </label>
+                    </>
+                  )}
+                  <UiSwitch checked={environment.lampOn} onChange={onLamp}>
+                    <Lamp size={16} />
+                    {room.id === 'cyberpunk' ? 'Lava lamp' : 'Desk lamp'}
+                  </UiSwitch>
+                  <UiSwitch checked={environment.ceilingOn !== false} onChange={onCeiling}>
+                    <Lightbulb size={16} />
+                    Ceiling light
+                  </UiSwitch>
+                  <UiSwitch
+                    checked={environment.shelfLit}
+                    onChange={() => setEnvironment({shelfLit: !environment.shelfLit})}
+                  >
+                    <Library size={16} />
+                    Bookshelf lights
+                  </UiSwitch>
+                  {!isVisitor && (
+                    <UiSwitch
+                      checked={environment.displayCaseLit !== false}
+                      onChange={() => setEnvironment({displayCaseLit: environment.displayCaseLit === false})}
+                    >
+                      <Lightbulb size={16} />
+                      Display case
+                    </UiSwitch>
+                  )}
+                  <small>
+                    {room.id === 'cyberpunk'
+                      ? 'Map and case lights follow the CRT color.'
+                      : 'Case lights follow the CRT color.'}
+                  </small>
+                  {room.id === 'beachfront' && (
+                    <button
+                      aria-pressed={environment.coastalWindowOpen !== false}
+                      onClick={() =>
+                        setEnvironment({coastalWindowOpen: environment.coastalWindowOpen === false})
+                      }
+                    >
+                      Ocean window <span>{environment.coastalWindowOpen !== false ? 'Open' : 'Closed'}</span>
+                    </button>
+                  )}
+                  <button onClick={action(onMusic)}>
+                    <Music2 size={16} />
+                    Music and sound
+                  </button>
+                </>
+              )}
+            </section>
+            <footer>
+              <button onClick={action(onSettings)}>
+                <Settings2 size={16} />
+                Room settings
+              </button>
+              <small>Appearance · graphics · privacy</small>
+            </footer>
+          </div>
+        </details>
+      </nav>
+    </>
+  );
 }

@@ -4,20 +4,20 @@
  *
  *   node docs/build-docs.mjs
  */
-import { execFileSync } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import {execFileSync} from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-const srcDir = path.join(dir, "src");
+const srcDir = path.join(dir, 'src');
 const outDir = dir;
-const artifactsDir = "/opt/cursor/artifacts";
+const artifactsDir = '/opt/cursor/artifacts';
 
 const CHROME =
-  ["/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/opt/google/chrome/chrome"].find(
-    (p) => fs.existsSync(p),
-  ) || "google-chrome";
+  ['/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/opt/google/chrome/chrome'].find(p =>
+    fs.existsSync(p),
+  ) || 'google-chrome';
 
 const SHARED_CSS = `
   @page { size: A4; margin: 20mm 18mm; }
@@ -59,8 +59,8 @@ function build(name, title, subtitle) {
     console.warn(`skip ${name}: no ${bodyPath}`);
     return;
   }
-  const body = fs.readFileSync(bodyPath, "utf8");
-  const generated = new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC";
+  const body = fs.readFileSync(bodyPath, 'utf8');
+  const generated = new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
@@ -80,19 +80,19 @@ ${body}
   execFileSync(
     CHROME,
     [
-      "--headless=new",
-      "--no-sandbox",
-      "--disable-gpu",
-      "--no-pdf-header-footer",
-      "--virtual-time-budget=4000",
+      '--headless=new',
+      '--no-sandbox',
+      '--disable-gpu',
+      '--no-pdf-header-footer',
+      '--virtual-time-budget=4000',
       `--print-to-pdf=${outPdf}`,
       `file://${tmpHtml}`,
     ],
-    { stdio: "ignore" },
+    {stdio: 'ignore'},
   );
-  fs.rmSync(tmpHtml, { force: true });
+  fs.rmSync(tmpHtml, {force: true});
   try {
-    fs.mkdirSync(artifactsDir, { recursive: true });
+    fs.mkdirSync(artifactsDir, {recursive: true});
     fs.copyFileSync(outPdf, path.join(artifactsDir, `${name}.pdf`));
   } catch {
     /* artifacts dir may not exist outside cloud */
@@ -100,5 +100,9 @@ ${body}
   console.log(`built ${outPdf}`);
 }
 
-build("keepsake-worklog", "Keepsake — Build Work Log", "Per-phase summary of work, decisions, and changes");
-build("keepsake-suggestions", "Keepsake — Suggestions & Deviations", "Ideas that differ from Design Bible v3, saved for your review");
+build('keepsake-worklog', 'Keepsake — Build Work Log', 'Per-phase summary of work, decisions, and changes');
+build(
+  'keepsake-suggestions',
+  'Keepsake — Suggestions & Deviations',
+  'Ideas that differ from Design Bible v3, saved for your review',
+);

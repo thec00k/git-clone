@@ -1,15 +1,24 @@
-import {woodlandStudyPose,type WoodlandStudyView} from './woodlandStudy';
+import type {RoomTheme} from './themes';
+import {woodlandStudyPose, type WoodlandStudyView} from './woodlandStudy';
 import {useReducedMotion} from '../../hooks/useReducedMotion';
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import * as THREE from "three";
-import type { RoomFace } from "../../lib/roomLayout";
-import {useActiveRoom} from "./useActiveRoom";
+import {useEffect, useMemo, useRef, useState} from 'react';
+import {useFrame, useThree} from '@react-three/fiber';
+import * as THREE from 'three';
+import type {RoomFace} from '../../lib/roomLayout';
+import {useActiveRoom} from './useActiveRoom';
 import {DISPLAY_CASE_VIEW} from './ArtifactDisplayCase';
+import {CAMERA_MOVE_SECONDS, cameraMoveEase} from '../../lib/motion';
+import {CAMERA_PAUSING_DIALOG, ignorePageKey} from '../../lib/keyTargets';
 const EYE_Y = 1.32;
-const WORKBENCH_VIEW={position:new THREE.Vector3(-.15,1.55,-1.12),target:new THREE.Vector3(-.15,.78,-1.72)};
+const WORKBENCH_VIEW = {
+  position: new THREE.Vector3(-0.15, 1.55, -1.12),
+  target: new THREE.Vector3(-0.15, 0.78, -1.72),
+};
 
-const READING_VIEW = {position:new THREE.Vector3(.25,1.32,.45),target:new THREE.Vector3(-1.9,.45,1.35)};
+const READING_VIEW = {
+  position: new THREE.Vector3(0.25, 1.32, 0.45),
+  target: new THREE.Vector3(-1.9, 0.45, 1.35),
+};
 /** Straight down on the oak. Open `?look=desk` to check contact. */
 const DESK_OVERHEAD_VIEW = {
   position: new THREE.Vector3(-0.15, 2.05, -1.72),
@@ -17,23 +26,24 @@ const DESK_OVERHEAD_VIEW = {
 };
 
 function wantsDeskOverhead() {
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("look") === "desk";
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('look') === 'desk';
 }
-
 
 const WALK_SPEED = 2.35;
 const LOOK_YAW = 0.0044;
 const LOOK_PITCH = 0.0036;
 const PITCH_MIN = -0.72;
 const PITCH_MAX = 0.55;
+/** Pointer travel (px) below which a press counts as a click, matching scene hit tests. */
+const CLICK_SLOP = 4;
 
-function walkIntent(e: KeyboardEvent): { axis: "f" | "r"; dir: -1 | 1 } | null {
+function walkIntent(e: KeyboardEvent): {axis: 'f' | 'r'; dir: -1 | 1} | null {
   const code = e.code;
-  if (code === "KeyW" || e.key === "ArrowUp") return { axis: "f", dir: 1 };
-  if (code === "KeyS" || e.key === "ArrowDown") return { axis: "f", dir: -1 };
-  if (code === "KeyA" || e.key === "ArrowLeft") return { axis: "r", dir: -1 };
-  if (code === "KeyD" || e.key === "ArrowRight") return { axis: "r", dir: 1 };
+  if (code === 'KeyW' || e.key === 'ArrowUp') return {axis: 'f', dir: 1};
+  if (code === 'KeyS' || e.key === 'ArrowDown') return {axis: 'f', dir: -1};
+  if (code === 'KeyA' || e.key === 'ArrowLeft') return {axis: 'r', dir: -1};
+  if (code === 'KeyD' || e.key === 'ArrowRight') return {axis: 'r', dir: 1};
   return null;
 }
 
@@ -52,69 +62,202 @@ function lookDir(yaw: number, pitch: number, target = new THREE.Vector3()) {
   return target.set(Math.sin(yaw) * cp, Math.sin(pitch), -Math.cos(yaw) * cp);
 }
 
-function clampInRoom(pos: THREE.Vector3, ROOM_WALK: {minX:number;maxX:number;minZ:number;maxZ:number}) {
+function clampInRoom(pos: THREE.Vector3, ROOM_WALK: RoomTheme['walkBounds']) {
   pos.x = THREE.MathUtils.clamp(pos.x, ROOM_WALK.minX, ROOM_WALK.maxX);
   pos.z = THREE.MathUtils.clamp(pos.z, ROOM_WALK.minZ, ROOM_WALK.maxZ);
+  // The hearth stands on the Woodland south wall: stay out of its footprint.
+  const k = ROOM_WALK.keepOut;
+  if (k && pos.x > k.minX && pos.x < k.maxX && pos.z > k.minZ) {
+    // Slide out along the nearest edge instead of snapping the viewer across the room.
+    const dz = pos.z - k.minZ,
+      dl = pos.x - k.minX,
+      dr = k.maxX - pos.x;
+    if (dz <= dl && dz <= dr) pos.z = k.minZ;
+    else if (dl < dr) pos.x = k.minX;
+    else pos.x = k.maxX;
+  }
   // Keep the viewer's body clear of the cabinet, including its handles.
-  if (pos.z > .88 && pos.x > 1.30) pos.x = 1.30;
+  if (pos.z > 0.88 && pos.x > 1.3) pos.x = 1.3;
 }
 
 /** Walking stays at eye height; named study views and the editor use authored poses. */
-export function EyeCamera({ face, seated, touring, viewRevision, reading = false, workbench = false, displayCase = false, studyView = null }: { studyView?:WoodlandStudyView|null; face: RoomFace; seated: boolean; touring: boolean; viewRevision: number; reading?: boolean; workbench?:boolean; displayCase?:boolean }) {
+export function EyeCamera({
+  face,
+  seated,
+  touring,
+  viewRevision,
+  reading = false,
+  workbench = false,
+  displayCase = false,
+  studyView = null,
+}: {
+  studyView?: WoodlandStudyView | null;
+  face: RoomFace;
+  seated: boolean;
+  touring: boolean;
+  viewRevision: number;
+  reading?: boolean;
+  workbench?: boolean;
+  displayCase?: boolean;
+}) {
   const activeRoom = useActiveRoom();
-  const [photoView,setPhotoView]=useState<{position:THREE.Vector3;target:THREE.Vector3}|null>(null);
-  useEffect(()=>{const change=(e:Event)=>{const d=(e as CustomEvent).detail;setPhotoView(d?{position:new THREE.Vector3(...d.position),target:new THREE.Vector3(...d.target)}:null);};window.addEventListener('ks-frame-view',change);return()=>window.removeEventListener('ks-frame-view',change);},[]);
+  const [photoView, setPhotoView] = useState<{position: THREE.Vector3; target: THREE.Vector3} | null>(null);
+  useEffect(() => {
+    const change = (e: Event) => {
+      const d = (e as CustomEvent).detail;
+      setPhotoView(
+        d ? {position: new THREE.Vector3(...d.position), target: new THREE.Vector3(...d.target)} : null,
+      );
+    };
+    window.addEventListener('ks-frame-view', change);
+    return () => window.removeEventListener('ks-frame-view', change);
+  }, []);
   const ROOM_WALK = activeRoom.walkBounds;
-  const FACE_VIEW = useMemo(() => Object.fromEntries(Object.entries(activeRoom.views).map(([face,v]) => [face,{position:new THREE.Vector3(...v.position),target:new THREE.Vector3(...v.target)}])) as Record<RoomFace,{position:THREE.Vector3;target:THREE.Vector3}>, [activeRoom]);
-  const SEATED_VIEW = useMemo(() => ({position:new THREE.Vector3(...activeRoom.seated.position),target:new THREE.Vector3(...activeRoom.seated.target)}),[activeRoom]);
-  const { camera, gl, size } = useThree();
-  const portrait=size.width/size.height<.85;
-  const studyPose=useMemo(()=>studyView&&activeRoom.study?woodlandStudyPose(studyView,portrait):null,[studyView,activeRoom.study,portrait]);
-  const studyCamera=useMemo(()=>studyPose?{position:new THREE.Vector3(...studyPose.position),target:new THREE.Vector3(...studyPose.target)}:null,[studyPose]);
-  const authored=!!studyCamera&&!workbench&&!photoView&&!displayCase&&!reading&&!touring&&!seated;
-  const aim=useMemo(()=>({matrix:new THREE.Matrix4(),quaternion:new THREE.Quaternion()}),[]);
-  const scratch=useMemo(()=>({forward:new THREE.Vector3(),right:new THREE.Vector3(),target:new THREE.Vector3()}),[]);
-  const diagnosticElapsed=useRef(0);
-  const keys = useRef({ f: 0, r: 0 });
+  const FACE_VIEW = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(activeRoom.views).map(([face, v]) => [
+          face,
+          {position: new THREE.Vector3(...v.position), target: new THREE.Vector3(...v.target)},
+        ]),
+      ) as Record<RoomFace, {position: THREE.Vector3; target: THREE.Vector3}>,
+    [activeRoom],
+  );
+  const SEATED_VIEW = useMemo(
+    () => ({
+      position: new THREE.Vector3(...activeRoom.seated.position),
+      target: new THREE.Vector3(...activeRoom.seated.target),
+    }),
+    [activeRoom],
+  );
+  const {camera, gl, size} = useThree();
+  const portrait = size.width / size.height < 0.85;
+  const studyPose = useMemo(
+    () => (studyView && activeRoom.study ? woodlandStudyPose(studyView, portrait) : null),
+    [studyView, activeRoom.study, portrait],
+  );
+  const studyCamera = useMemo(
+    () =>
+      studyPose
+        ? {position: new THREE.Vector3(...studyPose.position), target: new THREE.Vector3(...studyPose.target)}
+        : null,
+    [studyPose],
+  );
+  const authored =
+    !!studyCamera && !workbench && !photoView && !displayCase && !reading && !touring && !seated;
+  const aim = useMemo(() => ({matrix: new THREE.Matrix4(), quaternion: new THREE.Quaternion()}), []);
+  const scratch = useMemo(
+    () => ({forward: new THREE.Vector3(), right: new THREE.Vector3(), target: new THREE.Vector3()}),
+    [],
+  );
+  const diagnosticElapsed = useRef(0);
+  const keys = useRef({f: 0, r: 0});
   const objectControls = useRef(false);
   const yaw = useRef(0);
   const pitch = useRef(0);
   const dragging = useRef(false);
+  const dragTravel = useRef(0);
   const userMoved = useRef(false);
-  useEffect(()=>{const change=(e:Event)=>{objectControls.current=!!(e as CustomEvent).detail;keys.current={f:0,r:0};dragging.current=false;};window.addEventListener('ks-object-controls',change);return()=>window.removeEventListener('ks-object-controls',change);},[]);
+  useEffect(() => {
+    const change = (e: Event) => {
+      objectControls.current = !!(e as CustomEvent).detail;
+      keys.current = {f: 0, r: 0};
+      dragging.current = false;
+    };
+    window.addEventListener('ks-object-controls', change);
+    return () => window.removeEventListener('ks-object-controls', change);
+  }, []);
   const touringRef = useRef(touring);
 
   const seatedRef = useRef(seated);
 
-  useEffect(() => { touringRef.current = touring||workbench||!!photoView||authored; seatedRef.current = seated||workbench; }, [touring, seated,workbench,photoView,authored]);
+  useEffect(() => {
+    touringRef.current = touring || workbench || !!photoView || authored;
+    seatedRef.current = seated || workbench;
+  }, [touring, seated, workbench, photoView, authored]);
   const reduced = useReducedMotion();
   const overhead = wantsDeskOverhead();
-  const view = photoView ?? (workbench ? WORKBENCH_VIEW : displayCase && !touring ? DISPLAY_CASE_VIEW : reading && !touring ? READING_VIEW : overhead ? DESK_OVERHEAD_VIEW : seated && face === "front" ? SEATED_VIEW : authored ? studyCamera! : FACE_VIEW[face]);
+  // Desk, corkboard and bookshelf are the three walking-eye faces. Only moves between them get the timed
+  // glide, including the welcome tour turning to the place each step names.
+  const faceMode =
+    !photoView &&
+    !workbench &&
+    !(displayCase && !touring) &&
+    !(reading && !touring) &&
+    !overhead &&
+    !seated &&
+    !authored;
+  const previousFace = useRef<{face: RoomFace; faceMode: boolean} | null>(null);
+  const glide = useRef<{
+    elapsed: number;
+    from: THREE.Vector3;
+    fromQuaternion: THREE.Quaternion;
+    toQuaternion: THREE.Quaternion;
+  } | null>(null);
+  const view =
+    photoView ??
+    (workbench
+      ? WORKBENCH_VIEW
+      : displayCase && !touring
+        ? DISPLAY_CASE_VIEW
+        : reading && !touring
+          ? READING_VIEW
+          : overhead
+            ? DESK_OVERHEAD_VIEW
+            : seated && face === 'front'
+              ? SEATED_VIEW
+              : authored
+                ? studyCamera!
+                : FACE_VIEW[face]);
+  // The display-case pose is authored above eye height to frame all four shelves.
+  const framed = view === DISPLAY_CASE_VIEW;
 
   useEffect(() => {
     userMoved.current = false;
-    keys.current={f:0,r:0};dragging.current=false;
+    keys.current = {f: 0, r: 0};
+    dragging.current = false;
+    const before = previousFace.current;
+    previousFace.current = {face, faceMode};
+    if (before && before.faceMode && faceMode && before.face !== face && !reduced) {
+      // Start from wherever the camera is now, so a change of mind mid-glide stays smooth.
+      aim.matrix.lookAt(view.position, view.target, camera.up);
+      glide.current = {
+        elapsed: 0,
+        from: camera.position.clone(),
+        fromQuaternion: camera.quaternion.clone(),
+        toQuaternion: new THREE.Quaternion().setFromRotationMatrix(aim.matrix),
+      };
+    } else {
+      glide.current = null;
+    }
     const look = lookFromView(view.position, view.target);
     yaw.current = look.yaw;
     pitch.current = look.pitch;
-  }, [face, seated, touring, view, viewRevision]);
+  }, [face, faceMode, seated, touring, view, viewRevision, camera, aim, reduced]);
 
   useEffect(() => {
     const el = gl.domElement;
     const blockMenu = (e: Event) => e.preventDefault();
     const down = (e: PointerEvent) => {
-      if (touringRef.current||objectControls.current) return;
+      if (touringRef.current || objectControls.current) return;
       if ((e.target as HTMLElement | null)?.closest?.("button, a, input, textarea, [role='dialog']")) return;
       dragging.current = true;
-      // Begin a drag from the visible pose, including midway through a transition.
-      camera.getWorldDirection(scratch.forward);
-      yaw.current = Math.atan2(scratch.forward.x, -scratch.forward.z);
-      pitch.current = Math.asin(THREE.MathUtils.clamp(scratch.forward.y,-1,1));
-      userMoved.current = true;
+      dragTravel.current = 0;
       el.setPointerCapture(e.pointerId);
     };
     const move = (e: PointerEvent) => {
-      if (!dragging.current || touringRef.current||objectControls.current) return;
+      if (!dragging.current || touringRef.current || objectControls.current) return;
+      // A click must not freeze a turn halfway; only a real drag takes over.
+      if (dragTravel.current < CLICK_SLOP) {
+        dragTravel.current += Math.abs(e.movementX) + Math.abs(e.movementY);
+        if (dragTravel.current < CLICK_SLOP) return;
+        // Begin the drag from the visible pose, including midway through a transition.
+        camera.getWorldDirection(scratch.forward);
+        yaw.current = Math.atan2(scratch.forward.x, -scratch.forward.z);
+        pitch.current = Math.asin(THREE.MathUtils.clamp(scratch.forward.y, -1, 1));
+        userMoved.current = true;
+        glide.current = null;
+      }
       // Mouse right looks right; mouse up looks up. Screen Y grows downward.
       yaw.current += e.movementX * LOOK_YAW;
       pitch.current = THREE.MathUtils.clamp(pitch.current - e.movementY * LOOK_PITCH, PITCH_MIN, PITCH_MAX);
@@ -124,7 +267,7 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
       if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
     };
     const wheel = (e: WheelEvent) => {
-      if (touringRef.current || seatedRef.current||objectControls.current) return;
+      if (touringRef.current || seatedRef.current || objectControls.current) return;
       e.preventDefault();
       userMoved.current = true;
       const dir = lookDir(yaw.current, 0);
@@ -132,29 +275,26 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
       clampInRoom(camera.position, ROOM_WALK);
       camera.position.y = EYE_Y;
     };
-    el.addEventListener("contextmenu", blockMenu);
-    el.addEventListener("pointerdown", down);
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", up);
-    el.addEventListener("wheel", wheel, { passive: false });
+    el.addEventListener('contextmenu', blockMenu);
+    el.addEventListener('pointerdown', down);
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+    el.addEventListener('wheel', wheel, {passive: false});
     return () => {
-      el.removeEventListener("contextmenu", blockMenu);
-      el.removeEventListener("pointerdown", down);
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", up);
-      el.removeEventListener("wheel", wheel);
+      el.removeEventListener('contextmenu', blockMenu);
+      el.removeEventListener('pointerdown', down);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      el.removeEventListener('wheel', wheel);
     };
   }, [camera, gl, ROOM_WALK, scratch]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (touringRef.current || objectControls.current || seated || document.querySelector('[aria-modal="true"]')) return;
+      if (touringRef.current || objectControls.current || seated || ignorePageKey(e)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.target instanceof HTMLElement && e.target.closest("input, textarea, select, [contenteditable='true'], [aria-modal='true']")) {
-        return;
-      }
       const intent = walkIntent(e);
       if (!intent) return;
       e.preventDefault();
@@ -170,72 +310,105 @@ export function EyeCamera({ face, seated, touring, viewRevision, reading = false
       keys.current.f = 0;
       keys.current.r = 0;
     };
-    window.addEventListener("keydown", down);
-    window.addEventListener("keyup", up);
-    window.addEventListener("blur", clear);
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', clear);
     return () => {
-      window.removeEventListener("keydown", down);
-      window.removeEventListener("keyup", up);
-      window.removeEventListener("blur", clear);
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', clear);
       clear();
     };
   }, [seated]);
 
   useFrame((_, dt) => {
-    if(objectControls.current)return;
-    if (document.querySelector('[aria-modal="true"]')) { keys.current = { f: 0, r: 0 }; dragging.current = false; return; }
-    dt = Math.min(dt, .05);
-    if (touring || !userMoved.current) {
+    if (objectControls.current) return;
+    if (document.querySelector(CAMERA_PAUSING_DIALOG)) {
+      keys.current = {f: 0, r: 0};
+      dragging.current = false;
+      return;
+    }
+    dt = Math.min(dt, 0.05);
+    const move = glide.current;
+    if (move && !userMoved.current && !reduced) {
+      move.elapsed += dt;
+      const progress = Math.min(1, move.elapsed / CAMERA_MOVE_SECONDS);
+      const eased = cameraMoveEase(progress);
+      camera.position.lerpVectors(move.from, view.position, eased);
+      camera.position.y = EYE_Y;
+      clampInRoom(camera.position, ROOM_WALK);
+      camera.quaternion.copy(move.fromQuaternion).slerp(move.toQuaternion, eased);
+      if (progress >= 1) glide.current = null;
+    } else if (touring || !userMoved.current) {
+      glide.current = null;
       const t = reduced || touring ? 1 : 1 - Math.pow(0.0008, dt);
       camera.position.lerp(view.position, t);
       if (overhead) {
         camera.position.copy(view.position);
-      } else if (!seated&&!workbench&&!photoView&&!authored) {
+      } else if (!seated && !workbench && !photoView && !authored && !framed) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }
-      aim.matrix.lookAt(camera.position,view.target,camera.up);
+      aim.matrix.lookAt(camera.position, view.target, camera.up);
       aim.quaternion.setFromRotationMatrix(aim.matrix);
-      camera.quaternion.slerp(aim.quaternion,t);
+      camera.quaternion.slerp(aim.quaternion, t);
     } else {
       if (!seated && (keys.current.f || keys.current.r)) {
         const forward = lookDir(yaw.current, 0, scratch.forward);
         const right = scratch.right.set(-forward.z, 0, forward.x);
-        const distance = WALK_SPEED * dt / Math.max(1, Math.hypot(keys.current.f, keys.current.r));
+        const distance = (WALK_SPEED * dt) / Math.max(1, Math.hypot(keys.current.f, keys.current.r));
         camera.position.addScaledVector(forward, keys.current.f * distance);
         camera.position.addScaledVector(right, keys.current.r * distance);
       }
       if (seated) {
         camera.position.copy(SEATED_VIEW.position);
-      } else {
+      } else if (!framed || keys.current.f || keys.current.r) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }
-      camera.lookAt(scratch.target.copy(camera.position).add(lookDir(yaw.current, pitch.current,scratch.forward)));
+      camera.lookAt(
+        scratch.target.copy(camera.position).add(lookDir(yaw.current, pitch.current, scratch.forward)),
+      );
     }
 
-    if(camera instanceof THREE.PerspectiveCamera){
-      const bookFov=Math.max(42,THREE.MathUtils.radToDeg(2*Math.atan(.42/Math.max(.35,camera.aspect))));
-      const targetFov=workbench?bookFov:authored&&studyPose?studyPose.fov:seated?38:activeRoom.fov;
-      const nextFov=Math.abs(camera.fov-targetFov)<.001?targetFov:THREE.MathUtils.lerp(camera.fov,targetFov,reduced?1:1-Math.exp(-dt*7));
-      if(camera.fov!==nextFov){camera.fov=nextFov;camera.updateProjectionMatrix();}
+    if (camera instanceof THREE.PerspectiveCamera) {
+      const bookFov = Math.max(
+        42,
+        THREE.MathUtils.radToDeg(2 * Math.atan(0.42 / Math.max(0.35, camera.aspect))),
+      );
+      const targetFov = workbench
+        ? bookFov
+        : authored && studyPose
+          ? studyPose.fov
+          : seated
+            ? 38
+            : activeRoom.fov;
+      const nextFov =
+        Math.abs(camera.fov - targetFov) < 0.001
+          ? targetFov
+          : THREE.MathUtils.lerp(camera.fov, targetFov, reduced ? 1 : 1 - Math.exp(-dt * 7));
+      if (camera.fov !== nextFov) {
+        camera.fov = nextFov;
+        camera.updateProjectionMatrix();
+      }
     }
-    diagnosticElapsed.current+=dt;
-    if(diagnosticElapsed.current<.1)return;
-    diagnosticElapsed.current=0;
-    const host = gl.domElement.closest(".ks-room3d");
+    diagnosticElapsed.current += dt;
+    if (diagnosticElapsed.current < 0.1) return;
+    diagnosticElapsed.current = 0;
+    const host = gl.domElement.closest('.ks-room3d');
     if (host instanceof HTMLElement) {
       host.dataset.cam = `${camera.position.x.toFixed(3)},${camera.position.y.toFixed(3)},${camera.position.z.toFixed(3)}`;
-      if(camera instanceof THREE.PerspectiveCamera)host.dataset.fov=camera.fov.toFixed(2);
-      if(activeRoom.study){host.dataset.textureCount=String(gl.info.memory.textures);host.dataset.drawCalls=String(gl.info.render.calls);host.dataset.triangles=String(gl.info.render.triangles);}
+      if (camera instanceof THREE.PerspectiveCamera) host.dataset.fov = camera.fov.toFixed(2);
+      if (activeRoom.review) {
+        host.dataset.textureCount = String(gl.info.memory.textures);
+        host.dataset.drawCalls = String(gl.info.render.calls);
+        host.dataset.triangles = String(gl.info.render.triangles);
+      }
       host.dataset.eye = camera.position.y.toFixed(3);
       host.dataset.look = `${yaw.current.toFixed(3)},${pitch.current.toFixed(3)}`;
-      host.dataset.walk = keys.current.f || keys.current.r ? "1" : "0";
+      host.dataset.walk = keys.current.f || keys.current.r ? '1' : '0';
     }
   });
 
   return null;
 }
-
-
-

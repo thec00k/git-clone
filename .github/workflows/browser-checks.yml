@@ -1,0 +1,88 @@
+name: Browser checks
+
+# Takes screenshots on a real (software rendered) Chromium and publishes them to the "ci-shots" branch,
+# which is rewritten every run and never merged.
+# - Quick set (lettering, book and print, two room views, about 10 minutes): automatically on every push that
+#   changes the app's code, styles or room files.
+# - Full set (every season, holiday and room, about 90 minutes on software rendering): when
+#   .github/requests/browser-checks changes.
+on:
+  push:
+    paths:
+      - '.github/requests/browser-checks'
+      - 'keepsake/src/**'
+      - 'keepsake/public/**'
+      - 'keepsake/scripts/capture-*.mjs'
+      - 'keepsake/index.html'
+
+concurrency:
+  group: browser-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: keepsake
+    env:
+      TEST_BASE_URL: http://127.0.0.1:5184
+      TEST_CHANNEL: chromium
+      SHOT_DIR: ${{ github.workspace }}/shots
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false  # keep the write token out of .git/config while third-party installs run
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: keepsake/package-lock.json
+      - name: Install
+        run: bash ../.github/scripts/run-step.sh install npm ci
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Start the dev server
+        run: |
+          nohup npx vite --host 127.0.0.1 --port 5184 > "$RUNNER_TEMP/vite.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:5184/ >/dev/null && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/vite.log"; exit 1
+      - name: Lettering sheet
+        if: always()
+        run: bash ../.github/scripts/run-step.sh lettering node scripts/capture-lettering.mjs
+      - name: Book lettering
+        if: always()
+        run: bash ../.github/scripts/run-step.sh book node scripts/capture-book.mjs
+      - name: Decide quick or full
+        id: scope
+        run: |
+          if git -C .. diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q '^.github/requests/browser-checks$'; then echo "full=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Room screenshots
+        if: always()
+        env:
+          QUICK: ${{ steps.scope.outputs.full != '1' && '1' || '' }}
+        run: bash ../.github/scripts/run-step.sh capture node scripts/capture-room.mjs
+      # The other browser checks (study, performance, storage) need their ports and
+      # timeouts adapting to CI before they can run here; see docs/ci.md.
+      - name: Collect screenshots
+        if: always()
+        run: |
+          mkdir -p "$SHOT_DIR"
+          find art -path '*/review/*.png' -newer package.json -exec cp {} "$SHOT_DIR"/ \; 2>/dev/null || true
+          ls -la "$SHOT_DIR"
+      - name: Publish screenshots to ci-shots
+        if: always()
+        run: |
+          cd "$SHOT_DIR" && git init -q -b ci-shots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "Run ${{ github.run_id }} on ${{ github.sha }}" > RUN.txt
+          git add -A && git commit -q -m "Screenshots for ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/ci-shots

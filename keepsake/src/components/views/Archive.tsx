@@ -1,19 +1,19 @@
-import {BatchPhotoReview} from "../BatchPhotoReview";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { BookPlus, Check, Heart, Lock, Pencil, Plus, Search, Upload, X } from "lucide-react";
-import { useApp } from "../../store/appStore";
-import { useNav } from "../../store/nav";
-import {checkImportCapacity,checkStorageCapacity} from '../../lib/importLimits';
-import { loadImageFile } from "../../lib/image";
-import { uid } from "../../lib/id";
-import type { PhotoElement } from "../../types/scrapbook";
-import { ViewShell } from "./ViewShell";
-import {FoundPhotos} from "../FoundPhotos";
+import {BatchPhotoReview} from '../BatchPhotoReview';
+import {useEffect, useMemo, useRef, useState} from 'react';
+import {BookPlus, Check, Heart, Lock, Pencil, Plus, Search, Upload, X} from 'lucide-react';
+import {useApp} from '../../store/appStore';
+import {useNav} from '../../store/nav';
+import {checkImportCapacity, checkStorageCapacity} from '../../lib/importLimits';
+import {loadImageFile} from '../../lib/image';
+import {uid} from '../../lib/id';
+import type {PhotoElement} from '../../types/scrapbook';
+import {ViewShell} from './ViewShell';
+import {FoundPhotos} from '../FoundPhotos';
 import {TicketCompanion} from '../TicketCompanion';
 import {FolderUpload} from '../FolderUpload';
 import {downloadOriginal} from '../../lib/originalPhotos';
 
-type TabKey = "all" | "favorites" | string;
+type TabKey = 'all' | 'favorites' | string;
 
 export function Archive() {
   const {
@@ -27,67 +27,90 @@ export function Archive() {
     renameArchiveTab,
     removeArchiveTab,
   } = useApp();
-  const { isVisitor, archiveFolder, back } = useNav();
-  const [query, setQuery] = useState("");
+  const {isVisitor, archiveFolder, back} = useNav();
+  const [query, setQuery] = useState('');
   const [tab, setTab] = useState<TabKey>(archiveFolder);
   useEffect(() => {
     setTab(archiveFolder);
   }, [archiveFolder]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draftName, setDraftName] = useState("");
+  const [draftName, setDraftName] = useState('');
   const [adding, setAdding] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [reviewIds,setReviewIds]=useState<string[]>([]);
-  const [uploadStatus,setUploadStatus]=useState('');
-  const [uploading,setUploading]=useState(false);
-  const stopUpload=useRef(false);
-  useEffect(()=>()=>{stopUpload.current=true;},[]);
+  const [newName, setNewName] = useState('');
+  const [reviewIds, setReviewIds] = useState<string[]>([]);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const stopUpload = useRef(false);
+  useEffect(
+    () => () => {
+      stopUpload.current = true;
+    },
+    [],
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   const tabs = state.archiveTabs;
-  useEffect(() => { setEditingId(null); setAdding(false); }, [tab]);
+  useEffect(() => {
+    setEditingId(null);
+    setAdding(false);
+  }, [tab]);
 
-  const recent = useMemo(
-    () => [...state.archive].sort((a, b) => b.createdAt - a.createdAt),
-    [state.archive],
-  );
+  const recent = useMemo(() => [...state.archive].sort((a, b) => b.createdAt - a.createdAt), [state.archive]);
 
-  const filtered = recent.filter((a) => {
-    if (tab === "favorites" && !a.favorite) return false;
-    if (tab !== "all" && tab !== "favorites" && !a.categories.includes(tab)) return false;
+  const filtered = recent.filter(a => {
+    if (tab === 'favorites' && !a.favorite) return false;
+    if (tab !== 'all' && tab !== 'favorites' && !a.categories.includes(tab)) return false;
     if (!query.trim()) return true;
     const q = query.toLowerCase();
-    const names = a.categories.map((id) => tabs.find((t) => t.id === id)?.name ?? id).join(" ");
-    if (a.favorite && ("favourites".includes(q) || "favorites".includes(q))) return true;
+    const names = a.categories.map(id => tabs.find(t => t.id === id)?.name ?? id).join(' ');
+    if (a.favorite && ('favourites'.includes(q) || 'favorites'.includes(q))) return true;
     return names.toLowerCase().includes(q);
   });
 
   async function upload(files: FileList | null) {
     if (!files || uploading) return;
-    const list=Array.from(files),cats=tab !== 'all' && tab !== 'favorites' ? [tab] : [];
-    setUploading(true);stopUpload.current=false;let count=0,failed=0;const imported:string[]=[];
-    try{
-      await checkImportCapacity(list);
+    const list = Array.from(files),
+      cats = tab !== 'all' && tab !== 'favorites' ? [tab] : [];
+    setUploading(true);
+    stopUpload.current = false;
+    let count = 0,
+      failed = 0;
+    const imported: string[] = [];
+    try {
+      await checkImportCapacity(list, state.archive.length);
       for (const file of list) {
-        if(stopUpload.current)break;
-        let photo;try{photo=await loadImageFile(file,state.profile.preserveOriginals!==false);}catch{failed++;continue;}
-        if(stopUpload.current)break;
-        await checkStorageCapacity(photo.src.length);imported.push(addArchivePhoto(photo.src,photo.aspect,cats,photo.original));count++;
+        if (stopUpload.current) break;
+        let photo;
+        try {
+          photo = await loadImageFile(file, state.profile.preserveOriginals !== false);
+        } catch {
+          failed++;
+          continue;
+        }
+        if (stopUpload.current) break;
+        await checkStorageCapacity(photo.src.length);
+        imported.push(addArchivePhoto(photo.src, photo.aspect, cats, photo.original));
+        count++;
         setUploadStatus(`Imported ${count} of ${list.length}…`);
       }
-      setUploadStatus(`${count} imported; ${failed} unreadable. ${stopUpload.current?'Import stopped.':''}`);
-    }catch(error){setUploadStatus(`${count} imported. ${error instanceof Error?error.message:'Import failed.'}`);}
-    setUploading(false);if(imported.length)setReviewIds(imported);
+      setUploadStatus(
+        `${count} imported; ${failed} unreadable. ${stopUpload.current ? 'Import stopped.' : ''}`,
+      );
+    } catch (error) {
+      setUploadStatus(`${count} imported. ${error instanceof Error ? error.message : 'Import failed.'}`);
+    }
+    setUploading(false);
+    if (imported.length) setReviewIds(imported);
   }
 
   function placeInBook(src: string, photoId: string) {
     if (!activeBook) return;
-    updateActiveBook((b) => {
+    updateActiveBook(b => {
       const pages = [...b.pages];
       const target = pages[pages.length - 1];
       const el: PhotoElement = {
-        id: uid("el"),
-        type: "photo",
+        id: uid('el'),
+        type: 'photo',
         src,
         photoId,
         x: 50,
@@ -95,10 +118,10 @@ export function Archive() {
         w: 46,
         rotation: -3,
         z: (target.elements.reduce((m, e) => Math.max(m, e.z), 0) || 0) + 1,
-        frame: "polaroid",
+        frame: 'polaroid',
       };
-      pages[pages.length - 1] = { ...target, elements: [...target.elements, el] };
-      return { ...b, pages };
+      pages[pages.length - 1] = {...target, elements: [...target.elements, el]};
+      return {...b, pages};
     });
   }
 
@@ -118,12 +141,12 @@ export function Archive() {
       const id = addArchiveTab(name);
       setTab(id);
     }
-    setNewName("");
+    setNewName('');
     setAdding(false);
   }
 
   function toggleTabOnPhoto(photoId: string, tabId: string, current: string[]) {
-    const next = current.includes(tabId) ? current.filter((c) => c !== tabId) : [...current, tabId];
+    const next = current.includes(tabId) ? current.filter(c => c !== tabId) : [...current, tabId];
     setCategories(photoId, next);
   }
 
@@ -149,12 +172,36 @@ export function Archive() {
           <button className="ks-tool ks-tool--accent" onClick={() => inputRef.current?.click()}>
             <Upload size={16} /> Upload
           </button>
-          <FolderUpload onImported={setTab}/>{uploading&&<button className="ks-tool" onClick={()=>{stopUpload.current=true;}}>Stop import</button>}<span role="status">{uploadStatus}</span>
+          <FolderUpload onImported={setTab} />
+          {uploading && (
+            <button
+              className="ks-tool"
+              onClick={() => {
+                stopUpload.current = true;
+              }}
+            >
+              Stop import
+            </button>
+          )}
+          <span role="status">{uploadStatus}</span>
         </>
       }
     >
-      {!!reviewIds.length&&<BatchPhotoReview photoIds={reviewIds} notice={uploadStatus} onClose={()=>setReviewIds([])}/>}
-      <input ref={inputRef} type="file" accept="image/*" multiple hidden aria-label="Upload photographs" onChange={(e) => { upload(e.target.files); e.target.value = ""; }} />
+      {!!reviewIds.length && (
+        <BatchPhotoReview photoIds={reviewIds} notice={uploadStatus} onClose={() => setReviewIds([])} />
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        aria-label="Upload photographs"
+        onChange={e => {
+          upload(e.target.files);
+          e.target.value = '';
+        }}
+      />
 
       <div className="mt-3 flex items-center gap-2 rounded-full bg-black/25 px-3 py-1.5">
         <Search size={15} className="text-paper/50" />
@@ -164,18 +211,28 @@ export function Archive() {
           className="w-full bg-transparent text-paper outline-none"
           placeholder="search by tab…"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={e => setQuery(e.target.value)}
         />
       </div>
 
       <div className="ks-archive-category-tabs" role="tablist" aria-label="Archive tabs">
-        <button className={`ks-tool ${tab === "all" ? "ks-tool--accent" : ""}`} role="tab" aria-selected={tab === "all"} onClick={() => setTab("all")}>
+        <button
+          className={`ks-tool ${tab === 'all' ? 'ks-tool--accent' : ''}`}
+          role="tab"
+          aria-selected={tab === 'all'}
+          onClick={() => setTab('all')}
+        >
           All
         </button>
-        <button className={`ks-tool ${tab === "favorites" ? "ks-tool--accent" : ""}`} role="tab" aria-selected={tab === "favorites"} onClick={() => setTab("favorites")}>
-          <Heart size={13} fill={tab === "favorites" ? "currentColor" : "none"} /> Favourites
+        <button
+          className={`ks-tool ${tab === 'favorites' ? 'ks-tool--accent' : ''}`}
+          role="tab"
+          aria-selected={tab === 'favorites'}
+          onClick={() => setTab('favorites')}
+        >
+          <Heart size={13} fill={tab === 'favorites' ? 'currentColor' : 'none'} /> Favourites
         </button>
-        {tabs.map((t) =>
+        {tabs.map(t =>
           editingId === t.id && tab === t.id ? (
             <span key={t.id} className="flex items-center gap-1">
               <input
@@ -183,10 +240,10 @@ export function Archive() {
                 value={draftName}
                 aria-label="Tab name"
                 autoFocus
-                onChange={(e) => setDraftName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") commitRename();
-                  if (e.key === "Escape") setEditingId(null);
+                onChange={e => setDraftName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') commitRename();
+                  if (e.key === 'Escape') setEditingId(null);
                 }}
               />
               <button className="ks-chip h-7 w-7" aria-label="Save tab name" onClick={commitRename}>
@@ -195,15 +252,35 @@ export function Archive() {
             </span>
           ) : (
             <span key={t.id} className="flex items-center">
-              <button className={`ks-tool ${tab === t.id ? "ks-tool--accent" : ""}`} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
+              <button
+                className={`ks-tool ${tab === t.id ? 'ks-tool--accent' : ''}`}
+                role="tab"
+                aria-selected={tab === t.id}
+                onClick={() => setTab(t.id)}
+              >
                 {t.name}
               </button>
-              {tab === t.id && <><button className="ks-chip ml-0.5 h-7 w-7" aria-label={`Rename ${t.name}`} onClick={() => startRename(t.id, t.name)}>
-                <Pencil size={11} />
-              </button>
-              <button className="ks-chip h-7 w-7" aria-label={`Remove ${t.name} tab`} onClick={() => { if (tab === t.id) setTab("all"); removeArchiveTab(t.id); }}>
-                <X size={12} />
-              </button></>}
+              {tab === t.id && (
+                <>
+                  <button
+                    className="ks-chip ml-0.5 h-7 w-7"
+                    aria-label={`Rename ${t.name}`}
+                    onClick={() => startRename(t.id, t.name)}
+                  >
+                    <Pencil size={11} />
+                  </button>
+                  <button
+                    className="ks-chip h-7 w-7"
+                    aria-label={`Remove ${t.name} tab`}
+                    onClick={() => {
+                      if (tab === t.id) setTab('all');
+                      removeArchiveTab(t.id);
+                    }}
+                  >
+                    <X size={12} />
+                  </button>
+                </>
+              )}
             </span>
           ),
         )}
@@ -217,10 +294,10 @@ export function Archive() {
               aria-label="New tab name"
               value={newName}
               autoFocus
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") commitNewTab();
-                if (e.key === "Escape") setAdding(false);
+              onChange={e => setNewName(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') commitNewTab();
+                if (e.key === 'Escape') setAdding(false);
               }}
             />
             <button className="ks-chip h-7 w-7" aria-label="Create tab" onClick={commitNewTab}>
@@ -235,25 +312,32 @@ export function Archive() {
       </div>
 
       <p className="mt-4 mb-2 text-sm text-ink/70">
-        {filtered.length} photo{filtered.length === 1 ? "" : "s"} · newest first
-        {tab !== "all" && tab !== "favorites" ? " · uploads join this tab" : ""}
+        {filtered.length} photo{filtered.length === 1 ? '' : 's'} · newest first
+        {tab !== 'all' && tab !== 'favorites' ? ' · uploads join this tab' : ''}
       </p>
-      <TicketCompanion/><FoundPhotos/>
+      <TicketCompanion />
+      <FoundPhotos />
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-        {filtered.map((a) => (
+        {filtered.map(a => (
           <div key={a.id} className="ks-panel overflow-hidden">
             <div className="aspect-square w-full overflow-hidden">
-              <img src={a.src} alt="" className="h-full w-full object-cover" />
+              <img
+                src={a.src}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
             </div>
             <div className="flex items-center justify-between px-2 py-1.5">
               <button
-                className={`ks-chip h-8 w-8 ${a.favorite ? "!bg-seal" : ""}`}
+                className={`ks-chip h-8 w-8 ${a.favorite ? '!bg-seal' : ''}`}
                 title="Favourite"
-                aria-label={a.favorite ? "Remove from favourites" : "Add to favourites"}
+                aria-label={a.favorite ? 'Remove from favourites' : 'Add to favourites'}
                 aria-pressed={a.favorite}
                 onClick={() => toggleFavorite(a.id)}
               >
-                <Heart size={14} fill={a.favorite ? "currentColor" : "none"} />
+                <Heart size={14} fill={a.favorite ? 'currentColor' : 'none'} />
               </button>
               <button
                 className="ks-chip h-8 w-8"
@@ -264,22 +348,42 @@ export function Archive() {
                 <BookPlus size={14} />
               </button>
             </div>
-            <div className="px-2 pb-2 text-xs">{a.original?<button className="ks-tool" onClick={()=>void downloadOriginal(a.original!).catch(e=>setUploadStatus(e instanceof Error?e.message:"Download failed."))}>Download original</button>:<span>Display copy only</span>}</div>
+            <div className="px-2 pb-2 text-xs">
+              {a.original ? (
+                <button
+                  className="ks-tool"
+                  onClick={() =>
+                    void downloadOriginal(a.original!).catch(e =>
+                      setUploadStatus(e instanceof Error ? e.message : 'Download failed.'),
+                    )
+                  }
+                >
+                  Download original
+                </button>
+              ) : (
+                <span>Display copy only</span>
+              )}
+            </div>
             {tabs.length > 0 && (
-              <details className="ks-archive-photo-categories"><summary>Categories</summary><div className="flex flex-wrap gap-1 pt-2">
-                {tabs.map((t) => (
-                  <button
-                    key={t.id}
-                    className={`rounded-full px-1.5 py-0.5 text-[0.65rem] ${
-                      a.categories.includes(t.id) ? "bg-accent/80 text-accent-fg" : "bg-black/25 text-paper/50"
-                    }`}
-                    aria-pressed={a.categories.includes(t.id)}
-                    onClick={() => toggleTabOnPhoto(a.id, t.id, a.categories)}
-                  >
-                    {t.name}
-                  </button>
-                ))}
-              </div></details>
+              <details className="ks-archive-photo-categories">
+                <summary>Categories</summary>
+                <div className="flex flex-wrap gap-1 pt-2">
+                  {tabs.map(t => (
+                    <button
+                      key={t.id}
+                      className={`rounded-full px-1.5 py-0.5 text-[0.65rem] ${
+                        a.categories.includes(t.id)
+                          ? 'bg-accent/80 text-accent-fg'
+                          : 'bg-black/25 text-paper/50'
+                      }`}
+                      aria-pressed={a.categories.includes(t.id)}
+                      onClick={() => toggleTabOnPhoto(a.id, t.id, a.categories)}
+                    >
+                      {t.name}
+                    </button>
+                  ))}
+                </div>
+              </details>
             )}
           </div>
         ))}
