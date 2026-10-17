@@ -34,6 +34,9 @@ const scripts = [
   'check-soundcloud.mjs',
   'check-spotify.mjs',
   'check-room-themes.mjs',
+  'check-display-case-leak.mjs',
+  'check-model-cache-eviction.mjs',
+  'check-frame-allocations.mjs',
 ];
 for (const script of scripts) {
   process.stdout.write(`\nChecking ${script}\n`);
