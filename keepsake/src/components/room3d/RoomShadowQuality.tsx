@@ -1,4 +1,4 @@
-import {useEffect, useLayoutEffect} from 'react';
+import {useLayoutEffect} from 'react';
 import {useFrame, useThree} from '@react-three/fiber';
 import type * as THREE from 'three';
 
@@ -33,30 +33,5 @@ export function RoomShadowQuality({enabled}: {enabled: boolean}) {
       if (light.shadow.intensity !== strength) light.shadow.intensity = strength;
     });
   });
-  return null;
-}
-
-/**
- * Prepares every material's shader in the background once a room has loaded, including objects that start hidden
- * (for example the hearth fire outside autumn and winter), so showing them later does not stall the page.
- * Uses the browser's parallel shader compiling where it is available; elsewhere it behaves like a normal compile.
- */
-export function RoomShaderWarmup({roomKey}: {roomKey: string}) {
-  const gl = useThree(s => s.gl);
-  const scene = useThree(s => s.scene);
-  const camera = useThree(s => s.camera);
-  useEffect(() => {
-    let cancelled = false;
-    const id = window.setTimeout(() => {
-      if (cancelled) return;
-      gl.compileAsync(scene, camera).catch(() => {
-        /* warm-up is only a head start; the room still compiles what it draws */
-      });
-    }, 0);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(id);
-    };
-  }, [gl, scene, camera, roomKey]);
   return null;
 }

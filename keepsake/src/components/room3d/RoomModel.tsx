@@ -34,7 +34,7 @@ import {useRoomAsset} from './useRoomAsset';
 import {WorkbenchBook} from './WorkbenchBook';
 import {useWorkbench} from '../../store/workbench';
 import {FurnitureModels} from './FurnitureModels';
-import {ArtifactDisplayCase} from './ArtifactDisplayCase';
+import {ArtifactDisplayCase, DisplayCaseLights} from './ArtifactDisplayCase';
 import {ChairFloorContact} from './ChairFloorContact';
 import {PropRefinements} from './PropRefinements';
 export function RoomModel({
@@ -110,6 +110,7 @@ export function RoomModel({
           <PropRefinements scene={cloned} />
         </>
       )}
+      <DisplayCaseLights />
       <Suspense fallback={null}>
         <ArtifactDisplayCase />
       </Suspense>

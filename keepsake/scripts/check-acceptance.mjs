@@ -39,6 +39,7 @@ const scripts = [
   'check-frame-allocations.mjs',
   'check-start-camera.mjs',
   'check-constant-lights.mjs',
+  'check-render-stability.mjs',
 ];
 for (const script of scripts) {
   process.stdout.write(`\nChecking ${script}\n`);
