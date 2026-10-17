@@ -3,6 +3,7 @@ import {fileURLToPath} from 'node:url';
 
 const scripts = [
   'check-card-binders.mjs',
+  'check-display-case-leak.mjs',
   'check-neon-assets.mjs',
   'check-then-now.mjs',
   'check-memory-expansion.mjs',

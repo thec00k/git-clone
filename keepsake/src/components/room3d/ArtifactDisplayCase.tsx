@@ -15,7 +15,11 @@ import {
   modelDataUrl,
 } from '../../lib/displayModelImport';
 import {useReducedMotion} from '../../hooks/useReducedMotion';
+import {cloneWithOwnMaterials, createModelCache} from '../../lib/sceneDisposal';
 RectAreaLightUniformsLib.init();
+
+/** Scan models are loaded from large inline data and cached by the loader; this frees them once unused. */
+const scanModels = createModelCache(src => useGLTF.clear(src));
 
 /** Shared placement: clear of shelf end, wall trim, and the central walking aisle. */
 export const DISPLAY_CASE_POSITION: [number, number, number] = [2.03, 0, 1.65];
@@ -34,6 +38,11 @@ export function ArtifactDisplayCase() {
   const [selected, setSelected] = useState<string | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const scans = state.displayCaseScans ?? [];
+  const savedScans = state.displayCaseScans;
+  useEffect(() => {
+    scanModels.keepOnly(new Set((savedScans ?? []).map(x => x.modelSrc)));
+  }, [savedScans]);
+  useEffect(() => () => scanModels.releaseAll(), []);
   const add = async (file: File | undefined) => {
     const place = pending.current;
     pending.current = null;
@@ -267,14 +276,10 @@ function DisplayScan({
   onDragEnd: () => void;
 }) {
   const {scene} = useGLTF(src);
-  const copy = useMemo(() => {
-    const root = scene.clone(true);
-    root.traverse(o => {
-      if (o instanceof THREE.Mesh)
-        o.material = Array.isArray(o.material) ? o.material.map(m => m.clone()) : o.material.clone();
-    });
-    return root;
-  }, [scene]);
+  useEffect(() => scanModels.register(src, scene), [src, scene]);
+  const {root: copy, materials} = useMemo(() => cloneWithOwnMaterials(scene), [scene]);
+  // The copies belong to this shelf slot; the loaded original stays cached for reuse.
+  useEffect(() => () => materials.forEach(m => m.dispose()), [materials]);
   useEffect(() => {
     copy.traverse(o => {
       if (o instanceof THREE.Mesh)
