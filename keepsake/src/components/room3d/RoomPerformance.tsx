@@ -28,7 +28,7 @@ export function RoomPerformance() {
     if (times.current.length % 120 !== 0) return;
     const a = times.current.slice(-1200).sort((a, b) => a - b);
     const avg = a.reduce((n, t) => n + t, 0) / a.length;
-    output.current.textContent = `${Math.round(1000 / avg)} fps · p95 ${a[Math.floor(a.length * 0.95)].toFixed(1)} ms · ${gl.info.render.calls} draws · ${gl.info.render.triangles} triangles · DPR ${gl.getPixelRatio().toFixed(2)} · ${a.length} frames`;
+    output.current.textContent = `${Math.round(1000 / avg)} fps · p95 ${a[Math.floor(a.length * 0.95)].toFixed(1)} ms · ${gl.info.render.calls} draws · ${gl.info.render.triangles} triangles · ${gl.info.programs?.length ?? 0} shaders · DPR ${gl.getPixelRatio().toFixed(2)} · ${a.length} frames`;
     if (times.current.length > 1200) times.current = times.current.slice(-1200);
   });
   return null;

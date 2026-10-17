@@ -26,6 +26,7 @@ import {WoodlandScenery} from './WoodlandScenery';
 import {OutdoorWeather} from './OutdoorWeather';
 import {RoomControls} from './RoomControls';
 import {RoomLoading} from './RoomLoading';
+import {RoomShadowQuality, RoomShaderWarmup} from './RoomShadowQuality';
 import {useWorkbench} from '../../store/workbench';
 const CardBinders = lazy(() => import('../CardBinders').then(m => ({default: m.CardBinders})));
 export function RoomScene3D({
@@ -226,7 +227,8 @@ export function RoomScene3D({
             far: 40,
           }}
           dpr={[1, profile.dpr]}
-          shadows={profile.shadows}
+          // Always on: Balanced turns shadows off with RoomShadowQuality instead, without rebuilding every shader.
+          shadows
           gl={{
             antialias: true,
             toneMapping: THREE.ACESFilmicToneMapping,
@@ -248,6 +250,7 @@ export function RoomScene3D({
             ]}
           />
           <RoomPerformance />
+          <RoomShadowQuality enabled={profile.shadows} />
           <Suspense fallback={<RoomLoading />}>
             <RoomModel
               phase={phase}
@@ -264,6 +267,7 @@ export function RoomScene3D({
               onToggleLamp={toggleLamp}
               onToggleCeiling={toggleCeiling}
             />
+            <RoomShaderWarmup roomKey={activeRoom.asset} />
             {activeRoom.woodland && !study && (
               <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />
             )}

@@ -131,9 +131,10 @@ const walk = dir => {
     else if (/\.tsx?$/.test(name) && readFileSync(path, 'utf8').includes(`${marker}=`)) marked.push(path);
   }
 };
-walk(new URL('../src', import.meta.url).pathname);
+// fileURLToPath keeps this working on Windows, where URL.pathname gives "/C:/...".
+walk((await import('node:url')).fileURLToPath(new URL('../src', import.meta.url)));
 assert.deepEqual(
-  marked.map(p => p.replace(/.*\/src\//, '')),
+  marked.map(p => p.replace(/\\/g, '/').replace(/.*\/src\//, '')),
   ['components/room/DialogueBubble.tsx'],
   'only the tour bubble opts out of the camera pause',
 );

@@ -124,8 +124,8 @@ export function RoomModel({
       {coastal && <HolidayDecor coastal />}
       {(study || coastal) && <DustBunnies />}
       {study && <WindowDustMotes phase={phase} />}
-      {study && hearthPosition && (environment.season === 'winter' || environment.season === 'autumn') && (
-        <HearthFire phase={phase} />
+      {study && hearthPosition && (
+        <HearthFire phase={phase} lit={environment.season === 'winter' || environment.season === 'autumn'} />
       )}
       <Suspense fallback={null}>
         <RoomWorldMap scene={cloned} onOpen={() => onActivate('map')} />
