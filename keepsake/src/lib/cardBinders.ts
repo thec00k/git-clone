@@ -125,3 +125,50 @@ export function validateCardGlb(buffer: ArrayBuffer) {
     throw new Error('Simplify this card to 50,000 triangles, 200 nodes and four textures or fewer.');
   return json;
 }
+export const MAX_SCAN_BYTES = 5 * 1024 * 1024;
+/** The phone-scan receiver runs on this computer or the home network; anything else is refused. */
+export function scanReceiverUrl(address: string): string {
+  let url: URL;
+  try {
+    url = new URL(address.trim());
+  } catch {
+    throw new Error('Enter the receiver address shown in the desktop terminal, like http://127.0.0.1:4318.');
+  }
+  const host = url.hostname.replace(/^\[|\]$/g, '');
+  const local =
+    host === 'localhost' ||
+    host === '::1' ||
+    host.endsWith('.local') ||
+    /^(127|10)\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host);
+  if (!/^https?:$/.test(url.protocol) || !local)
+    throw new Error('The receiver address must be on this computer or your home network.');
+  return `${url.origin}${url.pathname.replace(/\/$/, '')}/latest`;
+}
+/** Reads a response body but stops as soon as it passes `max` bytes, so a wrong address cannot fill memory. */
+export async function readCappedBody(response: Response, max = MAX_SCAN_BYTES): Promise<ArrayBuffer> {
+  const tooBig = () => new Error('Choose a GLB smaller than 5 MB.');
+  if (Number(response.headers.get('content-length') ?? 0) > max) throw tooBig();
+  if (!response.body) return new ArrayBuffer(0);
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const {done, value} = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) {
+      void reader.cancel();
+      throw tooBig();
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(size);
+  let at = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, at);
+    at += chunk.byteLength;
+  }
+  return bytes.buffer;
+}

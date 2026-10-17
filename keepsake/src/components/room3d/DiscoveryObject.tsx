@@ -7,6 +7,15 @@ import {renderedMesh, visibleBounds} from './furnitureContact';
 import {useApp} from '../../store/appStore';
 import {useNav} from '../../store/nav';
 import {activeDiscovery, discoveryState, PLACES, REWARDS, discover} from '../../lib/discoveries';
+// Per-frame scratch: useFrame must not allocate.
+const scratch = {
+  seat: new THREE.Vector3(),
+  origin: new THREE.Vector3(),
+  down: new THREE.Vector3(0, -1, 0),
+  bounds: new THREE.Box3(),
+  meshes: [] as THREE.Mesh[],
+  hits: [] as THREE.Intersection[],
+};
 export function DiscoveryObject({scene}: {scene: THREE.Object3D}) {
   const note = useRef<THREE.Group>(null);
   const ray = useMemo(() => new THREE.Raycaster(), []);
@@ -21,15 +30,17 @@ export function DiscoveryObject({scene}: {scene: THREE.Object3D}) {
       chair.getObjectByName('Cozy_Chair_Cushion') ??
       chair.getObjectByName('Chair_Seat');
     if (!seat) return;
-    const p = seat.getWorldPosition(new THREE.Vector3());
-    if (seat instanceof THREE.Mesh) visibleBounds(seat).getCenter(p);
-    const meshes: THREE.Mesh[] = [];
+    const p = seat.getWorldPosition(scratch.seat);
+    if (seat instanceof THREE.Mesh) visibleBounds(seat, scratch.bounds).getCenter(p);
+    const {meshes, hits} = scratch;
     chair.traverse(o => {
       if (renderedMesh(o)) meshes.push(o);
     });
-    ray.set(new THREE.Vector3(p.x, p.y + 0.16, p.z), new THREE.Vector3(0, -1, 0));
-    const hit = ray.intersectObjects(meshes, false)[0];
-    note.current.position.set(p.x, (hit?.point.y ?? p.y) + 0.002, p.z);
+    ray.set(scratch.origin.set(p.x, p.y + 0.16, p.z), scratch.down);
+    const y = ray.intersectObjects(meshes, false, hits)[0]?.point.y ?? p.y;
+    meshes.length = 0;
+    hits.length = 0;
+    note.current.position.set(p.x, y + 0.002, p.z);
     note.current.rotation.set(-Math.PI / 2, 0, 0.18);
   });
   const {state, update} = useApp();

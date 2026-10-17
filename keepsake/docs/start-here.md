@@ -12,6 +12,7 @@ Written for the next agent (for example the Claude desktop agent) picking this u
 - Shared size limits (`src/lib/limits.ts`): 4 photos a page, 10 pages, 40 a book, 12 books, 100 pins, 500 photos, 25 MB, 2048 px. Page cap changed from 6 to 4.
 - Photos, card art and 3D scans stored once by hash outside the room record. GPS/EXIF stripped from originals.
 - Moderation decision logic (tested); the edge function is a stub.
+- Images load on demand (Oct 11): photos, card art and scans are stored as Blobs and reach the app as `blob:` URLs, so a 500-photo archive opens in about 0.15 s instead of 0.75 s with almost nothing in memory (was about 195 MB). Older saves upgrade themselves on first open.
 - Licence ledger covering all 270 files in `public/` and `art/`, enforced in CI. Prettier formatting enforced in CI. CI on every push with quick screenshots.
 
 ## Open work
@@ -20,7 +21,6 @@ Model guide: Opus 5.5 for database permissions, safety, data-loss and audits; So
 | Task | Model |
 | --- | --- |
 | Connect the app to Supabase (project, auth, sync client with outbox) | Opus 5.5 |
-| Load images on demand (blob URLs) before archives near 500 photos | Opus 5.5 |
 | Remaining audit findings (below) | Opus 5.5 |
 | Moderation vendors, image processing, moderator screen, in-app safety links, Terms/Privacy, account deletion/export | Opus 5.5 (legal review by a lawyer) |
 | Remodel the 14 inherited Woodland objects, replace unverified assets, Beachfront remodel (needs Blender on the owner's computer) | Sonnet 5.5 |
@@ -28,7 +28,7 @@ Model guide: Opus 5.5 for database permissions, safety, data-loss and audits; So
 | Enforce the 5-photo share minimum on the server too (the app enforces it since October 11; the database does not check it yet) | Opus 5.5 |
 | Neon City and Sky Castle review against the art direction | Opus 5.5 |
 
-Audit findings still open: restore can be overwritten by an older autosave; originals in `keepsake-originals` never deleted; GPU caches for room/furniture GLTFs never evicted; display-case scan models leak; camera stops mid-turn on click; focus trap misses late content; no keyboard moving of page elements; per-frame allocations (WorkbenchBook, DiscoveryObject); arrow keys captured page-wide; display-case camera pose clamped; all images loaded into memory at startup; flat room buttons hidden from the accessibility tree; CardBinders scan URL fetch unbounded; Spotify refresh token in localStorage while CSP is report-only.
+Audit findings still open: switch the CSP from report-only to enforcing after a hosted build has been exercised (the Spotify login stays in localStorage on purpose, so it is remembered; enforcing the CSP is the protection). Fixed Oct 11 in PR #12 (not yet checked in a real browser): restore vs. older autosave, unused originals deleted on load, room/furniture GLTF eviction, display-case scan leaks, camera stopping mid-turn, focus trap late content, arrow-key nudging of page elements, page-wide arrow keys, per-frame allocations, display-case camera clamp, flat room buttons in the accessibility tree, bounded scan receiver fetch.
 
 ## Decisions waiting on the owner
 1. May adults send friend requests to teens? (Today yes, teen must accept; room stays invite-only. Stricter option available.)

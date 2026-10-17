@@ -8,6 +8,7 @@ import type {RoomFace} from '../../lib/roomLayout';
 import {useActiveRoom} from './useActiveRoom';
 import {DISPLAY_CASE_VIEW} from './ArtifactDisplayCase';
 import {CAMERA_MOVE_SECONDS, cameraMoveEase} from '../../lib/motion';
+import {ignorePageKey} from '../../lib/keyTargets';
 const EYE_Y = 1.32;
 const WORKBENCH_VIEW = {
   position: new THREE.Vector3(-0.15, 1.55, -1.12),
@@ -34,6 +35,8 @@ const LOOK_YAW = 0.0044;
 const LOOK_PITCH = 0.0036;
 const PITCH_MIN = -0.72;
 const PITCH_MAX = 0.55;
+/** Pointer travel (px) below which a press counts as a click, matching scene hit tests. */
+const CLICK_SLOP = 4;
 
 function walkIntent(e: KeyboardEvent): {axis: 'f' | 'r'; dir: -1 | 1} | null {
   const code = e.code;
@@ -153,6 +156,7 @@ export function EyeCamera({
   const yaw = useRef(0);
   const pitch = useRef(0);
   const dragging = useRef(false);
+  const dragTravel = useRef(0);
   const userMoved = useRef(false);
   useEffect(() => {
     const change = (e: Event) => {
@@ -205,6 +209,8 @@ export function EyeCamera({
               : authored
                 ? studyCamera!
                 : FACE_VIEW[face]);
+  // The display-case pose is authored above eye height to frame all four shelves.
+  const framed = view === DISPLAY_CASE_VIEW;
 
   useEffect(() => {
     userMoved.current = false;
@@ -236,16 +242,22 @@ export function EyeCamera({
       if (touringRef.current || objectControls.current) return;
       if ((e.target as HTMLElement | null)?.closest?.("button, a, input, textarea, [role='dialog']")) return;
       dragging.current = true;
-      // Begin a drag from the visible pose, including midway through a transition.
-      camera.getWorldDirection(scratch.forward);
-      yaw.current = Math.atan2(scratch.forward.x, -scratch.forward.z);
-      pitch.current = Math.asin(THREE.MathUtils.clamp(scratch.forward.y, -1, 1));
-      userMoved.current = true;
-      glide.current = null;
+      dragTravel.current = 0;
       el.setPointerCapture(e.pointerId);
     };
     const move = (e: PointerEvent) => {
       if (!dragging.current || touringRef.current || objectControls.current) return;
+      // A click must not freeze a turn halfway; only a real drag takes over.
+      if (dragTravel.current < CLICK_SLOP) {
+        dragTravel.current += Math.abs(e.movementX) + Math.abs(e.movementY);
+        if (dragTravel.current < CLICK_SLOP) return;
+        // Begin the drag from the visible pose, including midway through a transition.
+        camera.getWorldDirection(scratch.forward);
+        yaw.current = Math.atan2(scratch.forward.x, -scratch.forward.z);
+        pitch.current = Math.asin(THREE.MathUtils.clamp(scratch.forward.y, -1, 1));
+        userMoved.current = true;
+        glide.current = null;
+      }
       // Mouse right looks right; mouse up looks up. Screen Y grows downward.
       yaw.current += e.movementX * LOOK_YAW;
       pitch.current = THREE.MathUtils.clamp(pitch.current - e.movementY * LOOK_PITCH, PITCH_MIN, PITCH_MAX);
@@ -281,20 +293,8 @@ export function EyeCamera({
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (
-        touringRef.current ||
-        objectControls.current ||
-        seated ||
-        document.querySelector('[aria-modal="true"]')
-      )
-        return;
+      if (touringRef.current || objectControls.current || seated || ignorePageKey(e)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (
-        e.target instanceof HTMLElement &&
-        e.target.closest("input, textarea, select, [contenteditable='true'], [aria-modal='true']")
-      ) {
-        return;
-      }
       const intent = walkIntent(e);
       if (!intent) return;
       e.preventDefault();
@@ -345,7 +345,7 @@ export function EyeCamera({
       camera.position.lerp(view.position, t);
       if (overhead) {
         camera.position.copy(view.position);
-      } else if (!seated && !workbench && !photoView && !authored) {
+      } else if (!seated && !workbench && !photoView && !authored && !framed) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }
@@ -362,7 +362,7 @@ export function EyeCamera({
       }
       if (seated) {
         camera.position.copy(SEATED_VIEW.position);
-      } else {
+      } else if (!framed || keys.current.f || keys.current.r) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }

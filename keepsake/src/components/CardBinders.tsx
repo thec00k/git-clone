@@ -21,6 +21,8 @@ import {
   cardsWithPositions,
   newCardBinder,
   placeBinderCards,
+  readCappedBody,
+  scanReceiverUrl,
   validateCardGlb,
   type BinderCard,
   type CardBinder,
@@ -195,19 +197,26 @@ export function CardBinders({
     setBusy(true);
     setMessage('Looking for the latest phone scan…');
     try {
-      const response = await fetch(`${address.replace(/\/$/, '')}/latest`);
+      const response = await fetch(scanReceiverUrl(address), {signal: AbortSignal.timeout(30_000)});
       if (!response.ok)
         throw new Error(
           response.status === 404
             ? 'No scan has arrived yet. Send one from Keepsake Scanner first.'
             : 'Could not reach the receiver. Keep it running on this desktop.',
         );
-      const bytes = await response.arrayBuffer();
+      const bytes = await readCappedBody(response);
       const disposition = response.headers.get('content-disposition') ?? '';
       const name = /filename="?([^";]+)/.exec(disposition)?.[1] ?? 'keepsake-scan.glb';
       await scan(new File([bytes], name, {type: 'model/gltf-binary'}));
     } catch (e) {
-      if (alive.current) setMessage(e instanceof Error ? e.message : 'Could not receive the scan.');
+      if (alive.current)
+        setMessage(
+          e instanceof Error && e.name === 'TimeoutError'
+            ? 'The receiver did not answer. Keep it running on this desktop.'
+            : e instanceof Error
+              ? e.message
+              : 'Could not receive the scan.',
+        );
     } finally {
       if (alive.current) setBusy(false);
     }
