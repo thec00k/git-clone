@@ -44,7 +44,8 @@ save('stone',np.array([138,137,126])+stone[...,None],stone/70,.91+noise*.06,.6)
 print('Saved 15 seamless PBR maps to',OUT)
 
 # Bake color variants so Blender and glTF render the same tint without custom nodes.
-for tile,tints in [('oak',['b7a18d']),('linen',['718466','e4d3b5','fff4da','b37d61','62715b'])]:
+# oak b08868: medium walnut veneer (CRT cabinet); timber f2c99f: warm honey planks (archive drawer).
+for tile,tints in [('oak',['b7a18d','b08868']),('timber',['f2c99f']),('linen',['718466','e4d3b5','fff4da','b37d61','62715b'])]:
     base=np.asarray(Image.open(OUT/(tile+'-color.png')),dtype=float)/255
     for tint in tints:
         rgb=np.array([int(tint[i:i+2],16)/255 for i in (0,2,4)])
