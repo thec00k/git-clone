@@ -108,7 +108,7 @@ export function TimeCapsule({onClose}: {onClose: () => void}) {
                 aria-label={`Add photo ${p.id}`}
                 onClick={() => setPhotos(a => [...a, {src: p.src}])}
               >
-                <img src={p.src} alt="Filed memory" />
+                <img src={p.src} alt="Filed memory" loading="lazy" decoding="async" />
               </button>
             ))}
           </div>

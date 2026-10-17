@@ -1,6 +1,7 @@
 import {DustBunnies} from './DustBunnies';
 import {HolidayDecor} from './HolidayDecor';
 import {HearthFire} from './HearthFire';
+import {WindowDustMotes} from './WindowDustMotes';
 import {Vector3} from 'three';
 import {TimeCapsuleChest} from './TimeCapsuleChest';
 import {CabinetPhoto} from './CabinetPhoto';
@@ -122,6 +123,7 @@ export function RoomModel({
       {study && <HolidayDecor />}
       {coastal && <HolidayDecor coastal />}
       {(study || coastal) && <DustBunnies />}
+      {study && <WindowDustMotes phase={phase} />}
       {study && hearthPosition && (
         <HearthFire phase={phase} lit={environment.season === 'winter' || environment.season === 'autumn'} />
       )}

@@ -16,7 +16,7 @@ export function FramePhotoPicker() {
             aria-pressed={state.framePhotoId === a.id}
             onClick={() => update(s => ({...s, framePhotoId: a.id}))}
           >
-            <img src={a.src} alt="" />
+            <img src={a.src} alt="" loading="lazy" decoding="async" />
           </button>
         ))}
       </div>
