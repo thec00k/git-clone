@@ -49,3 +49,8 @@ The owner asked for walls that read as stacked solid logs, with no gaps between 
 - **Casing:** 12 cm walnut casing around the window (sides, apron under the sill and both sloped transom edges) and the door (head and right side; the left side is 4.5 cm because the hearth mantel stands 5 cm from the jamb). Boards sit 10 mm into the log crowns.
 - **Fan glow:** `useRoomAsset.ts` makes the cabin fan's glass bowl (`Fan_Bowl`, `CEILING_FAN_BOWL`) glow while the ceiling light is on. Only the cabin is affected; Beachfront and Neon City also have a `Fan_Bowl` and are unchanged.
 - Result: 301 nodes, 267 meshes, 64,210 triangles, 19 materials, 23 images, 7.82 MB.
+
+### Prop clearance (October 17, owner request)
+
+- `check-woodland-study-assets.mjs` now tests every prop mesh against the shell, trim, beams and every other prop with triangle-level BVH intersection (`three-mesh-bvh`, now a dev dependency), once with both drawers shut and once pulled open by the runtime's travel. Only the window and door frames may enter the walls. It also checks that the map hangs within 5 mm of the log crowns, that floor furniture stands on the floor and desk things sit on the desk.
+- It found three pre-existing faults, fixed in `build.py`: the desk lamp shade sat 8 cm inside the window sill (lamp moved 11 cm into the room), the map hung 2.7 cm off the log crowns (moved back onto them) and the guestbook table floated 2.3 cm with its book 8 mm above the top (both lowered). Before/after lamp renders are in `art/woodland/review/cabin-shell/`.

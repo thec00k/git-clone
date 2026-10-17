@@ -1,5 +1,5 @@
 {
-  "bytes": 7818860,
+  "bytes": 7822784,
   "meshes": 267,
   "triangles": 64210,
   "checks": [
@@ -13,6 +13,8 @@
     "Chair heading",
     "Chimney ceiling and door clearance",
     "Rounded log geometry",
-    "Ceiling fan clearance"
+    "Ceiling fan clearance",
+    "Prop clearance, drawers shut and open",
+    "Props resting on wall, floor and desk"
   ]
 }

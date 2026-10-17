@@ -4,7 +4,7 @@ Original source and published room assets are never overwritten.
 """
 import bpy, math, json
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Vector, Matrix
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'public/room/woodland-study'
 OUT.mkdir(parents=True,exist_ok=True)
@@ -84,6 +84,15 @@ bean=bpy.data.objects['Beanbag'];bean.location.x+=.20;bean.location.y+=.55;bean.
 shelf=bpy.data.objects['ks_shelf'];shelf.location.y+=.22
 clock=bpy.data.objects.get('ks_clock')
 if clock:clock.location.x-=.06
+# Prop clearance (scripts/check-woodland-study-assets.mjs): the lamp shade sat inside the sill,
+# the map hung 3 cm off the log crowns, and the guestbook table floated above the floor.
+def nudge(name,d):
+    o=bpy.data.objects.get(name)
+    if o:bpy.context.view_layer.update();o.matrix_world=Matrix.Translation(web(d))@o.matrix_world
+nudge('ks_lamp',(0,0,.11))
+nudge('ks_map',(-.025,0,0))
+nudge('ks_guestbook',(0,-.023,0))
+for n in ['Guestbook_Cover','Guestbook_Pages','Guestbook_Ribbon','Finish_Guestbook_Bookmark']:nudge(n,(0,-.008,0))
 # Compact hearth behind the sitting area, clear of the door sweep.
 for x in [-1.28,-.54]:cube('Study_HearthPier',(x,.49,1.90),(.14,.88,.33),stone,bevel=.02)
 cube('Study_HearthBase',(-.91,.07,1.83),(.94,.14,.57),stone,bevel=.015)
