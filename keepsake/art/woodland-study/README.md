@@ -25,7 +25,7 @@ The owner preferred wood to cream for a "modern nostalgia" cabin: a hand-built p
 - **CRT cabinet and hood:** medium walnut veneer (`oak` tile tinted `#b08868`), with projected grain. The screen keeps its runtime UVs. The bezel stays warm iron, and the knobs and antenna stay brass.
 - **Desk drawer front:** the desk's own oiled oak.
 - **Archive drawer:** warm honey planks (`timber` tile tinted `#f2c99f`).
-- The clock keeps its cream case as a small modern accent.
+- **Clock case:** the same walnut veneer as the CRT, at the owner's request. The base stays walnut joinery and the digits stay live.
 
 Regenerating the textures reproduced every existing map byte-for-byte; only `oak-b08868-color.png` and `timber-f2c99f-color.png` are new. The study GLB is now 7.47 MB with 19 materials and 22 images. Captures are in `art/woodland/review/study-wood/`.
 
