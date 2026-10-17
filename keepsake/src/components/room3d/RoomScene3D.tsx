@@ -18,14 +18,15 @@ import {useApp} from '../../store/appStore';
 import {useNav} from '../../store/nav';
 import {useListen} from '../../store/listen';
 import {EyeCamera} from './RoomCamera';
+import {startCamera} from './startCamera';
 import {RoomModel} from './RoomModel';
 import type {HotspotAction} from './RoomInteractions';
 import {useRoomRenderProfile} from './useRoomRenderProfile';
 import {WoodlandScenery} from './WoodlandScenery';
 import {OutdoorWeather} from './OutdoorWeather';
 import {RoomControls} from './RoomControls';
-import {RoomLoading} from './RoomLoading';
-import {RoomShadowQuality, RoomShaderWarmup} from './RoomShadowQuality';
+import {RoomShadowQuality} from './RoomShadowQuality';
+import {RoomRenderGate, ShaderWarmup} from './ShaderWarmup';
 import {useWorkbench} from '../../store/workbench';
 const CardBinders = lazy(() => import('../CardBinders').then(m => ({default: m.CardBinders})));
 export function RoomScene3D({
@@ -66,6 +67,10 @@ export function RoomScene3D({
   const {phase: workbenchPhase, openBinder} = useWorkbench();
   const atWorkbench = workbenchPhase !== 'room';
   const quality = environment.roomQuality ?? 'balanced';
+  // Each room/quality loads a different model, so its shaders are compiled before it is shown.
+  const [warmedAsset, setWarmedAsset] = useState<string | null>(null);
+  const shadersReady = warmedAsset === activeRoom.asset;
+  const markShadersReady = useCallback(() => setWarmedAsset(activeRoom.asset), [activeRoom.asset]);
   const {discoveryOpen, isVisitor} = useNav();
   const [tabVisible, setTabVisible] = useState(!document.hidden);
   useEffect(() => {
@@ -220,10 +225,10 @@ export function RoomScene3D({
         <Canvas
           frameloop={tabVisible && !discoveryOpen && !binderOpen ? 'always' : 'demand'}
           camera={{
+            ...startCamera(activeRoom.views.front),
             fov: seated ? 38 : activeRoom.fov,
             near: 0.08,
             far: 40,
-            position: activeRoom.views.front.position,
           }}
           dpr={[1, profile.dpr]}
           // Always on: Balanced turns shadows off with RoomShadowQuality instead, without rebuilding every shader.
@@ -250,7 +255,8 @@ export function RoomScene3D({
           />
           <RoomPerformance />
           <RoomShadowQuality enabled={profile.shadows} />
-          <Suspense fallback={<RoomLoading />}>
+          <RoomRenderGate ready={shadersReady} />
+          <Suspense fallback={null}>
             <RoomModel
               phase={phase}
               environment={environment}
@@ -266,7 +272,6 @@ export function RoomScene3D({
               onToggleLamp={toggleLamp}
               onToggleCeiling={toggleCeiling}
             />
-            <RoomShaderWarmup roomKey={activeRoom.asset} />
             {activeRoom.woodland && !study && (
               <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />
             )}
@@ -280,6 +285,7 @@ export function RoomScene3D({
             {activeRoom.id === 'cyberpunk' && environment.weather !== 'clear' && (
               <OutdoorWeather kind={environment.weather} count={profile.particles} room="cyberpunk" />
             )}
+            <ShaderWarmup key={activeRoom.asset} onReady={markShadersReady} />
           </Suspense>
           <EyeCamera
             studyView={study ? studyView : null}

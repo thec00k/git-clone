@@ -15,6 +15,9 @@ function load() {
 export function PropRefinements({scene}: {scene: THREE.Object3D}) {
   const room = useActiveRoom().id;
   useEffect(() => {
+    // Woodland's CRT and clock are authored with rounded edges (remodel-crt.py and
+    // restyle-furniture.py); these older overlays no longer match and would undo that work.
+    if (room === 'woodland') return;
     let active = true;
     const changed: {mesh: THREE.Mesh; original: THREE.BufferGeometry; refined: THREE.BufferGeometry}[] = [];
     load()

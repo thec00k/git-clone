@@ -492,6 +492,7 @@
         "art/reviews/*",
         "art/room-screenshots/**",
         "art/woodland-study/review/**",
+        "art/woodland/review/**",
         "art/woodland-study/*.png",
         "art/stickers/*",
         "art/furniture/*.png",
