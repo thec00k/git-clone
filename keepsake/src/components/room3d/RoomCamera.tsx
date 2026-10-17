@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import type {RoomFace} from '../../lib/roomLayout';
 import {useActiveRoom} from './useActiveRoom';
 import {DISPLAY_CASE_VIEW} from './ArtifactDisplayCase';
+import {CAMERA_MOVE_SECONDS, cameraMoveEase} from '../../lib/motion';
 const EYE_Y = 1.32;
 const WORKBENCH_VIEW = {
   position: new THREE.Vector3(-0.15, 1.55, -1.12),
@@ -172,6 +173,23 @@ export function EyeCamera({
   }, [touring, seated, workbench, photoView, authored]);
   const reduced = useReducedMotion();
   const overhead = wantsDeskOverhead();
+  // Desk, corkboard and bookshelf are the three walking-eye faces. Only moves between them get the timed glide.
+  const faceMode =
+    !photoView &&
+    !workbench &&
+    !(displayCase && !touring) &&
+    !(reading && !touring) &&
+    !overhead &&
+    !seated &&
+    !authored &&
+    !touring;
+  const previousFace = useRef<{face: RoomFace; faceMode: boolean} | null>(null);
+  const glide = useRef<{
+    elapsed: number;
+    from: THREE.Vector3;
+    fromQuaternion: THREE.Quaternion;
+    toQuaternion: THREE.Quaternion;
+  } | null>(null);
   const view =
     photoView ??
     (workbench
@@ -192,10 +210,24 @@ export function EyeCamera({
     userMoved.current = false;
     keys.current = {f: 0, r: 0};
     dragging.current = false;
+    const before = previousFace.current;
+    previousFace.current = {face, faceMode};
+    if (before && before.faceMode && faceMode && before.face !== face && !reduced) {
+      // Start from wherever the camera is now, so a change of mind mid-glide stays smooth.
+      aim.matrix.lookAt(view.position, view.target, camera.up);
+      glide.current = {
+        elapsed: 0,
+        from: camera.position.clone(),
+        fromQuaternion: camera.quaternion.clone(),
+        toQuaternion: new THREE.Quaternion().setFromRotationMatrix(aim.matrix),
+      };
+    } else {
+      glide.current = null;
+    }
     const look = lookFromView(view.position, view.target);
     yaw.current = look.yaw;
     pitch.current = look.pitch;
-  }, [face, seated, touring, view, viewRevision]);
+  }, [face, faceMode, seated, touring, view, viewRevision, camera, aim, reduced]);
 
   useEffect(() => {
     const el = gl.domElement;
@@ -209,6 +241,7 @@ export function EyeCamera({
       yaw.current = Math.atan2(scratch.forward.x, -scratch.forward.z);
       pitch.current = Math.asin(THREE.MathUtils.clamp(scratch.forward.y, -1, 1));
       userMoved.current = true;
+      glide.current = null;
       el.setPointerCapture(e.pointerId);
     };
     const move = (e: PointerEvent) => {
@@ -296,7 +329,18 @@ export function EyeCamera({
       return;
     }
     dt = Math.min(dt, 0.05);
-    if (touring || !userMoved.current) {
+    const move = glide.current;
+    if (move && !touring && !userMoved.current && !reduced) {
+      move.elapsed += dt;
+      const progress = Math.min(1, move.elapsed / CAMERA_MOVE_SECONDS);
+      const eased = cameraMoveEase(progress);
+      camera.position.lerpVectors(move.from, view.position, eased);
+      camera.position.y = EYE_Y;
+      clampInRoom(camera.position, ROOM_WALK);
+      camera.quaternion.copy(move.fromQuaternion).slerp(move.toQuaternion, eased);
+      if (progress >= 1) glide.current = null;
+    } else if (touring || !userMoved.current) {
+      glide.current = null;
       const t = reduced || touring ? 1 : 1 - Math.pow(0.0008, dt);
       camera.position.lerp(view.position, t);
       if (overhead) {
