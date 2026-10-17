@@ -28,3 +28,17 @@ The owner preferred wood to cream for a "modern nostalgia" cabin: a hand-built p
 - The clock keeps its cream case as a small modern accent.
 
 Regenerating the textures reproduced every existing map byte-for-byte; only `oak-b08868-color.png` and `timber-f2c99f-color.png` are new. The study GLB is now 7.47 MB with 19 materials and 22 images. Captures are in `art/woodland/review/study-wood/`.
+
+## Solid log walls and a log-beam ceiling (October 17, owner references)
+
+The owner asked for walls that read as stacked solid logs, with no gaps between the logs and the wall or beside the door frame, and for a log roof with support beams that stays clear of the ceiling fan and light. `cabin-shell.py` (run by `build.py` before `materials.py`) now builds the walls and ceiling; the old course loop, corner posts and baseboards were removed from `build.py`.
+
+- **Walls:** 17 courses on the old pitch, with the logs' room-side crowns where they were, so furniture, the map, the shelf and every camera corridor are unchanged. The radius grows from 0.112 to 0.13 m (with ±4 mm variation), so neighbouring courses overlap by 35 mm and meet in a shaded crease. Each log is modelled only in front of its wall plane, with a flat back, sharp edges and grain UVs that wrap around the log.
+- **The cause of the "glued on" look:** the flat shell walls stood 30–40 mm in front of the creases between courses and showed as pale strips. The shell now sits on the logs' back planes (side walls 60 mm out, window and door walls 65 mm out).
+- **Openings:** each window and door course is one full log with the opening cut out exactly (EXACT boolean, 10 mm inside the jambs, rail, head and sloped transom frame). Logs end behind the frames, so there is no gap beside the door or under the transom.
+- **Corners:** side logs run into the end walls' shells and end logs run into the side shells, so each inner corner closes on log.
+- **Ceiling:** 135 mm tongue-and-groove boards in honey timber over a walnut backing that shows in the grooves; four round log joists (0.22 m) spanning side wall to side wall at z = ±0.85 and ±1.6; and two heavy support beams (0.30 m) at x = ±1.55 spanning the window wall to the door wall, with the joists notched 30 mm into them.
+- **Ceiling fan:** the inherited fan from `woodland.blend` (`ks_ceiling_fan`) is kept. Its blades hang at 3.20 m, below the beams, and the drop rod reaches the boards. The runtime spins `ks_ceiling_fan_blades` and puts the ceiling light at `ks_ceiling_fan_light`, which is now above the centre of the room instead of the old fallback point.
+- `check-woodland-study-assets.mjs` adds a fan clearance check: no point on any `Cabin_*` log or beam (sampled every 5 cm along each triangle edge) may enter the blade sweep (blade radius + 10 cm, from 5 cm under the blades up to the canopy), and the canopy must meet the boards.
+- Result: 293 nodes, 259 meshes, 56,696 triangles (was 69,288), 18 materials, 22 images, 7.01 MB (was 7.47 MB). The removed bevel modifiers on the old logs account for the triangle drop. Before/after renders are in `art/woodland/review/cabin-shell/`.
+- Built headless with Blender 5.1.2 (the `bpy` wheel), the same major version that saved the files.

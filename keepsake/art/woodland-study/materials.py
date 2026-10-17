@@ -62,6 +62,8 @@ def project(o,kind):
             else:
                 tile=.24 if kind=='cloth' else .65 if kind=='stone' else 1.15
                 u=co[axes[0]]*scales[axes[0]]/tile;v=co[axes[1]]*scales[axes[1]]/(tile if kind!='wood' else .65)
+                # Each ceiling board takes its own slice of the grain so neighbours don't repeat.
+                if o.name.startswith('Cabin_Ceiling_Board'):u+=o.location.x*2.37;v+=o.location.x*1.61
             uv.data[loop].uv=(u,v)
 
 for o in bpy.context.scene.objects:
@@ -70,8 +72,13 @@ for o in bpy.context.scene.objects:
     if 'glass' in n.lower():continue
     m=oak;kind='wood';preserve_uv=False
     if n=='Study_Floor':m=floor;kind='floor'
-    elif n=='Study_Ceiling':m=plaster
-    elif n.startswith('Cabin_'):m=oak;kind='wood'
+    elif n=='Study_Ceiling':m=joinery # dark backing shows in the grooves between ceiling boards
+    elif n.startswith('Cabin_Ceiling_Board'):m=timber;kind='wood'
+    elif n.startswith('Cabin_'):m=oak;kind='wood';preserve_uv=True # cabin-shell.py wraps grain around each log
+    elif n.startswith('Fan_'):
+        # Inherited ceiling fan: walnut blades, cream glass bowl, brass trim, warm-iron body.
+        if n.startswith('Fan_Blade'):m=joinery;kind='wood'
+        else:m=ceramic if n=='Fan_Bowl' else brass if n.startswith(('Fan_Plate','Fan_Canopy','Fan_Ring')) else iron;preserve_uv=True
     elif any(k in n for k in ['SideWall','WindowWall','DoorWall','DoorLintel','TransomLeft','TransomRight']):m=timber;kind='wall'
     elif any(k in n for k in ['ChairSeat','ChairBack','Folded_Throw']):m=moss;kind='cloth'
     elif n.startswith('Beanbag'):m=linen;kind='cloth'

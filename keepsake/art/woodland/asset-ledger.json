@@ -126,6 +126,24 @@
       "preserved": "All existing object names, parents, origins and transforms; Desk_Top height; drawer, door and archive pivots; Lamp_Shade and ks_lamp_bulb; ks_clock_digits; Map_Sheet; ks_archive_frame_mat; runtime-tinted ks_shelf_book_*; existing inherited textures where not repainted",
       "optimization": "Shared solid-color materials, no new textures; +10,704 triangles (80,002 total), -3 materials, -2 images, smaller GLBs",
       "review": "art/woodland/review/furniture-restyle/"
+    },
+    {
+      "id": "woodland-study-log-shell-and-ceiling",
+      "source": "Authored procedurally in Blender 5.1 by art/woodland-study/cabin-shell.py (run by art/woodland-study/build.py), from owner reference photos of log cabin interiors",
+      "sourceUrl": null,
+      "creator": "Keepsake project / Claude-assisted modeling",
+      "license": "Original project work; no third-party models, textures, scans or AI-generated meshes. Reference photos were used only as visual reference and are not shipped",
+      "commercialUse": "No additional third-party asset license introduced",
+      "attribution": "None required for newly authored geometry",
+      "created": "2026-10-17",
+      "original": "art/woodland-study/build.py study shell; ks_ceiling_fan from art/woodland/woodland.blend (see inherited-room)",
+      "modified": "public/room/woodland-study/woodland-study.glb",
+      "includes": [
+        "17 courses of overlapping round wall logs on all four walls, cut exactly to the window, transom and door frames",
+        "tongue-and-groove ceiling boards, four round log joists and two log support beams",
+        "inherited ceiling fan rehung between the joists with a longer drop rod"
+      ],
+      "preserved": "Log crowns, furniture placement, camera poses and corridors, interaction anchors and the window/door apertures"
     }
   ]
 }

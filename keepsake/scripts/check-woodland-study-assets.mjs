@@ -127,6 +127,42 @@ assert.ok(
   meshes.some(o => o.name.startsWith('Cabin_Window_Log')),
   'Cabin courses are exported geometry',
 );
+// The ceiling fan hangs from the boards between the log joists; no beam, joist or wall log may
+// enter the blades' sweep or the drop rod above them.
+const fan = scene.getObjectByName('ks_ceiling_fan');
+assert.ok(fan && scene.getObjectByName('ks_ceiling_fan_light'), 'Ceiling fan and its light anchor');
+const blades = new THREE.Box3().setFromObject(scene.getObjectByName('ks_ceiling_fan_blades'));
+const canopy = bounds('Fan_Canopy');
+const hub = blades.getCenter(new THREE.Vector3());
+const sweep = Math.max(blades.max.x - hub.x, blades.max.z - hub.z) + 0.1;
+const a = new THREE.Vector3(),
+  b = new THREE.Vector3(),
+  v = new THREE.Vector3();
+for (const mesh of meshes.filter(o => o.name.startsWith('Cabin_'))) {
+  // Logs are long and have vertices only at their ends, so sample along every triangle edge.
+  const position = mesh.geometry.attributes.position;
+  const index = mesh.geometry.index?.array ?? [...Array(position.count).keys()];
+  for (let t = 0; t < index.length; t += 3)
+    for (const [i, j] of [
+      [0, 1],
+      [1, 2],
+      [2, 0],
+    ]) {
+      a.fromBufferAttribute(position, index[t + i]).applyMatrix4(mesh.matrixWorld);
+      b.fromBufferAttribute(position, index[t + j]).applyMatrix4(mesh.matrixWorld);
+      const steps = Math.ceil(a.distanceTo(b) / 0.05);
+      for (let k = 0; k <= steps; k++) {
+        v.lerpVectors(a, b, k / steps);
+        const inside =
+          Math.hypot(v.x - hub.x, v.z - hub.z) < sweep && v.y > blades.min.y - 0.05 && v.y < canopy.min.y;
+        assert.ok(!inside, 'Fan clearance: ' + mesh.name + ' enters the blade sweep or drop rod');
+      }
+    }
+}
+assert.ok(
+  Math.abs(canopy.max.y - bounds('Study_Ceiling').min.y) < 0.03,
+  'Fan canopy meets the ceiling boards',
+);
 let triangles = 0;
 for (const mesh of meshes)
   triangles += (mesh.geometry.index?.count ?? mesh.geometry.attributes.position.count) / 3;
@@ -145,6 +181,7 @@ const report = {
     'Chair heading',
     'Chimney ceiling and door clearance',
     'Rounded log geometry',
+    'Ceiling fan clearance',
   ],
 };
 await writeFile(
