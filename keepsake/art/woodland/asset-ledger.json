@@ -114,7 +114,7 @@
       "attribution": "None required for newly authored geometry",
       "created": "2026-10-17",
       "original": "art/woodland/woodland.blend (inherited Desk, ks_chair, ks_lamp, ks_clock, ks_archive, ks_guestbook, ks_shelf, ks_map, ks_door; see inherited-room)",
-      "modified": "public/room/woodland/woodland.glb; public/room/woodland/woodland.high.glb",
+      "modified": "public/room/woodland/woodland.glb; public/room/woodland/woodland.high.glb; public/room/woodland-study/woodland-study.glb (rebuilt with art/woodland-study/build.py, 2026-10-17)",
       "includes": [
         "rounded edges across desk, chair, cabinet, shelf, map frame and door",
         "tapered desk and chair legs; brass desk-leg ferrules (new Desk_Leg_*_Ferrule)",

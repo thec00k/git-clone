@@ -77,6 +77,11 @@ for o in bpy.context.scene.objects:
     elif n=='Study_Firebox':m=iron
     elif any(k in n for k in ['WindowJamb','WindowRail','TransomFrame','CornerPost','Baseboard','ChairLeg','HearthMantel','HearthLog']):m=joinery
     elif any(k in n for k in ['Handle','Knob','Brass','Inlay','hinge','Door_Plate','Door_KnobStem']):m=brass
+    # CRT-style restyle (art/woodland/restyle-furniture.py): brass feet, cream fronts, walnut bases.
+    elif n.endswith('_Ferrule') or n=='Lamp_Foot':m=brass
+    elif n in ['Desk_DrawerFront','ks_archive_drawer','Clock_Top','Clock_Left','Clock_Right','Clock_Back']:m=ceramic;preserve_uv=True
+    elif n in ['Lamp_Base','Clock_Bottom','Archive_Plinth','Shelf_Kick','Shelf_Bot','Map_Frame','Door_Sill'] or n.startswith('Cozy_Guest_Table_Leg'):m=joinery
+    elif n.startswith('Map_Pin_'):m=clay;kind='cloth'
     elif n.startswith('Lamp_'):m=enamel if n=='Lamp_Shade' else brass
     elif n=='ks_lamp_bulb':m=ceramic
     elif n.startswith('CRT_'):m=screen if n=='CRT_Screen' else iron if n in ['CRT_Bezel','CRT_Toggle'] else brass if n=='CRT_Antenna' else joinery if n=='CRT_Base' else ceramic;preserve_uv=True
