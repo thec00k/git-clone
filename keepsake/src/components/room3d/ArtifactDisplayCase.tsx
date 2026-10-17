@@ -15,6 +15,7 @@ import {
   modelDataUrl,
 } from '../../lib/displayModelImport';
 import {useReducedMotion} from '../../hooks/useReducedMotion';
+import {disposeGltf} from './disposeGltf';
 RectAreaLightUniformsLib.init();
 
 /** Shared placement: clear of shelf end, wall trim, and the central walking aisle. */
@@ -23,6 +24,14 @@ export const DISPLAY_CASE_VIEW = {
   position: new THREE.Vector3(-0.35, 1.38, -0.65),
   target: new THREE.Vector3(2.03, 1.07, 1.65),
 };
+/** Parsed scans by source, kept while the scan is on a shelf so the doors reopen instantly. */
+const parsedScans = new Map<string, THREE.Object3D>();
+function releaseScan(src: string) {
+  const scene = parsedScans.get(src);
+  if (scene) disposeGltf({scene});
+  parsedScans.delete(src);
+  useGLTF.clear(src);
+}
 
 export function ArtifactDisplayCase() {
   const {environment, state, update} = useApp();
@@ -80,6 +89,22 @@ export function ArtifactDisplayCase() {
     return {copy, materials};
   }, [scene]);
   useEffect(() => () => model.materials.forEach(m => m.dispose()), [model]);
+  // A removed or replaced scan frees its parse; mounted copies have already unmounted.
+  const shownScans = useRef(new Set<string>());
+  useEffect(() => {
+    const live = new Set((state.displayCaseScans ?? []).map(scan => scan.modelSrc));
+    shownScans.current.forEach(src => {
+      if (!live.has(src)) releaseScan(src);
+    });
+    shownScans.current = live;
+  }, [state.displayCaseScans]);
+  useEffect(
+    () => () => {
+      shownScans.current.forEach(releaseScan);
+      shownScans.current = new Set();
+    },
+    [],
+  );
   useEffect(() => {
     const remove = (e: KeyboardEvent) => {
       const t = e.target;
@@ -267,14 +292,24 @@ function DisplayScan({
   onDragEnd: () => void;
 }) {
   const {scene} = useGLTF(src);
-  const copy = useMemo(() => {
+  useEffect(() => {
+    parsedScans.set(src, scene);
+  }, [src, scene]);
+  const {copy, materials} = useMemo(() => {
+    const materials: THREE.Material[] = [];
+    const clone = (m: THREE.Material) => {
+      const next = m.clone();
+      materials.push(next);
+      return next;
+    };
     const root = scene.clone(true);
     root.traverse(o => {
       if (o instanceof THREE.Mesh)
-        o.material = Array.isArray(o.material) ? o.material.map(m => m.clone()) : o.material.clone();
+        o.material = Array.isArray(o.material) ? o.material.map(clone) : clone(o.material);
     });
-    return root;
+    return {copy: root, materials};
   }, [scene]);
+  useEffect(() => () => materials.forEach(m => m.dispose()), [materials]);
   useEffect(() => {
     copy.traverse(o => {
       if (o instanceof THREE.Mesh)

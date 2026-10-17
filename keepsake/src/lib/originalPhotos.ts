@@ -99,6 +99,71 @@ export async function restoreOriginalFiles(state: AppState): Promise<AppState> {
   const {originalFiles: _files, ...room} = state;
   return room;
 }
+/** Keys of every preserved original the room still points at, wherever the photo sits. */
+export function referencedOriginals(state: unknown, keys = new Set<string>()): Set<string> {
+  if (Array.isArray(state)) state.forEach(v => referencedOriginals(v, keys));
+  else if (state && typeof state === 'object')
+    for (const [k, v] of Object.entries(state)) {
+      const key = (v as {key?: unknown} | null)?.key;
+      if (k === 'original' && typeof key === 'string') keys.add(key);
+      else referencedOriginals(v, keys);
+    }
+  return keys;
+}
+// Every open Keepsake tab answers this channel, so one tab never prunes an original another tab is importing.
+// (A channel never receives its own messages, so this tab does not answer itself.)
+const tabs = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('keepsake-originals');
+// Node (the check scripts) would otherwise stay alive waiting on the channel.
+(tabs as {unref?: () => void} | null)?.unref?.();
+let answered: (() => void) | null = null;
+if (tabs)
+  tabs.onmessage = e => {
+    if (e.data === 'anyone-open?') tabs.postMessage('open');
+    else if (e.data === 'open') answered?.();
+  };
+function otherTabOpen(): Promise<boolean> {
+  if (!tabs) return Promise.resolve(false);
+  return new Promise(resolve => {
+    const timer = setTimeout(() => {
+      answered = null;
+      resolve(false);
+    }, 400);
+    answered = () => {
+      clearTimeout(timer);
+      answered = null;
+      resolve(true);
+    };
+    tabs.postMessage('anyone-open?');
+  });
+}
+/** Deletes preserved originals the saved room no longer uses (deleted photos, a room replaced by a restore), so
+ * removing a photo really frees its full-size file. Run only on a room that just loaded from storage: nothing
+ * is mid-import then, and a missing room record never prunes. Returns how many files were removed. */
+export async function pruneOriginals(state: AppState): Promise<number> {
+  if (await otherTabOpen()) return 0;
+  const keep = referencedOriginals(state);
+  const d = await db();
+  try {
+    return await new Promise<number>((resolve, reject) => {
+      const tx = d.transaction('files', 'readwrite');
+      const store = tx.objectStore('files');
+      let removed = 0;
+      const keys = store.getAllKeys();
+      keys.onsuccess = () => {
+        for (const key of keys.result)
+          if (!keep.has(String(key))) {
+            store.delete(key);
+            removed++;
+          }
+      };
+      tx.oncomplete = () => resolve(removed);
+      tx.onabort = () => reject(tx.error);
+      tx.onerror = () => reject(tx.error);
+    });
+  } finally {
+    d.close();
+  }
+}
 export async function downloadOriginal(original: OriginalPhoto) {
   const blob = await readOriginal(original),
     url = URL.createObjectURL(blob);

@@ -1,5 +1,5 @@
 import {use, useEffect, useMemo} from 'react';
-import {loadRoomAsset} from './roomAssetCache';
+import {loadRoomAsset, releaseRoomAssetsExcept} from './roomAssetCache';
 import * as THREE from 'three';
 import {LAMP_BULB} from '../../lib/roomHotspots';
 import type {Environment} from '../../types/app';
@@ -81,6 +81,8 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
     return {cloned, materials};
   }, [scene, activeRoom.id, activeRoom.study]);
   useEffect(() => () => materials.forEach(material => material.dispose()), [materials]);
+  // Runs after the commit that swapped rooms, so the previous room is off screen.
+  useEffect(() => releaseRoomAssetsExcept(activeRoom.asset), [activeRoom.asset]);
   useEffect(() => {
     cloned.traverse(obj => {
       if (!(obj instanceof THREE.Mesh)) return;

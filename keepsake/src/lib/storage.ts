@@ -137,9 +137,16 @@ async function persist(state: AppState): Promise<void> {
     db.close();
   }
 }
-/** Serialize writes within a tab; compare revisions atomically across tabs. */
-export function saveState(state: AppState): Promise<void> {
-  const next = queue.catch(() => {}).then(() => persist(state));
+/** Serialize writes within a tab; compare revisions atomically across tabs. `isCurrent` is checked when the
+ * write's turn comes: a save queued before a restore must not land after it, so it resolves false unwritten. */
+export function saveState(state: AppState, isCurrent: () => boolean = () => true): Promise<boolean> {
+  const next = queue
+    .catch(() => {})
+    .then(async () => {
+      if (!isCurrent()) return false;
+      await persist(state);
+      return true;
+    });
   queue = next;
   return next;
 }
