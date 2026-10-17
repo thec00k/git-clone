@@ -67,12 +67,22 @@ export function RoomLights({
   }, [night, dusk, memoryMood, neon, woodland]);
   // Woodland dusk gets a cool fill (the art bible's warm-pool-against-cool-room contrast); other rooms keep their warm fill.
   const coolDusk = woodland && dusk;
+  // The same pass for Woodland's other hours: at night the room is cool and dim and the desk
+  // lamp leads; by day the window light leads and the lamp is a quiet accent.
+  const woodlandNight = woodland && night;
+  const woodlandDay = woodland && !night && !dusk;
   const ambientColor = useMemo(
-    () => new THREE.Color(night ? '#8a9bb8' : coolDusk ? '#b9c6dc' : '#fff4e6'),
-    [night, coolDusk],
+    () => new THREE.Color(night ? '#8a9bb8' : coolDusk ? '#b9c6dc' : woodlandDay ? '#f6f1e8' : '#fff4e6'),
+    [night, coolDusk, woodlandDay],
   );
-  const skyColor = useMemo(() => new THREE.Color(coolDusk ? '#8fa3bd' : '#bac4ba'), [coolDusk]);
-  const groundColor = useMemo(() => new THREE.Color(coolDusk ? '#3a342c' : '#3f4931'), [coolDusk]);
+  const skyColor = useMemo(
+    () => new THREE.Color(coolDusk ? '#8fa3bd' : woodlandNight ? '#5d6f8c' : '#bac4ba'),
+    [coolDusk, woodlandNight],
+  );
+  const groundColor = useMemo(
+    () => new THREE.Color(coolDusk ? '#3a342c' : woodlandNight ? '#2a2622' : '#3f4931'),
+    [coolDusk, woodlandNight],
+  );
   useFrame((_, dt) => {
     const t = motionFactor(dt, MOTION.light, reduced);
     const lights: [
@@ -82,20 +92,32 @@ export function RoomLights({
       [THREE.Light | null, number],
       [THREE.Light | null, number],
     ] = [
-      [ambientRef.current, night ? 0.16 : dusk ? (woodland ? 0.3 : 0.24) : 0.34],
+      [ambientRef.current, night ? (woodland ? 0.2 : 0.16) : dusk ? (woodland ? 0.3 : 0.24) : 0.34],
       [sunRef.current, neon ? 0.65 : night ? 0.55 : dusk ? (woodland ? 0.9 : 1.35) : 2.1],
       [
         ceilingRef.current,
-        // The Woodland ceiling light eases down at dusk so the desk lamp pool leads (scrapbook first).
-        environment.ceilingOn !== false ? (coolDusk ? 1.1 : coastal ? 2.3 : 3.2) : 0,
+        // The Woodland ceiling light eases down at dusk and night so the desk lamp pool leads
+        // (scrapbook first), and a little by day so the window light leads.
+        environment.ceilingOn !== false
+          ? coolDusk
+            ? 1.1
+            : woodlandNight
+              ? 0.9
+              : woodlandDay
+                ? 2.4
+                : coastal
+                  ? 2.3
+                  : 3.2
+          : 0,
       ],
       [
         lampRef.current,
         environment.lampOn && !neon
-          ? (night ? 3.8 : dusk ? (woodland ? 2.6 : 2.8) : 1.6) * (coastal ? 0.28 : 1)
+          ? (night ? (woodland ? 2.5 : 3.8) : dusk ? (woodland ? 2.6 : 2.8) : woodland ? 1.0 : 1.6) *
+            (coastal ? 0.28 : 1)
           : 0,
       ],
-      [skyRef.current, night ? 0.25 : coolDusk ? 0.6 : 0.55],
+      [skyRef.current, night ? (woodland ? 0.3 : 0.25) : coolDusk ? 0.6 : 0.55],
     ];
     lights.forEach(([light, target]) => {
       if (light) light.intensity = THREE.MathUtils.lerp(light.intensity, target, t);
@@ -148,7 +170,7 @@ export function RoomLights({
           ref={lampRef}
           position={(scene ? lampShadePos(scene) : deskLampCorner(STAND_IN_DESK)).toArray()}
           intensity={1.6}
-          color={coastal ? '#ffe1b5' : woodland && dusk ? '#ffcc9c' : '#ffb56a'}
+          color={coastal ? '#ffe1b5' : woodlandDay ? '#ffd9b0' : woodland ? '#ffcc9c' : '#ffb56a'}
           distance={1.85}
         />
       }
