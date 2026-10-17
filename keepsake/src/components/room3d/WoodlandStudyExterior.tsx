@@ -21,7 +21,7 @@ function paintLayer(index: number, season: Season, phase: Phase) {
       : ['#b9ccd2', '#8fa9b4', '#6b8994', '#d6dedd', '#59767b', '#3d595d']
     : season === 'autumn' && !night
       ? dusk
-        ? ['#b0a79a', '#8b8878', '#8a6b45', '#b0793c', '#8c5b33', '#4d4332']
+        ? ['#7b8da3', '#6c7c8b', '#67654f', '#9a6a3a', '#744c2d', '#3a3329']
         : ['#cdc9b4', '#a8a58c', '#9a7a4a', '#c58a3e', '#9d6a36', '#554a35']
       : season === 'spring' && !night
         ? dusk
@@ -42,7 +42,7 @@ function paintLayer(index: number, season: Season, phase: Phase) {
   if (index === 0) {
     const gradient = c.createLinearGradient(0, 0, 0, 768);
     gradient.addColorStop(0, palettes[0]);
-    gradient.addColorStop(1, night ? '#475861' : winter ? '#e6e4d5' : dusk ? '#d7bb98' : '#eee6c6');
+    gradient.addColorStop(1, night ? '#475861' : winter ? '#e6e4d5' : dusk ? '#cfa27f' : '#eee6c6');
     c.fillStyle = gradient;
     c.fillRect(0, 0, 1024, 768);
     c.fillStyle = night ? '#d7dfd4' : '#e9d9b0';
