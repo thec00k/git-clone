@@ -263,18 +263,18 @@ export function ArtifactDisplayCase() {
           <meshBasicMaterial transparent opacity={0} />
         </mesh>
       ))}
-      {on &&
-        [0.6, 1.08, 1.58, 2.04].map(y => (
-          <rectAreaLight
-            key={y}
-            color={tint}
-            intensity={3.5}
-            width={0.65}
-            height={0.18}
-            position={[0, y - 0.018, 0.04]}
-            rotation={[-Math.PI / 2, 0, 0]}
-          />
-        ))}
+      {/* Always mounted: "Display case" off sets intensity 0, so the light count never changes. */}
+      {[0.6, 1.08, 1.58, 2.04].map(y => (
+        <rectAreaLight
+          key={y}
+          color={tint}
+          intensity={on ? 3.5 : 0}
+          width={0.65}
+          height={0.18}
+          position={[0, y - 0.018, 0.04]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        />
+      ))}
     </group>
   );
 }

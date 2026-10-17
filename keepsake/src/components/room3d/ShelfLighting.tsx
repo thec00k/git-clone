@@ -27,17 +27,17 @@ export function ShelfLighting({scene, on}: {scene?: THREE.Object3D; on: boolean}
             <meshStandardMaterial color="#70634c" roughness={0.8} />
           </mesh>
           {/* Bounded washes cannot reach the floor, including with Balanced shadows off. */}
-          {on &&
-            [-0.32, 0, 0.32].map(offset => (
-              <pointLight
-                key={offset}
-                position={[s.x - 0.27, s.y - 0.025, s.z + offset * s.length]}
-                color="#ffe1ad"
-                intensity={0.65}
-                distance={0.39}
-                decay={1}
-              />
-            ))}
+          {/* Always mounted: switching off sets intensity 0, so the light count (and every shader) stays the same. */}
+          {[-0.32, 0, 0.32].map(offset => (
+            <pointLight
+              key={offset}
+              position={[s.x - 0.27, s.y - 0.025, s.z + offset * s.length]}
+              color="#ffe1ad"
+              intensity={on ? 0.65 : 0}
+              distance={0.39}
+              decay={1}
+            />
+          ))}
         </group>
       ))}
     </>
