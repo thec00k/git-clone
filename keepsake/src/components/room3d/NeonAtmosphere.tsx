@@ -4,6 +4,37 @@ import * as THREE from 'three';
 import {useApp} from '../../store/appStore';
 import {CRT_LIGHT_COLORS} from '../../lib/roomMusic';
 import {useReducedMotion} from '../../hooks/useReducedMotion';
+/**
+ * Room-wide neon channels (ceiling ring and floor-to-ceiling corners) and the honeycomb panels share
+ * batched meshes with the window rim and the skyline, so they are dimmed by position instead of by object.
+ * The window rim and the city keep their full glow; these become quiet accents.
+ */
+const NEON_ACCENT_MASK = `
+float ksNeonMask(vec3 p){
+  if(p.z<-2.3)return 1.;
+  if(p.y>2.9||abs(p.x)>2.3)return .2;
+  if(p.x>1.5&&p.y>1.35&&p.y<2.45&&p.z<-1.9)return .18;
+  return 1.;
+}`;
+function dimNeonAccents(material: THREE.MeshStandardMaterial) {
+  material.onBeforeCompile = shader => {
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vKsNeonWorld;')
+      .replace(
+        '#include <project_vertex>',
+        '#include <project_vertex>\nvKsNeonWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;',
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vKsNeonWorld;' + NEON_ACCENT_MASK)
+      .replace(
+        '#include <opaque_fragment>',
+        '#include <opaque_fragment>\ngl_FragColor.rgb *= ksNeonMask(vKsNeonWorld);',
+      );
+  };
+  material.customProgramCacheKey = () => 'ks-neon-accent-mask';
+  material.needsUpdate = true;
+}
+
 export function NeonAtmosphere({scene}: {scene: THREE.Object3D}) {
   const {environment, state} = useApp();
   const reduced = useReducedMotion();
@@ -51,6 +82,29 @@ export function NeonAtmosphere({scene}: {scene: THREE.Object3D}) {
       material.dispose();
     };
   }, [scene, mirrorMode, mirrorColor]);
+  useEffect(() => {
+    // Each room mesh owns a cloned material (useRoomAsset), so patching these two leaves the lava, jellyfish and door alone.
+    const patched: THREE.MeshStandardMaterial[] = [];
+    for (const name of ['Neon_Static_Neon_Cyan', 'Neon_Static_Neon_Magenta']) {
+      const mesh = scene.getObjectByName(name);
+      if (mesh instanceof THREE.Mesh && mesh.material instanceof THREE.MeshStandardMaterial) {
+        dimNeonAccents(mesh.material);
+        patched.push(mesh.material);
+      }
+    }
+    return () => {
+      patched.forEach(m => {
+        m.onBeforeCompile = () => {};
+        m.customProgramCacheKey = () => '';
+        m.needsUpdate = true;
+      });
+    };
+  }, [scene]);
+  const deskLight = useMemo(() => {
+    const book = scene.getObjectByName('ks_book');
+    const p = book ? book.getWorldPosition(new THREE.Vector3()) : new THREE.Vector3(-0.15, 0.78, -1.68);
+    return p.add(new THREE.Vector3(0.05, 0.75, 0.3));
+  }, [scene]);
   useEffect(() => {
     const halos: THREE.Mesh[] = [];
     const originals: {mesh: THREE.Mesh; material: THREE.Material | THREE.Material[]}[] = [];
@@ -142,7 +196,7 @@ export function NeonAtmosphere({scene}: {scene: THREE.Object3D}) {
       o.scale.y = sy * (1 + Math.sin(t * 0.5 + i) * 0.08);
       if (o instanceof THREE.Mesh) {
         const m = o.material;
-        if (m instanceof THREE.MeshStandardMaterial) m.emissiveIntensity = environment.lampOn ? 2 : 0;
+        if (m instanceof THREE.MeshStandardMaterial) m.emissiveIntensity = environment.lampOn ? 1.2 : 0;
       }
     });
     parts.jellies.forEach((o, i) => {
@@ -176,15 +230,24 @@ export function NeonAtmosphere({scene}: {scene: THREE.Object3D}) {
         intensity={mirrorMode === 'off' ? 0 : 0.65}
         distance={3}
       />
+      {/* Cool white desk light: with the lamp on, the scrapbook is the brightest thing on the desk. */}
+      <pointLight
+        name="Neon_Desk_Light"
+        position={deskLight.toArray()}
+        color="#e8eeff"
+        intensity={environment.lampOn ? 1.8 : 0}
+        distance={1.7}
+        decay={2}
+      />
       <pointLight
         position={[-0.965, 1.02, -1.96]}
         color="#e94ab7"
-        intensity={environment.lampOn ? 0.7 : 0}
+        intensity={environment.lampOn ? 0.35 : 0}
         distance={1.3}
       />
-      <pointLight position={[1.07, 1.1, -1.8]} color="#26d8ff" intensity={0.5} distance={1.2} />
-      <pointLight position={[-1, 2.35, 0]} color="#25c9ff" intensity={1.2} distance={5} />
-      <pointLight position={[1.8, 2.35, 0]} color="#dd37a2" intensity={1.1} distance={5} />
+      <pointLight position={[1.07, 1.1, -1.8]} color="#26d8ff" intensity={0.25} distance={1.2} />
+      <pointLight position={[-1, 2.35, 0]} color="#25c9ff" intensity={0.8} distance={5} />
+      <pointLight position={[1.8, 2.35, 0]} color="#dd37a2" intensity={0.7} distance={5} />
     </>
   );
 }
