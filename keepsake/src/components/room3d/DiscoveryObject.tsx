@@ -3,13 +3,24 @@ import {Html} from '@react-three/drei';
 import {useFrame} from '@react-three/fiber';
 import {useMemo, useRef} from 'react';
 import * as THREE from 'three';
-import {renderedMesh, visibleBounds} from './furnitureContact';
+import {collectRenderedMeshes, visibleBoundsInto} from './furnitureContact';
 import {useApp} from '../../store/appStore';
 import {useNav} from '../../store/nav';
 import {activeDiscovery, discoveryState, PLACES, REWARDS, discover} from '../../lib/discoveries';
 export function DiscoveryObject({scene}: {scene: THREE.Object3D}) {
   const note = useRef<THREE.Group>(null);
-  const ray = useMemo(() => new THREE.Raycaster(), []);
+  // Reused every frame so following the chair does not create garbage.
+  const scratch = useMemo(
+    () => ({
+      ray: new THREE.Raycaster(),
+      seatAt: new THREE.Vector3(),
+      from: new THREE.Vector3(),
+      down: new THREE.Vector3(0, -1, 0),
+      box: new THREE.Box3(),
+      meshes: [] as THREE.Mesh[],
+    }),
+    [],
+  );
   const {state: contactState} = useApp();
   const contactLetter = activeDiscovery(contactState);
   useFrame(() => {
@@ -21,13 +32,11 @@ export function DiscoveryObject({scene}: {scene: THREE.Object3D}) {
       chair.getObjectByName('Cozy_Chair_Cushion') ??
       chair.getObjectByName('Chair_Seat');
     if (!seat) return;
-    const p = seat.getWorldPosition(new THREE.Vector3());
-    if (seat instanceof THREE.Mesh) visibleBounds(seat).getCenter(p);
-    const meshes: THREE.Mesh[] = [];
-    chair.traverse(o => {
-      if (renderedMesh(o)) meshes.push(o);
-    });
-    ray.set(new THREE.Vector3(p.x, p.y + 0.16, p.z), new THREE.Vector3(0, -1, 0));
+    const {ray, seatAt: p, from, down, box, meshes} = scratch;
+    seat.getWorldPosition(p);
+    if (seat instanceof THREE.Mesh) visibleBoundsInto(seat, box).getCenter(p);
+    collectRenderedMeshes(chair, meshes);
+    ray.set(from.set(p.x, p.y + 0.16, p.z), down);
     const hit = ray.intersectObjects(meshes, false)[0];
     note.current.position.set(p.x, (hit?.point.y ?? p.y) + 0.002, p.z);
     note.current.rotation.set(-Math.PI / 2, 0, 0.18);

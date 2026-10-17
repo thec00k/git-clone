@@ -31,17 +31,23 @@ export function smootherstep(progress: number) {
 }
 
 /** Left stack stays on the inner face of the moving cover, in metres. */
-export function leftStackPose(angle: number, hingeY: number) {
-  return {rotation: angle - Math.PI, x: -Math.sin(angle) * 0.004, y: hingeY + Math.cos(angle) * 0.004};
+export function leftStackPose(
+  angle: number,
+  hingeY: number,
+  out: {rotation: number; x: number; y: number} = {rotation: 0, x: 0, y: 0},
+) {
+  out.rotation = angle - Math.PI;
+  out.x = -Math.sin(angle) * 0.004;
+  out.y = hingeY + Math.cos(angle) * 0.004;
+  return out;
 }
 
 /** Four authored Blender targets describe a complete physical page turn. */
-export function pageTurnWeights(progress: number): [number, number, number, number] {
+export function pageTurnWeights(
+  progress: number,
+  out: [number, number, number, number] = [0, 0, 0, 0],
+): [number, number, number, number] {
   const p = Math.max(0, Math.min(1, progress)) * 4;
-  return [1, 2, 3, 4].map(target => Math.max(0, 1 - Math.abs(p - target))) as [
-    number,
-    number,
-    number,
-    number,
-  ];
+  for (let i = 0; i < 4; i++) out[i] = Math.max(0, 1 - Math.abs(p - (i + 1)));
+  return out;
 }

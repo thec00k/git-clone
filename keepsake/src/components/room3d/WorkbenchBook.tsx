@@ -26,6 +26,10 @@ const loadBook = () =>
     throw error;
   }));
 
+/** Morph target names of the four authored page-turn poses, in weight order. */
+const TURN_TARGETS = [1, 2, 3, 4].map(i => `Turn_${String(i * 25).padStart(3, '0')}`);
+const IDENTITY = new THREE.Quaternion();
+
 function EditorSurface({
   header,
   footer,
@@ -85,6 +89,16 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
   const turnTime = useRef(0),
     turnFinished = useRef(false);
   const group = useRef<THREE.Group>(null);
+  // Reused every frame so the animation loop does not create garbage.
+  const scratch = useMemo(
+    () => ({
+      resting: new THREE.Vector3(),
+      atDesk: new THREE.Vector3(-0.15, 0, -0.78),
+      pose: {rotation: 0, x: 0, y: 0},
+      weights: [0, 0, 0, 0] as [number, number, number, number],
+    }),
+    [],
+  );
   const chair = useMemo(() => {
     const object = roomScene.getObjectByName('ks_chair');
     return object ? {object, position: object.position.clone(), rotation: object.quaternion.clone()} : null;
@@ -182,6 +196,15 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
     }
     return () => maps?.forEach(map => map.dispose());
   }, [turn, maps, leaf]);
+  // The page-turn meshes and their morph indices never change, so look them up once per page.
+  const leafMorphs = useMemo(() => {
+    const found: {mesh: THREE.Mesh; indices: (number | undefined)[]}[] = [];
+    leaf?.traverse(o => {
+      if (o instanceof THREE.Mesh && o.morphTargetInfluences)
+        found.push({mesh: o, indices: TURN_TARGETS.map(name => o.morphTargetDictionary?.[name])});
+    });
+    return found;
+  }, [leaf]);
   const opened = phase === 'opening' || phase === 'editing';
   useEffect(() => {
     const old = roomScene.getObjectByName('ks_book');
@@ -202,7 +225,7 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
       // The left stack rides the inside of the cover instead of expanding
       // horizontally through it. At rest its top matches the editor surface.
       const angle = hinge.rotation.z;
-      const pose = leftStackPose(angle, hinge.position.y);
+      const pose = leftStackPose(angle, hinge.position.y, scratch.pose);
       leftPages.rotation.z = pose.rotation;
       leftPages.position.set(pose.x, pose.y, 0);
       leftPages.scale.x = 1;
@@ -212,23 +235,24 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
       group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, opened ? -0.15 : -0.31, t);
     if (chair) {
       const active = phase !== 'room' && phase !== 'leaving';
-      const resting = chair.position.clone();
+      const {resting, atDesk} = scratch;
+      resting.copy(chair.position);
       resting.y += Number(chair.object.userData.floorLift ?? 0);
-      chair.object.position.lerp(active ? new THREE.Vector3(-0.15, resting.y, -0.78) : resting, t);
-      chair.object.quaternion.slerp(active ? new THREE.Quaternion() : chair.rotation, t);
+      atDesk.y = resting.y;
+      chair.object.position.lerp(active ? atDesk : resting, t);
+      chair.object.quaternion.slerp(active ? IDENTITY : chair.rotation, t);
     }
     if (turn && leaf && !turnFinished.current) {
       turnTime.current += Math.min(delta, 0.05);
       const progress = smootherstep(Math.min(1, turnTime.current / 0.95));
-      const weights = pageTurnWeights(turn.direction === 'next' ? progress : 1 - progress);
-      leaf.traverse(o => {
-        if (o instanceof THREE.Mesh && o.morphTargetInfluences)
-          weights.forEach((w, i) => {
-            const name = `Turn_${String((i + 1) * 25).padStart(3, '0')}`;
-            const index = o.morphTargetDictionary?.[name];
-            if (index !== undefined) o.morphTargetInfluences![index] = w;
-          });
-      });
+      const weights = pageTurnWeights(turn.direction === 'next' ? progress : 1 - progress, scratch.weights);
+      for (let m = 0; m < leafMorphs.length; m++) {
+        const {mesh, indices} = leafMorphs[m];
+        for (let i = 0; i < indices.length; i++) {
+          const index = indices[i];
+          if (index !== undefined) mesh.morphTargetInfluences![index] = weights[i];
+        }
+      }
       if (turnTime.current >= 0.95) {
         turnFinished.current = true;
         turn.done();
