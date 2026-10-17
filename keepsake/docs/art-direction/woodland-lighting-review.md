@@ -17,7 +17,7 @@ Before and after pictures are in `lighting-pass/` (`before-*.png`, `after-*.png`
 | 5 | **Log walls read as repeated stripes.** Same highlight and shadow band on every course, little variation in roughness or tone, so walls look like a pattern instead of timber with age. | Visible in Establishing and Window views. | Not fixed: material work in the Blender source. |
 | 6 | **Window frame goes almost black** in the Window view and has no catch-light on its bevels, so the opening reads as a hard dark cut-out. | Window view. | Not fixed. |
 | 7 | **Metals look matte.** Aged brass and warm iron have no environment to reflect (the room has no environment map), so lamp rim, drawer pull and hinges look dull rather than metallic. | Desk view lamp base and pull. | Not fixed: a small generated environment map would help, to be tried with a careful look at keeping it cool and dim. |
-| 8 | **Night and winter grades have not had this pass.** The ceiling light is still the same strength at night, which is not "restrained practical light". | Code review only; not captured. | Not changed on purpose (no before/after evidence yet). |
+| 8 | **Night and winter grades have not had this pass.** The ceiling light is still the same strength at night, which is not "restrained practical light". | Captured in the follow-up below. | Fixed in the follow-up pass (day, night and winter) |
 | 9 | **Exterior layers are flat colour.** The six paint layers have no haze or value steps between them and the sun is a flat disc. | Window view. | Art task (the painted exterior is already planned). |
 | 10 | **Hearth view not reviewed.** The capture failed three times under software rendering in this session. | n/a | Open. |
 
@@ -53,3 +53,32 @@ No frame-rate claim is made. Software rendering cannot say anything about real d
 ## Suggested next steps
 
 Items 4 to 6 above (cover contrast, wall material variation, window trim catch-light), then the same pass on the night and winter grades with captures, then the hearth view.
+
+## Follow-up: the same pass for day, night and winter (October 17)
+
+The owner asked for the dusk pass to be applied to the other time and season settings. Method as above (`capture-room.mjs`, 960 x 600, software rendering), using the Establishing, Desk and Window views. Captures are in `lighting-pass/` (`before-autumn-*`, `after-autumn-*`, `before-winter-night`, `after-winter-night`).
+
+What was off before:
+
+- **Night was the old dusk problem again.** The ceiling light ran at full daytime strength, so the cabin was one amber wash and the lamp burned out the wall behind it.
+- **Day read like evening.** The desk lamp's saturated orange pool was the warmest thing in the room, and white paper on the desk burned out.
+
+What changed (Woodland only, `RoomLighting.tsx`; other rooms and dusk are unchanged):
+
+- **Night:** ceiling light 3.2 → 0.9 (restrained practical light); cool blue-grey sky and ground fill; ambient 0.16 → 0.2 so the room doesn't go black; desk lamp uses the dusk pass's softer tone at 2.5 instead of 3.8. The moonlit window stays cool, and the map keeps its picture light.
+- **Day:** window light leads; ceiling light 3.2 → 2.4; desk lamp 1.6 → 1.0 in a pale warm tone; neutral daylight fill instead of a warm one.
+- **Winter** uses the same time-of-day grades. Winter dusk already had the cool-window contrast from the dusk pass, and winter night now matches autumn night inside, against its snowy exterior.
+
+No lights were added or removed and no light is mounted conditionally. Only intensities and colours change, so `check-constant-lights.mjs` still holds and changing the time setting never rebuilds shaders.
+
+| Measure (960 x 600) | Before | After |
+| --- | --- | --- |
+| Night, Establishing: left / right wall brightness | 101 / 98 | 75 / 61 |
+| Night, Establishing: desk top clipped pixels | 16.1% | 7.9% |
+| Night, Desk view: back wall clipped pixels | 41.8% | 26.3% (dusk after the first pass: 27.8%) |
+| Night, Establishing: window warmth (red-to-blue) | 0.83 | 0.83 (cool, unchanged) |
+| Day, Desk view: white note clipped pixels | 90.9% | 0.0% |
+| Day, Desk view: back wall clipped pixels | 19.1% | 2.3% |
+| Day, Establishing: wall behind lamp warmth | 1.75 | 1.60 |
+
+Limits: same as above. These are software-rendered screenshots measured on hand-picked patches. They show direction, not acceptance. The small white note right under the lamp still clips at dusk and night, the lamp's warm pool by design. No frame-rate claim is made.

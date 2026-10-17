@@ -20,6 +20,13 @@ const ALL_SHOTS = [
   ['woodland-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=establishing'],
   ['woodland-autumn-dusk-desk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=desk'],
   ['woodland-autumn-dusk-window', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=window'],
+  // The same views by day and night, and winter, for the follow-up lighting pass.
+  ['woodland-autumn-day', '2026-10-10T12:00:00', {timeMode: 'day'}, '?view=establishing'],
+  ['woodland-autumn-day-desk', '2026-10-10T12:00:00', {timeMode: 'day'}, '?view=desk'],
+  ['woodland-autumn-night', '2026-10-10T12:00:00', {timeMode: 'night'}, '?view=establishing'],
+  ['woodland-autumn-night-desk', '2026-10-10T12:00:00', {timeMode: 'night'}, '?view=desk'],
+  ['woodland-winter-dusk', '2027-01-15T12:00:00', {timeMode: 'dusk'}, '?view=establishing'],
+  ['woodland-winter-night', '2027-01-15T12:00:00', {timeMode: 'night'}, '?view=establishing'],
   ['woodland-hearth-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
   ['holiday-halloween-hearth', '2026-10-25T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
   ['holiday-christmas-hearth', '2026-12-20T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
