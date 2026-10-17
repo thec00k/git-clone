@@ -4,11 +4,11 @@ Original source and published room assets are never overwritten.
 """
 import bpy, math, json
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Vector, Matrix
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'public/room/woodland-study'
 OUT.mkdir(parents=True,exist_ok=True)
-keep={'Desk','ks_book','ks_crt','ks_archive','ks_guestbook','ks_map','ks_shelf','ks_chair','ks_lamp','ks_door','ks_clock','ks_ceiling_switch','ks_window','Beanbag'}
+keep={'Desk','ks_book','ks_crt','ks_archive','ks_guestbook','ks_map','ks_shelf','ks_chair','ks_lamp','ks_door','ks_clock','ks_ceiling_switch','ks_window','Beanbag','ks_ceiling_fan'}
 def root_of(o):
     while o.parent:o=o.parent
     return o
@@ -72,10 +72,6 @@ for a,b in [((-1.115,3.05,-2.1),(-.15,3.69,-2.1)),((-.15,3.69,-2.1),(.815,3.05,-
     mid=tuple((a[i]+b[i])/2 for i in range(3));length=(Vector(web(b))-Vector(web(a))).length
     o=cube('Study_TransomFrame',mid,(.07,length,.16),dark,window)
     o.rotation_euler=(Vector(web(b))-Vector(web(a))).to_track_quat('Z','Y').to_euler()
-# Sparse structural accents, kept clear of the aperture.
-for x in [-2.46,2.46]:
-    cube('Study_CornerPost',(x,1.91,-2.06),(.13,3.82,.13),dark,bevel=.018)
-    cube('Study_Baseboard',(x,.075,0),(.045,.15,4.24),dark)
 # Keep the existing desk top and interaction pivots. A stable upholstered chair.
 chair=bpy.data.objects['ks_chair'];chair.location=web((-.54,0,-.78));chair.rotation_euler=(0,0,0)
 cube('Study_ChairSeat',(-.54,.46,-.78),(.49,.12,.47),moss,chair,.035)
@@ -88,6 +84,15 @@ bean=bpy.data.objects['Beanbag'];bean.location.x+=.20;bean.location.y+=.55;bean.
 shelf=bpy.data.objects['ks_shelf'];shelf.location.y+=.22
 clock=bpy.data.objects.get('ks_clock')
 if clock:clock.location.x-=.06
+# Prop clearance (scripts/check-woodland-study-assets.mjs): the lamp shade sat inside the sill,
+# the map hung 3 cm off the log crowns, and the guestbook table floated above the floor.
+def nudge(name,d):
+    o=bpy.data.objects.get(name)
+    if o:bpy.context.view_layer.update();o.matrix_world=Matrix.Translation(web(d))@o.matrix_world
+nudge('ks_lamp',(0,0,.11))
+nudge('ks_map',(-.025,0,0))
+nudge('ks_guestbook',(0,-.023,0))
+for n in ['Guestbook_Cover','Guestbook_Pages','Guestbook_Ribbon','Finish_Guestbook_Bookmark']:nudge(n,(0,-.008,0))
 # Compact hearth behind the sitting area, clear of the door sweep.
 for x in [-1.28,-.54]:cube('Study_HearthPier',(x,.49,1.90),(.14,.88,.33),stone,bevel=.02)
 cube('Study_HearthBase',(-.91,.07,1.83),(.94,.14,.57),stone,bevel=.015)
@@ -97,30 +102,6 @@ for x in [-1.08,-.81]:cube('Study_HearthLog',(x,.22,1.9),(.24,.07,.16),dark,beve
 empty('Hearth_Light',(-.91,.48,1.70))
 empty('Window_Layer_Origin',(-.15,2.08,-2.24))
 empty('ks_window_sun',(-.15,2.70,-2.60))
-# Rounded cabin courses sit in front of the sealed shell, with deliberate narrow chinking.
-def log(name,a,b,radius=.112):
-    av,bv=Vector(web(a)),Vector(web(b));delta=bv-av
-    if delta.length<.045:return
-    bpy.ops.mesh.primitive_cylinder_add(vertices=16,radius=radius,depth=delta.length,location=(av+bv)/2)
-    o=bpy.context.object;o.name=name;o.rotation_euler=delta.to_track_quat('Z','Y').to_euler();o.data.materials.append(wall)
-    for f in o.data.polygons:f.use_smooth=len(f.vertices)==4
-    bevel=o.modifiers.new('Soft log ends','BEVEL');bevel.width=.007;bevel.segments=2
-for i in range(17):
-    y=.115+i*.225
-    for x in [-2.565,2.565]:log('Cabin_Side_Log',(x,y,-2.14),(x,y,2.14))
-    low=y-.112;high=y+.112
-    # Use the widest aperture intersecting each rounded course so corners stay clear.
-    if high>=1.075 and low<=3.085:half=1.015
-    elif high>3.085 and low<3.73:half=max(0,.965*(3.69-low)/.64)+.075
-    else:half=0
-    if half:
-        log('Cabin_Window_Log',(-2.51,y,-2.205),(-.15-half,y,-2.205))
-        log('Cabin_Window_Log',(-.15+half,y,-2.205),(2.51,y,-2.205))
-    else:log('Cabin_Window_Log',(-2.51,y,-2.205),(2.51,y,-2.205))
-    if low<2.20:
-        log('Cabin_Door_Log',(-2.51,y,2.205),(-.41,y,2.205))
-        log('Cabin_Door_Log',(.71,y,2.205),(2.51,y,2.205))
-    else:log('Cabin_Door_Log',(-2.51,y,2.205),(2.51,y,2.205))
 # Chimney meets the ceiling; broad masonry courses, restrained mortar joints.
 cube('Study_Chimney_Core',(-.91,2.44,1.98),(.73,2.88,.35),stone)
 for row in range(15):
@@ -149,6 +130,8 @@ for name,v in shots.items():
 (ROOT/'src/generated/woodlandStudy.json').write_text(json.dumps(shots,indent=2)+'\n')
 # Finish materials and chair orientation before publishing the authored scene.
 import runpy
+# Solid log walls, log-beam ceiling and the fan's new height (owner references, 2026-10-17).
+runpy.run_path(str(Path(__file__).with_name('cabin-shell.py')))
 runpy.run_path(str(Path(__file__).with_name('materials.py')))
 runpy.run_path(str(Path(__file__).with_name('quality-pass.py')))
 # Selected export includes only this blockout's scene.
