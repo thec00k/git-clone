@@ -16,6 +16,10 @@ const ALL_SHOTS = [
   ['beachfront-summer-day', '2027-07-20T12:00:00', {roomTheme: 'beachfront', timeMode: 'day'}, ''],
   ['beachfront-winter-dusk', '2027-01-15T12:00:00', {roomTheme: 'beachfront', timeMode: 'dusk'}, ''],
   ['beachfront-autumn-night', '2026-10-10T12:00:00', {roomTheme: 'beachfront', timeMode: 'night'}, ''],
+  // The approved Woodland camera views at dusk (the proof scene), used for lighting reviews.
+  ['woodland-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=establishing'],
+  ['woodland-autumn-dusk-desk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=desk'],
+  ['woodland-autumn-dusk-window', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=window'],
   ['woodland-hearth-autumn-dusk', '2026-10-10T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
   ['holiday-halloween-hearth', '2026-10-25T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
   ['holiday-christmas-hearth', '2026-12-20T12:00:00', {timeMode: 'dusk'}, '?view=hearth'],
