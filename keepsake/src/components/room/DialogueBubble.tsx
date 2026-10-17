@@ -48,6 +48,7 @@ export function DialogueBubble({
       className="ks-say"
       role="dialog"
       aria-modal="true"
+      data-tour-bubble=""
       aria-label={`${speaker} says`}
       data-complete={complete ? 'true' : 'false'}
     >

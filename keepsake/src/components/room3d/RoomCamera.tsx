@@ -8,7 +8,7 @@ import type {RoomFace} from '../../lib/roomLayout';
 import {useActiveRoom} from './useActiveRoom';
 import {DISPLAY_CASE_VIEW} from './ArtifactDisplayCase';
 import {CAMERA_MOVE_SECONDS, cameraMoveEase} from '../../lib/motion';
-import {ignorePageKey} from '../../lib/keyTargets';
+import {CAMERA_PAUSING_DIALOG, ignorePageKey} from '../../lib/keyTargets';
 const EYE_Y = 1.32;
 const WORKBENCH_VIEW = {
   position: new THREE.Vector3(-0.15, 1.55, -1.12),
@@ -177,7 +177,8 @@ export function EyeCamera({
   }, [touring, seated, workbench, photoView, authored]);
   const reduced = useReducedMotion();
   const overhead = wantsDeskOverhead();
-  // Desk, corkboard and bookshelf are the three walking-eye faces. Only moves between them get the timed glide.
+  // Desk, corkboard and bookshelf are the three walking-eye faces. Only moves between them get the timed
+  // glide, including the welcome tour turning to the place each step names.
   const faceMode =
     !photoView &&
     !workbench &&
@@ -185,8 +186,7 @@ export function EyeCamera({
     !(reading && !touring) &&
     !overhead &&
     !seated &&
-    !authored &&
-    !touring;
+    !authored;
   const previousFace = useRef<{face: RoomFace; faceMode: boolean} | null>(null);
   const glide = useRef<{
     elapsed: number;
@@ -323,14 +323,14 @@ export function EyeCamera({
 
   useFrame((_, dt) => {
     if (objectControls.current) return;
-    if (document.querySelector('[aria-modal="true"]')) {
+    if (document.querySelector(CAMERA_PAUSING_DIALOG)) {
       keys.current = {f: 0, r: 0};
       dragging.current = false;
       return;
     }
     dt = Math.min(dt, 0.05);
     const move = glide.current;
-    if (move && !touring && !userMoved.current && !reduced) {
+    if (move && !userMoved.current && !reduced) {
       move.elapsed += dt;
       const progress = Math.min(1, move.elapsed / CAMERA_MOVE_SECONDS);
       const eased = cameraMoveEase(progress);

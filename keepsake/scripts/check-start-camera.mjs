@@ -71,6 +71,78 @@ assert.match(
   'the room canvas starts its camera from startCamera(front view)',
 );
 
+// The welcome tour: each step that names a place turns the room camera to that place's view.
+const {TOUR_STEPS} = await import('../src/lib/tour.ts');
+const {faceForHotspot} = await import('../src/lib/roomLayout.ts');
+const keyTargets = await import('../src/lib/keyTargets.ts');
+// Before the fix the camera paused for every modal, the tour's speech bubble included.
+const pauseSelector = keyTargets.CAMERA_PAUSING_DIALOG ?? '[aria-modal="true"]';
+const shelfStep = TOUR_STEPS.find(step => step.focus === 'shelf');
+assert.ok(shelfStep, 'the tour has a bookshelf step');
+assert.equal(
+  faceForHotspot(shelfStep.focus),
+  'right',
+  'the bookshelf step asks for the right (bookshelf) view',
+);
+for (const room of Object.values(roomThemes)) {
+  const right = room.views.right;
+  const dir = new THREE.Vector3(...right.target).sub(new THREE.Vector3(...right.position)).normalize();
+  const yaw = degrees(Math.atan2(dir.x, -dir.z));
+  assert.ok(
+    Math.abs(yaw - 90) < 15,
+    `${room.id}: the bookshelf view faces the east wall (${yaw.toFixed(1)}°)`,
+  );
+  const hitY = right.position[1] + (dir.y * (2.2 - right.position[0])) / dir.x;
+  assert.ok(hitY > 0.6 && hitY < 2.2, `${room.id}: the bookshelf view meets the shelf at book height`);
+}
+for (const step of TOUR_STEPS.filter(step => step.focus)) {
+  const face = faceForHotspot(step.focus);
+  for (const room of Object.values(roomThemes)) {
+    assert.ok(room.views[face], `${room.id}: tour step "${step.id}" uses an existing ${face} view`);
+  }
+}
+const tour = read('../src/components/room/RoomTour.tsx');
+assert.match(tour, /setRoomFace\(targetFace\)/, 'each tour step sets the room face for its place');
+const camera = read('../src/components/room3d/RoomCamera.tsx');
+assert.match(camera, /:\s*FACE_VIEW\[face\]\);/, 'while touring the camera aims at the face view');
+
+// The tour bubble stays a modal dialog for screen readers, but must not freeze the camera.
+const bubble = read('../src/components/room/DialogueBubble.tsx');
+assert.match(bubble, /role="dialog"\s+aria-modal="true"/, 'the tour bubble is still a modal dialog');
+assert.match(
+  camera,
+  /if \(document\.querySelector\(CAMERA_PAUSING_DIALOG\)\)/,
+  'the camera pause checks the shared pausing-dialog selector',
+);
+const marker = keyTargets.TOUR_BUBBLE_ATTR;
+assert.ok(marker && bubble.includes(`${marker}=""`), 'the tour bubble carries the tour marker');
+assert.equal(
+  pauseSelector,
+  `[aria-modal='true']:not([${marker}])`,
+  'the camera pause skips the tour bubble and still covers every other modal',
+);
+// Only the tour bubble opts out; every other modal dialog still freezes the camera.
+const {readdirSync, statSync} = await import('node:fs');
+const marked = [];
+const walk = dir => {
+  for (const name of readdirSync(dir)) {
+    const path = `${dir}/${name}`;
+    if (statSync(path).isDirectory()) walk(path);
+    else if (/\.tsx?$/.test(name) && readFileSync(path, 'utf8').includes(`${marker}=`)) marked.push(path);
+  }
+};
+walk(new URL('../src', import.meta.url).pathname);
+assert.deepEqual(
+  marked.map(p => p.replace(/.*\/src\//, '')),
+  ['components/room/DialogueBubble.tsx'],
+  'only the tour bubble opts out of the camera pause',
+);
+// Tour turns use the timed glide (or a snap with reduced motion), not a different path.
+const faceMode = camera.match(/const faceMode =([\s\S]*?);/)?.[1] ?? '';
+assert.ok(!/!touring;?\s*$/.test(faceMode.trim()), 'tour turns between faces count as face moves');
+assert.match(camera, /if \(move && !userMoved\.current && !reduced\)/, 'the glide also runs while touring');
+
+console.log('The tour bubble no longer freezes the camera; the bookshelf step turns to the bookshelf view.');
 console.log(
   `First frame faces the desk and window (before: ${degrees(Math.asin(beforeDir.y)).toFixed(0)}° down at the floor).`,
 );

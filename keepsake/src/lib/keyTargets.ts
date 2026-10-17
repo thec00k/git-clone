@@ -20,6 +20,15 @@ export function dialogOpen() {
   return !!document.querySelector("[aria-modal='true']");
 }
 
+/** Marks the welcome tour's speech bubble: still a modal dialog, but it steers the camera. */
+export const TOUR_BUBBLE_ATTR = 'data-tour-bubble';
+
+/**
+ * Open dialogs that freeze the room camera. The tour bubble is left out so each
+ * step can turn the room toward the place it names; walking stays blocked by the tour itself.
+ */
+export const CAMERA_PAUSING_DIALOG = `[aria-modal='true']:not([${TOUR_BUBBLE_ATTR}])`;
+
 /**
  * True when a window-level shortcut should ignore this key press: a control
  * already handled it, focus is in a field or arrow-key widget, or a dialog is open.

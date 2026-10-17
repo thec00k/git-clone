@@ -5,6 +5,7 @@ import {markTourFinished, TOUR_STEPS} from '../../lib/tour';
 import {faceForHotspot, roomLayoutFromSearch, YAW_MS} from '../../lib/roomLayout';
 import {DialogueBubble} from './DialogueBubble';
 import {KEY_OWNING_TARGETS} from '../../lib/keyTargets';
+import {CAMERA_MOVE_SECONDS} from '../../lib/motion';
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -71,7 +72,8 @@ export function RoomTour() {
       const yaw = document.querySelector('.ks-yaw');
       const needsTurn = yaw instanceof HTMLElement && prevFace !== targetFace && !prefersReducedMotion();
       if (!needsTurn && prevFace !== targetFace && !prefersReducedMotion()) {
-        await new Promise(r => window.setTimeout(r, 480));
+        // Let the 3D camera finish its glide to the named place before outlining it.
+        await new Promise(r => window.setTimeout(r, CAMERA_MOVE_SECONDS * 1000 + 80));
       }
       if (needsTurn) {
         await new Promise<void>(resolve => {
