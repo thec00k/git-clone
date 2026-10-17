@@ -14,6 +14,7 @@ export function MapPictureLight({scene,night}:{scene?:THREE.Object3D;night:boole
   <mesh position={[x,y,z]}><boxGeometry args={[.055,.035,.56]}/><meshStandardMaterial color="#7c6540" metalness={.65} roughness={.4}/></mesh>
   <mesh position={[x-.005,y-.019,z]}><boxGeometry args={[.034,.005,.51]}/><meshStandardMaterial color="#f0dfb5" emissive="#ffdc98" emissiveIntensity={night?2:0}/></mesh>
   <primitive object={target}/>
-  {night&&<spotLight position={[x,y-.025,z]} target={target} color="#ffe0a3" intensity={4} angle={.95} penumbra={.65} distance={2.3} decay={2}/>}
+  {/* Always mounted: toggling the light at dusk/night would recompile every material. */}
+  <spotLight position={[x,y-.025,z]} target={target} color="#ffe0a3" intensity={night?4:0} angle={.95} penumbra={.65} distance={2.3} decay={2}/>
  </group>;
 }

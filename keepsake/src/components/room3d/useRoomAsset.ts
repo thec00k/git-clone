@@ -29,6 +29,15 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
         return local;
       };
       obj.material = Array.isArray(obj.material) ? obj.material.map(copy) : copy(obj.material);
+      // Any transmissive material makes three.js render the whole room a second time each
+      // frame (with its own shader variants). Small glass pieces read the same as alpha glass.
+      for (const mat of Array.isArray(obj.material) ? obj.material : [obj.material]) {
+        if (mat instanceof THREE.MeshPhysicalMaterial && mat.transmission > 0) {
+          mat.opacity = Math.min(mat.opacity, Math.max(.18, 1 - mat.transmission * .85));
+          mat.transmission = 0; mat.transparent = true; mat.depthWrite = false;
+          obj.castShadow = false;
+        }
+      }
       if (/Beachfront_Prop_(Fishbowl|Bowl_Rim|Bowl_Water|Waterline)|Beachfront_Casement_.*_Glass/.test(obj.name)) {
         obj.castShadow = false;
         obj.receiveShadow = false;

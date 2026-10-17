@@ -10,6 +10,7 @@
     "assets:doctor": "node scripts/refresh-room-assets.mjs --doctor",
     "assets:refresh": "node scripts/refresh-room-assets.mjs",
     "check:assets:browser": "node scripts/check-room-assets-browser.mjs",
+    "check:responsiveness:browser": "node scripts/check-room-responsiveness-browser.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",

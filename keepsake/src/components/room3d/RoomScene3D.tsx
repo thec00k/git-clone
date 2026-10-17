@@ -24,7 +24,7 @@ import {useRoomRenderProfile} from './useRoomRenderProfile';
 import { WoodlandScenery } from "./WoodlandScenery";
 import { OutdoorWeather } from "./OutdoorWeather";
 import { RoomControls } from "./RoomControls";
-import { RoomLoading } from "./RoomLoading";
+import { RoomRenderGate, ShaderWarmup } from "./ShaderWarmup";
 import {useWorkbench} from '../../store/workbench';
 const CardBinders=lazy(()=>import('../CardBinders').then(m=>({default:m.CardBinders})));
 export function RoomScene3D({
@@ -60,6 +60,11 @@ export function RoomScene3D({
   const {phase:workbenchPhase,openBinder}=useWorkbench();
   const atWorkbench=workbenchPhase!=='room';
   const quality=environment.roomQuality??"balanced";
+  // Each room/quality loads a different model, so its shaders are warmed before it is shown.
+  const warmupKey=`${activeRoom.id}:${quality}`;
+  const [warmedKey,setWarmedKey]=useState<string|null>(null);
+  const shadersReady=warmedKey===warmupKey;
+  const markShadersReady=useCallback(()=>setWarmedKey(warmupKey),[warmupKey]);
   const {discoveryOpen,isVisitor}=useNav();const [tabVisible,setTabVisible]=useState(!document.hidden);
   useEffect(()=>{const change=()=>setTabVisible(!document.hidden);document.addEventListener('visibilitychange',change);return()=>document.removeEventListener('visibilitychange',change);},[]);
   const [viewRevision, setViewRevision] = useState(0);
@@ -191,7 +196,8 @@ export function RoomScene3D({
       >
         <color attach="background" args={[activeRoom.id === "cyberpunk" ? "#070b20" : phase === "night" ? "#12161c" : phase === "dusk" ? "#2a1c14" : "#5a6570"]} />
         <RoomPerformance/>
-        <Suspense fallback={<RoomLoading />}>
+        <RoomRenderGate ready={shadersReady} />
+        <Suspense fallback={null}>
           <RoomModel
             phase={phase}
             environment={environment}
@@ -211,6 +217,7 @@ export function RoomScene3D({
         {study&&<WoodlandStudyExterior winter={winter} phase={phase}/>}
         {activeRoom.id === "beachfront" && <BeachfrontScenery phase={phase} environment={environment} particles={profile.particles}/>}
         {activeRoom.id === "cyberpunk" && environment.weather !== "clear" && <OutdoorWeather kind={environment.weather} count={profile.particles} room="cyberpunk"/>}
+        <ShaderWarmup key={warmupKey} onReady={markShadersReady} />
         </Suspense>
         <EyeCamera studyView={study?studyView:null} displayCase={displayCase} workbench={atWorkbench} reading={reading} face={roomFace} seated={seated} touring={touring} viewRevision={viewRevision} />
       </Canvas>

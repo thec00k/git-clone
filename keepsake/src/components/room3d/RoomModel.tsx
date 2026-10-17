@@ -20,7 +20,7 @@ import { useRoomAsset } from "./useRoomAsset";
 import {WorkbenchBook} from './WorkbenchBook';
 import {useWorkbench} from '../../store/workbench';
 import {FurnitureModels} from './FurnitureModels';
-import {ArtifactDisplayCase} from './ArtifactDisplayCase';
+import {ArtifactDisplayCase,DisplayCaseLights} from './ArtifactDisplayCase';
 import {ChairFloorContact} from './ChairFloorContact';
 import {PropRefinements} from './PropRefinements';
 export function RoomModel({
@@ -73,10 +73,10 @@ export function RoomModel({
       <CabinetPhoto scene={cloned}/>
       {neon&&<><NeonAtmosphere scene={cloned}/><NeonExtras/></>}
       {!study&&<><FurnitureModels scene={cloned}/><PropRefinements scene={cloned}/></>}
-      <Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
+      <DisplayCaseLights/><Suspense fallback={null}><ArtifactDisplayCase/></Suspense><Suspense fallback={null}><TimeCapsuleChest/></Suspense>
       <Suspense fallback={null}><WorkbenchBook roomScene={cloned}/></Suspense>
       {!study&&<ChairFloorContact scene={cloned}/>}
-      {study&&hearthPosition&&environment.season==='winter'&&<pointLight position={hearthPosition} color="#eec391" intensity={phase==='day'?.2:.7} distance={2.2}/>}
+      {study&&hearthPosition&&<pointLight position={hearthPosition} color="#eec391" intensity={environment.season!=='winter'?0:phase==='day'?.2:.7} distance={2.2}/>}{/* render-stability: per-room, fixed once the room loads */}
       <Suspense fallback={null}><RoomWorldMap scene={cloned} onOpen={() => onActivate("map")} /></Suspense>
       <DeskDrawer scene={cloned} open={drawerOpen} />
       <ArchiveCabinet
