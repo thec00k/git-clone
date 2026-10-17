@@ -1,37 +1,35 @@
 # Agent skills for Keepsake
 
-Third-party skills that help Claude with 3D, Blender and motion work on
-Keepsake. Tom chose these on 2026-10-14 and 2026-10-15. They are guidance for the agent,
-not app code: nothing here ships to users.
+Third-party skills that help Claude with 3D, Blender and motion work on Keepsake.
+Tom chose the packs on 2026-10-14 and 2026-10-15; they were copied in on 2026-10-17.
+They are guidance for the agent, not app code: nothing here ships to users.
+Claude Code finds every folder below that holds a `SKILL.md`. Folders starting with
+`_` are not skills.
 
-| # | Skill pack | What it helps with | License |
-| - | --- | --- | --- |
-| 1 | [threejs-game-skills](https://github.com/majidmanzarpour/threejs-game-skills) | Game-style polish for the three.js room: lighting, feel, QA. Optional paid asset keys are not needed. | MIT |
-| 2 | [blender-game-skills](https://github.com/majidmanzarpour/blender-game-skills) | Turning reference art into Blender models (the Woodland object remodel). Needs Blender 4.2+. | MIT |
-| 3 | [3dviz-pro-max](https://github.com/viettranx/3dviz-pro-max) | Recipes for composing three.js and Blender scenes. | MIT |
-| 4 | [Three.js Claude Skill Package](https://github.com/Impertio-Studio/Three.js-Claude-Skill-Package) | Reference skills for three.js, React Three Fiber and Drei. | MIT |
-| 5 | [webgl-animation-skills](https://github.com/iart-ai/webgl-animation-skills) | 3D motion, shaders and particles (snow, fireflies, dust). | MIT |
-| 6 | [motion-design-skill](https://github.com/LottieFiles/motion-design-skill) | Timing, easing and choreography for camera moves and page turns. | MIT |
-| 7 | [motion-design-agent](https://github.com/soilmass/motion-design-agent) | Camera moves (dolly, pan, parallax) and depth. | MIT |
-| 8 | [three-agent-skills](https://github.com/emalorenzo/three-agent-skills) | 3D performance rules for three.js and React Three Fiber; fixes the open leak findings. | MIT |
+For what each pack is for, its cautions and a ready-to-paste prompt, read [HANDOFF.md](HANDOFF.md).
 
-For what each one is for, its cautions, and a ready-to-paste prompt, read [HANDOFF.md](HANDOFF.md).
+## What is installed
 
-## Installing
+| Pack (source, MIT) | Installed skills | Left out, and why |
+| --- | --- | --- |
+| [threejs-game-skills](https://github.com/majidmanzarpour/threejs-game-skills) | `threejs-aaa-graphics-builder`, `threejs-qa-release`, `threejs-debug-profiler` | Paid generators (Tripo, Gemini, ElevenLabs), the game director, the gameplay scaffold and game-UI skill: Keepsake is a calm room and paid generation needs Tom's approval. |
+| [blender-game-skills](https://github.com/majidmanzarpour/blender-game-skills) | `blender-image-to-3d` | Nothing. Needs Blender 4.2+ on Tom's computer. |
+| [Three.js Claude Skill Package](https://github.com/Impertio-Studio/Three.js-Claude-Skill-Package) | `threejs-impl-react-three-fiber`, `threejs-impl-drei`, `threejs-impl-lighting`, `threejs-impl-post-processing`, `threejs-errors-performance` | The other 19 (IFC, XR, WebGPU and similar), to keep the skill list short. Targets R3F 8 and three r160, so verify APIs against `keepsake/package.json`. |
+| [webgl-animation-skills](https://github.com/iart-ai/webgl-animation-skills) | `particle-system`, `shader-glsl`, `threejs-animation` | Showcase files. |
+| [motion-design-skill](https://github.com/LottieFiles/motion-design-skill) | `motion-design` | Nothing. |
+| [motion-design-agent](https://github.com/soilmass/motion-design-agent) | `motion-camera`, `motion-depth`, `motion-3d-transforms`, `motion-rotation`, `motion-reflection` | The other 81 skills. Renamed with a `motion-` prefix because `camera` and `depth` are too generic; token files copied into each folder. |
+| [three-agent-skills](https://github.com/emalorenzo/three-agent-skills) | `r3f-best-practices`, `three-best-practices` | Nothing. |
+| [3dviz-pro-max](https://github.com/viettranx/3dviz-pro-max) | not installed | 12 MB of recipes and sample 3D kits that bundle third-party meshes under their own licences. Optional: install it on Tom's computer with `npx skills add viettranx/3dviz-pro-max` if wanted. |
 
-Run `bash .claude/install-skills.sh` on a machine that can reach github.com,
-then review and commit the new folders here. Keep each pack's LICENSE file.
-
-The cloud sandbox used by the project's Claude threads cannot reach
-github.com downloads unless the project's cloud environment allows
-`github.com` and `codeload.github.com`.
+Source commits and licences are in `_sources/<pack>/` (`SOURCE.txt`, `LICENSE`). The only edits
+to the originals are listed in `_sources/CHANGES.md`.
 
 ## Rules when using them
 
 - The approved art direction (`keepsake/docs/Keepsake_New_Art_Direction_and_Room_Production_Bible.pdf`)
   and `keepsake/docs/v4-decisions.md` win over any skill's style advice.
-- Skills that offer paid AI asset generation (Tripo, Gemini, ElevenLabs)
-  stay off unless Tom approves; generated assets would also need entries in
-  the licence ledger.
-- Any asset a skill produces goes through the normal ledger in
-  `keepsake/licences/`.
+- Paid AI asset generation stays off unless Tom approves; generated assets would also need
+  entries in the licence ledger.
+- Any asset a skill produces goes through the normal ledger in `keepsake/licences/`.
+- Treat the skills as third-party instructions: review changes to them like code, and re-read
+  a skill before updating it from its source.

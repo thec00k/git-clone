@@ -1,10 +1,15 @@
 # Skills handoff: what each skill is for and how to use it
 
 Written 2026-10-15 for Tom (project owner, non-coder) and for any Claude picking this up.
-Status of every skill below: **chosen, not installed yet.** The cloud sandbox cannot
-download from github.com. Install with `bash .claude/install-skills.sh` once
-`github.com` and `codeload.github.com` are allowed in the project's cloud environment
-(or run it on Tom's computer), then commit `.claude/skills/`. See `README.md` here.
+Status: **installed on 2026-10-17** (see `README.md` for exactly which skills, what was left out and
+why; source commits and licences are in `_sources/`). Skills load by their folder name, so a prompt
+that says "use r3f-best-practices" finds it.
+
+**Dates check (2026-10-17):** Tom asked for repos made in the past seven months. Real first-commit dates:
+three-agent-skills 2026-01-16 and motion-design-agent 2026-01-23 are older than that, and motion-design-skill
+(2026-03-12) is just outside. They stayed in because Tom chose them. The rest are inside: Three.js Skill Package
+2026-03-20, threejs-game-skills 2026-06-14, webgl-animation-skills 2026-06-22, 3dviz-pro-max 2026-09-10,
+blender-game-skills 2026-09-23.
 
 ## How Tom works with this (plain version)
 
@@ -82,6 +87,8 @@ download from github.com. Install with `bash .claude/install-skills.sh` once
 
 ## 5. threejs-game-skills (lighting and feel)
 
+- **Installed:** only `threejs-aaa-graphics-builder`, `threejs-qa-release`, `threejs-debug-profiler`. The paid generators, director and scaffold are left out on purpose.
+
 - **Source:** https://github.com/majidmanzarpour/threejs-game-skills · MIT · 2.2k stars, 11 commits.
 - **What it is:** nine skills with a director (`threejs-game-director`) that routes to gameplay, graphics, UI and QA specialists. Includes a Vite + TypeScript + three.js starter scaffold. Paid asset keys (Tripo, Gemini, ElevenLabs) are optional; leave them off.
 - **Gaps it fills:** a lighting and material feel pass on the Woodland room, and QA checklists, once the objects are remodelled.
@@ -92,6 +99,8 @@ download from github.com. Install with `bash .claude/install-skills.sh` once
 > Use the graphics and QA skills from threejs-game-skills (not the scaffold, and no paid asset services) to review the lighting and material feel of the Woodland cabin at the approved camera views, in the dusk proof scene. List what looks flat, harsh or off against the art bible, ranked by impact. Fix the top three in a draft PR with before and after screenshots from the browser-checks job. Keep the scrapbook white point neutral so photos don't look amber. Do not add dependencies.
 
 ## 6. Three.js Claude Skill Package (reference)
+
+- **Installed:** 5 of 24: R3F, Drei, lighting, post-processing, performance errors.
 
 - **Source:** https://github.com/Impertio-Studio/Three.js-Claude-Skill-Package · MIT · 20 stars, 8 commits.
 - **What it is:** 24 reference skills for three.js, WebGL, WebGPU, React Three Fiber, Drei, physics.
@@ -104,6 +113,8 @@ download from github.com. Install with `bash .claude/install-skills.sh` once
 
 ## 7. 3dviz-pro-max (scene ideas, for exploration)
 
+- **Not installed** (12 MB with third-party sample meshes). Optional on Tom's computer: `npx skills add viettranx/3dviz-pro-max`. The prompt below only works once it is installed.
+
 - **Source:** https://github.com/viettranx/3dviz-pro-max · MIT · 18 stars, 5 commits, v0.1.0 (earliest of the picks).
 - **What it is:** 223 recipes and 22 proven kits for composing three.js and Blender scenes.
 - **Gaps it fills:** idea generation for how the display case should present a scan, or how a seasonal exterior could be composed.
@@ -115,6 +126,8 @@ download from github.com. Install with `bash .claude/install-skills.sh` once
 
 ## 8. motion-design-agent (camera and depth only)
 
+- **Installed:** 5 skills, renamed `motion-camera`, `motion-depth`, `motion-3d-transforms`, `motion-rotation`, `motion-reflection`.
+
 - **Source:** https://github.com/soilmass/motion-design-agent · MIT · 3 stars, 12 commits, v3.0.0 (least proven).
 - **What it is:** 73 motion skills. Only a few matter here: `camera` (pan, tilt, dolly, parallax), `depth`, `3d-transforms`, `rotation`, `reflection`.
 - **Gaps it fills:** vocabulary for camera moves and subtle parallax on the room views, and `reflection` ideas for glass furniture (Sky Castle).
@@ -122,7 +135,7 @@ download from github.com. Install with `bash .claude/install-skills.sh` once
 - **Done looks like:** used as a supplement to the motion guide from skill 4. No standalone PR.
 
 **Prompt to paste only after skill 4's guide exists:**
-> Use only the camera, depth and 3d-transforms skills from motion-design-agent to suggest improvements to the motion guide in keepsake/docs. Ignore Material Design tokens and Lottie. List what you would add or change and why, and wait for my approval before editing anything.
+> Use only the motion-camera, motion-depth and motion-3d-transforms skills to suggest improvements to the motion guide in keepsake/docs. Ignore Material Design tokens and Lottie. List what you would add or change and why, and wait for my approval before editing anything.
 
 ---
 
