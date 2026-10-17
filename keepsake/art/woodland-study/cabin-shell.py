@@ -21,44 +21,75 @@ def mesh_object(name, bm):
     o = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(o); o.location = centre
     return o
 
-def log(name, a, b, radius, back=None, segments=16, taper=0.0):
+# Per-log tones (multiplied over the log texture through the 'Tone' colour attribute): honey,
+# amber, weathered tan and a few darker logs, as in the owner's references.
+TONES = [(1, .97, .93), (.94, .88, .81), (1.02, .94, .84), (.88, .81, .74), (.98, .96, .91), (.83, .75, .67), (.93, .86, .76)]
+
+def log(name, a, b, radius, back=None, segments=16, taper=0.0, step=.7):
     """Round log from a to b (web metres). `back` = (axis, plane), e.g. ('x', -2.55): the log is
     modelled only in front of that wall plane, as a round barrel closed by a flat back face.
     Barrel, back and end faces are split by sharp edges, so the shading stays round right into
-    the crease between two courses."""
-    av, bv = Vector(a), Vector(b); axis = (bv - av).normalized()
+    the crease between two courses. Rings every `step` metres carry a slight swell, and the
+    'Tone' colour gives each log its own shade, drifting along its length and darker in the
+    creases (or on top, against the ceiling, for free-standing logs)."""
+    av, bv = Vector(a), Vector(b); axis = (bv - av).normalized(); length = (bv - av).length
     if back:
         i = 'xyz'.index(back[0]); out = Vector([0, 0, 0]); out[i] = math.copysign(1, back[1])
-        # Angle from the wall-facing direction at which the barrel meets the wall plane.
-        start = math.acos(max(-1, min(1, (abs(back[1]) - av.dot(out)) / radius)))
     else:
-        out = Vector((0, 1, 0)) if abs(axis.y) < .9 else Vector((1, 0, 0)); start = 0
+        out = Vector((0, 1, 0)) if abs(axis.y) < .9 else Vector((1, 0, 0))
     out = (out - axis * out.dot(axis)).normalized(); m = axis.cross(out)
-    span = 2 * math.pi - 2 * start; closed = not back
-    count = segments if closed else max(4, round(segments * span / (2 * math.pi)))
-    angles = [start + span * k / count for k in range(count + (0 if closed else 1))]
-    bm = bmesh.new(); rings = []
-    for t, end in [(0, av), (1, bv)]:
-        r = radius * (1 - taper * t)
-        rings.append([bm.verts.new(web(end + out * (math.cos(f) * r) + m * (math.sin(f) * r))) for f in angles])
+    rings_n = max(1, round(length / step)); swell, phase = rng.uniform(.004, .009), rng.uniform(0, 6.28)
+    tone = Vector(rng.choice(TONES)) * rng.uniform(.96, 1.03)
+    bm = bmesh.new(); rings = []; ring_angles = []; ring_t = []
+    uv = bm.loops.layers.uv.new('MaterialUV'); col = bm.loops.layers.float_color.new('Tone')
+    for j in range(rings_n + 1):
+        t = j / rings_n; centre = av.lerp(bv, t)
+        r = radius * (1 - taper * t + swell * math.sin(math.pi * t) / radius * .5) + .002 * math.sin(phase + t * 9)
+        if back:
+            # Angle from the wall-facing direction at which the barrel meets the wall plane.
+            start = math.acos(max(-1, min(1, (abs(back[1]) - centre.dot(out)) / r)))
+        else: start = 0
+        span = 2 * math.pi - 2 * start
+        if j == 0: count = segments if not back else max(4, round(segments * span / (2 * math.pi)))
+        angles = [start + span * k / count for k in range(count + (1 if back else 0))]
+        rings.append([bm.verts.new(web(centre + out * (math.cos(f) * r) + m * (math.sin(f) * r))) for f in angles])
+        ring_angles.append((angles, r)); ring_t.append(t)
+    closed = not back; n = len(rings[0])
+    def shade(j, ang):
+        along = .95 + .05 * math.sin(phase * 1.7 + ring_t[j] * 7) * math.cos(phase + ring_t[j] * 3)
+        if back:
+            front = math.pi; half = (2 * math.pi - 2 * ring_angles[j][0][0]) / 2
+            crease = 1 - .2 * min(1, abs(ang - front) / half) ** 3
+        else:
+            crease = 1 - .14 * max(0, math.cos(ang)) ** 2
+        c = tone * along * crease
+        return (c.x, c.y, c.z, 1)
     # Grain runs along the log and wraps around it (u: length, v: arc), on the oak tile sizes
     # materials.py uses (1.15 m x .65 m); a per-log offset keeps neighbouring logs from repeating.
-    uv = bm.loops.layers.uv.new('MaterialUV'); length = (bv - av).length
-    du, dv = rng.random(), rng.random(); n = len(angles); barrel = []
-    for k in range(n if closed else n - 1):
-        k2 = (k + 1) % n
-        f = bm.faces.new((rings[0][k], rings[0][k2], rings[1][k2], rings[1][k])); f.smooth = True; barrel.append(f)
-        a0, a1 = angles[k], angles[k] + span / count
-        for loop, (t, ang) in zip(f.loops, [(0, a0), (0, a1), (1, a1), (1, a0)]):
-            loop[uv].uv = (du + t * length / 1.15, dv + ang * radius / .65)
-    flat = [bm.faces.new(list(reversed(rings[0]))), bm.faces.new(rings[1])]
-    if not closed: flat.append(bm.faces.new((rings[0][0], rings[1][0], rings[1][-1], rings[0][-1])))
+    du, dv = rng.random(), rng.random()
+    for j in range(rings_n):
+        for k in range(n if closed else n - 1):
+            k2 = (k + 1) % n
+            f = bm.faces.new((rings[j][k], rings[j][k2], rings[j + 1][k2], rings[j + 1][k])); f.smooth = True
+            for loop, (jj, kk) in zip(f.loops, [(j, k), (j, k + 1), (j + 1, k + 1), (j + 1, k)]):
+                angs, r = ring_angles[jj]
+                ang = angs[kk % n] if (closed or kk < n) else angs[-1]
+                if closed and kk == n: ang = angs[0] + 2 * math.pi
+                loop[uv].uv = (du + ring_t[jj] * length / 1.15, dv + ang * radius / .65)
+                loop[col] = shade(jj, ang)
+    flat = [bm.faces.new(list(reversed(rings[0]))), bm.faces.new(rings[-1])]
+    if not closed:
+        for j in range(rings_n): flat.append(bm.faces.new((rings[j][0], rings[j + 1][0], rings[j + 1][-1], rings[j][-1])))
     for f in flat:
         f.smooth = False
-        for loop in f.loops: loop[uv].uv = (du + loop.vert.co.x * 3, dv + (loop.vert.co.y + loop.vert.co.z) * 3)
+        for loop in f.loops:
+            loop[uv].uv = (du + loop.vert.co.x * 3, dv + (loop.vert.co.y + loop.vert.co.z) * 3)
+            loop[col] = (*(tone * .9), 1)
         for e in f.edges: e.smooth = False
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    return mesh_object(name, bm)
+    o = mesh_object(name, bm)
+    attrs = o.data.color_attributes; attrs.active_color_name = 'Tone'; attrs.render_color_index = attrs.active_color_index
+    return o
 
 def cut(o, outline, axis):
     """Remove the part of a wall log inside an opening. `outline` is a convex polygon in the wall
@@ -112,6 +143,33 @@ for i in range(COURSES):
     zd = END_CROWN + r
     o = log('Cabin_Door_Log', (-2.55, y, zd), (2.55, y, zd), r, back=('z', 2.19))
     if y - r < 2.15: cut(o, DOOR, 'z')
+
+# --- Door and window casing -----------------------------------------------------------------
+# Wide walnut casing boards (as in the owner's French-door reference) frame each opening on the
+# room side, set 10 mm into the log crowns so the logs read as scribed to them.
+def board(name, centre, size, tilt=0.0):
+    """Flat board in a wall plane: centre (web), size (width, height, depth), tilt about the wall normal."""
+    bpy.ops.mesh.primitive_cube_add(size=1, location=web(centre))
+    o = bpy.context.object; o.name = o.data.name = name
+    o.dimensions = (size[0], size[2], size[1]); bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    o.rotation_euler = (0, -tilt, 0); bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+    bev = o.modifiers.new('Eased edges', 'BEVEL'); bev.width = .004; bev.segments = 2
+    return o
+CASE_W, CASE_T = .12, .04
+wz = -END_CROWN + CASE_T / 2 - .01            # window wall casing centre (room side is +z)
+for x in (-1.15 - CASE_W / 2, .85 + CASE_W / 2):
+    board('Cabin_Trim_Window', (x, 2.09, wz), (CASE_W, 2.05, CASE_T))
+board('Cabin_Trim_Window', (-.15, 1.087 - .06, wz), (2.02, .12, CASE_T))          # apron under the sill
+d = Vector((.965, .64)).normalized(); nrm = Vector((-d.y, d.x)); off = .035 + CASE_W / 2
+for side, extra in ((-1, 0.0), (1, .002)):   # the right board sits 2 mm proud so the apex overlap never flickers
+    p0 = Vector((-1.115, 3.05)) if side < 0 else Vector((.815, 3.05)); apex = Vector((-.15, 3.69))
+    dd = (apex - p0).normalized(); nn = Vector((-dd.y, dd.x)) if side < 0 else Vector((dd.y, -dd.x))
+    a = p0 + nn * off - dd * .1; b = apex + nn * off + dd * .09; mid = (a + b) / 2
+    board('Cabin_Trim_Window', (mid.x, mid.y, wz + extra), ((b - a).length, CASE_W, CASE_T + 2 * extra), math.atan2(dd.y, dd.x))
+dz = END_CROWN - CASE_T / 2 + .01             # door wall casing centre (room side is -z)
+board('Cabin_Trim_Door', (-.36 - .0225, 1.13, dz), (.045, 2.26, CASE_T))          # narrow: the mantel is 5 cm away
+board('Cabin_Trim_Door', (.66 + CASE_W / 2 - .02, 1.13, dz), (CASE_W - .04, 2.26, CASE_T))
+board('Cabin_Trim_Door', ((-.405 + .76) / 2, 2.16 + .05, dz - .002), (1.165, .10, CASE_T + .004))
 
 # --- Ceiling --------------------------------------------------------------------------------
 # Tongue-and-groove boards under the sealed ceiling, carried by round log joists, which rest on

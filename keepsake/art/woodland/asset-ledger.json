@@ -141,7 +141,9 @@
       "includes": [
         "17 courses of overlapping round wall logs on all four walls, cut exactly to the window, transom and door frames",
         "tongue-and-groove ceiling boards, four round log joists and two log support beams",
-        "inherited ceiling fan rehung between the joists with a longer drop rod"
+        "inherited ceiling fan rehung between the joists with a longer drop rod",
+        "per-log tone, swell and crease shading (Tone colour attribute) over the procedural log-color.png (seasoning checks and knots, art/woodland-study/generate-textures.py)",
+        "walnut casing boards around the window (including the sloped transom) and the door"
       ],
       "preserved": "Log crowns, furniture placement, camera poses and corridors, interaction anchors and the window/door apertures"
     }

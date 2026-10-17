@@ -34,6 +34,15 @@ linen=textured('Oat_Linen','linen','#e4d3b5');paper=textured('Ivory_Paper','line
 clay=textured('Terracotta_Bookcloth','linen','#b37d61');forest=textured('Forest_Bookcloth','linen','#62715b')
 # Hand-made cabin, modern pieces: each wood-cased piece gets its own wood (owner's request).
 veneer=textured('Walnut_Veneer','oak','#b08868');honey=textured('Honey_Planks','timber','#f2c99f')
+# Cabin logs: the checked log colour map over the oak normal/roughness, multiplied by each log's
+# 'Tone' colour attribute (cabin-shell.py). glTF exports it as COLOR_0 on the logs only.
+logs=textured('Cabin_Logs','oak')
+_n=logs.node_tree.nodes;_l=logs.node_tree.links;_p=next(x for x in _n if x.type=='BSDF_PRINCIPLED')
+_tex=_p.inputs['Base Color'].links[0].from_node
+_tex.image=bpy.data.images.load(str(TEX/'log-color.png'),check_existing=True);_tex.image.pack()
+_tone=_n.new('ShaderNodeVertexColor');_tone.layer_name='Tone'
+_mix=_n.new('ShaderNodeMix');_mix.data_type='RGBA';_mix.blend_type='MULTIPLY';_mix.inputs['Factor'].default_value=1
+_l.new(_tex.outputs['Color'],_mix.inputs['A']);_l.new(_tone.outputs['Color'],_mix.inputs['B']);_l.new(_mix.outputs['Result'],_p.inputs['Base Color'])
 brass=solid('Aged_Brass','#bda16b',.36,.72);iron=solid('Warm_Iron','#343832',.56,.35)
 ceramic=solid('Glazed_Cream','#e2d7b8',.29);enamel=solid('Olive_Enamel','#78816c',.39,.08)
 screen=solid('Screen_Glass','#172422',.23);plaster=solid('Warm_Chalk','#e4dac8',.96)
@@ -74,7 +83,8 @@ for o in bpy.context.scene.objects:
     if n=='Study_Floor':m=floor;kind='floor'
     elif n=='Study_Ceiling':m=joinery # dark backing shows in the grooves between ceiling boards
     elif n.startswith('Cabin_Ceiling_Board'):m=timber;kind='wood'
-    elif n.startswith('Cabin_'):m=oak;kind='wood';preserve_uv=True # cabin-shell.py wraps grain around each log
+    elif n.startswith('Cabin_Trim'):m=joinery;kind='wood'
+    elif n.startswith('Cabin_'):m=logs;kind='wood';preserve_uv=True # cabin-shell.py wraps grain around each log
     elif n.startswith('Fan_'):
         # Inherited ceiling fan: walnut blades, cream glass bowl, brass trim, warm-iron body.
         if n.startswith('Fan_Blade'):m=joinery;kind='wood'

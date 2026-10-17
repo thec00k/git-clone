@@ -2,7 +2,7 @@
 
 Owner request (October 17): walls that read as stacked solid logs, with no gaps between the logs and the wall or beside the door frame, and a log roof with support beams that stays clear of the ceiling fan and light. Reference photos: a log bedroom with French doors (logs running straight into the door casing), a gabled great room with exposed beams, and a log bedroom with a plank ceiling, log beams and a ceiling fan.
 
-Renders are Cycles (32 samples, denoised) of `woodland-study.blend` before and after the change, with the same five cameras and lights. They were made with `render-script/review-render.py`:
+Renders are Cycles (32 samples, denoised) of `woodland-study.blend` before the change and after the polish pass (log tones and checks, casing, glowing fan bowl), with the same five cameras and lights. They were made with `render-script/review-render.py`:
 
 ```
 python review-render.py 32 <woodland-study.blend> <output-prefix>

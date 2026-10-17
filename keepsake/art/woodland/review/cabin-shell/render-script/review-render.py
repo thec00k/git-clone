@@ -4,6 +4,12 @@ from mathutils import Vector
 blend,out,=sys.argv[-2:]
 bpy.ops.wm.open_mainfile(filepath=blend)
 sc=bpy.context.scene
+# Ceiling light on: the fan bowl glows, as it does in the app.
+bowl=bpy.data.objects.get('Fan_Bowl')
+if bowl:
+    m=bowl.data.materials[0].copy();bowl.data.materials[0]=m
+    bs=next(n for n in m.node_tree.nodes if n.type=='BSDF_PRINCIPLED')
+    bs.inputs['Emission Color'].default_value=(1,.82,.6,1);bs.inputs['Emission Strength'].default_value=6
 def web(p):return Vector((p[0],-p[2],p[1]))
 for o in list(sc.objects):
     if o.type in {'CAMERA','LIGHT'}:bpy.data.objects.remove(o,do_unlink=True)
