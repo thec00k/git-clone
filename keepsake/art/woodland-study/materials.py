@@ -83,7 +83,7 @@ for o in bpy.context.scene.objects:
     elif n.endswith('_Ferrule') or n=='Lamp_Foot':m=brass
     elif n=='Desk_DrawerFront':m=oak
     elif n=='ks_archive_drawer':m=honey
-    elif n in ['Clock_Top','Clock_Left','Clock_Right','Clock_Back']:m=ceramic;preserve_uv=True
+    elif n in ['Clock_Top','Clock_Left','Clock_Right','Clock_Back']:m=veneer # matches the CRT's walnut case
     elif n in ['Lamp_Base','Clock_Bottom','Archive_Plinth','Shelf_Kick','Shelf_Bot','Map_Frame','Door_Sill'] or n.startswith('Cozy_Guest_Table_Leg'):m=joinery
     elif n.startswith('Map_Pin_'):m=clay;kind='cloth'
     elif n.startswith('Lamp_'):m=enamel if n=='Lamp_Shade' else brass
