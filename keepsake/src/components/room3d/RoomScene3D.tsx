@@ -18,6 +18,7 @@ import {useApp} from '../../store/appStore';
 import {useNav} from '../../store/nav';
 import {useListen} from '../../store/listen';
 import {EyeCamera} from './RoomCamera';
+import {startCamera} from './startCamera';
 import {RoomModel} from './RoomModel';
 import type {HotspotAction} from './RoomInteractions';
 import {useRoomRenderProfile} from './useRoomRenderProfile';
@@ -219,10 +220,10 @@ export function RoomScene3D({
         <Canvas
           frameloop={tabVisible && !discoveryOpen && !binderOpen ? 'always' : 'demand'}
           camera={{
+            ...startCamera(activeRoom.views.front),
             fov: seated ? 38 : activeRoom.fov,
             near: 0.08,
             far: 40,
-            position: activeRoom.views.front.position,
           }}
           dpr={[1, profile.dpr]}
           shadows={profile.shadows}
