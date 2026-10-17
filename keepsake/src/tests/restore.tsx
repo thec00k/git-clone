@@ -4,7 +4,7 @@ import {AppProvider, useApp} from '../store/appStore';
 import {NavProvider} from '../store/nav';
 import {RoomBackup} from '../components/RoomBackup';
 import {serializeRoom, parseRoomBackup} from '../lib/roomBackup';
-import {loadState} from '../lib/storage';
+import {inlineFiles, loadState} from '../lib/storage';
 import '../index.css';
 function TestRoom() {
   const {state} = useApp();
@@ -15,9 +15,9 @@ function TestRoom() {
       <p>Run only on port 5175. This origin has its own IndexedDB.</p>
       <button
         className="ks-tool"
-        onClick={() => {
+        onClick={async () => {
           if (location.port !== '5175') throw Error('Use the isolated test origin.');
-          const fixture = structuredClone(state);
+          const fixture = structuredClone(await inlineFiles(state));
           fixture.profile.displayName = 'Restored verification room';
           fixture.books[0].title = 'Restored woodland memories';
           fixture.environment.timeMode = 'night';
@@ -38,14 +38,15 @@ function TestRoom() {
       <button
         className="ks-tool"
         onClick={async () => {
-          const stored = await loadState();
+          const stored = await loadState().then(s => s && inlineFiles(s));
+          const rendered = await inlineFiles(state);
           const expected = parseRoomBackup(sessionStorage.getItem('expected-room')!);
           const fields = Object.keys(expected) as (keyof typeof expected)[];
           setResult(
             fields.every(
               k =>
                 JSON.stringify(stored?.[k]) === JSON.stringify(expected[k]) &&
-                JSON.stringify(state[k]) === JSON.stringify(expected[k]),
+                JSON.stringify(rendered[k]) === JSON.stringify(expected[k]),
             )
               ? 'PASS: rendered room and IndexedDB match the backup'
               : 'FAIL: mismatch',
