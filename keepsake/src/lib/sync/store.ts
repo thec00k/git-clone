@@ -121,6 +121,14 @@ export async function delayChange(entry: OutboxEntry, notBefore: number): Promis
     if (now && now.seq === entry.seq) store.put({...now, attempts: now.attempts + 1, notBefore}, entry.key);
   });
 }
+/** Makes every waiting change due at once (the owner pressed "Back up now"), whatever its backoff. */
+export async function retryNow(): Promise<void> {
+  await run(['outbox'], 'readwrite', async tx => {
+    const store = tx.objectStore('outbox');
+    for (const entry of (await request(store.getAll())) as OutboxEntry[])
+      if (entry.notBefore > 0) store.put({...entry, notBefore: 0}, entry.key);
+  });
+}
 /** Queues a change again (for example a book once one of its photos has been uploaded). */
 export async function requeue(changes: Change[]): Promise<void> {
   if (!changes.length) return;

@@ -83,15 +83,17 @@ export function syncAfterSave(state: AppState) {
     const state = latest;
     if (!state) return;
     void record(state, local)
-      .then(sendNow)
+      .then(() => sendNow())
       .catch(() => {});
   }, 3_000);
 }
 
-export async function sendNow() {
+/** `retry` (the "Back up now" button) resends changes that are waiting out a failure instead of leaving
+ * them to their backoff, which can be up to ten minutes. */
+export async function sendNow(retry = false) {
   if (!active || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
   const c = await connection();
-  if (c) await flush(c.backend, local).catch(() => {});
+  if (c) await flush(c.backend, local, Date.now, retry).catch(() => {});
 }
 
 export async function sendSignInLink(email: string) {

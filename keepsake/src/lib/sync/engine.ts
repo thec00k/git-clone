@@ -202,10 +202,12 @@ async function send(entry: OutboxEntry, snapshot: Snapshot, backend: SyncBackend
 class Paused extends Error {}
 
 let running: Promise<void> | null = null;
-/** Sends what is due. One run at a time in this tab (and across tabs where the browser supports locks). */
-export function flush(backend: SyncBackend, local: Local, now = Date.now): Promise<void> {
+/** Sends what is due. One run at a time in this tab (and across tabs where the browser supports locks).
+ * `retry` sends everything now, ignoring the wait after earlier failures (the owner pressed "Back up now"). */
+export function flush(backend: SyncBackend, local: Local, now = Date.now, retry = false): Promise<void> {
   if (running) return running;
   const work = async () => {
+    if (retry) await store.retryNow();
     for (;;) {
       const meta = await store.readMeta();
       if (!meta.account || meta.paused || !meta.snapshot) return;

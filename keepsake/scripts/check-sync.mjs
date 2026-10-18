@@ -209,9 +209,18 @@ assert.ok((await status()).lastError, 'the failure is visible');
 s.online = true;
 await flush(s.backend, local, now);
 assert.equal((await status()).pending, 1, 'waits before retrying');
+// Repeated failures wait longer each time; "Back up now" (retry) sends regardless of that wait.
+s.online = false;
+for (let i = 0; i < 8; i++) {
+  clock += 10 * 60_000;
+  await flush(s.backend, local, now);
+}
+s.online = true;
 clock += 60_000;
 await flush(s.backend, local, now);
-assert.equal((await status()).pending, 0, 'sent after coming back online');
+assert.equal((await status()).pending, 1, 'still waiting out the backoff after many failures');
+await flush(s.backend, local, now, true);
+assert.equal((await status()).pending, 0, 'sent at once when the owner asks');
 assert.equal(s.books.size, 1, 'retry updated the same book');
 assert.equal(s.books.get(bookId).title, 'Summer 2026');
 

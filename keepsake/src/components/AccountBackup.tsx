@@ -239,7 +239,7 @@ export function AccountBackup() {
               ))}
             </ul>
           )}
-          <button className="ks-tool" disabled={busy} onClick={() => void act(sendNow)}>
+          <button className="ks-tool" disabled={busy} onClick={() => void act(() => sendNow(true))}>
             Back up now
           </button>
           <button className="ks-tool" disabled={busy} onClick={() => void act(signOut)}>
