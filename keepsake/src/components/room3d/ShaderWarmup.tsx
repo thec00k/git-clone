@@ -7,6 +7,7 @@ import {setWarmupProgress} from './warmupProgress';
 /** Longest we hold the first frame if a driver never reports compile completion. */
 const WARMUP_LIMIT_MS = 20000;
 /** Main-thread time a frame may spend on warm-up draws before yielding to the next frame. */
+// (Also the threshold past which a single draw counts as having waited on the driver.)
 const FRAME_BUDGET_MS = 8;
 /** A camera layer nothing in the room uses, so one object can be drawn on its own. */
 const WARM_LAYER = 31;
@@ -90,9 +91,18 @@ export function warmDraw(
  * geometry's attribute layout (the driver builds a vertex program per layout). Everything else that shares a
  * program is free once its representative has been drawn.
  */
-function representatives(gl: THREE.WebGLRenderer, scene: THREE.Scene) {
+function representatives(gl: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) {
   const seen = new Set<string>();
   const picks: THREE.Object3D[] = [];
+  // What the first frame will show goes first, so the room can open as soon as possible if the limit is hit.
+  const frustum = new THREE.Frustum().setFromProjectionMatrix(
+    new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse),
+  );
+  const inView = (object: Drawable) =>
+    !object.geometry || !object.geometry.boundingSphere
+      ? true
+      : frustum.intersectsSphere(object.geometry.boundingSphere.clone().applyMatrix4(object.matrixWorld));
+  const later: THREE.Object3D[] = [];
   scene.traverseVisible(object => {
     if (!isDrawable(object) || !object.geometry) return;
     const layout =
@@ -105,10 +115,13 @@ function representatives(gl: THREE.WebGLRenderer, scene: THREE.Scene) {
       seen.add(key);
       fresh = true;
     }
-    if (fresh) picks.push(object);
+    if (fresh) (inView(object) ? picks : later).push(object);
   });
-  return picks;
+  return picks.concat(later);
 }
+
+const isWebGL2 = (ctx: WebGLRenderingContext | WebGL2RenderingContext): ctx is WebGL2RenderingContext =>
+  typeof WebGL2RenderingContext !== 'undefined' && ctx instanceof WebGL2RenderingContext;
 
 /**
  * Compiles every room shader before the first frame, then draws one object per shader program out of sight.
@@ -124,10 +137,15 @@ export function ShaderWarmup({onReady}: {onReady: () => void}) {
   const queue = useRef<THREE.Object3D[] | null>(null);
   const total = useRef(0);
   const finished = useRef(false);
+  // Set after each warm-up draw; the next draw waits until the GPU process has finished the previous one.
+  const fence = useRef<WebGLSync | null>(null);
+  // Whether the driver is answering quickly (a cached shader), so several draws can share a frame.
+  const fast = useRef(true);
   useEffect(() => {
     let live = true;
     queue.current = null;
     finished.current = false;
+    fast.current = true;
     setWarmupProgress(0);
     const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
     const compile = async () => {
@@ -140,7 +158,7 @@ export function ShaderWarmup({onReady}: {onReady: () => void}) {
       .catch(() => undefined)
       .then(() => {
         if (!live) return;
-        const picks = representatives(gl, scene);
+        const picks = representatives(gl, scene, camera);
         total.current = picks.length;
         queue.current = picks;
       });
@@ -155,16 +173,37 @@ export function ShaderWarmup({onReady}: {onReady: () => void}) {
     return () => {
       live = false;
       window.clearTimeout(limit);
+      const ctx = gl.getContext();
+      if (fence.current && isWebGL2(ctx)) ctx.deleteSync(fence.current);
+      fence.current = null;
     };
   }, [gl, scene, camera, onReady]);
   useFrame(() => {
     const pending = queue.current;
     if (finished.current || !pending) return;
+    const ctx = gl.getContext();
+    const gl2 = isWebGL2(ctx) ? ctx : null;
+    if (fence.current && gl2) {
+      // The driver builds a program while the previous draw runs, inside the browser's GPU process. Any GL call
+      // that needs an answer would wait for it, so no more drawing until the fence says that work is done.
+      if (gl2.getSyncParameter(fence.current, gl2.SYNC_STATUS) !== gl2.SIGNALED) return;
+      gl2.deleteSync(fence.current);
+      fence.current = null;
+    }
     const start = performance.now();
-    while (pending.length && performance.now() - start < FRAME_BUDGET_MS) {
+    while (pending.length) {
       const object = pending.shift()!;
       // An object can leave the scene (a Suspense swap) between picking and drawing; skip it then.
-      if (object.parent) warmDraw(gl, scene, camera, object);
+      if (!object.parent) continue;
+      const before = performance.now();
+      warmDraw(gl, scene, camera, object);
+      // A draw that took the whole budget waited on the driver: from now on, one draw per frame.
+      if (performance.now() - before >= FRAME_BUDGET_MS) fast.current = false;
+      if (!fast.current || performance.now() - start >= FRAME_BUDGET_MS) break;
+    }
+    if (gl2) {
+      fence.current = gl2.fenceSync(gl2.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      gl2.flush();
     }
     setWarmupProgress(total.current ? 1 - pending.length / total.current : 1);
     if (pending.length) return;
