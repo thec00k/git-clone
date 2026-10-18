@@ -232,7 +232,9 @@ export function RoomScene3D({
           }}
           dpr={[1, profile.dpr]}
           // Always on: Balanced turns shadows off with RoomShadowQuality instead, without rebuilding every shader.
-          shadows
+          // Named explicitly: a bare `shadows` asks for the soft type, which three.js no longer supports and swaps
+          // for this one on the first shadow pass. That swap changes every shader and built each one twice.
+          shadows="percentage"
           // Reading shader logs after every compile is a blocking round trip per program; keep it for development.
           onCreated={({gl}) => {
             gl.debug.checkShaderErrors = import.meta.env.DEV;
