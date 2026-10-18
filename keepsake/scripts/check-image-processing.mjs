@@ -1,17 +1,25 @@
 // Upload processing (supabase/functions/_shared/processImage.ts) with the same image library the edge
-// function uses: shrinks to 2048 px, re-encodes as WebP without metadata, refuses unsafe or unknown files.
+// function uses (magick-wasm): shrinks to 2048 px, turns photos upright, re-encodes as WebP without
+// metadata, refuses unsafe or unknown files. imagescript only makes the test pictures here.
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
+import * as magick from '@imagemagick/magick-wasm';
 import imagescript from 'imagescript';
 import {
   toWebp,
   headerSize,
   fitWithin,
+  magickLib,
   UnsupportedImage,
   MAX_EDGE,
 } from '../supabase/functions/_shared/processImage.ts';
 
 const {Image} = imagescript;
-const lib = {decode: bytes => Image.decode(bytes)};
+await magick.initializeImageMagick(
+  readFileSync(createRequire(import.meta.url).resolve('@imagemagick/magick-wasm/magick.wasm')),
+);
+const lib = magickLib(magick);
 const text = bytes => Buffer.from(bytes).toString('latin1');
 
 const wide = new Image(3000, 1500);
@@ -43,6 +51,45 @@ assert.equal(text(out.webp.subarray(0, 4)), 'RIFF');
 assert.equal(text(out.webp.subarray(8, 12)), 'WEBP');
 assert.ok(!text(out.webp).includes('GPS-SECRET') && !text(out.webp).includes('Exif'), 'no metadata kept');
 
+// A phone photo stored sideways with an "turn right" tag (EXIF orientation 6) comes out upright.
+const tiff = Buffer.from([
+  0x4d,
+  0x4d,
+  0,
+  0x2a,
+  0,
+  0,
+  0,
+  8, // big-endian TIFF header, first IFD at 8
+  0,
+  1,
+  0x01,
+  0x12,
+  0,
+  3,
+  0,
+  0,
+  0,
+  1,
+  0,
+  6,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0, // one entry: orientation = 6; no next IFD
+]);
+const orient = Buffer.concat([Buffer.from('Exif\0\0'), tiff]);
+const sideways = Buffer.concat([
+  jpeg.subarray(0, 2),
+  Buffer.from([0xff, 0xe1, (orient.length + 2) >> 8, (orient.length + 2) & 0xff]),
+  orient,
+  jpeg.subarray(2),
+]);
+const upright = await toWebp(new Uint8Array(sideways), lib);
+assert.deepEqual([upright.width, upright.height], [1024, 2048], 'turned upright, then shrunk');
+
 const small = await toWebp(png, lib);
 assert.deepEqual([small.width, small.height], [640, 480], 'small photos keep their size');
 
@@ -52,7 +99,7 @@ new DataView(bomb.buffer).setUint32(16, 20000);
 new DataView(bomb.buffer).setUint32(20, 20000);
 let decoded = false;
 await assert.rejects(
-  toWebp(bomb, {decode: async b => ((decoded = true), lib.decode(b))}),
+  toWebp(bomb, {toWebp: async (...a) => ((decoded = true), lib.toWebp(...a))}),
   UnsupportedImage,
   'decompression bomb refused',
 );
@@ -65,5 +112,5 @@ await assert.rejects(
 );
 
 console.log(
-  'Image processing: 2048 px limit, WebP output, metadata removed, oversized and unknown files refused.',
+  'Image processing (magick-wasm): 2048 px limit, upright, WebP output, metadata removed, oversized and unknown files refused.',
 );
