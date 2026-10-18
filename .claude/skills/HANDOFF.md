@@ -137,6 +137,20 @@ blender-game-skills 2026-09-23.
 **Prompt to paste only after skill 4's guide exists:**
 > Use only the motion-camera, motion-depth and motion-3d-transforms skills to suggest improvements to the motion guide in keepsake/docs. Ignore Material Design tokens and Lottie. List what you would add or change and why, and wait for my approval before editing anything.
 
+## 10. blender-asset-qa (model checker)
+
+- **Installed:** `blender-asset-qa` only (added 2026-10-18). Tom asked for the model checker, not the rest of the pack.
+- **Source:** https://github.com/EL4CTEO/blender-skills · MIT · 1 commit (2026-10-16), very new.
+- **What it is:** a review gate for Blender models. `scripts/qa_check.py` reports numbers: surfaces that overlap and flicker (z-fighting), floating parts, flipped normals, holes, unapplied scale and UV problems. `scripts/review_shots.py` renders a multi-angle contact sheet.
+- **Gaps it fills:** a check before calling any remodelled Woodland object done. On 2026-10-18 it found 28 z-fighting errors across all 273 meshes in `woodland.glb` (`--profile render`). The biggest are the Beanbag against its stitched seams, the fern, the archive top against the terracotta, and the shelf bottom against its sides. Many others are feet or trim resting flat on floor planks, which a visitor never sees. None have been checked by eye yet.
+- **Cautions:** written for Blender 5.2; Tom has 5.1.2. `qa_check.py` ran fine on bpy 5.1.2; `review_shots.py` could not be tested in the cloud (no display library) and should work on Tom's computer. Run it with `--profile render` on the whole room: the `game` profile reports 102 errors there, mostly flat-colour parts with no UV map and props scaled in the file, which are fine for Keepsake. Duplicate-vertex and UV-overlap warnings are normal for imported GLB files. The skill mentions `blender-core`, `blender-retopology-uv` and `blender-character-rigging`, which are not installed; run the scripts directly as below. It does not replace `check-room-assets` or the size budgets.
+- **Done looks like:** each remodel PR lists the checker's errors before and after.
+
+**How to run (cloud or Tom's computer):** `blender -b file.blend -P .claude/skills/blender-asset-qa/scripts/qa_check.py -- --objects Chair_Seat Chair_Back --profile render`. In a live Blender session: add the scripts folder to `sys.path`, then `import qa_check; print(qa_check.run(objects=[...], profile="render"))`.
+
+**Prompt to paste:**
+> Use blender-asset-qa to check the Woodland room model for z-fighting and floating parts. List each finding in plain English with a screenshot of the spot, say which ones a visitor would actually notice, and do not change anything until I pick which to fix.
+
 ---
 
 ## Not in this set (decided against, 2026-10-15)
