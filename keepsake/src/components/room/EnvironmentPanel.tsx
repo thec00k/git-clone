@@ -8,7 +8,7 @@ import {ShopRoomVariants} from '../ShopRoomVariants';
 import {MusicSettings} from './MusicPanel';
 import {StorageSummary} from '../StorageSummary';
 import {useRef, useState} from 'react';
-import {useApp} from '../../store/appStore';
+import {useApp, useSaveStatus} from '../../store/appStore';
 import {useNav} from '../../store/nav';
 import {useListen} from '../../store/listen';
 import {useFocusTrap} from '../../hooks/useFocusTrap';
@@ -30,7 +30,8 @@ export function EnvironmentPanel({
   onClose: () => void;
   initialSection?: Section;
 }) {
-  const {state, environment, setEnvironment, setProfile, saveStatus, flushSave} = useApp();
+  const {state, environment, setEnvironment, setProfile, flushSave} = useApp();
+  const saveStatus = useSaveStatus();
   const {startTour, isVisitor} = useNav();
   const {preview, setPreview} = useListen();
   const [section, setSection] = useState<Section>(initialSection);
