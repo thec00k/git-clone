@@ -1,7 +1,7 @@
 # Agent skills for Keepsake
 
-Third-party skills that help Claude with 3D, Blender and motion work on Keepsake.
-Tom chose the packs on 2026-10-14 and 2026-10-15; they were copied in on 2026-10-17.
+Third-party skills that help Claude with 3D, Blender and motion work on Keepsake, plus ponytail for keeping code changes small.
+Tom chose the packs on 2026-10-14 and 2026-10-15; they were copied in on 2026-10-17. Tom added ponytail on 2026-10-18.
 They are guidance for the agent, not app code: nothing here ships to users.
 Claude Code finds every folder below that holds a `SKILL.md`. Folders starting with
 `_` are not skills.
@@ -19,6 +19,7 @@ For what each pack is for, its cautions and a ready-to-paste prompt, read [HANDO
 | [motion-design-skill](https://github.com/LottieFiles/motion-design-skill) | `motion-design` | Nothing. |
 | [motion-design-agent](https://github.com/soilmass/motion-design-agent) | `motion-camera`, `motion-depth`, `motion-3d-transforms`, `motion-rotation`, `motion-reflection` | The other 81 skills. Renamed with a `motion-` prefix because `camera` and `depth` are too generic; token files copied into each folder. |
 | [three-agent-skills](https://github.com/emalorenzo/three-agent-skills) | `r3f-best-practices`, `three-best-practices` | Nothing. |
+| [ponytail](https://github.com/DietrichGebert/ponytail) | `ponytail`, `ponytail-review`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help` | The plugin hooks (auto-on every session, level memory, status band) and the other agents' config files. Run `/ponytail` to turn it on; for always-on, install the plugin on Tom's computer instead. Added 2026-10-18. |
 | [3dviz-pro-max](https://github.com/viettranx/3dviz-pro-max) | not installed | 12 MB of recipes and sample 3D kits that bundle third-party meshes under their own licences. Optional: install it on Tom's computer with `npx skills add viettranx/3dviz-pro-max` if wanted. |
 
 Source commits and licences are in `_sources/<pack>/` (`SOURCE.txt`, `LICENSE`). The only edits

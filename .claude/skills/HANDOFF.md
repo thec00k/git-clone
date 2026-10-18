@@ -137,6 +137,18 @@ blender-game-skills 2026-09-23.
 **Prompt to paste only after skill 4's guide exists:**
 > Use only the motion-camera, motion-depth and motion-3d-transforms skills to suggest improvements to the motion guide in keepsake/docs. Ignore Material Design tokens and Lottie. List what you would add or change and why, and wait for my approval before editing anything.
 
+## 9. ponytail (keep changes small, plain-English reviews)
+
+- **Installed:** `ponytail`, `ponytail-review`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help` (added 2026-10-18).
+- **Source:** https://github.com/DietrichGebert/ponytail · MIT · very widely used, updated daily.
+- **What it is:** "lazy senior dev" mode. Claude reuses existing code, the standard library and built-in features before writing new code, and ends each reply with what it skipped and any risk. The review and audit skills give a numbered, plain-English list of problems ("fix 2 and 5") and change nothing.
+- **Gaps it fills:** matches the "Simplicity First" rule in the project instructions, and gives Tom reviews he can read without coding knowledge.
+- **Cautions:** only the skills are copied, not the plugin hooks, so it is not on by default: say `/ponytail` (or "be lazy") to turn it on. Mentions of the band, `/ponytail band` and auto-update in `ponytail-help` do not apply here. `ponytail-gain` shows the author's benchmark numbers, not Keepsake's. It never overrides the art direction, data safety, or accessibility.
+- **Done looks like:** smaller diffs, and a review list Tom can pick from.
+
+**Prompt to paste:**
+> Use /ponytail-review on the open PR for this thread. Explain each finding in plain English, number them, and do not change anything until I say which to fix.
+
 ---
 
 ## Not in this set (decided against, 2026-10-15)
