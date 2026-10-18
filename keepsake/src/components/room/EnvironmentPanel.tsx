@@ -174,9 +174,11 @@ export function EnvironmentPanel({
                     ? 'Saving failed. Retry or download a backup before leaving.'
                     : 'Saving your latest changes…'}
               </p>
-              <button className="ks-tool my-3" onClick={() => void flushSave()}>
-                Save now
-              </button>
+              {saveStatus === 'error' && (
+                <button className="ks-tool my-3" onClick={() => void flushSave()}>
+                  Try again
+                </button>
+              )}
               <label className="block my-3">
                 New photo uploads
                 <select

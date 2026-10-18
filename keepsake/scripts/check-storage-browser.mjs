@@ -156,7 +156,6 @@ try {
   await page.getByRole('button', {name: 'Music & CRT', exact: true}).click();
   await page.getByLabel('Music on room entry').selectOption('off');
   await page.getByRole('button', {name: 'Saving & storage', exact: true}).click();
-  await page.getByRole('button', {name: 'Save now', exact: true}).click();
   await page.getByRole('status').filter({hasText: 'All changes saved on this device.'}).waitFor();
   await page.getByRole('button', {name: 'Close room settings', exact: true}).click();
   await page.reload();
@@ -189,7 +188,6 @@ try {
   await page.getByRole('button', {name: 'Return to the desk', exact: true}).click();
   await page.getByRole('button', {name: 'Room settings', exact: true}).click();
   await page.getByRole('button', {name: 'Saving & storage', exact: true}).click();
-  await page.getByRole('button', {name: 'Save now', exact: true}).click();
   await page.getByRole('status').filter({hasText: 'All changes saved on this device.'}).waitFor();
   await page.getByRole('button', {name: 'Close room settings', exact: true}).click();
   console.log('PASS: 20-photo import, undo/redo, thumbnails with square crops and marker strokes.');
@@ -199,7 +197,6 @@ try {
   await second.getByRole('button', {name: 'Help & profile', exact: true}).click();
   await second.getByLabel('Your name', {exact: true}).fill('Second tab');
   await second.getByRole('button', {name: 'Saving & storage', exact: true}).click();
-  await second.getByRole('button', {name: 'Save now', exact: true}).click();
   await second.getByRole('status').filter({hasText: 'All changes saved on this device.'}).waitFor();
   await page.getByRole('button', {name: 'Room settings', exact: true}).click();
   await page.getByRole('button', {name: 'Help & profile', exact: true}).click();
