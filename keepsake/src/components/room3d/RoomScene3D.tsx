@@ -233,6 +233,10 @@ export function RoomScene3D({
           dpr={[1, profile.dpr]}
           // Always on: Balanced turns shadows off with RoomShadowQuality instead, without rebuilding every shader.
           shadows
+          // Reading shader logs after every compile is a blocking round trip per program; keep it for development.
+          onCreated={({gl}) => {
+            gl.debug.checkShaderErrors = import.meta.env.DEV;
+          }}
           gl={{
             antialias: true,
             toneMapping: THREE.ACESFilmicToneMapping,
