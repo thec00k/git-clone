@@ -6,7 +6,11 @@ import {useApp} from '../../store/appStore';
 import {createFireplaceAudio, type FireplaceAudio} from '../../lib/fireplaceAudio';
 import type {Phase} from '../room/RoomFurniture';
 
-/** Fire in the Woodland hearth: autumn and winter only (the season engine decides). Adapted from the Snowy Mountain branch. */
+/**
+ * Fire in the Woodland hearth: lit in autumn and winter only (the season engine decides). Adapted from the Snowy Mountain branch.
+ * Mounted in every season so the room always has the same lights: unlit, the flames are hidden and the light is at
+ * intensity 0. Adding or removing a light would make three.js rebuild every material's shader.
+ */
 const vertex = `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
 const fragment = `varying vec2 vUv;uniform float time;
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -91,7 +95,7 @@ function HearthSound() {
   return null;
 }
 
-export function HearthFire({phase}: {phase: Phase}) {
+export function HearthFire({phase, lit}: {phase: Phase; lit: boolean}) {
   const reduced = useReducedMotion();
   const fire = useRef<THREE.ShaderMaterial>(null),
     light = useRef<THREE.PointLight>(null),
@@ -102,11 +106,11 @@ export function HearthFire({phase}: {phase: Phase}) {
     const t = elapsed.current,
       flicker = reduced ? 1 : 1 + 0.075 * Math.sin(t * 7.1) + 0.04 * Math.sin(t * 13.7);
     if (fire.current) fire.current.uniforms.time.value = t;
-    if (light.current) light.current.intensity = (phase === 'day' ? 0.5 : 1.1) * flicker;
+    if (light.current) light.current.intensity = lit ? (phase === 'day' ? 0.5 : 1.1) * flicker : 0;
   });
   return (
     <group name="Hearth_Fire">
-      <mesh position={[FIRE.x, FIRE.y - 0.02, FIRE.z - 0.1]} rotation={[0, Math.PI, 0]}>
+      <mesh position={[FIRE.x, FIRE.y - 0.02, FIRE.z - 0.1]} rotation={[0, Math.PI, 0]} visible={lit}>
         <planeGeometry args={[0.4, 0.46]} />
         <shaderMaterial
           ref={fire}
@@ -123,11 +127,11 @@ export function HearthFire({phase}: {phase: Phase}) {
         ref={light}
         position={[FIRE.x, FIRE.y + 0.08, FIRE.z - 0.2]}
         color="#ff9f45"
-        intensity={1.1}
+        intensity={lit ? 1.1 : 0}
         distance={3.2}
         decay={2}
       />
-      <HearthSound />
+      {lit && <HearthSound />}
     </group>
   );
 }

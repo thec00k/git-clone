@@ -9,3 +9,22 @@ For this incremental revision, `export-quality.py` was run in background Blender
 The live scrapbook remains a separate articulated asset. Its study-only cloth roughness and normal strength are set in WorkbenchBook. User-selected colors, lettering, photographs, pivots and page animation remain dynamic.
 
 Runtime sharing is limited to materials on explicitly marked static batches. Animated and individually tinted objects keep separate materials. Tiny added trim receives shadows but does not cast separate shadows.
+
+## October 17 rebuild with the CRT-style restyle
+
+`woodland-study.glb` and `woodland-study.blend` were rebuilt with the full `build.py` pipeline from the restyled `art/woodland/woodland.blend` (see `art/woodland/remodel-crt.py`, `art/woodland/restyle-furniture.py`). Before rebuilding, the pipeline was checked to reproduce the previously shipped GLB exactly from the pre-restyle source (256 nodes, 229 meshes, 55,516 triangles, 17 materials).
+
+- `materials.py` maps the restyled parts to the study families: brass ferrules and lamp foot; cream ceramic desk drawer front, archive drawer and clock case; walnut joinery lamp base, clock base, archive plinth, shelf kick/base, map frame, door sill and guestbook legs; terracotta map pins. The study chair and window are still rebuilt by `build.py`, so the furniture restyle of those two does not apply here.
+- `build.py` now authors the `hearth` / `portraitHearth` shots, which had been added to `src/generated/woodlandStudy.json` by hand. The exported anchors match the manifest again, and `check-woodland-study-assets.mjs` passes, including camera alignment.
+- Result: 267 nodes, 236 meshes, 69,288 triangles, 17 materials, 6.83 MB (was 6.46 MB). Before/after captures are in `art/woodland/review/study-rebuild/`.
+
+## Wood finishes (October 17, owner feedback)
+
+The owner preferred wood to cream for a "modern nostalgia" cabin: a hand-built place in the woods with a few modern pieces, such as the CRT. The CRT keeps its rounded shape, and three pieces now each get their own wood. All use the project's own procedural tiles from `generate-textures.py`; no third-party textures.
+
+- **CRT cabinet and hood:** medium walnut veneer (`oak` tile tinted `#b08868`), with projected grain. The screen keeps its runtime UVs. The bezel stays warm iron, and the knobs and antenna stay brass.
+- **Desk drawer front:** the desk's own oiled oak.
+- **Archive drawer:** warm honey planks (`timber` tile tinted `#f2c99f`).
+- **Clock case:** the same walnut veneer as the CRT, at the owner's request. The base stays walnut joinery and the digits stay live.
+
+Regenerating the textures reproduced every existing map byte-for-byte; only `oak-b08868-color.png` and `timber-f2c99f-color.png` are new. The study GLB is now 7.47 MB with 19 materials and 22 images. Captures are in `art/woodland/review/study-wood/`.

@@ -1,7 +1,7 @@
 import {musicOnEntry} from '../lib/roomMusic';
 import {validFurnitureChoices} from '../lib/furniture';
 import {claimDailyStamps} from '../lib/stamps';
-import {LIMITS} from '../lib/limits';
+import {LIMITS, canSetVisibility} from '../lib/limits';
 import {msUntilNextDay} from '../lib/seasons';
 import {ownsRoomTheme, normalizeLegacyRooms} from '../lib/roomThemes';
 import {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
@@ -24,7 +24,7 @@ import {createSeed} from '../data/seed';
 import {loadState, saveState, SaveConflict} from '../lib/storage';
 import {syncAfterSave} from '../lib/sync';
 import {recordPhotoActivity} from '../lib/photoActivity';
-import {restoreOriginalFiles} from '../lib/originalPhotos';
+import {pruneOriginals, restoreOriginalFiles} from '../lib/originalPhotos';
 import {downloadRoom} from '../lib/roomBackup';
 import {evaluate} from '../lib/achievements';
 import {baseline} from '../lib/discoveries';
@@ -103,6 +103,10 @@ export function AppProvider({children}: {children: ReactNode}) {
   const [retry, setRetry] = useState(0);
   const savedRef = useRef<AppState | null>(null);
   const blockedRef = useRef(false);
+  // Restores bump the epoch; saves carry the epoch they were made in and are dropped if it moved on, so an
+  // autosave of the room as it was before a restore can never overwrite the restored room.
+  const epochRef = useRef(0);
+  const restoringRef = useRef(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
   const loadedRef = useRef(false);
@@ -155,6 +159,8 @@ export function AppProvider({children}: {children: ReactNode}) {
       setState(musicOnEntry(initial));
       if (stored) syncAfterSave(stored);
       loadedRef.current = true;
+      // Free full-size originals of photos deleted (or replaced by a restore) in earlier visits.
+      if (stored) void pruneOriginals(stored).catch(() => {});
     })().catch(error => {
       if (!cancelled)
         setLoadError(error instanceof Error ? error.message : 'Your saved room could not be read.');
@@ -164,10 +170,11 @@ export function AppProvider({children}: {children: ReactNode}) {
     };
   }, [retry]);
 
-  const persist = useCallback(async (snapshot: AppState) => {
-    if (blockedRef.current) return false;
+  const persist = useCallback(async (snapshot: AppState, epoch = epochRef.current, restoring = false) => {
+    if (blockedRef.current || epoch !== epochRef.current || (restoringRef.current && !restoring))
+      return false;
     try {
-      await saveState(snapshot);
+      if (!(await saveState(snapshot, () => epoch === epochRef.current))) return false;
       savedRef.current = snapshot;
       // Backup to the account (when signed in) only ever follows a successful save on this device.
       syncAfterSave(snapshot);
@@ -230,22 +237,29 @@ export function AppProvider({children}: {children: ReactNode}) {
     }
     setSaveStatus('saving');
     window.clearTimeout(saveTimer.current);
+    const epoch = epochRef.current;
     saveTimer.current = window.setTimeout(() => {
-      void persist(state);
+      void persist(state, epoch);
     }, 450);
     return () => window.clearTimeout(saveTimer.current);
   }, [state, persist]);
 
   const restoreRoom = useCallback(
     async (next: AppState) => {
-      next = await restoreOriginalFiles(next);
-      next = {
-        ...next,
-        achievementBaseline: next.achievementBaseline ?? baseline(next),
-        environment: {...next.environment, tidiedAt: Date.now()},
-      };
+      const epoch = ++epochRef.current;
+      restoringRef.current = true;
       window.clearTimeout(saveTimer.current);
-      if (!(await persist(next))) throw new Error('The restored room could not be saved.');
+      try {
+        next = await restoreOriginalFiles(next);
+        next = {
+          ...next,
+          achievementBaseline: next.achievementBaseline ?? baseline(next),
+          environment: {...next.environment, tidiedAt: Date.now()},
+        };
+        if (!(await persist(next, epoch, true))) throw new Error('The restored room could not be saved.');
+      } finally {
+        if (epoch === epochRef.current) restoringRef.current = false;
+      }
       stateRef.current = next;
       setState(next);
       setNewlyUnlocked([]);
@@ -362,7 +376,11 @@ export function AppProvider({children}: {children: ReactNode}) {
 
   const setBookVisibility = useCallback(
     (id: string, v: Visibility) =>
-      update(p => ({...p, books: p.books.map(b => (b.id === id ? {...b, visibility: v} : b))})),
+      update(p => ({
+        ...p,
+        // Sharing needs LIMITS.minPhotosToShare photos; an early request leaves the book as it is.
+        books: p.books.map(b => (b.id === id && canSetVisibility(b, v) ? {...b, visibility: v} : b)),
+      })),
     [update],
   );
 

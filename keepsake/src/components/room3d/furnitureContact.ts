@@ -5,13 +5,14 @@ export function renderedMesh(o: THREE.Object3D): o is THREE.Mesh {
   return (Array.isArray(o.material) ? o.material : [o.material]).some(m => m.visible);
 }
 /** Geometry bounds exclude hidden originals and interaction targets. */
-export function visibleBounds(root: THREE.Object3D) {
-  const b = new THREE.Box3();
+const meshBox = new THREE.Box3();
+export function visibleBounds(root: THREE.Object3D, b = new THREE.Box3()) {
+  b.makeEmpty();
   root.updateWorldMatrix(true, true);
   root.traverse(o => {
     if (renderedMesh(o)) {
       o.geometry.computeBoundingBox();
-      if (o.geometry.boundingBox) b.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));
+      if (o.geometry.boundingBox) b.union(meshBox.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld));
     }
   });
   return b;

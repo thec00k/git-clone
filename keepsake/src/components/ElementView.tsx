@@ -430,6 +430,10 @@ function CaptionView({
         if (e.target === e.currentTarget && e.key === 'Enter') {
           onSelect(element.id);
           setEditing(true);
+        } else if (e.target === e.currentTarget && e.key === ' ') {
+          // Select without editing, so arrow keys can move the caption.
+          e.preventDefault();
+          onSelect(element.id);
         }
       }}
       role="button"

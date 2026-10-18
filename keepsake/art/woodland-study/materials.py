@@ -32,6 +32,8 @@ oak=textured('Oiled_Oak','oak');floor=textured('Oak_Floorboards','floor');timber
 joinery=textured('Walnut_Joinery','oak','#b7a18d');moss=textured('Moss_Woven_Linen','linen','#718466')
 linen=textured('Oat_Linen','linen','#e4d3b5');paper=textured('Ivory_Paper','linen','#fff4da');stone=textured('Honed_Limestone','stone')
 clay=textured('Terracotta_Bookcloth','linen','#b37d61');forest=textured('Forest_Bookcloth','linen','#62715b')
+# Hand-made cabin, modern pieces: each wood-cased piece gets its own wood (owner's request).
+veneer=textured('Walnut_Veneer','oak','#b08868');honey=textured('Honey_Planks','timber','#f2c99f')
 brass=solid('Aged_Brass','#bda16b',.36,.72);iron=solid('Warm_Iron','#343832',.56,.35)
 ceramic=solid('Glazed_Cream','#e2d7b8',.29);enamel=solid('Olive_Enamel','#78816c',.39,.08)
 screen=solid('Screen_Glass','#172422',.23);plaster=solid('Warm_Chalk','#e4dac8',.96)
@@ -77,9 +79,18 @@ for o in bpy.context.scene.objects:
     elif n=='Study_Firebox':m=iron
     elif any(k in n for k in ['WindowJamb','WindowRail','TransomFrame','CornerPost','Baseboard','ChairLeg','HearthMantel','HearthLog']):m=joinery
     elif any(k in n for k in ['Handle','Knob','Brass','Inlay','hinge','Door_Plate','Door_KnobStem']):m=brass
+    # CRT-style restyle (art/woodland/restyle-furniture.py): brass feet, cream fronts, walnut bases.
+    elif n.endswith('_Ferrule') or n=='Lamp_Foot':m=brass
+    elif n=='Desk_DrawerFront':m=oak
+    elif n=='ks_archive_drawer':m=honey
+    elif n in ['Clock_Top','Clock_Left','Clock_Right','Clock_Back']:m=veneer # matches the CRT's walnut case
+    elif n in ['Lamp_Base','Clock_Bottom','Archive_Plinth','Shelf_Kick','Shelf_Bot','Map_Frame','Door_Sill'] or n.startswith('Cozy_Guest_Table_Leg'):m=joinery
+    elif n.startswith('Map_Pin_'):m=clay;kind='cloth'
     elif n.startswith('Lamp_'):m=enamel if n=='Lamp_Shade' else brass
     elif n=='ks_lamp_bulb':m=ceramic
-    elif n.startswith('CRT_'):m=screen if n=='CRT_Screen' else iron if n in ['CRT_Bezel','CRT_Toggle'] else ceramic;preserve_uv=True
+    # Wood-cased set: the cabinet and hood get projected grain; the screen keeps its runtime UVs.
+    elif n in ['CRT_Body','CRT_Back']:m=veneer
+    elif n.startswith('CRT_'):m=screen if n=='CRT_Screen' else iron if n in ['CRT_Bezel','CRT_Toggle'] else brass if n=='CRT_Antenna' else joinery if n=='CRT_Base' else ceramic;preserve_uv=True
     elif n in ['Accent_Mug']:m=ceramic
     elif any(k in n for k in ['Pages','Map_Sheet','frame_mat','Archive_Tab']):m=paper;kind='cloth';preserve_uv=n=='Map_Sheet'
     elif n.startswith('ks_shelf_book'):m=paper;kind='cloth' # Runtime applies the book's individual cover color.

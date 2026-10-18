@@ -38,6 +38,7 @@ export function RoomLights({
     environment.memoryLighting && bookPhase === 'editing' ? activeBook?.memoryMood : undefined;
   const coastal = useActiveRoom().id === 'beachfront';
   const neon = useActiveRoom().id === 'cyberpunk';
+  const woodland = useActiveRoom().id === 'woodland';
   const night = phase === 'night';
   const dusk = phase === 'dusk';
   const ceiling = useMemo(() => {
@@ -57,12 +58,31 @@ export function RoomLights({
   const lampRef = useRef<THREE.PointLight>(null);
 
   const lightColor = useMemo(() => {
-    const color = new THREE.Color(neon ? '#939cff' : night ? '#c8d4f0' : dusk ? '#ffb070' : '#ffe6b8');
+    // Woodland dusk window light is a pale peach, not saturated orange: the room's warm pool comes from the desk lamp.
+    const duskColor = woodland ? '#ffcfa6' : '#ffb070';
+    const color = new THREE.Color(neon ? '#939cff' : night ? '#c8d4f0' : dusk ? duskColor : '#ffe6b8');
     if (memoryMood && memoryMood !== 'neutral' && MEMORY_MOODS[memoryMood])
       color.lerp(new THREE.Color(MEMORY_MOODS[memoryMood].light), 0.22);
     return color;
-  }, [night, dusk, memoryMood, neon]);
-  const ambientColor = useMemo(() => new THREE.Color(night ? '#8a9bb8' : '#fff4e6'), [night]);
+  }, [night, dusk, memoryMood, neon, woodland]);
+  // Woodland dusk gets a cool fill (the art bible's warm-pool-against-cool-room contrast); other rooms keep their warm fill.
+  const coolDusk = woodland && dusk;
+  // The same pass for Woodland's other hours: at night the room is cool and dim and the desk
+  // lamp leads; by day the window light leads and the lamp is a quiet accent.
+  const woodlandNight = woodland && night;
+  const woodlandDay = woodland && !night && !dusk;
+  const ambientColor = useMemo(
+    () => new THREE.Color(night ? '#8a9bb8' : coolDusk ? '#b9c6dc' : woodlandDay ? '#f6f1e8' : '#fff4e6'),
+    [night, coolDusk, woodlandDay],
+  );
+  const skyColor = useMemo(
+    () => new THREE.Color(coolDusk ? '#8fa3bd' : woodlandNight ? '#5d6f8c' : '#bac4ba'),
+    [coolDusk, woodlandNight],
+  );
+  const groundColor = useMemo(
+    () => new THREE.Color(coolDusk ? '#3a342c' : woodlandNight ? '#2a2622' : '#3f4931'),
+    [coolDusk, woodlandNight],
+  );
   useFrame((_, dt) => {
     const t = motionFactor(dt, MOTION.light, reduced);
     const lights: [
@@ -72,20 +92,40 @@ export function RoomLights({
       [THREE.Light | null, number],
       [THREE.Light | null, number],
     ] = [
-      [ambientRef.current, night ? 0.16 : dusk ? 0.24 : 0.34],
-      [sunRef.current, neon ? 0.65 : night ? 0.55 : dusk ? 1.35 : 2.1],
-      [ceilingRef.current, environment.ceilingOn !== false ? (coastal ? 2.3 : 3.2) : 0],
+      [ambientRef.current, night ? (woodland ? 0.2 : 0.16) : dusk ? (woodland ? 0.3 : 0.24) : 0.34],
+      [sunRef.current, neon ? 0.65 : night ? 0.55 : dusk ? (woodland ? 0.9 : 1.35) : 2.1],
+      [
+        ceilingRef.current,
+        // The Woodland ceiling light eases down at dusk and night so the desk lamp pool leads
+        // (scrapbook first), and a little by day so the window light leads.
+        environment.ceilingOn !== false
+          ? coolDusk
+            ? 1.1
+            : woodlandNight
+              ? 0.9
+              : woodlandDay
+                ? 2.4
+                : coastal
+                  ? 2.3
+                  : 3.2
+          : 0,
+      ],
       [
         lampRef.current,
-        environment.lampOn && !neon ? (night ? 3.8 : dusk ? 2.8 : 1.6) * (coastal ? 0.28 : 1) : 0,
+        environment.lampOn && !neon
+          ? (night ? (woodland ? 2.5 : 3.8) : dusk ? (woodland ? 2.6 : 2.8) : woodland ? 1.0 : 1.6) *
+            (coastal ? 0.28 : 1)
+          : 0,
       ],
-      [skyRef.current, night ? 0.25 : 0.55],
+      [skyRef.current, night ? (woodland ? 0.3 : 0.25) : coolDusk ? 0.6 : 0.55],
     ];
     lights.forEach(([light, target]) => {
       if (light) light.intensity = THREE.MathUtils.lerp(light.intensity, target, t);
     });
     sunRef.current?.color.lerp(lightColor, t);
     ambientRef.current?.color.lerp(ambientColor, t);
+    skyRef.current?.color.lerp(skyColor, t);
+    skyRef.current?.groundColor.lerp(groundColor, t);
     const blades =
       scene?.getObjectByName(CEILING_FAN_BLADES) ??
       scene?.getObjectByName(CEILING_FAN_OBJECT)?.children.find(child => /blade/i.test(child.name));
@@ -130,7 +170,7 @@ export function RoomLights({
           ref={lampRef}
           position={(scene ? lampShadePos(scene) : deskLampCorner(STAND_IN_DESK)).toArray()}
           intensity={1.6}
-          color={coastal ? '#ffe1b5' : '#ffb56a'}
+          color={coastal ? '#ffe1b5' : woodlandDay ? '#ffd9b0' : woodland ? '#ffcc9c' : '#ffb56a'}
           distance={1.85}
         />
       }

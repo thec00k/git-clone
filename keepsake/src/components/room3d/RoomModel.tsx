@@ -1,6 +1,7 @@
 import {DustBunnies} from './DustBunnies';
 import {HolidayDecor} from './HolidayDecor';
 import {HearthFire} from './HearthFire';
+import {WindowDustMotes} from './WindowDustMotes';
 import {Vector3} from 'three';
 import {TimeCapsuleChest} from './TimeCapsuleChest';
 import {CabinetPhoto} from './CabinetPhoto';
@@ -33,7 +34,7 @@ import {useRoomAsset} from './useRoomAsset';
 import {WorkbenchBook} from './WorkbenchBook';
 import {useWorkbench} from '../../store/workbench';
 import {FurnitureModels} from './FurnitureModels';
-import {ArtifactDisplayCase} from './ArtifactDisplayCase';
+import {ArtifactDisplayCase, DisplayCaseLights} from './ArtifactDisplayCase';
 import {ChairFloorContact} from './ChairFloorContact';
 import {PropRefinements} from './PropRefinements';
 export function RoomModel({
@@ -109,6 +110,7 @@ export function RoomModel({
           <PropRefinements scene={cloned} />
         </>
       )}
+      <DisplayCaseLights />
       <Suspense fallback={null}>
         <ArtifactDisplayCase />
       </Suspense>
@@ -122,8 +124,9 @@ export function RoomModel({
       {study && <HolidayDecor />}
       {coastal && <HolidayDecor coastal />}
       {(study || coastal) && <DustBunnies />}
-      {study && hearthPosition && (environment.season === 'winter' || environment.season === 'autumn') && (
-        <HearthFire phase={phase} />
+      {study && <WindowDustMotes phase={phase} />}
+      {study && hearthPosition && (
+        <HearthFire phase={phase} lit={environment.season === 'winter' || environment.season === 'autumn'} />
       )}
       <Suspense fallback={null}>
         <RoomWorldMap scene={cloned} onOpen={() => onActivate('map')} />

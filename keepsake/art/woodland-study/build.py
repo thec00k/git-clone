@@ -139,6 +139,10 @@ shots={
  'portraitEstablishing':{'position':[.20,1.47,1.72],'target':[-.15,1.67,-1.68],'fov':66},
  'portraitDesk':{'position':[-.15,1.69,.12],'target':[-.15,.84,-1.7],'fov':60},
  'portraitWindow':{'position':[-.15,1.87,.60],'target':[-.15,2.25,-2.15],'fov':68},
+ # Hearth view, added to the generated manifest on foundations-and-seasons; authored here so the
+ # exported anchors match it (check-woodland-study-assets.mjs).
+ 'hearth':{'position':[-.45,1.40,-.10],'target':[-.91,.75,2.0],'fov':62},
+ 'portraitHearth':{'position':[-.45,1.40,-.10],'target':[-.91,.75,2.0],'fov':62},
 }
 for name,v in shots.items():
     empty('Camera_'+name,v['position']);empty('Target_'+name,v['target'])

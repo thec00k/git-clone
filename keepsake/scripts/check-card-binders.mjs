@@ -137,3 +137,32 @@ assert.throws(() => parseRoomBackup(serializeRoom(missingDeskBinder)));
 console.log(
   'PASS card scans: valid embedded GLB and backup round-trip; reject remote assets, cycles, excessive geometry and unsupported compression.',
 );
+{
+  const {readCappedBody, scanReceiverUrl, MAX_SCAN_BYTES} = await import('../src/lib/cardBinders.ts');
+  assert.equal(scanReceiverUrl('http://127.0.0.1:4318/'), 'http://127.0.0.1:4318/latest');
+  assert.equal(scanReceiverUrl('http://192.168.1.20:4318'), 'http://192.168.1.20:4318/latest');
+  for (const bad of ['https://example.com', 'file:///etc/passwd', 'not a url', 'http://8.8.8.8:4318'])
+    assert.throws(() => scanReceiverUrl(bad), 'receiver must be local');
+  const small = new Uint8Array(1000).fill(7);
+  assert.deepEqual(
+    new Uint8Array(await readCappedBody(new Response(small))),
+    small,
+    'small bodies read whole',
+  );
+  const stream = new ReadableStream({
+    pull(c) {
+      c.enqueue(new Uint8Array(1024 * 1024));
+    },
+  });
+  await assert.rejects(
+    readCappedBody(new Response(stream)),
+    /smaller than 5 MB/,
+    'endless body stops at the cap',
+  );
+  await assert.rejects(
+    readCappedBody(new Response('x', {headers: {'content-length': String(MAX_SCAN_BYTES + 1)}})),
+    /smaller than 5 MB/,
+    'declared oversize body refused before reading',
+  );
+  console.log('Card binders: phone-scan receiver must be local and its download stops at 5 MB.');
+}

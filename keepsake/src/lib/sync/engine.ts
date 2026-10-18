@@ -1,5 +1,5 @@
 import type {AppState} from '../../types/app';
-import {buildSnapshot, diffSnapshots, PRIVATE_BYTES, SETTINGS_BYTES} from './snapshot.ts';
+import {buildSnapshot, diffSnapshots, PRIVATE_BYTES, SETTINGS_BYTES, type KindOf} from './snapshot.ts';
 import type {BookShape, Change, RoomShape, Snapshot} from './snapshot.ts';
 import * as store from './store.ts';
 import type {OutboxEntry, Pause} from './store.ts';
@@ -44,6 +44,8 @@ export class PermanentError extends Error {}
 export interface Local {
   keyOf(src: string): Promise<string>;
   readFile(key: string): Promise<string | undefined>;
+  /** Which values are files; defaults to data: URLs only (see buildSnapshot). */
+  kindOf?: KindOf;
 }
 
 export interface SyncStatus {
@@ -93,7 +95,7 @@ export async function link(backend: SyncBackend): Promise<void> {
 export async function record(state: AppState, local: Local): Promise<void> {
   const meta = await store.readMeta();
   if (!meta.account || meta.paused === 'other-account' || meta.paused === 'server-has-room') return;
-  const next = await buildSnapshot(state, local.keyOf);
+  const next = await buildSnapshot(state, local.keyOf, local.kindOf);
   const changes = diffSnapshots(meta.snapshot ?? null, next);
   if (changes.length) await store.queueChanges(next, changes);
   changed();
@@ -117,7 +119,7 @@ export async function adoptAccountRoom(
   for (const [name, id] of Object.entries(restored.ids)) await store.rememberId(name, id);
   for (const [file, id] of restored.photoIdByData)
     await store.rememberId(`photo:${await local.keyOf(file)}`, id);
-  const snapshot = await buildSnapshot(restored.state, local.keyOf);
+  const snapshot = await buildSnapshot(restored.state, local.keyOf, local.kindOf);
   await store.resetTo({account: uid, revision: data.revision, snapshot, paused: null});
   changed();
   return {missing: restored.missing};

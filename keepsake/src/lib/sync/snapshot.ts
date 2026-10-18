@@ -41,25 +41,29 @@ export interface Snapshot {
 
 export const SETTINGS_BYTES = 240_000; // server limit 256 KiB
 export const PRIVATE_BYTES = 1_000_000; // server limit 1 MiB
-const isImageData = (s: unknown): s is string => typeof s === 'string' && s.startsWith('data:image/');
-const isFileData = (s: unknown): s is string =>
-  typeof s === 'string' && (s.startsWith('data:image/') || s.startsWith('data:model/'));
+/** Which kind of file a value is, if any. The app passes fileKind from ../storage.ts, which also knows the
+ * blob: URLs of saved files; this default only sees data: URLs. */
+export type KindOf = (src: string) => 'image' | 'model' | undefined;
+const dataKind: KindOf = s =>
+  s.startsWith('data:image/') ? 'image' : s.startsWith('data:model/') ? 'model' : undefined;
 
 /** Replaces every file in a value by its key. */
 function withKeys(value: unknown, keys: Map<string, string>): unknown {
-  if (isFileData(value)) return keys.get(value) ?? null;
+  if (typeof value === 'string' && keys.has(value)) return keys.get(value);
   if (Array.isArray(value)) return value.map(v => withKeys(v, keys));
   if (value && typeof value === 'object')
     return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, withKeys(v, keys)]));
   return value;
 }
-function collectFiles(value: unknown, into: Set<string>) {
-  if (isFileData(value)) into.add(value);
-  else if (Array.isArray(value)) for (const v of value) collectFiles(v, into);
-  else if (value && typeof value === 'object') for (const v of Object.values(value)) collectFiles(v, into);
+function collectFiles(value: unknown, kind: KindOf, into: Map<string, 'image' | 'model'>) {
+  const found = typeof value === 'string' ? kind(value) : undefined;
+  if (found) into.set(value as string, found);
+  else if (Array.isArray(value)) for (const v of value) collectFiles(v, kind, into);
+  else if (value && typeof value === 'object')
+    for (const v of Object.values(value)) collectFiles(v, kind, into);
 }
 
-function bookShape(book: Scrapbook, keys: Map<string, string>): BookShape {
+function bookShape(book: Scrapbook, keys: Map<string, string>, images: Set<string>): BookShape {
   const {pages, title, subtitle, visibility, ...rest} = book;
   return {
     title: (title.trim() || 'Untitled').slice(0, 80),
@@ -71,7 +75,7 @@ function bookShape(book: Scrapbook, keys: Map<string, string>): BookShape {
       const photos: PagePhoto[] = [];
       const elements: unknown[] = [];
       for (const el of page.elements) {
-        if (el.type === 'photo' && isImageData(el.src) && photos.length < LIMITS.photosPerPage) {
+        if (el.type === 'photo' && images.has(el.src) && photos.length < LIMITS.photosPerPage) {
           const {src, ...layout} = el;
           photos.push({key: keys.get(src)!, slot: photos.length, layout});
         } else elements.push(withKeys(el, keys));
@@ -98,15 +102,17 @@ function bookShape(book: Scrapbook, keys: Map<string, string>): BookShape {
 export async function buildSnapshot(
   state: AppState,
   keyOf: (src: string) => Promise<string>,
+  kind: KindOf = dataKind,
 ): Promise<Snapshot> {
-  const files = new Set<string>();
-  collectFiles(state, files);
+  const files = new Map<string, 'image' | 'model'>();
+  collectFiles(state, kind, files);
+  const images = new Set([...files].filter(([, k]) => k === 'image').map(([src]) => src));
   const keys = new Map<string, string>();
-  for (const src of files) keys.set(src, await keyOf(src));
+  for (const src of files.keys()) keys.set(src, await keyOf(src));
 
   const photos = new Set<string>();
   const addPhoto = (src: unknown) => {
-    if (isImageData(src)) photos.add(keys.get(src)!);
+    if (typeof src === 'string' && images.has(src)) photos.add(keys.get(src)!);
   };
   for (const p of state.archive ?? []) addPhoto(p.src);
   for (const b of state.books ?? [])
@@ -121,7 +127,7 @@ export async function buildSnapshot(
       settings: withKeys({environment, roomDecor, ownedRoomThemes}, keys) as Record<string, unknown>,
       private: withKeys(rest, keys) as Record<string, unknown>,
     },
-    books: Object.fromEntries((books ?? []).map(b => [b.id, bookShape(b, keys)])),
+    books: Object.fromEntries((books ?? []).map(b => [b.id, bookShape(b, keys, images)])),
     photos: [...photos],
   };
 }

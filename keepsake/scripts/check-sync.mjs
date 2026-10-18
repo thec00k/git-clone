@@ -3,7 +3,7 @@
 // pauses instead of overwriting when another device or account is involved.
 import assert from 'node:assert/strict';
 import 'fake-indexeddb/auto';
-import {saveState, loadState, assetKey, readAsset} from '../src/lib/storage.ts';
+import {saveState, loadState, assetKey, readAsset, fileKind, inlineFiles} from '../src/lib/storage.ts';
 import {
   link,
   record,
@@ -14,7 +14,7 @@ import {
   keepThisRoom,
 } from '../src/lib/sync/engine.ts';
 
-const local = {keyOf: assetKey, readFile: readAsset};
+const local = {keyOf: assetKey, readFile: readAsset, kindOf: fileKind};
 const photo = n => 'data:image/jpeg;base64,' + String(n).repeat(400);
 const pic = (id, n) => ({
   id,
@@ -174,7 +174,7 @@ await record(state, local);
 assert.equal((await status()).pending, 5, '3 photos, the room and 1 book queued');
 await flush(s.backend, local, now);
 assert.equal(JSON.stringify(state), before, 'the room object is never changed');
-assert.deepEqual(await loadState(), state, 'the room saved on this device is unchanged');
+assert.deepEqual(await inlineFiles(await loadState()), state, 'the room saved on this device is unchanged');
 let st = await status();
 assert.equal(st.pending, 0, 'everything sent');
 assert.ok(st.lastSyncedAt, 'last backup time recorded');
@@ -381,6 +381,37 @@ await record(state, local);
 await flush(kept.backend, local, now);
 assert.equal((await status()).pending, 0);
 assert.equal(kept.revision, 5, 'saved on top of the account’s latest revision');
+
+// 14. A room reopened from disk holds blob: links instead of file data; it is still the same room.
+await fresh();
+const disk = fakeServer();
+await saveState(state);
+await link(disk.backend);
+await record(state, local);
+await flush(disk.backend, local, now);
+const reopened = await loadState();
+assert.ok(
+  reopened.archive.every(a => a.src.startsWith('blob:')),
+  'saved photos come back as blob: links',
+);
+assert.equal(await assetKey(reopened.archive[0].src), await assetKey(state.archive[0].src), 'same file key');
+assert.equal(await readAsset(await assetKey(reopened.archive[0].src)), state.archive[0].src, 'file readable');
+disk.calls = [];
+await record(reopened, local);
+await flush(disk.backend, local, now);
+assert.deepEqual(disk.calls, [], 'a reopened room sends nothing again');
+const added = {...reopened, archive: [...reopened.archive, {...state.archive[0], id: 'a4', src: photo(4)}]};
+await saveState(added);
+await record(added, local);
+assert.equal((await status()).pending, 2, 'only the new photo and the room are queued');
+await flush(disk.backend, local, now);
+assert.equal(disk.uploads, 4, 'the new photo is uploaded once');
+assert.ok(!sentText(disk).includes('blob:'), 'no blob: links inside rows');
+const reopenedBook = (await loadState()).books[0];
+disk.calls = [];
+await record({...added, books: [reopenedBook]}, local);
+await flush(disk.backend, local, now);
+assert.deepEqual(disk.calls, [], 'book pages reopened from disk keep their photos');
 
 console.log(
   'Sync: outbox sends the room without changing it, survives offline and mid-send edits, never duplicates, pauses on conflicts.',

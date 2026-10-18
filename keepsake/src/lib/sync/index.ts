@@ -1,5 +1,5 @@
 import type {AppState} from '../../types/app';
-import {assetKey, readAsset} from '../storage.ts';
+import {assetKey, fileKind, readAsset} from '../storage.ts';
 import {syncConfigured} from './config.ts';
 import {flush, keepThisRoom, link, record, adoptAccountRoom, type Local} from './engine.ts';
 
@@ -15,7 +15,7 @@ async function connection() {
  * Wires the sync engine to the app: sign-in state, saves, and coming back online.
  * Everything is a no-op when no Supabase project is configured (see config.ts).
  */
-const local: Local = {keyOf: assetKey, readFile: readAsset};
+const local: Local = {keyOf: assetKey, readFile: readAsset, kindOf: fileKind};
 let active = false;
 let latest: AppState | null = null;
 let timer: ReturnType<typeof setTimeout> | undefined;

@@ -11,6 +11,7 @@ import type {Environment, MemoryPin} from '../../types/app';
 import type {ViewAs} from '../../types/app';
 import {BookshelfWall, CorkboardWall, SEASON_TINT, WALL_PAINT, type Phase} from './RoomFurniture';
 import {DeskLayer, WindowPane} from './RoomFlat';
+import {ignorePageKey} from '../../lib/keyTargets';
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -83,12 +84,7 @@ export function RoomChamber({
   useEffect(() => {
     if (touring) return;
     const onKey = (e: KeyboardEvent) => {
-      if (
-        e.target instanceof HTMLElement &&
-        e.target.closest("input, textarea, select, [contenteditable='true']")
-      ) {
-        return;
-      }
+      if (ignorePageKey(e)) return;
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
         setRoomFace(nextFace(roomFace, 'left'));
