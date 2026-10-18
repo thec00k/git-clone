@@ -63,6 +63,9 @@ for o in list(bpy.context.scene.objects):
     elif o.name.startswith('Cabin_Window_Log'):family='window'
     elif o.name.startswith('Cabin_Door_Log'):family='door'
     elif o.name.startswith('Study_Chimney_Stone'):family='chimney'
+    # Boards and logs batch apart so each batch keeps one material (one mesh in the GLB).
+    elif o.name.startswith('Cabin_Ceiling_Board'):family='ceiling-boards-'+str(o.matrix_world.translation.x>0)
+    elif o.name.startswith('Cabin_Ceiling'):family='ceiling-logs-'+str(o.matrix_world.translation.x>0)
     if family:
         # Half-metre height bands preserve close-view frustum culling.
         family += '-band-'+str(math.floor(o.matrix_world.translation.z/.5))

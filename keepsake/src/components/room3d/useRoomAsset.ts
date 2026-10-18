@@ -1,7 +1,7 @@
 import {use, useEffect, useMemo} from 'react';
 import {loadRoomAsset, releaseRoomAssetsExcept} from './roomAssetCache';
 import * as THREE from 'three';
-import {LAMP_BULB} from '../../lib/roomHotspots';
+import {CEILING_FAN_BOWL, LAMP_BULB} from '../../lib/roomHotspots';
 import type {Environment} from '../../types/app';
 import type {Phase} from '../room/RoomFurniture';
 import {useActiveRoom} from './useActiveRoom';
@@ -117,12 +117,17 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
           mat.emissive.set(environment.musicOn ? '#3ec8c8' : '#102428');
           mat.emissiveIntensity = environment.musicOn ? 1.4 : 0.15;
         }
+        // The cabin fan's glass bowl glows while the ceiling light (which sits just below it) is on.
+        if (activeRoom.study && obj.name === CEILING_FAN_BOWL) {
+          mat.emissive.set(environment.ceilingOn !== false ? '#ffe9c4' : '#2e2924');
+          mat.emissiveIntensity = environment.ceilingOn !== false ? 1.6 : 0.05;
+        }
         if (obj.name === LAMP_BULB || /lamp.*bulb/i.test(obj.name)) {
           mat.emissive.set(environment.lampOn ? '#ffe6b0' : '#3a3228');
           mat.emissiveIntensity = environment.lampOn ? 2.4 : 0.08;
         }
       }
     });
-  }, [cloned, environment.musicOn, environment.lampOn, phase]);
+  }, [cloned, environment.musicOn, environment.lampOn, environment.ceilingOn, phase, activeRoom.study]);
   return cloned;
 }
