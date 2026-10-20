@@ -16,6 +16,7 @@ import {
   DESK_DRAWER,
   CLOCK_OBJECT,
   CLOCK_DIGITS,
+  CLOCK_GLASS,
   CEILING_SWITCH,
   CHAIR_OBJECT,
   DOOR_OBJECT,
@@ -236,6 +237,7 @@ const STAND_IN_TOP_THICK = 0.045;
 const STAND_IN_TOP_W = 1.78;
 const STAND_IN_TOP_D = 0.7;
 const CLOCK_FACE_PX = 168;
+const CLOCK_FACE_HEIGHT_PX = 56;
 
 type BookOnDesk = {x: number; z: number; halfW: number; halfD: number};
 
@@ -569,12 +571,20 @@ export function DeskClock({scene, timeMode}: {scene: THREE.Object3D; timeMode: T
     const pos = new THREE.Vector3();
     box.getCenter(pos);
     if (!digits || !hasGeometry(digits)) pos.z = box.max.z + 0.004;
+    // The digits are a flat web page drawn over the 3D scene, so the case can never hide it. Put it on the glass
+    // (the digits mesh sits about 1 cm behind it) and fit it inside the opening in both directions.
+    const glass = scene.getObjectByName(CLOCK_GLASS);
+    if (digits && glass && hasGeometry(glass)) new THREE.Box3().setFromObject(glass).getCenter(pos);
     const size = box.getSize(new THREE.Vector3());
     const width = Math.max(size.x, size.z, 0.1);
     const quat = new THREE.Quaternion();
     face.getWorldQuaternion(quat);
-    return {pos, quat, scale: width / CLOCK_FACE_PX};
-  }, [clock, digits]);
+    return {
+      pos,
+      quat,
+      scale: Math.min(width / CLOCK_FACE_PX, digits ? size.y / CLOCK_FACE_HEIGHT_PX : Infinity),
+    };
+  }, [scene, clock, digits]);
 
   if (!pose) return null;
   return (

@@ -12,6 +12,7 @@ export const CEILING_FAN_BOWL = 'Fan_Bowl';
 /** Retro desk clock. Digits live on `ks_clock_digits` when that face exists. */
 export const CLOCK_OBJECT = 'ks_clock';
 export const CLOCK_DIGITS = 'ks_clock_digits';
+export const CLOCK_GLASS = 'ks_clock_glass';
 /** Desk lamp. Click it to turn the bulb on. Optional child `ks_lamp_bulb`. */
 export const LAMP_OBJECT = 'ks_lamp';
 export const LAMP_BULB = 'ks_lamp_bulb';
