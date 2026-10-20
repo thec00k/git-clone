@@ -8,7 +8,7 @@ Generated from licences/ledger.json (2026-10-19) by `node scripts/check-licences
 | ai-generated | 2 | 9 |
 | documented | 10 | 99 |
 | verified | 2 | 15 |
-| original | 6 | 223 |
+| original | 6 | 224 |
 
 Status meanings: **unverified**: Origin or licence unknown, or contains such parts. Replace or remodel before public launch. **ai-generated**: Made with an image generator. Check the tool's terms; may not be protectable by copyright. **documented**: Licence known from the source, but no saved proof yet. Save a dated copy to move it to verified. **verified**: Licence known and a copy of the licence or receipt is stored (licences/proof/ or a file shipped with the asset). **original**: Made for Keepsake; the source files or scripts are in this repository.
 
@@ -43,7 +43,7 @@ Status meanings: **unverified**: Origin or licence unknown, or contains such par
 - **Files:** 7 (0 shipped, 0.0 MB shipped)
 - **Author / origin:** Keepsake project (built in Blender for Keepsake); textures by Poly Haven; botanical print from an image generator (mixed)
 - **Licence:** Original geometry; textures CC0 from Poly Haven; embeds the AI-generated woodland-fern-v1 print (see room-prints-ai)
-- **Next action:** Settled with room-prints-ai (confirm the image tool allows commercial use).
+- **Next action:** Settled with room-prints-ai (confirm the image tool allows commercial use). Its exported GLBs were retired on 2026-10-20; the .blend stays as the starting scene for art/woodland-study/build.py.
 
 ### room-prints-ai
 
