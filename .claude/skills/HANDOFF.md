@@ -137,6 +137,20 @@ blender-game-skills 2026-09-23.
 **Prompt to paste only after skill 4's guide exists:**
 > Use only the motion-camera, motion-depth and motion-3d-transforms skills to suggest improvements to the motion guide in keepsake/docs. Ignore Material Design tokens and Lottie. List what you would add or change and why, and wait for my approval before editing anything.
 
+## 10. blender-asset-qa (model checker)
+
+- **Installed:** `blender-asset-qa` only (added 2026-10-18). Tom asked for the model checker, not the rest of the pack.
+- **Source:** https://github.com/EL4CTEO/blender-skills · MIT · 1 commit (2026-10-16), very new.
+- **What it is:** a review gate for Blender models. `scripts/qa_check.py` reports numbers: surfaces that overlap and flicker (z-fighting), floating parts, flipped normals, holes, unapplied scale and UV problems. `scripts/review_shots.py` renders a multi-angle contact sheet.
+- **Gaps it fills:** a check before calling any remodelled Woodland object done. The room the app loads is `keepsake/public/room/woodland-study/woodland-study.glb` (not the older `woodland/woodland.glb`). On 2026-10-19 it listed 20 z-fighting errors across its 267 meshes (`--profile render`), but the list stops at 20 object pairs: there are 197 in all. The largest are the Beanbag against its stitched seams and the lamp shade against its rolled rim; most of the rest are cabin logs meeting at corners, door and window cuts and the ceiling joist, which may be hidden inside the logs. Checked 2026-10-20: none show from inside the room. The log, joist, beam and ceiling-board overlaps are end caps and back faces at the outer wall planes, facing outward. The beanbag overlaps are mostly on its underside, and seam and bag share one material. The lamp rim overlap is the shade's underside. A fuller pass on 2026-10-20 found two that could flicker in view: the door casing's end beside the fireplace (fixed in `cabin-shell.py`, the head board now runs 4 mm past the side board) and the ends of the desk drawer front while the drawer is open (left for the furniture remodel). See `art/woodland/review/overlap-check/README.md` on branch `claude/woodland-overlaps-and-retire`.
+- **Cautions:** written for Blender 5.2; Tom has 5.1.2. `qa_check.py` ran fine on bpy 5.1.2; `review_shots.py` could not be tested in the cloud (no display library) and should work on Tom's computer. Run it with `--profile render` on the whole room: the `game` profile reports 119 errors there, mostly zero-area UV faces on plain-coloured logs, which are fine for Keepsake. Duplicate-vertex and UV-overlap warnings are normal for imported GLB files. The skill mentions `blender-core`, `blender-retopology-uv` and `blender-character-rigging`, which are not installed; run the scripts directly as below. It does not replace `check-room-assets` or the size budgets.
+- **Done looks like:** each remodel PR lists the checker's errors before and after.
+
+**How to run (cloud or Tom's computer):** `blender -b file.blend -P .claude/skills/blender-asset-qa/scripts/qa_check.py -- --objects Chair_Seat Chair_Back --profile render`. In a live Blender session: add the scripts folder to `sys.path`, then `import qa_check; print(qa_check.run(objects=[...], profile="render"))`.
+
+**Prompt to paste:**
+> Use blender-asset-qa to check the Woodland room model (woodland-study.glb) for z-fighting and floating parts. List each finding in plain English with a screenshot of the spot, say which ones a visitor would actually notice, and do not change anything until I pick which to fix.
+
 ---
 
 ## Not in this set (decided against, 2026-10-15)

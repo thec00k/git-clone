@@ -54,3 +54,16 @@ The owner asked for walls that read as stacked solid logs, with no gaps between 
 
 - `check-woodland-study-assets.mjs` now tests every prop mesh against the shell, trim, beams and every other prop with triangle-level BVH intersection (`three-mesh-bvh`, now a dev dependency), once with both drawers shut and once pulled open by the runtime's travel. Only the window and door frames may enter the walls. It also checks that the map hangs within 5 mm of the log crowns, that floor furniture stands on the floor and desk things sit on the desk.
 - It found three pre-existing faults, fixed in `build.py`: the desk lamp shade sat 8 cm inside the window sill (lamp moved 11 cm into the room), the map hung 2.7 cm off the log crowns (moved back onto them) and the guestbook table floated 2.3 cm with its book 8 mm above the top (both lowered). Before/after lamp renders are in `art/woodland/review/cabin-shell/`.
+
+## Wall mounts and hide rug from Snowy Mountain (October 20, owner request)
+
+Snowy Mountain is retired as a separate room. The owner asked to keep its deer and bear wall mounts and its fur rug, so `wall-mounts-and-rug.py` (run by `build.py` after `quality-pass.py`) rebuilds them from the Snowy script on branch `codex/snowy-mountain-room` (commit 7037e85).
+
+- **Mounts:** the deer (`Mount_Deer`, x -1.73) and bear (`Mount_Bear`, x 1.46) hang either side of the window, as in Snowy. They sit 6 mm further into the room so the plaques rest on the log crowns.
+- **Hide rug:** `Hide_Rug` is 76% of Snowy's size and centred at (0.15, 0.55). That keeps it clear of the chair, the beanbag, the hearth and the holiday tree and pumpkin. It uses Snowy's marbled sheepskin image (`marbled-fur.jpg`, made with an image generator; ledger entry `hide-rug-fur-ai`).
+- **When they show:** all three are in the GLB but hidden by default (`src/components/room3d/WoodlandKeepsakes.tsx`). The rug shows only while the room's season is winter, chosen or by the calendar. Each mount hangs only after the visitor picks it in the drawer's Extras tab (free; saved as `roomDecor.wallMounts`).
+- `check-woodland-study-assets.mjs` treats all three as props for the clearance check, and it passes. The GLB grows from 7.8 MB to 9.2 MB (87,035 triangles).
+
+### Furniture remodel (October 20, owner request)
+
+`build.py` runs `furniture-remodel.py` after `cabin-shell.py`: every furniture piece is rebuilt in the CRT family inside its old footprint, and the CRT keeps its approved October 17 remodel. New parts name their material family in `ks_family` for `materials.py`. It was written in a Blender session on the owner's PC (branch `claude/woodland-overlaps-and-retire`). Details and before/after renders: [`art/woodland/review/furniture-remodel/`](../woodland/review/furniture-remodel/README.md).

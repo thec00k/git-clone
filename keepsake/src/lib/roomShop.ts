@@ -141,6 +141,35 @@ export const NEON_EXTRAS = [
     description: 'An endlessly played Snake game in a neon frame.',
   },
 ] as const;
+/** Woodland's deer and bear heads, kept from the retired Snowy Mountain room. Free; each hangs or comes down on its own. */
+export const WALL_MOUNTS = [
+  {
+    id: 'mount-deer',
+    title: 'Deer head mount',
+    price: 0,
+    kind: 'Wall mount',
+    icon: '🦌',
+    description: 'A calm antlered deer on a walnut plaque, left of the window.',
+  },
+  {
+    id: 'mount-bear',
+    title: 'Bear head mount',
+    price: 0,
+    kind: 'Wall mount',
+    icon: '🐻',
+    description: 'A sleepy brown bear on a walnut plaque, right of the window.',
+  },
+] as const;
+export type WallMountId = (typeof WALL_MOUNTS)[number]['id'];
+export function toggleWallMount(s: AppState, id: WallMountId): AppState {
+  const d = s.roomDecor ?? {owned: []};
+  if (!WALL_MOUNTS.some(i => i.id === id)) return s;
+  const hung = d.wallMounts ?? [];
+  return {
+    ...s,
+    roomDecor: {...d, wallMounts: hung.includes(id) ? hung.filter(m => m !== id) : [...hung, id]},
+  };
+}
 export const SHOP_GOODS = [...ROOM_GOODS, ...EXTRA_GOODS, ...NEON_EXTRAS];
 export const POSTER_GOODS = [...EXTRA_GOODS, ...NEON_EXTRAS].filter(i => i.kind === 'Poster');
 export function getNeonSign(d: AppState['roomDecor']) {
