@@ -8,7 +8,7 @@ Generated from licences/ledger.json (2026-10-11) by `node scripts/check-licences
 | ai-generated | 2 | 9 |
 | documented | 10 | 99 |
 | verified | 2 | 15 |
-| original | 6 | 137 |
+| original | 6 | 192 |
 
 Status meanings: **unverified**: Origin or licence unknown, or contains such parts. Replace or remodel before public launch. **ai-generated**: Made with an image generator. Check the tool's terms; may not be protectable by copyright. **documented**: Licence known from the source, but no saved proof yet. Save a dated copy to move it to verified. **verified**: Licence known and a copy of the licence or receipt is stored (licences/proof/ or a file shipped with the asset). **original**: Made for Keepsake; the source files or scripts are in this repository.
 
@@ -40,10 +40,10 @@ Status meanings: **unverified**: Origin or licence unknown, or contains such par
 
 ### legacy-woodland
 
-- **Files:** 7 (2 shipped, 12.8 MB shipped)
+- **Files:** 7 (0 shipped, 0.0 MB shipped)
 - **Author / origin:** Keepsake project (built in Blender for Keepsake); textures by Poly Haven; botanical print from an image generator (mixed)
 - **Licence:** Original geometry; textures CC0 from Poly Haven; embeds the AI-generated woodland-fern-v1 print (see room-prints-ai)
-- **Next action:** Settled with room-prints-ai (confirm the image tool allows commercial use), or retire once nothing loads from it.
+- **Next action:** Settled with room-prints-ai (confirm the image tool allows commercial use). Its exported GLBs were retired on 2026-10-20; the .blend stays as the starting scene for art/woodland-study/build.py.
 
 ### room-prints-ai
 
@@ -97,7 +97,7 @@ Status meanings: **unverified**: Origin or licence unknown, or contains such par
 
 ### woodland-study-room
 
-- **Files:** 4 (1 shipped, 6.2 MB shipped)
+- **Files:** 4 (1 shipped, 7.5 MB shipped)
 - **Author / origin:** Keepsake project (built in Blender for Keepsake; art/woodland-study/build.py) (mixed)
 - **Licence:** Original geometry and textures; the beanbag is CC BY 4.0 (see sketchfab-beanbag, credited in the app)
 - **Inherited objects to remodel:** Desk, ks_book, ks_crt, ks_archive, ks_guestbook, ks_map, ks_shelf, ks_chair, ks_lamp, ks_door, ks_clock, ks_ceiling_switch, ks_window, Beanbag (CC BY, see sketchfab-beanbag)

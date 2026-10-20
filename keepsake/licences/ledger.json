@@ -222,7 +222,6 @@
     {
       "id": "legacy-woodland",
       "files": [
-        "public/room/woodland/*.glb",
         "art/woodland/woodland.blend",
         "art/woodland/*.py",
         "art/woodland/*.png"
@@ -233,7 +232,7 @@
       "author": "Keepsake project (built in Blender for Keepsake); textures by Poly Haven; botanical print from an image generator",
       "licence": "Original geometry; textures CC0 from Poly Haven; embeds the AI-generated woodland-fern-v1 print (see room-prints-ai)",
       "commercialUse": "unverified",
-      "action": "Settled with room-prints-ai (confirm the image tool allows commercial use), or retire once nothing loads from it.",
+      "action": "Settled with room-prints-ai (confirm the image tool allows commercial use). Its exported GLBs were retired on 2026-10-20; the .blend stays as the starting scene for art/woodland-study/build.py.",
       "notes": "Owner confirmed on 2026-10-11 that the shared furniture was built in the owner's own Blender sessions with the Blender MCP assistant (docs/provenance-trace-2026-10-11.md). public/room/keepsake.glb (the original inherited base room, 19 MB, unknown origin) was deleted on 2026-10-10; nothing loaded it.",
       "thirdPartyTextures": {
         "licence": "CC0-1.0",
