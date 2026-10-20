@@ -4861,9 +4861,9 @@
 }
 .ks-workbench-controls .ks-clutter-markers {
   position: absolute;
-  left: auto;
-  right: 22px;
-  bottom: 145px;
+  left: 22px;
+  right: auto;
+  bottom: 160px;
   top: auto;
   transform: none;
   z-index: 3;
@@ -4901,9 +4901,9 @@
   }
   .ks-workbench-controls .ks-clutter-markers {
     bottom: 160px;
-    right: 12px;
+    left: 12px;
     transform: scale(0.8);
-    transform-origin: bottom right;
+    transform-origin: bottom left;
   }
   .ks-workbench-controls > .ks-page-turn--prev {
     left: 2%;
