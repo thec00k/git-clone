@@ -9,6 +9,7 @@
   "scripts": {
     "assets:doctor": "node scripts/refresh-room-assets.mjs --doctor",
     "assets:refresh": "node scripts/refresh-room-assets.mjs",
+    "assets:woodland": "node scripts/publish-woodland-study.mjs",
     "check:assets:browser": "node scripts/check-room-assets-browser.mjs",
     "check:responsiveness:browser": "node scripts/check-room-responsiveness-browser.mjs",
     "dev": "vite",
@@ -16,7 +17,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "check:storage": "node scripts/check-storage-browser.mjs",
-    "check:room": "node scripts/check-woodland.mjs",
+    "check:room": "node scripts/check-woodland-study-assets.mjs",
     "check:start-camera": "node scripts/check-start-camera.mjs",
     "check:acceptance": "node scripts/check-acceptance.mjs",
     "check:editor": "node scripts/check-editor.mjs",

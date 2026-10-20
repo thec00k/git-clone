@@ -1,7 +1,7 @@
 """Illustrated Nostalgia remodel of the inherited desk CRT (ks_crt).
 
 Run once in background Blender 5.1 against the unremodeled art/woodland/woodland.blend,
-then publish through `npm run assets:refresh -- --room woodland`:
+then rebuild the cabin with art/woodland-study/build.py and run `npm run assets:woodland`:
 
     blender -b art/woodland/woodland.blend --python art/woodland/remodel-crt.py
 

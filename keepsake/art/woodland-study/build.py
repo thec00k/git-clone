@@ -132,8 +132,12 @@ for name,v in shots.items():
 import runpy
 # Solid log walls, log-beam ceiling and the fan's new height (owner references, 2026-10-17).
 runpy.run_path(str(Path(__file__).with_name('cabin-shell.py')))
+# Illustrated Nostalgia furniture remodel (owner, 2026-10-19).
+runpy.run_path(str(Path(__file__).with_name('furniture-remodel.py')))
 runpy.run_path(str(Path(__file__).with_name('materials.py')))
 runpy.run_path(str(Path(__file__).with_name('quality-pass.py')))
+# Deer and bear mounts and the hide rug kept from the retired Snowy Mountain room (owner, 2026-10-20).
+runpy.run_path(str(Path(__file__).with_name('wall-mounts-and-rug.py')))
 # Selected export includes only this blockout's scene.
 bpy.context.view_layer.update()
 bpy.ops.object.select_all(action='DESELECT')

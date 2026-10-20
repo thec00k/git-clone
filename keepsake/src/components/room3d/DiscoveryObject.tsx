@@ -6,7 +6,14 @@ import * as THREE from 'three';
 import {renderedMesh, visibleBounds} from './furnitureContact';
 import {useApp} from '../../store/appStore';
 import {useNav} from '../../store/nav';
-import {activeDiscovery, discoveryState, PLACES, REWARDS, discover} from '../../lib/discoveries';
+import {
+  activeDiscovery,
+  discoveryState,
+  GUESTBOOK_BOOK_NOTE,
+  PLACES,
+  REWARDS,
+  discover,
+} from '../../lib/discoveries';
 // Per-frame scratch: useFrame must not allocate.
 const scratch = {
   seat: new THREE.Vector3(),
@@ -28,7 +35,8 @@ export function DiscoveryObject({scene}: {scene: THREE.Object3D}) {
     const seat =
       chair.getObjectByName('Seat_Anchor') ??
       chair.getObjectByName('Cozy_Chair_Cushion') ??
-      chair.getObjectByName('Chair_Seat');
+      chair.getObjectByName('Chair_Seat') ??
+      chair.getObjectByName('Study_ChairSeat');
     if (!seat) return;
     const p = seat.getWorldPosition(scratch.seat);
     if (seat instanceof THREE.Mesh) visibleBounds(seat, scratch.bounds).getCenter(p);
@@ -57,7 +65,7 @@ export function DiscoveryObject({scene}: {scene: THREE.Object3D}) {
   if (inBook)
     return (
       <group
-        position={[-1.48, 0.755, -1.61]}
+        position={[...GUESTBOOK_BOOK_NOTE]}
         rotation={[-Math.PI / 2, 0, 0]}
         onClick={e => {
           e.stopPropagation();

@@ -90,10 +90,13 @@ try {
       const {createSeed} = await import('/src/data/seed.ts');
       const {saveState} = await import('/src/lib/storage.ts');
       const s = createSeed();
+      // A patch may carry `roomDecor` (drawer choices such as wall mounts); the rest is environment.
+      const {roomDecor, ...environment} = patch;
+      if (roomDecor) s.roomDecor = roomDecor;
       Object.assign(
         s.environment,
         {roomTheme: 'woodland', entryMusic: 'off', musicOn: false, musicProvider: 'ambient', timeMode: 'day'},
-        patch,
+        environment,
       );
       s.progress.completedTour = true;
       await saveState(s);

@@ -181,6 +181,9 @@ const props = [
   'ks_ceiling_fan',
   'ks_clock',
   'ks_window',
+  'Mount_Deer',
+  'Mount_Bear',
+  'Hide_Rug',
 ];
 const pieces = [];
 for (const child of scene.children) {

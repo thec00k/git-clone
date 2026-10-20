@@ -7,12 +7,16 @@ import {
   placePoster,
   placeNeonSign,
   getNeonSign,
+  WALL_MOUNTS,
+  toggleWallMount,
 } from '../lib/roomShop';
 export {ShopRoomVariants} from './ShopRoomVariants';
 export function ShopCreativeExtras() {
   const {state, update, environment} = useApp();
   const d = state.roomDecor ?? {owned: []};
   const neon = environment.roomTheme === 'cyberpunk';
+  const woodland = (environment.roomTheme ?? 'woodland') === 'woodland';
+  const mounts = d.wallMounts ?? [];
   const items = neon ? [...NEON_EXTRAS, ...EXTRA_GOODS] : EXTRA_GOODS;
   return (
     <>
@@ -92,6 +96,35 @@ export function ShopCreativeExtras() {
         >
           {d.snakePaused ? 'Resume poster animation' : 'Pause poster animation'}
         </button>
+      )}
+      {woodland && (
+        <>
+          <p className="ks-handnote mt-4">Wall mounts</p>
+          <ul className="ks-sticker-shop-list">
+            {WALL_MOUNTS.map(item => {
+              const hung = mounts.includes(item.id);
+              return (
+                <li className="ks-sticker-pack" key={item.id}>
+                  <span className="text-3xl" aria-hidden="true">
+                    {item.icon}
+                  </span>
+                  <div className="flex-1">
+                    <p className="font-display">{item.title}</p>
+                    <small>{item.description}</small>
+                  </div>
+                  <button
+                    className="ks-tool"
+                    aria-pressed={hung}
+                    aria-label={hung ? `Take down ${item.title}` : `Hang ${item.title}`}
+                    onClick={() => update(s => toggleWallMount(s, item.id))}
+                  >
+                    {hung ? 'Take down' : 'Hang · included'}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
     </>
   );

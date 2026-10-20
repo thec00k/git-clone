@@ -19,6 +19,7 @@ For what each pack is for, its cautions and a ready-to-paste prompt, read [HANDO
 | [motion-design-skill](https://github.com/LottieFiles/motion-design-skill) | `motion-design` | Nothing. |
 | [motion-design-agent](https://github.com/soilmass/motion-design-agent) | `motion-camera`, `motion-depth`, `motion-3d-transforms`, `motion-rotation`, `motion-reflection` | The other 81 skills. Renamed with a `motion-` prefix because `camera` and `depth` are too generic; token files copied into each folder. |
 | [three-agent-skills](https://github.com/emalorenzo/three-agent-skills) | `r3f-best-practices`, `three-best-practices` | Nothing. |
+| [blender-agent-skills](https://github.com/EL4CTEO/blender-skills) | `blender-asset-qa` (added 2026-10-18) | The other 21 skills: Tom asked for the model checker only. Written for Blender 5.2; `qa_check.py` was tested on 5.1.2. |
 | [3dviz-pro-max](https://github.com/viettranx/3dviz-pro-max) | not installed | 12 MB of recipes and sample 3D kits that bundle third-party meshes under their own licences. Optional: install it on Tom's computer with `npx skills add viettranx/3dviz-pro-max` if wanted. |
 
 Source commits and licences are in `_sources/<pack>/` (`SOURCE.txt`, `LICENSE`). The only edits

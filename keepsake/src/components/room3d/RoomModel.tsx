@@ -1,5 +1,6 @@
 import {DustBunnies} from './DustBunnies';
 import {HolidayDecor} from './HolidayDecor';
+import {WoodlandKeepsakes} from './WoodlandKeepsakes';
 import {HearthFire} from './HearthFire';
 import {WindowDustMotes} from './WindowDustMotes';
 import {Vector3} from 'three';
@@ -122,6 +123,7 @@ export function RoomModel({
       </Suspense>
       {!study && <ChairFloorContact scene={cloned} />}
       {study && <HolidayDecor />}
+      {study && <WoodlandKeepsakes scene={cloned} />}
       {coastal && <HolidayDecor coastal />}
       {(study || coastal) && <DustBunnies />}
       {study && <WindowDustMotes phase={phase} />}

@@ -8,7 +8,7 @@ import {MEMORY_MOODS} from './memoryAtmosphere.ts';
 import {KEEPSAKE_PRINTS, isPaperStyle} from './stationery.ts';
 import {validFurnitureChoices} from './furniture.ts';
 import {CRT_COLORS} from './roomMusic.ts';
-import {ROOM_GOODS, SHOP_GOODS, POSTER_GOODS} from './roomShop.ts';
+import {ROOM_GOODS, SHOP_GOODS, POSTER_GOODS, WALL_MOUNTS} from './roomShop.ts';
 import {soundCloudUrl} from './soundcloud.ts';
 import type {AppState} from '../types/app';
 import {PLACES, REWARDS} from './discoveries.ts';
@@ -428,6 +428,12 @@ export function parseRoomBackup(text: string): AppState {
           (s.roomDecor.owned as string[]).includes(s.roomDecor.neonSign as string)),
     );
     ensure(s.roomDecor.snakePaused === undefined || typeof s.roomDecor.snakePaused === 'boolean');
+    ensure(
+      s.roomDecor.wallMounts === undefined ||
+        (strings(s.roomDecor.wallMounts) &&
+          (s.roomDecor.wallMounts as string[]).every(id => WALL_MOUNTS.some(m => m.id === id)) &&
+          new Set(s.roomDecor.wallMounts as string[]).size === (s.roomDecor.wallMounts as string[]).length),
+    );
   }
   if (object(s.roomDecor) && s.roomDecor.layouts !== undefined) {
     ensure(object(s.roomDecor.layouts));

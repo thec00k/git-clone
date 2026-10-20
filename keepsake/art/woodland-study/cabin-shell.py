@@ -169,7 +169,7 @@ for side, extra in ((-1, 0.0), (1, .002)):   # the right board sits 2 mm proud s
 dz = END_CROWN - CASE_T / 2 + .01             # door wall casing centre (room side is -z)
 board('Cabin_Trim_Door', (-.36 - .0225, 1.13, dz), (.045, 2.26, CASE_T))          # narrow: the mantel is 5 cm away
 board('Cabin_Trim_Door', (.66 + CASE_W / 2 - .02, 1.13, dz), (CASE_W - .04, 2.26, CASE_T))
-board('Cabin_Trim_Door', ((-.405 + .76) / 2, 2.16 + .05, dz - .002), (1.165, .10, CASE_T + .004))
+board('Cabin_Trim_Door', ((-.409 + .76) / 2, 2.16 + .05, dz - .002), (1.169, .10, CASE_T + .004))  # 4 mm past the narrow side board, so their ends never share a face
 
 # --- Ceiling --------------------------------------------------------------------------------
 # Tongue-and-groove boards under the sealed ceiling, carried by round log joists, which rest on
