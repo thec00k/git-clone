@@ -60,7 +60,8 @@ for (const room of ['beachfront']) {
       `/room/woodland-study/woodland-study.glb?v=${hash.slice(0, 12)}`,
     );
   }
-  assert.ok(bytes.length <= 8 * 1048576);
+  // Both graphics levels load this one file, so it gets the High budget.
+  assert.ok(bytes.length <= 12 * 1048576);
 }
 assert.equal(roomDeviceTier(390), 'phone');
 assert.equal(roomDeviceTier(820), 'tablet');
