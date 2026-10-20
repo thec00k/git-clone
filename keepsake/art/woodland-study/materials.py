@@ -81,8 +81,6 @@ for o in bpy.context.scene.objects:
     if o.type not in {'MESH','CURVE'}:continue
     n=o.name
     if 'glass' in n.lower():continue
-    # keepsakes.py: the Snowy mounts keep their own coats; their plaques join the cabin's walnut joinery.
-    if n.startswith('Keepsake_') and not n.endswith(('_Plaque','_Plaque_Inlay')):continue
     m=oak;kind='wood';preserve_uv=False
     fam=o.get('ks_family') # furniture-remodel.py names each new part's family
     if fam:
@@ -92,7 +90,6 @@ for o in bpy.context.scene.objects:
     elif n=='Study_Ceiling':m=joinery # dark backing shows in the grooves between ceiling boards
     elif n.startswith('Cabin_Ceiling_Board'):m=timber;kind='wood'
     elif n.startswith('Cabin_Trim'):m=joinery;kind='wood'
-    elif n.startswith('Keepsake_'):m=joinery if n.endswith('_Plaque') else oak;kind='wood'
     elif n.startswith('Cabin_'):m=logs;kind='wood';preserve_uv=True # cabin-shell.py wraps grain around each log
     elif n.startswith('Fan_'):
         # Inherited ceiling fan: walnut blades, cream glass bowl, brass trim, warm-iron body.

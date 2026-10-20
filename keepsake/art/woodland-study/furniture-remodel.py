@@ -1,6 +1,6 @@
 """Illustrated Nostalgia remodel of the Woodland cabin's furniture (owner request, 2026-10-19).
 
-Run by build.py after keepsakes.py and before materials.py. Each piece is rebuilt inside its old
+Run by build.py after cabin-shell.py and before materials.py. Each piece is rebuilt inside its old
 footprint in the approved CRT family: softly rounded edges, tapered and turned legs, walnut frames,
 oak carcasses, cream and moss upholstery, oversized brass hardware (bible: handles 115-120 %).
 

@@ -1,19 +1,16 @@
-# Woodland furniture remodel and the Snowy keepsakes
+# Woodland furniture remodel
 
-October 19, 2026. The owner asked for every furniture piece in the cabin to be redone, for the Snowy Mountain room to be retired, and for its deer and bear wall mounts and fur rug to be kept.
+October 19, 2026. The owner asked for every furniture piece in the cabin to be redone, including the desk drawer front. The Snowy deer and bear mounts and hide rug are handled separately in PR #31.
 
-`before-*.jpg` and `after-*.jpg` use the same cameras and lights (Cycles, 48 samples, `art/woodland/review/cabin-shell/render-script/review-render.py` with these shots). `in-app-night.jpg` is the built app in a browser at night.
+`before-*.jpg` and `after-*.jpg` use the same cameras and lights (Cycles, 48 samples, `art/woodland/review/cabin-shell/render-script/review-render.py` with these shots).
 
 ## How it is built
 
-`art/woodland-study/build.py` now runs two more passes after `cabin-shell.py`:
-
-- `keepsakes.py` appends the deer mount, bear mount and hide rug from `keepsakes.blend`. That file was extracted once from the Snowy branch by `extract-keepsakes.py`. The mounts hang where they hung in the Snowy cabin, either side of the window, with their plaques flat on the log crowns (found by casting rays at the logs). Their plaques now use the cabin's walnut. The rug is 85% of its Snowy size, centred at x 0.10, z 0.45, which keeps it clear of the chair, the hearth and the beanbag. Geometry, coats and the rug's fur image are the Snowy ones. The fur image is repacked as a 1024 px JPEG.
-- `furniture-remodel.py` rebuilds each piece inside its old footprint in the approved CRT family. New parts carry `ks_family`, which `materials.py` uses to pick their material, and `ks_remodel`, which `quality-pass.py` uses to leave them alone.
+`art/woodland-study/build.py` runs `furniture-remodel.py` after `cabin-shell.py`. It rebuilds each piece inside its old footprint in the approved CRT family. New parts carry `ks_family`, which `materials.py` uses to pick their material, and `ks_remodel`, which `quality-pass.py` uses to leave them alone.
 
 | Piece | What changed |
 | --- | --- |
-| Desk | Thicker rounded top. Tapered legs with brass shoes. One centred drawer under the scrapbook with a raised panel, a D-pull on two roses and apron panels either side. The drawer box is 2 mm narrower than its front, which removes the flush-ends overlap. |
+| Desk | Thicker rounded top. Tapered legs with brass shoes. A new drawer front: one centred drawer under the scrapbook with a raised panel and a D-pull on two roses, between two apron panels. The drawer box is 2 mm narrower than its front, which removes the flush-ends overlap. |
 | Chair | Upholstered side chair: turned walnut legs with an H-stretcher, back posts that lean back slightly, an arched crest rail, a piped moss seat cushion and a back cushion. The seat top stays at 0.52 m, where the hidden note rests. |
 | Lamp | Walnut domed base on a brass ring, slim brass stem and socket, a larger cone shade (bible: oversized lamp shade), and a harp with a finial. |
 | Clock | Rounded walnut case with half-round cheeks and four brass feet. The live digits are unchanged. |
@@ -36,4 +33,4 @@ Every root keeps its name, origin and transform. The child names the code and ch
 - `check-woodland-study-assets.mjs` passes. That covers prop clearance with both drawers shut and open, props resting on the floor, desk and wall, the map on the log crowns, the camera corridors, and the fan and hearth clearances.
 - `check-discovery-geometry.mjs` and `npm run check:acceptance` pass, and the build succeeds.
 - Overlap scan (`art/woodland/review/overlap-check/zf_spots.py`): no new spot where two surfaces lie exactly on each other and a visitor can see it. The desk-drawer spot is gone. The two known cabin-shell spots remain (the door casing corner, and the top window logs behind the ceiling).
-- Model: 84,570 triangles (was 64,210), 9.1 MB (was 7.8 MB). The keepsakes add about 1.3 MB, which is mostly the mounts' fur strands and the rug's fur image. The inherited beanbag's 9,400 faces are gone.
+- Model: 59,970 triangles (was 64,210), 7.5 MB (was 7.8 MB). Removing the inherited beanbag's 9,400 faces more than pays for the new parts.
