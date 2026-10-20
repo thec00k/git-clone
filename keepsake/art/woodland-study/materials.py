@@ -46,6 +46,8 @@ _l.new(_tex.outputs['Color'],_mix.inputs['A']);_l.new(_tone.outputs['Color'],_mi
 brass=solid('Aged_Brass','#bda16b',.36,.72);iron=solid('Warm_Iron','#343832',.56,.35)
 ceramic=solid('Glazed_Cream','#e2d7b8',.29);enamel=solid('Olive_Enamel','#78816c',.39,.08)
 screen=solid('Screen_Glass','#172422',.23);plaster=solid('Warm_Chalk','#e4dac8',.96)
+families={'oak':oak,'joinery':joinery,'veneer':veneer,'honey':honey,'brass':brass,'iron':iron,'ceramic':ceramic,'enamel':enamel,
+          'moss':moss,'linen':linen,'paper':paper,'clay':clay,'forest':forest}
 def assign(o,m):
     o.data.materials.clear();o.data.materials.append(m)
     if o.type=='MESH':
@@ -80,6 +82,10 @@ for o in bpy.context.scene.objects:
     n=o.name
     if 'glass' in n.lower():continue
     m=oak;kind='wood';preserve_uv=False
+    fam=o.get('ks_family') # furniture-remodel.py names each new part's family
+    if fam:
+        m=families[fam];kind='cloth' if fam in ('moss','linen','paper','clay','forest') else 'wood'
+        assign(o,m);project(o,kind);continue
     if n=='Study_Floor':m=floor;kind='floor'
     elif n=='Study_Ceiling':m=joinery # dark backing shows in the grooves between ceiling boards
     elif n.startswith('Cabin_Ceiling_Board'):m=timber;kind='wood'
