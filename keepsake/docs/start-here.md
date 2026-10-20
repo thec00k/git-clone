@@ -3,7 +3,7 @@
 Written for the next agent (for example the Claude desktop agent) picking this up. Read this first, then the latest dated handoff [`handoff-2026-10-11.md`](handoff-2026-10-11.md) and `handoff-current.md`.
 
 ## Where things are
-- Repo `thec00k/git-clone`, app in `keepsake/`. Work branch: **`codex/foundations-and-seasons`** (from `codex/woodland-composition-proof`). Merged into it on October 11: [PR #6](https://github.com/thec00k/git-clone/pull/6) (rain and snow outside the cabin window, welcome tour restored), [PR #8](https://github.com/thec00k/git-clone/pull/8) (licence provenance trace) and [PR #9](https://github.com/thec00k/git-clone/pull/9) (5-photo minimum before sharing a book). CI was green. `main` is intentionally unchanged. Scanner branch `codex/scanner-texture-pipeline` is on hold. Snowy Mountain and Sky Castle branches are not integrated.
+- Repo `thec00k/git-clone`, app in `keepsake/`. Work branch: **`codex/foundations-and-seasons`** (from `codex/woodland-composition-proof`). Merged into it on October 11: [PR #6](https://github.com/thec00k/git-clone/pull/6) (rain and snow outside the cabin window, welcome tour restored), [PR #8](https://github.com/thec00k/git-clone/pull/8) (licence provenance trace) and [PR #9](https://github.com/thec00k/git-clone/pull/9) (5-photo minimum before sharing a book). CI was green. `main` is intentionally unchanged. Scanner branch `codex/scanner-texture-pipeline` is on hold. Sky Castle is not integrated. Snowy Mountain was retired on October 19; its fire and sound, and its deer and bear mounts and hide rug, live in the Woodland cabin, and its branch is kept only as reference.
 - Read in this order: `README.md`, `keepsake/README.md`, `docs/handoff-current.md`, `docs/code-map.md`, `CONTRIBUTING.md`, then `docs/handoff-2026-10-11.md`, `docs/backend-design.md`, `docs/safety-model.md`, `docs/roadmap-2026-10-10.md`, `licences/README.md`. Owner decisions are in the Project doc `claude/owner-decisions-2026-10-09.md`.
 
 ## Done in this stretch
@@ -23,7 +23,7 @@ Model guide: Opus 5.5 for database permissions, safety, data-loss and audits; So
 | Connect the app to Supabase (project, auth, sync client with outbox) | Opus 5.5 |
 | Remaining audit findings (below) | Opus 5.5 |
 | Moderation vendors, image processing, moderator screen, in-app safety links, Terms/Privacy, account deletion/export | Opus 5.5 (legal review by a lawyer) |
-| Remodel the 14 inherited Woodland objects, replace unverified assets, Beachfront remodel (needs Blender on the owner's computer) | Sonnet 5.5 |
+| ~~Remodel the 14 inherited Woodland objects~~ (done 2026-10-19, `art/woodland/review/furniture-remodel/`), replace unverified assets, Beachfront remodel (needs Blender on the owner's computer) | Sonnet 5.5 |
 | Save proof copies of licence pages into `licences/proof/` (5 entries known but unproven) | Sonnet 5.5 |
 | Enforce the 5-photo share minimum on the server too (the app enforces it since October 11; the database does not check it yet) | Opus 5.5 |
 | Neon City and Sky Castle review against the art direction | Opus 5.5 |

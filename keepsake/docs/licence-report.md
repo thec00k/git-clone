@@ -1,14 +1,14 @@
 # Licence report
 
-Generated from licences/ledger.json (2026-10-11) by `node scripts/check-licences.mjs --report`. Do not edit by hand.
+Generated from licences/ledger.json (2026-10-19) by `node scripts/check-licences.mjs --report`. Do not edit by hand.
 
 | Status | Entries | Files |
 | --- | --- | --- |
 | unverified | 3 | 14 |
-| ai-generated | 2 | 9 |
-| documented | 10 | 99 |
+| ai-generated | 3 | 11 |
+| documented | 10 | 100 |
 | verified | 2 | 15 |
-| original | 6 | 192 |
+| original | 6 | 226 |
 
 Status meanings: **unverified**: Origin or licence unknown, or contains such parts. Replace or remodel before public launch. **ai-generated**: Made with an image generator. Check the tool's terms; may not be protectable by copyright. **documented**: Licence known from the source, but no saved proof yet. Save a dated copy to move it to verified. **verified**: Licence known and a copy of the licence or receipt is stored (licences/proof/ or a file shipped with the asset). **original**: Made for Keepsake; the source files or scripts are in this repository.
 
@@ -43,7 +43,14 @@ Status meanings: **unverified**: Origin or licence unknown, or contains such par
 - **Files:** 7 (0 shipped, 0.0 MB shipped)
 - **Author / origin:** Keepsake project (built in Blender for Keepsake); textures by Poly Haven; botanical print from an image generator (mixed)
 - **Licence:** Original geometry; textures CC0 from Poly Haven; embeds the AI-generated woodland-fern-v1 print (see room-prints-ai)
-- **Next action:** Settled with room-prints-ai (confirm the image tool allows commercial use). Its exported GLBs were retired on 2026-10-20; the .blend stays as the starting scene for art/woodland-study/build.py.
+- **Next action:** Settled with room-prints-ai (confirm the image tool allows commercial use).
+
+### snowy-keepsakes
+
+- **Files:** 2 (1 shipped, 8.7 MB shipped)
+- **Author / origin:** Keepsake project (deer and bear mounts and hide rug built in Blender for the Snowy Mountain room, art/snowy-mountain/build.py on codex/snowy-mountain-room); rug fur image from an image generator (mixed)
+- **Licence:** Original geometry and procedural coat textures; the rug's marbled fur image (marbled-fur.png) was made with the built-in image generator, prompt recorded in docs/snowy-mountain-room.md on that branch
+- **Next action:** Confirm the image tool's terms allow commercial use (as for room-prints-ai), or replace the rug's fur image with a hand-made or commissioned one.
 
 ### room-prints-ai
 
@@ -97,11 +104,11 @@ Status meanings: **unverified**: Origin or licence unknown, or contains such par
 
 ### woodland-study-room
 
-- **Files:** 4 (1 shipped, 7.5 MB shipped)
+- **Files:** 5 (1 shipped, 8.7 MB shipped)
 - **Author / origin:** Keepsake project (built in Blender for Keepsake; art/woodland-study/build.py) (mixed)
-- **Licence:** Original geometry and textures; the beanbag is CC BY 4.0 (see sketchfab-beanbag, credited in the app)
-- **Inherited objects to remodel:** Desk, ks_book, ks_crt, ks_archive, ks_guestbook, ks_map, ks_shelf, ks_chair, ks_lamp, ks_door, ks_clock, ks_ceiling_switch, ks_window, Beanbag (CC BY, see sketchfab-beanbag)
-- **Next action:** Nothing blocks launch. The Illustrated Nostalgia remodel replaces the kept objects for art reasons.
+- **Licence:** Original geometry and textures (the rug's fur image is covered by snowy-keepsakes)
+- **Inherited objects to remodel:** ks_book (placeholder, hidden behind the live scrapbook), ks_ceiling_switch (invisible anchor)
+- **Next action:** Nothing blocks launch. The furniture was remodelled on 2026-10-19 (art/woodland-study/furniture-remodel.py); the CRT keeps its approved October 17 remodel.
 
 ### beachfront-room
 

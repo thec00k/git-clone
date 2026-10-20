@@ -54,3 +54,7 @@ The owner asked for walls that read as stacked solid logs, with no gaps between 
 
 - `check-woodland-study-assets.mjs` now tests every prop mesh against the shell, trim, beams and every other prop with triangle-level BVH intersection (`three-mesh-bvh`, now a dev dependency), once with both drawers shut and once pulled open by the runtime's travel. Only the window and door frames may enter the walls. It also checks that the map hangs within 5 mm of the log crowns, that floor furniture stands on the floor and desk things sit on the desk.
 - It found three pre-existing faults, fixed in `build.py`: the desk lamp shade sat 8 cm inside the window sill (lamp moved 11 cm into the room), the map hung 2.7 cm off the log crowns (moved back onto them) and the guestbook table floated 2.3 cm with its book 8 mm above the top (both lowered). Before/after lamp renders are in `art/woodland/review/cabin-shell/`.
+
+### Furniture remodel and Snowy keepsakes (October 19, owner request)
+
+`build.py` runs `keepsakes.py` (deer and bear mounts and the hide rug kept from the retired Snowy Mountain room, from `keepsakes.blend`) and `furniture-remodel.py` (every furniture piece rebuilt in the CRT family inside its old footprint) after `cabin-shell.py`. New parts name their material family in `ks_family` for `materials.py`. Details, before/after renders and the check results: [`art/woodland/review/furniture-remodel/`](../woodland/review/furniture-remodel/README.md).
