@@ -20,7 +20,7 @@ The Beanbag has a known CC BY licence (`sketchfab-beanbag` entry), so it needs a
 
 ## Where they live
 - The default cabin ("Woodland Retreat 2.0") is built by `art/woodland-study/build.py` on top of the earlier `art/woodland/woodland.blend`, and ships as `public/room/woodland-study/woodland-study.glb`. That build keeps these 14 objects from that scene; walls, hearth, floor, materials and textures are already original.
-- `art/woodland/woodland.blend` and `public/room/woodland/*.glb` stay until nothing loads from them (`legacy-woodland` entry).
+- `art/woodland/woodland.blend` stays as the cabin build's starting scene. The old `public/room/woodland/*.glb` exports were retired on October 20, 2026.
 
 ## Rules
 - Keep the object names, origins and pivots above: they are the app's interaction anchors (also `Desk_Drawer`). Do not join moving parts (drawer, chair parts, window panes) into static geometry. Keep the authored camera poses, furniture placement, window size and the 20-degree chair heading.

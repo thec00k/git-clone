@@ -1,7 +1,7 @@
 """Carry the desk-CRT style across the inherited Woodland furniture.
 
 Run once in background Blender 5.1 against art/woodland/woodland.blend after remodel-crt.py,
-then publish through `npm run assets:refresh -- --room woodland`:
+then rebuild the cabin with art/woodland-study/build.py and run `npm run assets:woodland`:
 
     blender -b art/woodland/woodland.blend --python art/woodland/restyle-furniture.py
 
