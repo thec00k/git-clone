@@ -4,13 +4,13 @@
   "qualities": {
     "balanced": {
       "file": "woodland-study.glb",
-      "bytes": 7822784,
-      "sha256": "2886852827375a07f48e89d66e79cea56ce59db91eb9a1a93faa9cd24476d829"
+      "bytes": 8936960,
+      "sha256": "ee10ac763be5c8115062b2c8911df1f224b14347cdb5a8f582c18077f56646b9"
     },
     "high": {
       "file": "woodland-study.glb",
-      "bytes": 7822784,
-      "sha256": "2886852827375a07f48e89d66e79cea56ce59db91eb9a1a93faa9cd24476d829"
+      "bytes": 8936960,
+      "sha256": "ee10ac763be5c8115062b2c8911df1f224b14347cdb5a8f582c18077f56646b9"
     }
   }
 }
