@@ -37,7 +37,7 @@ import {MemoryTrails} from './MemoryTrails';
 import {ownedStickerGlyphs} from '../lib/stickerPacks';
 import {RoomFrame} from './RoomFrame';
 import {Spread} from './Spread';
-import {PageFlip} from './PageFlip';
+import {PageFlip, SnapshotPrefetch} from './PageFlip';
 import {SelectionToolbar} from './SelectionToolbar';
 import {SaveIndicator} from './SaveIndicator';
 import {PrintView} from './PrintView';
@@ -593,25 +593,35 @@ export function BookView({
                 onDone={finishTurn}
               />
             ) : (
-              <Spread
-                leftPage={sb.leftPage}
-                rightPage={sb.rightPage}
-                activePageId={isVisitor ? null : targetPageId}
-                bookTitle={sb.book.title}
-                bookSubtitle={sb.book.subtitle}
-                selectedId={isVisitor ? null : sb.selectedId}
-                onActivate={isVisitor ? () => {} : sb.setActivePageId}
-                onSelect={isVisitor ? () => {} : sb.setSelectedId}
-                onDeselect={() => sb.setSelectedId(null)}
-                onMove={isVisitor ? () => {} : (id, x, y) => sb.updateElement(id, {x, y})}
-                onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
-                onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, {text})}
-                drawColor={isVisitor ? null : drawInk}
-                drawWidth={drawWidth}
-                onDrawStroke={
-                  isVisitor ? undefined : (id, color, points) => sb.addStroke(id, color, points, drawWidth)
-                }
-              />
+              <>
+                <SnapshotPrefetch
+                  nextFront={sb.rightPage}
+                  nextBack={sb.pages[(sb.spread + 1) * 2] ?? null}
+                  prevFront={sb.leftPage}
+                  prevBack={sb.pages[(sb.spread - 1) * 2 + 1] ?? null}
+                  bookTitle={sb.book.title}
+                  bookSubtitle={sb.book.subtitle}
+                />
+                <Spread
+                  leftPage={sb.leftPage}
+                  rightPage={sb.rightPage}
+                  activePageId={isVisitor ? null : targetPageId}
+                  bookTitle={sb.book.title}
+                  bookSubtitle={sb.book.subtitle}
+                  selectedId={isVisitor ? null : sb.selectedId}
+                  onActivate={isVisitor ? () => {} : sb.setActivePageId}
+                  onSelect={isVisitor ? () => {} : sb.setSelectedId}
+                  onDeselect={() => sb.setSelectedId(null)}
+                  onMove={isVisitor ? () => {} : (id, x, y) => sb.updateElement(id, {x, y})}
+                  onTransform={isVisitor ? () => {} : (id, patch) => sb.updateElement(id, patch)}
+                  onEditText={isVisitor ? () => {} : (id, text) => sb.updateElement(id, {text})}
+                  drawColor={isVisitor ? null : drawInk}
+                  drawWidth={drawWidth}
+                  onDrawStroke={
+                    isVisitor ? undefined : (id, color, points) => sb.addStroke(id, color, points, drawWidth)
+                  }
+                />
+              </>
             )}
             {overlay(
               <button
