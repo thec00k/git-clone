@@ -22,7 +22,6 @@ import {startCamera} from './startCamera';
 import {RoomModel} from './RoomModel';
 import type {HotspotAction} from './RoomInteractions';
 import {useRoomRenderProfile} from './useRoomRenderProfile';
-import {WoodlandScenery} from './WoodlandScenery';
 import {OutdoorWeather} from './OutdoorWeather';
 import {RoomControls} from './RoomControls';
 import {RoomShadowQuality} from './RoomShadowQuality';
@@ -272,9 +271,6 @@ export function RoomScene3D({
               onToggleLamp={toggleLamp}
               onToggleCeiling={toggleCeiling}
             />
-            {activeRoom.woodland && !study && (
-              <WoodlandScenery phase={phase} environment={environment} particles={profile.particles} />
-            )}
             {study && <WoodlandStudyExterior season={environment.season} phase={phase} />}
             {study && environment.weather !== 'clear' && (
               <OutdoorWeather kind={environment.weather} count={profile.particles} room="woodland" />
