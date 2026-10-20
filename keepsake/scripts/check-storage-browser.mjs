@@ -1,8 +1,19 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+
 import {createRequire} from 'node:module';
 const require = createRequire(import.meta.url);
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+
+// The flat room has a "Room settings" button; the 3D room opens the same panel from its window hotspot.
+async function openSettings(page) {
+  const button = page.getByRole('button', {name: 'Room settings', exact: true});
+  if (await button.count()) return button.click();
+  await page
+    .locator('[aria-label="Window and room settings"]')
+    .first()
+    .evaluate(el => el.click());
+}
 const browser = await chromium.launch({
   headless: true,
   ...(process.env.TEST_BROWSER ? {executablePath: process.env.TEST_BROWSER} : {}),
@@ -151,15 +162,15 @@ try {
   const page = await ui.newPage();
   await page.goto(base);
   await page.getByRole('button', {name: 'Open scrapbook', exact: true}).waitFor();
-  await page.getByRole('button', {name: 'Room settings', exact: true}).click();
+  await openSettings(page);
   await page.getByLabel('Graphics quality').selectOption('high');
-  await page.getByRole('button', {name: 'Music & CRT', exact: true}).click();
+  await page.getByRole('button', {name: 'Sound', exact: true}).click();
   await page.getByLabel('Music on room entry').selectOption('off');
-  await page.getByRole('button', {name: 'Saving & storage', exact: true}).click();
+  await page.getByRole('button', {name: 'Storage', exact: true}).click();
   await page.getByRole('status').filter({hasText: 'All changes saved on this device.'}).waitFor();
   await page.getByRole('button', {name: 'Close room settings', exact: true}).click();
   await page.reload();
-  await page.getByRole('button', {name: 'Room settings', exact: true}).click();
+  await openSettings(page);
   assert.equal(await page.getByLabel('Graphics quality').inputValue(), 'high');
   await page.getByRole('button', {name: 'Close room settings', exact: true}).click();
   await page.getByRole('button', {name: 'Open scrapbook', exact: true}).click();
@@ -186,20 +197,20 @@ try {
   assert.ok(await page.locator('.ks-page-mini polyline[stroke="#347dc1"][stroke-width="2.8"]').count());
   assert.equal(await page.locator('.ks-page-mini img[style*="aspect-ratio: 1"]').count(), 20);
   await page.getByRole('button', {name: 'Return to the desk', exact: true}).click();
-  await page.getByRole('button', {name: 'Room settings', exact: true}).click();
-  await page.getByRole('button', {name: 'Saving & storage', exact: true}).click();
+  await openSettings(page);
+  await page.getByRole('button', {name: 'Storage', exact: true}).click();
   await page.getByRole('status').filter({hasText: 'All changes saved on this device.'}).waitFor();
   await page.getByRole('button', {name: 'Close room settings', exact: true}).click();
   console.log('PASS: 20-photo import, undo/redo, thumbnails with square crops and marker strokes.');
   const second = await ui.newPage();
   await second.goto(base);
-  await second.getByRole('button', {name: 'Room settings', exact: true}).click();
-  await second.getByRole('button', {name: 'Help & profile', exact: true}).click();
+  await openSettings(second);
+  await second.getByRole('button', {name: 'Help', exact: true}).click();
   await second.getByLabel('Your name', {exact: true}).fill('Second tab');
-  await second.getByRole('button', {name: 'Saving & storage', exact: true}).click();
+  await second.getByRole('button', {name: 'Storage', exact: true}).click();
   await second.getByRole('status').filter({hasText: 'All changes saved on this device.'}).waitFor();
-  await page.getByRole('button', {name: 'Room settings', exact: true}).click();
-  await page.getByRole('button', {name: 'Help & profile', exact: true}).click();
+  await openSettings(page);
+  await page.getByRole('button', {name: 'Help', exact: true}).click();
   await page.getByLabel('Your name', {exact: true}).fill('Unsaved first tab');
   await page
     .getByRole('heading', {name: 'This room changed in another tab'})
