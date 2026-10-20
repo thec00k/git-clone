@@ -17,7 +17,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "check:storage": "node scripts/check-storage-browser.mjs",
-    "check:room": "node scripts/check-woodland.mjs",
+    "check:room": "node scripts/check-woodland-study-assets.mjs",
     "check:start-camera": "node scripts/check-start-camera.mjs",
     "check:acceptance": "node scripts/check-acceptance.mjs",
     "check:editor": "node scripts/check-editor.mjs",
