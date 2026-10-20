@@ -61,4 +61,5 @@ Snowy Mountain is retired as a separate room. The owner asked to keep its deer a
 
 - **Mounts:** the deer (`Mount_Deer`, x -1.73) and bear (`Mount_Bear`, x 1.46) hang either side of the window, as in Snowy. They sit 6 mm further into the room so the plaques rest on the log crowns.
 - **Hide rug:** `Hide_Rug` is 76% of Snowy's size and centred at (0.15, 0.55). That keeps it clear of the chair, the beanbag, the hearth and the holiday tree and pumpkin. It uses Snowy's marbled sheepskin image (`marbled-fur.jpg`, made with an image generator; ledger entry `hide-rug-fur-ai`).
+- **When they show:** all three are in the GLB but hidden by default (`src/components/room3d/WoodlandKeepsakes.tsx`). The rug shows only while the room's season is winter, chosen or by the calendar. Each mount hangs only after the visitor picks it in the drawer's Extras tab (free; saved as `roomDecor.wallMounts`).
 - `check-woodland-study-assets.mjs` treats all three as props for the clearance check, and it passes. The GLB grows from 7.8 MB to 9.2 MB (87,035 triangles).
