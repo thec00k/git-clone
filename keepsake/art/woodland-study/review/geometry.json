@@ -1,7 +1,7 @@
 {
-  "bytes": 7822784,
-  "meshes": 267,
-  "triangles": 64210,
+  "bytes": 9234016,
+  "meshes": 323,
+  "triangles": 87035,
   "checks": [
     "Functional anchors",
     "Camera manifest alignment",
