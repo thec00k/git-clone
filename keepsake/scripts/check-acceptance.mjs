@@ -9,6 +9,7 @@ const scripts = [
   'check-workbench.mjs',
   'check-furniture.mjs',
   'check-woodland.mjs',
+  'check-woodland-study-assets.mjs',
   'check-room-assets.mjs',
   'check-editor.mjs',
   'check-photo-batch.mjs',

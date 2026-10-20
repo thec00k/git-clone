@@ -6,7 +6,8 @@ const budget = {
   ...woodlandRoom.budget,
   maxBytes: process.argv.includes('--high') ? 12 * 1024 * 1024 : woodlandRoom.budget.maxBytes,
 };
-const theme = process.argv.includes('--beachfront') ? 'beachfront' : 'woodland';
+// The old Woodland export is retired; the cabin model is checked by check-woodland-study-assets.mjs.
+const theme = 'beachfront';
 const fileArg = process.argv.indexOf('--file');
 const file =
   fileArg >= 0
@@ -78,7 +79,7 @@ const desk = bounds('Desk_Top');
 const book = bounds('ks_book');
 const map = bounds('ks_map');
 const shelf = bounds('ks_shelf');
-const cactus = bounds(theme === 'beachfront' ? 'Beachfront_Prop_Seashell' : 'Accent_Pot');
+const cactus = bounds('Beachfront_Prop_Seashell');
 const sill = bounds('Win_Sill');
 assert.ok(
   cactus.min.x >= sill.min.x &&

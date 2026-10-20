@@ -1,0 +1,16 @@
+{
+  "room": "woodland",
+  "source": "art/woodland-study/build.py",
+  "qualities": {
+    "balanced": {
+      "file": "woodland-study.glb",
+      "bytes": 8936960,
+      "sha256": "ee10ac763be5c8115062b2c8911df1f224b14347cdb5a8f582c18077f56646b9"
+    },
+    "high": {
+      "file": "woodland-study.glb",
+      "bytes": 8936960,
+      "sha256": "ee10ac763be5c8115062b2c8911df1f224b14347cdb5a8f582c18077f56646b9"
+    }
+  }
+}
