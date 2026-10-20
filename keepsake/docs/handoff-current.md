@@ -20,6 +20,8 @@
 > - **Oct 11 fix** ([PR #6](https://github.com/thec00k/git-clone/pull/6), merged into `codex/foundations-and-seasons`): rain and snow now show outside the Woodland cabin window (the weather setting did nothing there after the promotion), and the welcome tour runs again for new owners in the cabin; only the `?study=woodland` review mode skips it. Checked with headless screenshots; build and acceptance pass.
 > - **Open**: holiday dressing; commissioned exterior art; remove classic; room swapping must not require `ownedRoomThemes`; stamps and daily login (small fixed amount, no streaks, balance cap, nothing public); other Playwright checks are not yet adapted to CI; the lab.gfx.world effects idea awaits the owner's reference.
 
+> **Update, October 20, 2026 — Beachfront furniture remodel** (branch `claude/beachfront-remodel`, for review): Woodland's new shapes in pale driftwood, whitewash and sea glass, made by `art/beachfront/coastal-remodel.py` (runs `furniture-remodel.py` with `KS_ROOM = 'beachfront'`) and published with `assets:refresh -- --room beachfront`. The coastal lamp, clock, CRT, window and shell are unchanged. Within the 80-material and 350-draw budgets: 4.61 / 7.53 MiB. Details and before/after renders: [`art/beachfront/review/coastal-remodel/`](../art/beachfront/review/coastal-remodel/README.md).
+
 ## Earlier record (October 7, 2026)
 
 _Historical: this section describes the branch as of October 7. The active branch is now `codex/foundations-and-seasons`, which descends from `codex/woodland-composition-proof` and contains everything below._

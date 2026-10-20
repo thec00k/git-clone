@@ -8,7 +8,7 @@ Generated from licences/ledger.json (2026-10-11) by `node scripts/check-licences
 | ai-generated | 3 | 10 |
 | documented | 10 | 99 |
 | verified | 2 | 15 |
-| original | 6 | 228 |
+| original | 6 | 230 |
 
 Status meanings: **unverified**: Origin or licence unknown, or contains such parts. Replace or remodel before public launch. **ai-generated**: Made with an image generator. Check the tool's terms; may not be protectable by copyright. **documented**: Licence known from the source, but no saved proof yet. Save a dated copy to move it to verified. **verified**: Licence known and a copy of the licence or receipt is stored (licences/proof/ or a file shipped with the asset). **original**: Made for Keepsake; the source files or scripts are in this repository.
 
@@ -112,7 +112,7 @@ Status meanings: **unverified**: Origin or licence unknown, or contains such par
 
 ### beachfront-room
 
-- **Files:** 5 (2 shipped, 13.2 MB shipped)
+- **Files:** 5 (2 shipped, 12.1 MB shipped)
 - **Author / origin:** Keepsake project (built in Blender for Keepsake); textures by Poly Haven (mixed)
 - **Licence:** Original geometry; textures CC0 from Poly Haven
 - **Next action:** Save dated copies of the Poly Haven pages listed in licences/proof/polyhaven-textures/ to move this to verified.
