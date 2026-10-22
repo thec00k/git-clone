@@ -1,5 +1,6 @@
 import type {AppState} from '../../types/app';
 import type {Scrapbook} from '../../types/scrapbook';
+import type {RoomThemeId} from '../roomThemes.ts';
 import {LIMITS, canShareBook} from '../limits.ts';
 
 /**
@@ -26,7 +27,7 @@ export interface BookShape {
   pages: PageShape[];
 }
 export interface RoomShape {
-  theme: 'woodland' | 'beachfront' | 'cyberpunk';
+  theme: RoomThemeId;
   /** What a visitor sees: lights, season, decor. */
   settings: Record<string, unknown>;
   /** Owner only: everything else that is not a book or a file. */
