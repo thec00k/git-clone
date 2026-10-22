@@ -2,7 +2,7 @@
 
 October 20, 2026. The owner asked for Beachfront to get Woodland's new furniture shapes in pale driftwood, whitewash and sea glass.
 
-`before-*.jpg` and `after-*.jpg` use the same cameras and lights (Cycles, 48 samples). `in-app-night.jpg` is the app in a browser after switching a test room to Beachfront.
+`before-*.jpg` and `after-*.jpg` use the same cameras and lights (Cycles, 48 samples). `after-driftwood-close.jpg` shows the driftwood up close.
 
 ## How it is built
 
@@ -10,7 +10,7 @@ October 20, 2026. The owner asked for Beachfront to get Woodland's new furniture
 
 | Family | Beachfront material |
 | --- | --- |
-| Woodland oak and walnut veneer | Pale driftwood: the room's teak grain, bleached to a soft grey-beige (new material) |
+| Woodland oak and walnut veneer | Pale driftwood (new material): an original sea-bleached texture made by the script: pale silver-grey, long raised fibres, darker worn grooves and a few fine drying checks, with a matching bump map and a dry, matte finish. Owner asked on October 21 for it to look more like driftwood; the first version was the teak grain bleached beige. |
 | Woodland walnut joinery; shelf and cabinet carcasses | The room's whitewashed wood |
 | Drawer fronts, door fields, guestbook cover | The room's sea-glass joinery paint |
 | Cushions and throw | The window's soft sea-glass paint (the room is at its 80-material budget) |
@@ -22,6 +22,6 @@ Remodelled: desk with the new drawer front, chair, archive cabinet, guestbook ta
 
 ## Budgets
 
-Beachfront's export allows 80 materials and 350 draws. The script merges small static parts that share a material (shelf back planks, beanbag seams, door hinges, cabinet feet, chair stretchers, guestbook-table legs and desk-leg shoes). The source also holds review copies of the display case and time capsule; the app loads those from `public/room/furniture/`, so they are marked `blender_preview_only` and stay out of the room export. Result: balanced 4.61 MiB, high 7.53 MiB, within budget. `check-woodland.mjs --beachfront` passes (anchors, contacts, window lights, budgets).
+Beachfront's export allows 80 materials and 350 draws. The script merges small static parts that share a material (shelf back planks, beanbag seams, door hinges, cabinet feet, chair stretchers, guestbook-table legs and desk-leg shoes). The source also holds review copies of the display case and time capsule; the app loads those from `public/room/furniture/`, so they are marked `blender_preview_only` and stay out of the room export. Result: balanced 4.81 MiB, high 8.31 MiB, within budget (8 and 12 MiB). `check-woodland.mjs --beachfront` passes (anchors, contacts, window lights, budgets).
 
 The guestbook table and book now have the cabin's heights (top 0.679), which the hidden notes were set for.

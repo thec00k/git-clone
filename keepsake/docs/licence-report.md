@@ -112,7 +112,7 @@ Status meanings: **unverified**: Origin or licence unknown, or contains such par
 
 ### beachfront-room
 
-- **Files:** 5 (2 shipped, 12.1 MB shipped)
+- **Files:** 5 (2 shipped, 13.1 MB shipped)
 - **Author / origin:** Keepsake project (built in Blender for Keepsake); textures by Poly Haven (mixed)
 - **Licence:** Original geometry; textures CC0 from Poly Haven
 - **Next action:** Save dated copies of the Poly Haven pages listed in licences/proof/polyhaven-textures/ to move this to verified.
