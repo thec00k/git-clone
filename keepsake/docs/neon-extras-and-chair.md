@@ -50,3 +50,12 @@ Hardware frame-rate benchmarking and every possible furniture combination were n
 The Extras shop now includes a red heart sign. Heart and cherries share the measured position (−1.72, 1.72, −2.045); exactly one is rendered. Both can remain owned, and either can be put away. The included heart uses a smooth red tube with a dark backing and subtle glow, authored as runtime geometry like the cherries; no Blender asset was changed.
 
 `roomDecor.neonSign` stores the selected sign or explicit empty slot. Older saves using `neonCherry` still display their cherries. Updates synchronize the legacy flag. The shop, backup validator, app types and `NeonExtras.tsx` use the shared selection. Tests cover old saves, switching, removal, theme changes and backup round trips; `check-neon-signs-browser.mjs` covers the shop and mutually exclusive scene objects. Preview: `art/demo-work/neon-heart-sign.png`.
+
+## Lighting restraint pass (October 11, 2026)
+
+Following the art-direction review (`docs/art-direction/neon-and-sky-castle-review.md`), Neon City's lights were calmed so the scrapbook and the window lead. Changes are runtime-only in `src/components/room3d/NeonAtmosphere.tsx`; no Blender asset changed.
+
+- A cool white `Neon_Desk_Light` sits above the desk book and follows the lamp switch.
+- The room-wide channels (ceiling ring and floor-to-ceiling corners) render at 20% and the honeycomb panels at 18%. They share batched meshes with the window rim and skyline, so a small shader mask dims them by position (inside the room only); the window rim and the city keep full strength.
+- Lava wax glow 2 → 1.2; lava lamp light 0.7 → 0.35; jellyfish light 0.5 → 0.25; the two broad room fills 1.2/1.1 → 0.8/0.7.
+- Unchanged: window rim, skyline, infinity mirror, Neon Extras (signs, Snake poster), door channels, holograms.
