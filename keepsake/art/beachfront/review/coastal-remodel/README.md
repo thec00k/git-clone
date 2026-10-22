@@ -16,12 +16,14 @@ October 20, 2026. The owner asked for Beachfront to get Woodland's new furniture
 | Cushions and throw | The window's soft sea-glass paint (the room is at its 80-material budget) |
 | Beanbag, pages, pins, brass, iron | Sailcloth, warm white linen, coral pin, the room's brass and iron |
 
+Jagged, sea-worn edges (owner, October 21): the desk top and its front apron panels, the guestbook table's top and the map frame have worn, bitten outlines. The bites only go inward, so nothing gets closer to the props or the map, and top surfaces keep their height. The map frame is driftwood too.
+
 Remodelled: desk with the new drawer front, chair, archive cabinet, guestbook table and guestbook, bookshelf, map frame, door and beanbag. Kept as they were: the coastal lamp, clock, CRT, conch and fishbowl, the arched window and casements, and the room shell.
 
 `furniture-remodel.py` now builds the chair relative to the chair's root, keeps the map frame's back where the old frame's back was, and sets the beanbag on the floor whatever height its root has. For the cabin these give the same numbers as before: a rebuild matched the published cabin in node, mesh, triangle and material counts. For Beachfront it skips the lamp, clock and window, and renames the chair parts to `Chair_*` and `Cozy_Chair_Cushion` (the names Beachfront's furniture swaps and hidden note use).
 
 ## Budgets
 
-Beachfront's export allows 80 materials and 350 draws. The script merges small static parts that share a material (shelf back planks, beanbag seams, door hinges, cabinet feet, chair stretchers, guestbook-table legs and desk-leg shoes). The source also holds review copies of the display case and time capsule; the app loads those from `public/room/furniture/`, so they are marked `blender_preview_only` and stay out of the room export. Result: balanced 4.81 MiB, high 8.31 MiB, within budget (8 and 12 MiB). `check-woodland.mjs --beachfront` passes (anchors, contacts, window lights, budgets).
+Beachfront's export allows 80 materials and 350 draws. The script merges small static parts that share a material (shelf back planks, beanbag seams, door hinges, cabinet feet, chair stretchers, guestbook-table legs and desk-leg shoes). The source also holds review copies of the display case and time capsule; the app loads those from `public/room/furniture/`, so they are marked `blender_preview_only` and stay out of the room export. Result: balanced 5.10 MiB, high 8.59 MiB, within budget (8 and 12 MiB). `check-woodland.mjs --beachfront` passes (anchors, contacts, window lights, budgets).
 
 The guestbook table and book now have the cabin's heights (top 0.679), which the hidden notes were set for.

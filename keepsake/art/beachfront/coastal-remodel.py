@@ -126,6 +126,99 @@ def project(o, tile):
             uv.data[li].uv = (co[axes[0]] * sc[axes[0]] / tile[0], co[axes[1]] * sc[axes[1]] / tile[1])
 
 
+# Jagged, sea-worn edges on the driftwood slabs and the map frame (owner, 2026-10-21). Edges only bite
+# inward, so nothing gets closer to the props or the map; top surfaces keep their height.
+import bmesh
+from mathutils import Vector
+rng = np.random.default_rng(2110)
+
+
+def profile(length, depth):
+    """A worn edge: random bites every 1.5-3 cm, now and then a deeper notch."""
+    xs, ds, x = [0.0], [rng.uniform(0, depth)], 0.0
+    while x < length:
+        x += rng.uniform(.015, .03)
+        xs.append(x)
+        ds.append(rng.uniform(0, depth) * (1.8 if rng.random() < .12 else 1))
+    return lambda t: float(np.interp(t, xs, ds))
+
+
+def prepare(o, step=.012):
+    with bpy.context.temp_override(object=o, active_object=o):
+        for mod in list(o.modifiers):
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    for e in list(bm.edges):
+        n = int(e.calc_length() / step)
+        if n > 0:
+            bmesh.ops.subdivide_edges(bm, edges=[e], cuts=n)
+    return bm
+
+
+def jag_rect(o, a, b, band, depth, inner=None):
+    """Slab or frame lying in local axes (a, b): verts within `band` of the outer outline move inward;
+    with `inner` (a margin), verts within `band` of the opening move outward (the bars get thinner)."""
+    bm = prepare(o)
+    co = [v.co for v in bm.verts]
+    lo = [min(c[i] for c in co) for i in range(3)]
+    hi = [max(c[i] for c in co) for i in range(3)]
+    sides = {}
+    for ax, other in ((a, b), (b, a)):
+        span = hi[other] - lo[other]
+        sides[(ax, 0)] = profile(span, depth)
+        sides[(ax, 1)] = profile(span, depth)
+        if inner:
+            sides[(ax, 2)] = profile(span, depth * .7)
+            sides[(ax, 3)] = profile(span, depth * .7)
+    for v in bm.verts:
+        for ax, other in ((a, b), (b, a)):
+            t = v.co[other] - lo[other]
+            if v.co[ax] - lo[ax] < band:
+                v.co[ax] += sides[(ax, 0)](t)
+            elif hi[ax] - v.co[ax] < band:
+                v.co[ax] -= sides[(ax, 1)](t)
+            elif inner:
+                i0, i1 = lo[ax] + inner, hi[ax] - inner
+                if 0 <= i0 - v.co[ax] < band:
+                    v.co[ax] -= sides[(ax, 2)](t)
+                elif 0 <= v.co[ax] - i1 < band:
+                    v.co[ax] += sides[(ax, 3)](t)
+    bm.to_mesh(o.data)
+    bm.free()
+
+
+def jag_round(o, band, depth):
+    """Round or oval top: verts near the rim move toward the centre by a worn profile around it."""
+    bm = prepare(o, .01)
+    co = [v.co for v in bm.verts]
+    cx = (min(c.x for c in co) + max(c.x for c in co)) / 2
+    cy = (min(c.y for c in co) + max(c.y for c in co)) / 2
+    rx = (max(c.x for c in co) - min(c.x for c in co)) / 2
+    ry = (max(c.y for c in co) - min(c.y for c in co)) / 2
+    bite = profile(2 * math.pi, depth)
+    for v in bm.verts:
+        dx, dy = (v.co.x - cx) / rx, (v.co.y - cy) / ry
+        r = math.hypot(dx, dy)
+        if r > 1 - band / min(rx, ry):
+            k = 1 - bite(math.atan2(dy, dx) % (2 * math.pi)) / min(rx, ry)
+            v.co.x, v.co.y = cx + (v.co.x - cx) * k, cy + (v.co.y - cy) * k
+    bm.to_mesh(o.data)
+    bm.free()
+
+
+# Blender axes: slabs lie in x/y; the map frame hangs in y/z (its depth is x).
+for name in ['Desk_Top', 'Desk_Apron_FL', 'Desk_Apron_FR']:
+    o = bpy.data.objects.get(name)
+    if o:
+        jag_rect(o, 0, 1, .02 if name == 'Desk_Top' else .012, .007 if name == 'Desk_Top' else .005)
+top = bpy.data.objects.get('Cozy_Guest_Tabletop')
+if top:
+    jag_round(top, .02, .008)
+frame = bpy.data.objects.get('Map_Frame')
+if frame:
+    jag_rect(frame, 1, 2, .016, .012, inner=.07)
+
 count = 0
 for o in bpy.context.scene.objects:
     fam = o.get('ks_family')
@@ -136,6 +229,8 @@ for o in bpy.context.scene.objects:
         m = white
     if o.name.startswith(GLASS):
         m = glass
+    if o.name.startswith('Map_Frame'):
+        m = drift  # a driftwood frame (owner, 2026-10-21)
     o.data.materials.clear()
     o.data.materials.append(m)
     for f in o.data.polygons:
