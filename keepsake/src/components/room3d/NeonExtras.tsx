@@ -17,6 +17,7 @@ import {
 } from '../../lib/snakePoster';
 import {useWorkbench} from '../../store/workbench';
 import {getNeonSign} from '../../lib/roomShop';
+import {ignorePageKey} from '../../lib/keyTargets';
 
 function NeonWallSign({kind}: {kind: 'neon-cherries' | 'neon-heart'}) {
   const paths = useMemo(() => {
@@ -210,11 +211,7 @@ function SnakePoster({paused}: {paused: boolean}) {
     }
     window.dispatchEvent(new CustomEvent('ks-object-controls', {detail: true}));
     const key = (e: KeyboardEvent) => {
-      if (
-        e.target instanceof HTMLElement &&
-        e.target.closest('input,textarea,select,[contenteditable="true"]')
-      )
-        return;
+      if (ignorePageKey(e)) return;
       const direction: Record<string, SnakeDirection> = {
         ArrowUp: 'up',
         ArrowDown: 'down',

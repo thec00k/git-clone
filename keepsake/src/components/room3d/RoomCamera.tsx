@@ -7,6 +7,8 @@ import * as THREE from 'three';
 import type {RoomFace} from '../../lib/roomLayout';
 import {useActiveRoom} from './useActiveRoom';
 import {DISPLAY_CASE_VIEW} from './ArtifactDisplayCase';
+import {CAMERA_MOVE_SECONDS, cameraMoveEase} from '../../lib/motion';
+import {CAMERA_PAUSING_DIALOG, ignorePageKey} from '../../lib/keyTargets';
 const EYE_Y = 1.32;
 const WORKBENCH_VIEW = {
   position: new THREE.Vector3(-0.15, 1.55, -1.12),
@@ -33,6 +35,8 @@ const LOOK_YAW = 0.0044;
 const LOOK_PITCH = 0.0036;
 const PITCH_MIN = -0.72;
 const PITCH_MAX = 0.55;
+/** Pointer travel (px) below which a press counts as a click, matching scene hit tests. */
+const CLICK_SLOP = 4;
 
 function walkIntent(e: KeyboardEvent): {axis: 'f' | 'r'; dir: -1 | 1} | null {
   const code = e.code;
@@ -152,6 +156,7 @@ export function EyeCamera({
   const yaw = useRef(0);
   const pitch = useRef(0);
   const dragging = useRef(false);
+  const dragTravel = useRef(0);
   const userMoved = useRef(false);
   useEffect(() => {
     const change = (e: Event) => {
@@ -172,6 +177,23 @@ export function EyeCamera({
   }, [touring, seated, workbench, photoView, authored]);
   const reduced = useReducedMotion();
   const overhead = wantsDeskOverhead();
+  // Desk, corkboard and bookshelf are the three walking-eye faces. Only moves between them get the timed
+  // glide, including the welcome tour turning to the place each step names.
+  const faceMode =
+    !photoView &&
+    !workbench &&
+    !(displayCase && !touring) &&
+    !(reading && !touring) &&
+    !overhead &&
+    !seated &&
+    !authored;
+  const previousFace = useRef<{face: RoomFace; faceMode: boolean} | null>(null);
+  const glide = useRef<{
+    elapsed: number;
+    from: THREE.Vector3;
+    fromQuaternion: THREE.Quaternion;
+    toQuaternion: THREE.Quaternion;
+  } | null>(null);
   const view =
     photoView ??
     (workbench
@@ -187,15 +209,31 @@ export function EyeCamera({
               : authored
                 ? studyCamera!
                 : FACE_VIEW[face]);
+  // The display-case pose is authored above eye height to frame all four shelves.
+  const framed = view === DISPLAY_CASE_VIEW;
 
   useEffect(() => {
     userMoved.current = false;
     keys.current = {f: 0, r: 0};
     dragging.current = false;
+    const before = previousFace.current;
+    previousFace.current = {face, faceMode};
+    if (before && before.faceMode && faceMode && before.face !== face && !reduced) {
+      // Start from wherever the camera is now, so a change of mind mid-glide stays smooth.
+      aim.matrix.lookAt(view.position, view.target, camera.up);
+      glide.current = {
+        elapsed: 0,
+        from: camera.position.clone(),
+        fromQuaternion: camera.quaternion.clone(),
+        toQuaternion: new THREE.Quaternion().setFromRotationMatrix(aim.matrix),
+      };
+    } else {
+      glide.current = null;
+    }
     const look = lookFromView(view.position, view.target);
     yaw.current = look.yaw;
     pitch.current = look.pitch;
-  }, [face, seated, touring, view, viewRevision]);
+  }, [face, faceMode, seated, touring, view, viewRevision, camera, aim, reduced]);
 
   useEffect(() => {
     const el = gl.domElement;
@@ -204,15 +242,22 @@ export function EyeCamera({
       if (touringRef.current || objectControls.current) return;
       if ((e.target as HTMLElement | null)?.closest?.("button, a, input, textarea, [role='dialog']")) return;
       dragging.current = true;
-      // Begin a drag from the visible pose, including midway through a transition.
-      camera.getWorldDirection(scratch.forward);
-      yaw.current = Math.atan2(scratch.forward.x, -scratch.forward.z);
-      pitch.current = Math.asin(THREE.MathUtils.clamp(scratch.forward.y, -1, 1));
-      userMoved.current = true;
+      dragTravel.current = 0;
       el.setPointerCapture(e.pointerId);
     };
     const move = (e: PointerEvent) => {
       if (!dragging.current || touringRef.current || objectControls.current) return;
+      // A click must not freeze a turn halfway; only a real drag takes over.
+      if (dragTravel.current < CLICK_SLOP) {
+        dragTravel.current += Math.abs(e.movementX) + Math.abs(e.movementY);
+        if (dragTravel.current < CLICK_SLOP) return;
+        // Begin the drag from the visible pose, including midway through a transition.
+        camera.getWorldDirection(scratch.forward);
+        yaw.current = Math.atan2(scratch.forward.x, -scratch.forward.z);
+        pitch.current = Math.asin(THREE.MathUtils.clamp(scratch.forward.y, -1, 1));
+        userMoved.current = true;
+        glide.current = null;
+      }
       // Mouse right looks right; mouse up looks up. Screen Y grows downward.
       yaw.current += e.movementX * LOOK_YAW;
       pitch.current = THREE.MathUtils.clamp(pitch.current - e.movementY * LOOK_PITCH, PITCH_MIN, PITCH_MAX);
@@ -248,20 +293,8 @@ export function EyeCamera({
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (
-        touringRef.current ||
-        objectControls.current ||
-        seated ||
-        document.querySelector('[aria-modal="true"]')
-      )
-        return;
+      if (touringRef.current || objectControls.current || seated || ignorePageKey(e)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (
-        e.target instanceof HTMLElement &&
-        e.target.closest("input, textarea, select, [contenteditable='true'], [aria-modal='true']")
-      ) {
-        return;
-      }
       const intent = walkIntent(e);
       if (!intent) return;
       e.preventDefault();
@@ -290,18 +323,29 @@ export function EyeCamera({
 
   useFrame((_, dt) => {
     if (objectControls.current) return;
-    if (document.querySelector('[aria-modal="true"]')) {
+    if (document.querySelector(CAMERA_PAUSING_DIALOG)) {
       keys.current = {f: 0, r: 0};
       dragging.current = false;
       return;
     }
     dt = Math.min(dt, 0.05);
-    if (touring || !userMoved.current) {
+    const move = glide.current;
+    if (move && !userMoved.current && !reduced) {
+      move.elapsed += dt;
+      const progress = Math.min(1, move.elapsed / CAMERA_MOVE_SECONDS);
+      const eased = cameraMoveEase(progress);
+      camera.position.lerpVectors(move.from, view.position, eased);
+      camera.position.y = EYE_Y;
+      clampInRoom(camera.position, ROOM_WALK);
+      camera.quaternion.copy(move.fromQuaternion).slerp(move.toQuaternion, eased);
+      if (progress >= 1) glide.current = null;
+    } else if (touring || !userMoved.current) {
+      glide.current = null;
       const t = reduced || touring ? 1 : 1 - Math.pow(0.0008, dt);
       camera.position.lerp(view.position, t);
       if (overhead) {
         camera.position.copy(view.position);
-      } else if (!seated && !workbench && !photoView && !authored) {
+      } else if (!seated && !workbench && !photoView && !authored && !framed) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }
@@ -318,7 +362,7 @@ export function EyeCamera({
       }
       if (seated) {
         camera.position.copy(SEATED_VIEW.position);
-      } else {
+      } else if (!framed || keys.current.f || keys.current.r) {
         camera.position.y = EYE_Y;
         clampInRoom(camera.position, ROOM_WALK);
       }

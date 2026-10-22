@@ -48,8 +48,6 @@ export function RoomFlat({
           data-tour="window"
           style={HOTSPOTS.window}
           onClick={onOpenWindow}
-          aria-hidden="true"
-          tabIndex={-1}
           aria-label="Window and room settings"
         >
           <WindowPane phase={phase} weather={environment.weather} />
@@ -63,8 +61,6 @@ export function RoomFlat({
           data-tour="shelf"
           style={HOTSPOTS.shelf}
           onClick={() => onGo('shelf')}
-          aria-hidden="true"
-          tabIndex={-1}
           aria-label="Bookshelf"
         >
           <MiniShelf count={bookCount} lit={environment.shelfLit} />
@@ -75,8 +71,6 @@ export function RoomFlat({
           data-tour="map"
           style={HOTSPOTS.map}
           onClick={() => onGo('atlas')}
-          aria-hidden="true"
-          tabIndex={-1}
           aria-label="Memory map"
         >
           <div
@@ -101,6 +95,7 @@ export function RoomFlat({
         layer={layer}
         onOpenMusic={onOpenMusic}
         onGo={onGo}
+        reachable
       />
     </>
   );
@@ -146,6 +141,7 @@ export function DeskLayer({
   onOpenMusic,
   onGo,
   hotspots,
+  reachable = false,
 }: {
   phase: Phase;
   environment: Environment;
@@ -161,7 +157,11 @@ export function DeskLayer({
     guestbook?: CSSProperties;
     crt?: CSSProperties;
   };
+  /** Flat view: these hotspots are real controls. The chamber keeps them out of
+   *  the accessibility tree and offers them in "Things in the room" instead. */
+  reachable?: boolean;
 }) {
+  const hide = reachable ? {} : ({'aria-hidden': true, tabIndex: -1} as const);
   const {state} = useApp();
   const {binderId} = useWorkbench();
   const binder = state.cardBinders?.find(item => item.id === binderId);
@@ -181,8 +181,7 @@ export function DeskLayer({
         data-tour="archive"
         style={archive}
         onClick={() => onGo('archive')}
-        aria-hidden="true"
-        tabIndex={-1}
+        {...hide}
         aria-label="Filing cabinet"
       >
         <Cabinet />
@@ -194,8 +193,7 @@ export function DeskLayer({
           data-tour="book"
           style={book}
           onClick={() => onGo('book')}
-          aria-hidden="true"
-          tabIndex={-1}
+          {...hide}
           aria-label={`Open ${binder ? 'card binder' : 'scrapbook'}: ${deskTitle}`}
         >
           <div
@@ -222,8 +220,7 @@ export function DeskLayer({
         data-tour="guestbook"
         style={guestbook}
         onClick={() => onGo('guestbook')}
-        aria-hidden="true"
-        tabIndex={-1}
+        {...hide}
         aria-label="Guest book"
       >
         <div
@@ -239,8 +236,7 @@ export function DeskLayer({
         data-tour="crt"
         style={crt}
         onClick={onOpenMusic}
-        aria-hidden="true"
-        tabIndex={-1}
+        {...hide}
         aria-label="CRT music"
       >
         <CRT on={environment.musicOn} />

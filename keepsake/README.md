@@ -49,8 +49,8 @@ Spotify is optional. SoundCloud plays public links; account OAuth is pending. Th
 
 ## Rooms and source assets
 
-- Default: public/room/woodland-study/woodland-study.glb (the legacy public/room/woodland/woodland.glb is pending removal)
-- Blender source: art/woodland/woodland.blend
+- Default: public/room/woodland-study/woodland-study.glb, built by art/woodland-study/build.py and recorded with `npm run assets:woodland`
+- Blender sources: art/woodland/woodland.blend (furniture the cabin build starts from) and art/woodland-study/
 - Modular runtime: src/components/room3d/
 - Previous room: ?theme=classic
 - CSS fallbacks: ?room=chamber and ?room=flat

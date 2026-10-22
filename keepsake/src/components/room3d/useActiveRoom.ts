@@ -1,4 +1,4 @@
-import {wantsWoodlandStudy, WOODLAND_STUDY_ASSET} from './woodlandStudy';
+import {wantsWoodlandStudy} from './woodlandStudy';
 import {useApp} from '../../store/appStore';
 import {beachfrontRoom, woodlandRoom, cyberpunkRoom} from './themes';
 import {useMemo} from 'react';
@@ -17,7 +17,7 @@ export function useActiveRoom() {
   return useMemo(
     () => ({
       ...(room === 'cyberpunk' ? cyberpunkRoom : room === 'beachfront' ? beachfrontRoom : woodlandRoom),
-      asset: study ? WOODLAND_STUDY_ASSET : roomAssets[room][quality],
+      asset: roomAssets[room][quality],
       study,
       review,
       ...(review ? {title: 'Woodland composition study'} : {}),

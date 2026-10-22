@@ -25,7 +25,7 @@ export function OfflineRoom() {
       for (const b of state.books)
         for (const p of b.pages)
           for (const e of p.elements)
-            if (e.type === 'photo' && !e.src.startsWith('data:')) {
+            if (e.type === 'photo' && !/^(data|blob):/.test(e.src)) {
               const u = new URL(e.src, location.origin);
               if (u.origin !== location.origin)
                 throw new Error(

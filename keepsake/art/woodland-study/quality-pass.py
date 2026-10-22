@@ -11,6 +11,7 @@ def bevel(o,width):
     n=o.modifiers.new('Weighted surface normals','WEIGHTED_NORMAL');n.keep_sharp=True
 
 for o in list(bpy.context.scene.objects):
+    if o.get('ks_remodel'): continue # furniture-remodel.py already rounds its parts
     if o.name=='Desk_Top': bevel(o,.003)
     elif o.name.startswith(('Desk_Leg','Desk_Apron','Desk_DrawerFront')): bevel(o,.002)
     elif o.name.startswith('Study_ChairLeg'): bevel(o,.0015)
@@ -38,7 +39,7 @@ if shade:
 
 # Upholstery piping follows the chair's authored local cushion edges.
 seat=bpy.data.objects.get('Study_ChairSeat')
-if seat:
+if seat and not seat.get('ks_remodel'): # the remodelled seat brings its own piping
     coords=[Vector(v) for v in seat.bound_box]
     lo=Vector(tuple(min(v[i] for v in coords) for i in range(3)));hi=Vector(tuple(max(v[i] for v in coords) for i in range(3)))
     curve=bpy.data.curves.new('Chair stitched welt','CURVE');curve.dimensions='3D';curve.bevel_depth=.0014;curve.bevel_resolution=1
@@ -63,6 +64,9 @@ for o in list(bpy.context.scene.objects):
     elif o.name.startswith('Cabin_Window_Log'):family='window'
     elif o.name.startswith('Cabin_Door_Log'):family='door'
     elif o.name.startswith('Study_Chimney_Stone'):family='chimney'
+    # Boards and logs batch apart so each batch keeps one material (one mesh in the GLB).
+    elif o.name.startswith('Cabin_Ceiling_Board'):family='ceiling-boards-'+str(o.matrix_world.translation.x>0)
+    elif o.name.startswith('Cabin_Ceiling'):family='ceiling-logs-'+str(o.matrix_world.translation.x>0)
     if family:
         # Half-metre height bands preserve close-view frustum culling.
         family += '-band-'+str(math.floor(o.matrix_world.translation.z/.5))

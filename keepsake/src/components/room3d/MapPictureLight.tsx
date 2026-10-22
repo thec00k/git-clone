@@ -27,18 +27,17 @@ export function MapPictureLight({scene, night}: {scene?: THREE.Object3D; night: 
         <meshStandardMaterial color="#f0dfb5" emissive="#ffdc98" emissiveIntensity={night ? 2 : 0} />
       </mesh>
       <primitive object={target} />
-      {night && (
-        <spotLight
-          position={[x, y - 0.025, z]}
-          target={target}
-          color="#ffe0a3"
-          intensity={4}
-          angle={0.95}
-          penumbra={0.65}
-          distance={2.3}
-          decay={2}
-        />
-      )}
+      {/* Always mounted (intensity 0 by day) so changing the time never changes the light count. */}
+      <spotLight
+        position={[x, y - 0.025, z]}
+        target={target}
+        color="#ffe0a3"
+        intensity={night ? 4 : 0}
+        angle={0.95}
+        penumbra={0.65}
+        distance={2.3}
+        decay={2}
+      />
     </group>
   );
 }

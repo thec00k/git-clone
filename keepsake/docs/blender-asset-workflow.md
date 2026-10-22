@@ -1,6 +1,8 @@
 # Keepsake assets — Blender 5.1
 
-The editable sources are `art/woodland/woodland.blend` and `art/beachfront/beachfront.blend`. They are now saved with Blender 5.1, with packed image dependencies, metric units, AgX preview color management, and denoised Cycles preview settings. Use Blender 5.1 or newer to edit them. The website continues to use optimized GLB files; it does not load the working Blender files.
+The editable sources are `art/woodland/woodland.blend` and `art/beachfront/beachfront.blend`.
+
+**Woodland (October 20, 2026):** the app now loads only the cabin built by `art/woodland-study/build.py` (which starts from `art/woodland/woodland.blend`). The old `public/room/woodland/*.glb` exports were retired, so `assets:refresh` handles Beachfront only. After exporting `public/room/woodland-study/woodland-study.glb`, run `npm run assets:woodland`: it writes `public/room/woodland-study/asset-manifest.json` and points `src/generated/roomAssets.ts` at the new revision (`?v=` hash), and `check-room-assets` fails until it has been run. One file serves both graphics levels. The rest of this page describes the Beachfront export. They are now saved with Blender 5.1, with packed image dependencies, metric units, AgX preview color management, and denoised Cycles preview settings. Use Blender 5.1 or newer to edit them. The website continues to use optimized GLB files; it does not load the working Blender files.
 
 ## Refresh a saved scene
 
