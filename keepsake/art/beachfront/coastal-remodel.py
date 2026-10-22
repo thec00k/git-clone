@@ -1,5 +1,5 @@
 """Beachfront furniture remodel: the Woodland cabin's new shapes in pale driftwood, whitewash and sea glass
-(owner, 2026-10-20; driftwood made more like real driftwood 2026-10-21).
+(owner, 2026-10-20; driftwood made more like real driftwood, then lightly whitewashed, 2026-10-21).
 
 Run once in background Blender 5.1 against art/beachfront/beachfront.blend, then publish:
 
@@ -70,6 +70,11 @@ def driftwood():
     t = tone[..., None]
     rgb = np.where(t < .5, lo + (mid - lo) * (t / .5), mid + (hi - mid) * ((t - .5) / .5))
     rgb = rgb * (1 + .04 * weather[..., None] * np.array([-.4, 0, .6]))  # sun-bleached patches go slightly blue-grey
+    # A thin whitewash over it (owner, 2026-10-21): the grain, fibres and checks still show through,
+    # the paint sits a little thicker on the raised fibres and thins out in patches.
+    wash = np.clip(.42 + .08 * np.tanh(height) + .1 * field(rng, n, 6, 2, 2.0), .25, .6)[..., None]
+    paint = np.array([.83, .815, .77])  # warm chalk white (linear)
+    rgb = rgb * (1 - wash) + paint * wash
     m = M['Beachfront | warm teak'].copy()
     m.name = 'Coastal | pale driftwood'
     nodes, links = m.node_tree.nodes, m.node_tree.links
