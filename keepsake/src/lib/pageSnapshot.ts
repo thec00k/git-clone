@@ -1,5 +1,28 @@
 /** Capture a private local page for the turning mesh. Nothing is uploaded. */
 import {preparePaperImages} from './paperTexture';
+
+// Finished snapshots, held only while the page object they were taken from still exists. Editing a page replaces
+// its object, so a changed page is never served from here. The key carries what else the picture depends on.
+const finished = new WeakMap<object, {key: string; canvas: HTMLCanvasElement}>();
+export const peekSnapshot = (page: object, key: string) => {
+  const found = finished.get(page);
+  return found && found.key === key ? found.canvas : null;
+};
+export const rememberSnapshot = (page: object, key: string, canvas: HTMLCanvasElement) => {
+  finished.set(page, {key, canvas});
+};
+const PSEUDO_COLOR_PROPERTIES = [
+  'background-color',
+  'background-image',
+  'border-top-color',
+  'border-right-color',
+  'border-bottom-color',
+  'border-left-color',
+  'box-shadow',
+  'color',
+  'outline-color',
+  'text-shadow',
+];
 export async function snapshotPage(page: HTMLElement, signal?: AbortSignal): Promise<HTMLCanvasElement> {
   const deadline = Date.now() + 5000;
   const bounded = <T>(pending: Promise<T>) =>
@@ -59,6 +82,26 @@ export async function snapshotPage(page: HTMLElement, signal?: AbortSignal): Pro
       target.removeAttribute('tabindex');
     }
   });
+  // Pseudo-elements (tape, stamps...) take their colours from the stylesheet, where html2canvas meets oklab() and
+  // color() values it cannot parse and gives up on the whole page. Bake each one's computed colours into a rule
+  // the copy carries, in the same plain rgba() form as above.
+  const pseudoRules: string[] = [];
+  originals.forEach((node, i) => {
+    for (const pseudo of ['::before', '::after'] as const) {
+      const style = getComputedStyle(node, pseudo);
+      if (style.content === 'none' || style.content === 'normal') continue;
+      (copies[i] as HTMLElement).dataset.ksSnap = String(i);
+      const declarations = PSEUDO_COLOR_PROPERTIES.map(
+        property => `${property}:${normalize(style.getPropertyValue(property))} !important`,
+      ).join(';');
+      pseudoRules.push(`[data-ks-snap="${i}"]${pseudo}{${declarations}}`);
+    }
+  });
+  if (pseudoRules.length) {
+    const rules = document.createElement('style');
+    rules.textContent = pseudoRules.join('\n');
+    clone.append(rules);
+  }
   // Descendants above have frozen pixel styles; preserve that layout and scale only the raster.
   const width = page.offsetWidth || 480,
     height = page.offsetHeight || 657;

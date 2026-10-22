@@ -24,15 +24,17 @@ export function PhotoImportDialog({onClose}: {onClose: () => void}) {
       alive.current = false;
     };
   }, []);
-  async function files(list: FileList | null) {
-    if (!list?.length) return;
+  async function files(input: FileList | null) {
+    if (!input?.length) return;
+    // The input is cleared right after this starts, which empties a live FileList.
+    const list = Array.from(input);
     setBusy(true);
     setMessage('Preparing your photographs…');
     const ids: string[] = [];
     let failed = 0;
     try {
-      await checkImportCapacity(Array.from(list), state.archive.length);
-      for (const file of Array.from(list)) {
+      await checkImportCapacity(list, state.archive.length);
+      for (const file of list) {
         if (!alive.current) return;
         let photo;
         try {

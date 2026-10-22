@@ -18,7 +18,9 @@ import type {
 } from '../types/app';
 import {canLeaveBookNote} from '../lib/permissions';
 import {PIN_NOTE_MAX, TIDY_ROOM, STICKY_NOTE_MAX} from '../types/app';
-import type {CoverStyle, SaveStatus, Scrapbook, Visibility} from '../types/scrapbook';
+import type {CoverStyle, Scrapbook, Visibility} from '../types/scrapbook';
+import {setSaveStatus} from './saveStatus';
+export {useSaveStatus} from './saveStatus';
 import {uid} from '../lib/id';
 import {createSeed} from '../data/seed';
 import {loadState, saveState, SaveConflict} from '../lib/storage';
@@ -32,7 +34,6 @@ import {EVERYDAY_PACK_ID, STARTING_STAMPS, packById} from '../lib/stickerPacks';
 
 interface AppContextValue {
   state: AppState;
-  saveStatus: SaveStatus;
   newlyUnlocked: string[];
   clearNewlyUnlocked: () => void;
   activeBook: Scrapbook | null;
@@ -106,7 +107,6 @@ export function AppProvider({children}: {children: ReactNode}) {
   // autosave of the room as it was before a restore can never overwrite the restored room.
   const epochRef = useRef(0);
   const restoringRef = useRef(false);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
   const loadedRef = useRef(false);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -674,6 +674,97 @@ export function AppProvider({children}: {children: ReactNode}) {
 
   const activeBook = useMemo(() => state?.books.find(b => b.id === state.activeBookId) ?? null, [state]);
 
+  // One object per state change (not per render), so the room re-renders once per click, not three times.
+  const value = useMemo<AppContextValue | null>(
+    () =>
+      state
+        ? {
+            state,
+            newlyUnlocked,
+            clearNewlyUnlocked,
+            activeBook,
+            environment: state.environment,
+            update,
+            updateActiveBook,
+            setProfile,
+            setActiveBook,
+            addBook,
+            renameBook,
+            deleteBook,
+            setBookVisibility,
+            setBookCover,
+            setBookPlaylist,
+            setBookShelf,
+            addArchivePhoto,
+            toggleFavorite,
+            setCategories,
+            addArchiveTab,
+            renameArchiveTab,
+            removeArchiveTab,
+            setEnvironment,
+            tidyRoom,
+            flushSave,
+            restoreRoom,
+            addGuestEntry,
+            addNote,
+            approveNote,
+            deleteNote,
+            addPin,
+            updatePin,
+            removePin,
+            addPinNote,
+            updatePinNote,
+            deletePinNote,
+            recordProgress,
+            markAchievementsSeen,
+            recordReceipt,
+            buyStickerPack,
+          }
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- every callback above is a stable useCallback
+    [
+      state,
+      newlyUnlocked,
+      clearNewlyUnlocked,
+      activeBook,
+      update,
+      updateActiveBook,
+      setProfile,
+      setActiveBook,
+      addBook,
+      renameBook,
+      deleteBook,
+      setBookVisibility,
+      setBookCover,
+      setBookPlaylist,
+      setBookShelf,
+      addArchivePhoto,
+      toggleFavorite,
+      setCategories,
+      addArchiveTab,
+      renameArchiveTab,
+      removeArchiveTab,
+      setEnvironment,
+      tidyRoom,
+      flushSave,
+      restoreRoom,
+      addGuestEntry,
+      addNote,
+      approveNote,
+      deleteNote,
+      addPin,
+      updatePin,
+      removePin,
+      addPinNote,
+      updatePinNote,
+      deletePinNote,
+      recordProgress,
+      markAchievementsSeen,
+      recordReceipt,
+      buyStickerPack,
+    ],
+  );
+
   if (loadError)
     return (
       <div className="ks-save-recovery" role="alert">
@@ -693,55 +784,11 @@ export function AppProvider({children}: {children: ReactNode}) {
         </button>
       </div>
     );
-  if (!state) {
+  if (!state || !value) {
     return (
       <div className="ks-room flex h-dvh items-center justify-center text-paper/60">Opening the room…</div>
     );
   }
-
-  const value: AppContextValue = {
-    state,
-    saveStatus,
-    newlyUnlocked,
-    clearNewlyUnlocked,
-    activeBook,
-    environment: state.environment,
-    update,
-    updateActiveBook,
-    setProfile,
-    setActiveBook,
-    addBook,
-    renameBook,
-    deleteBook,
-    setBookVisibility,
-    setBookCover,
-    setBookPlaylist,
-    setBookShelf,
-    addArchivePhoto,
-    toggleFavorite,
-    setCategories,
-    addArchiveTab,
-    renameArchiveTab,
-    removeArchiveTab,
-    setEnvironment,
-    tidyRoom,
-    flushSave,
-    restoreRoom,
-    addGuestEntry,
-    addNote,
-    approveNote,
-    deleteNote,
-    addPin,
-    updatePin,
-    removePin,
-    addPinNote,
-    updatePinNote,
-    deletePinNote,
-    recordProgress,
-    markAchievementsSeen,
-    recordReceipt,
-    buyStickerPack,
-  };
 
   return (
     <AppContext.Provider value={value}>

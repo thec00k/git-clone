@@ -9,7 +9,7 @@
 //   `return` whose condition reads anything other than the room's identity or whether the model has loaded;
 // - a light gets `visible={...}` or `castShadow={...}` from an expression (three.js skips hidden lights, so that
 //   changes the count too);
-// - the Canvas `shadows` prop is an expression, or code assigns `shadowMap.enabled`.
+// - the Canvas `shadows` prop is an expression (a fixed shadow type is fine), or code assigns `shadowMap.enabled`.
 import assert from 'node:assert/strict';
 import {readdirSync, readFileSync} from 'node:fs';
 import {join} from 'node:path';
@@ -139,7 +139,12 @@ export function findProblems(files) {
       const name = tagName(tag);
       if (name === 'Canvas') {
         for (const a of attributes(tag)) {
-          if (ts.isJsxAttribute(a) && a.name.getText() === 'shadows' && a.initializer)
+          if (
+            ts.isJsxAttribute(a) &&
+            a.name.getText() === 'shadows' &&
+            a.initializer &&
+            !ts.isStringLiteral(a.initializer)
+          )
             problems.push(`${where(c, a)} Canvas shadows={...} must stay fixed; see RoomShadowQuality`);
         }
       }
@@ -228,6 +233,7 @@ assert.equal(
   findProblems(fixture('export function A({q}){return <Canvas shadows={q.shadows} />;}')).length,
   1,
 );
+assert.equal(findProblems(fixture('export function A(){return <Canvas shadows="percentage" />;}')).length, 0);
 assert.equal(findProblems(fixture('export function A({on}){return <pointLight visible={on} />;}')).length, 1);
 assert.equal(
   findProblems(fixture('export function A({on}){if (!on) return null; return <pointLight />;}')).length,
