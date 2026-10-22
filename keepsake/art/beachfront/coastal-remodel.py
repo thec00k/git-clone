@@ -100,17 +100,15 @@ def driftwood():
 
 
 drift = driftwood()
-white = M['Beachfront | whitewashed wood']
 glass = M['Beachfront | sea glass joinery']
 canvas = M['Woodland | moss painted joinery']  # the window's soft sea-glass paint; the room is at its 80-material budget
+# Every wooden surface is driftwood (owner, 2026-10-21: "keep that same texture for all the surfaces";
+# the sea-glass drawer fronts looked wrong). Fabric, paper, pins and metal keep their own materials.
 families = {
-    'oak': drift, 'veneer': drift, 'joinery': white, 'honey': glass,
+    'oak': drift, 'veneer': drift, 'joinery': drift, 'honey': drift,
     'moss': canvas, 'linen': M['Beachfront | sailcloth'], 'paper': M['Coastal | warm white linen'],
     'forest': glass, 'clay': M['M_Pin'], 'brass': M['M_FanBrass'], 'iron': M['M_FanIron'],
 }
-# Shelf and cabinet carcasses are whitewashed (the room's palette); drawer fronts and door fields sea glass.
-WHITE = ('Shelf_', 'Archive_Top', 'Archive_Side')
-GLASS = ('Desk_DrawerPanel', 'Archive_DrawerPanel', 'Door_Field_')
 
 
 def project(o, tile):
@@ -225,24 +223,21 @@ for o in bpy.context.scene.objects:
     if not fam or o.type != 'MESH':
         continue
     m = families[fam]
-    if fam == 'oak' and o.name.startswith(WHITE):
-        m = white
-    if o.name.startswith(GLASS):
-        m = glass
-    if o.name.startswith('Map_Frame'):
-        m = drift  # a driftwood frame (owner, 2026-10-21)
     o.data.materials.clear()
     o.data.materials.append(m)
     for f in o.data.polygons:
         f.material_index = 0
     project(o, (.24, .24) if fam in ('moss', 'linen', 'paper', 'clay', 'forest') else (.5, .3) if m is drift else (1.15, .65))
     count += 1
-# The kept archive drawer and desk drawer bodies match the new driftwood.
-for n in ['ks_archive_drawer']:
+# Kept wooden parts (the cabinet's drawer, back, deck and header strip, the shelf boards) match too.
+for n in ['ks_archive_drawer', 'Archive_Back', 'Archive_Deck', 'Archive_Header', 'ks_shelf_board_0', 'ks_shelf_board_1', 'ks_shelf_board_2']:
     o = bpy.data.objects.get(n)
     if o:
         o.data.materials.clear()
         o.data.materials.append(drift)
+        for f in o.data.polygons:
+            f.material_index = 0
+        project(o, (.5, .3))
 # Beachfront's budget is 350 draws: merge small static parts that share a material into one mesh each.
 # Moving parts, interaction anchors and anything the app looks up by name stay separate.
 

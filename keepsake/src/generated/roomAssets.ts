@@ -5,8 +5,8 @@ export const roomAssets = {
     "high": "/room/woodland-study/woodland-study.glb?v=ee10ac763be5"
   },
   "beachfront": {
-    "balanced": "/room/beachfront/beachfront.glb?v=b083d922a27a",
-    "high": "/room/beachfront/beachfront.high.glb?v=17d5e3a4869d"
+    "balanced": "/room/beachfront/beachfront.glb?v=bb49b9ce483d",
+    "high": "/room/beachfront/beachfront.high.glb?v=d718c0696117"
   },
   "cyberpunk": {
     "balanced": "/room/cyberpunk/cyberpunk.glb?v=53a6b320b269",
