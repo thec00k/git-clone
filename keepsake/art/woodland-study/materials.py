@@ -32,9 +32,22 @@ oak=textured('Oiled_Oak','oak');floor=textured('Oak_Floorboards','floor');timber
 joinery=textured('Walnut_Joinery','oak','#b7a18d');moss=textured('Moss_Woven_Linen','linen','#718466')
 linen=textured('Oat_Linen','linen','#e4d3b5');paper=textured('Ivory_Paper','linen','#fff4da');stone=textured('Honed_Limestone','stone')
 clay=textured('Terracotta_Bookcloth','linen','#b37d61');forest=textured('Forest_Bookcloth','linen','#62715b')
+# Hand-made cabin, modern pieces: each wood-cased piece gets its own wood (owner's request).
+veneer=textured('Walnut_Veneer','oak','#b08868');honey=textured('Honey_Planks','timber','#f2c99f')
+# Cabin logs: the checked log colour map over the oak normal/roughness, multiplied by each log's
+# 'Tone' colour attribute (cabin-shell.py). glTF exports it as COLOR_0 on the logs only.
+logs=textured('Cabin_Logs','oak')
+_n=logs.node_tree.nodes;_l=logs.node_tree.links;_p=next(x for x in _n if x.type=='BSDF_PRINCIPLED')
+_tex=_p.inputs['Base Color'].links[0].from_node
+_tex.image=bpy.data.images.load(str(TEX/'log-color.png'),check_existing=True);_tex.image.pack()
+_tone=_n.new('ShaderNodeVertexColor');_tone.layer_name='Tone'
+_mix=_n.new('ShaderNodeMix');_mix.data_type='RGBA';_mix.blend_type='MULTIPLY';_mix.inputs['Factor'].default_value=1
+_l.new(_tex.outputs['Color'],_mix.inputs['A']);_l.new(_tone.outputs['Color'],_mix.inputs['B']);_l.new(_mix.outputs['Result'],_p.inputs['Base Color'])
 brass=solid('Aged_Brass','#bda16b',.36,.72);iron=solid('Warm_Iron','#343832',.56,.35)
 ceramic=solid('Glazed_Cream','#e2d7b8',.29);enamel=solid('Olive_Enamel','#78816c',.39,.08)
 screen=solid('Screen_Glass','#172422',.23);plaster=solid('Warm_Chalk','#e4dac8',.96)
+families={'oak':oak,'joinery':joinery,'veneer':veneer,'honey':honey,'brass':brass,'iron':iron,'ceramic':ceramic,'enamel':enamel,
+          'moss':moss,'linen':linen,'paper':paper,'clay':clay,'forest':forest}
 def assign(o,m):
     o.data.materials.clear();o.data.materials.append(m)
     if o.type=='MESH':
@@ -60,6 +73,8 @@ def project(o,kind):
             else:
                 tile=.24 if kind=='cloth' else .65 if kind=='stone' else 1.15
                 u=co[axes[0]]*scales[axes[0]]/tile;v=co[axes[1]]*scales[axes[1]]/(tile if kind!='wood' else .65)
+                # Each ceiling board takes its own slice of the grain so neighbours don't repeat.
+                if o.name.startswith('Cabin_Ceiling_Board'):u+=o.location.x*2.37;v+=o.location.x*1.61
             uv.data[loop].uv=(u,v)
 
 for o in bpy.context.scene.objects:
@@ -67,9 +82,19 @@ for o in bpy.context.scene.objects:
     n=o.name
     if 'glass' in n.lower():continue
     m=oak;kind='wood';preserve_uv=False
+    fam=o.get('ks_family') # furniture-remodel.py names each new part's family
+    if fam:
+        m=families[fam];kind='cloth' if fam in ('moss','linen','paper','clay','forest') else 'wood'
+        assign(o,m);project(o,kind);continue
     if n=='Study_Floor':m=floor;kind='floor'
-    elif n=='Study_Ceiling':m=plaster
-    elif n.startswith('Cabin_'):m=oak;kind='wood'
+    elif n=='Study_Ceiling':m=joinery # dark backing shows in the grooves between ceiling boards
+    elif n.startswith('Cabin_Ceiling_Board'):m=timber;kind='wood'
+    elif n.startswith('Cabin_Trim'):m=joinery;kind='wood'
+    elif n.startswith('Cabin_'):m=logs;kind='wood';preserve_uv=True # cabin-shell.py wraps grain around each log
+    elif n.startswith('Fan_'):
+        # Inherited ceiling fan: walnut blades, cream glass bowl, brass trim, warm-iron body.
+        if n.startswith('Fan_Blade'):m=joinery;kind='wood'
+        else:m=ceramic if n=='Fan_Bowl' else brass if n.startswith(('Fan_Plate','Fan_Canopy','Fan_Ring')) else iron;preserve_uv=True
     elif any(k in n for k in ['SideWall','WindowWall','DoorWall','DoorLintel','TransomLeft','TransomRight']):m=timber;kind='wall'
     elif any(k in n for k in ['ChairSeat','ChairBack','Folded_Throw']):m=moss;kind='cloth'
     elif n.startswith('Beanbag'):m=linen;kind='cloth'
@@ -77,9 +102,18 @@ for o in bpy.context.scene.objects:
     elif n=='Study_Firebox':m=iron
     elif any(k in n for k in ['WindowJamb','WindowRail','TransomFrame','CornerPost','Baseboard','ChairLeg','HearthMantel','HearthLog']):m=joinery
     elif any(k in n for k in ['Handle','Knob','Brass','Inlay','hinge','Door_Plate','Door_KnobStem']):m=brass
+    # CRT-style restyle (art/woodland/restyle-furniture.py): brass feet, cream fronts, walnut bases.
+    elif n.endswith('_Ferrule') or n=='Lamp_Foot':m=brass
+    elif n=='Desk_DrawerFront':m=oak
+    elif n=='ks_archive_drawer':m=honey
+    elif n in ['Clock_Top','Clock_Left','Clock_Right','Clock_Back']:m=veneer # matches the CRT's walnut case
+    elif n in ['Lamp_Base','Clock_Bottom','Archive_Plinth','Shelf_Kick','Shelf_Bot','Map_Frame','Door_Sill'] or n.startswith('Cozy_Guest_Table_Leg'):m=joinery
+    elif n.startswith('Map_Pin_'):m=clay;kind='cloth'
     elif n.startswith('Lamp_'):m=enamel if n=='Lamp_Shade' else brass
     elif n=='ks_lamp_bulb':m=ceramic
-    elif n.startswith('CRT_'):m=screen if n=='CRT_Screen' else iron if n in ['CRT_Bezel','CRT_Toggle'] else ceramic;preserve_uv=True
+    # Wood-cased set: the cabinet and hood get projected grain; the screen keeps its runtime UVs.
+    elif n in ['CRT_Body','CRT_Back']:m=veneer
+    elif n.startswith('CRT_'):m=screen if n=='CRT_Screen' else iron if n in ['CRT_Bezel','CRT_Toggle'] else brass if n=='CRT_Antenna' else joinery if n=='CRT_Base' else ceramic;preserve_uv=True
     elif n in ['Accent_Mug']:m=ceramic
     elif any(k in n for k in ['Pages','Map_Sheet','frame_mat','Archive_Tab']):m=paper;kind='cloth';preserve_uv=n=='Map_Sheet'
     elif n.startswith('ks_shelf_book'):m=paper;kind='cloth' # Runtime applies the book's individual cover color.

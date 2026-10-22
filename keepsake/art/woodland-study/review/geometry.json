@@ -1,7 +1,7 @@
 {
-  "bytes": 6456224,
-  "meshes": 229,
-  "triangles": 55516,
+  "bytes": 8936960,
+  "meshes": 377,
+  "triangles": 82795,
   "checks": [
     "Functional anchors",
     "Camera manifest alignment",
@@ -12,6 +12,9 @@
     "Hearth clearance",
     "Chair heading",
     "Chimney ceiling and door clearance",
-    "Rounded log geometry"
+    "Rounded log geometry",
+    "Ceiling fan clearance",
+    "Prop clearance, drawers shut and open",
+    "Props resting on wall, floor and desk"
   ]
 }

@@ -1,0 +1,2 @@
+emalorenzo/three-agent-skills @ f950f95ae3b13581546e6d6d8b2f88a08eb3e577
+License: MIT (declared in package.json and README; the repo has no LICENSE file)

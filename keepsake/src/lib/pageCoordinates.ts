@@ -45,3 +45,21 @@ export function pagePixelPoint(node: HTMLElement, x: number, y: number): Point {
   const p = pagePoint(page, x, y);
   return {x: (p.x / 100) * page.offsetWidth, y: (p.y / 100) * page.offsetHeight};
 }
+
+/** Owner decision: arrow keys nudge a selected piece 1% of the page, 5% with Shift. */
+const NUDGE_STEP = 1;
+const NUDGE_STEP_LARGE = 5;
+/** Arrow key -> nudge in page percent, or null for any other key. */
+export function nudgeDelta(key: string, large: boolean): Point | null {
+  const step = large ? NUDGE_STEP_LARGE : NUDGE_STEP;
+  if (key === 'ArrowLeft') return {x: -step, y: 0};
+  if (key === 'ArrowRight') return {x: step, y: 0};
+  if (key === 'ArrowUp') return {x: 0, y: -step};
+  if (key === 'ArrowDown') return {x: 0, y: step};
+  return null;
+}
+/** Move a piece's centre, kept inside the same 2-98% bounds dragging uses. */
+export function nudgedPosition(at: Point, delta: Point): Point {
+  const keep = (v: number) => Math.min(98, Math.max(2, v));
+  return {x: keep(at.x + delta.x), y: keep(at.y + delta.y)};
+}

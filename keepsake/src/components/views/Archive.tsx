@@ -321,7 +321,13 @@ export function Archive() {
         {filtered.map(a => (
           <div key={a.id} className="ks-panel overflow-hidden">
             <div className="aspect-square w-full overflow-hidden">
-              <img src={a.src} alt="" className="h-full w-full object-cover" />
+              <img
+                src={a.src}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
             </div>
             <div className="flex items-center justify-between px-2 py-1.5">
               <button

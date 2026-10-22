@@ -40,7 +40,7 @@ Storage buckets: `uploads/<user>/…` (raw, owner-only, deleted after processing
 
 ## Local storage changes (done and next)
 - Done: photos, card art and 3D scans (`src`, `photoSrc`, `coverSrc`, `backSrc`, `modelSrc`) are stored once by hash in the `images` store, so an edit no longer rewrites every model; the hash cache no longer grows for the whole session.
-- Next: **load images on demand.** `loadState` still reads every image into memory at start. Plan: keep `keepsake-asset:<hash>` references in state and resolve them through a small cache that returns `blob:` URLs when an image is about to be shown (archive grid, page, map). This is needed before archives approach the 500-photo limit, and it is the same shape the server sync needs (references, not data).
+- **Images load on demand (Oct 11).** Files are stored as Blobs under their `keepsake-asset:<hash>` key, and `loadState` hands the app one `blob:` URL per file instead of the file's content, so the browser reads a photo from disk only when it is shown. `storage.ts` maps each URL back to its key when saving, which is also what sync will need (references, not data). Chosen over keeping raw keys in state because every existing image consumer (`<img>`, three.js textures, GLB loaders, html2canvas) keeps working unchanged. Backups call `inlineFiles` to write content back out.
 
 ## Deployment (when you are ready)
 1. Create a Supabase project (EU or US region close to most users). Apply migrations with the Supabase CLI: `supabase link` then `supabase db push`.

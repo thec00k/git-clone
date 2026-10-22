@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {fitPhotoRows, photoRows} from '../src/lib/photoRows.ts';
 import {playlistEmbedId} from '../src/lib/spotify.ts';
+import {nudgeDelta, nudgedPosition} from '../src/lib/pageCoordinates.ts';
 const overlap = (a, b) => Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2;
 for (const ratios of [
   [1, 1, 1, 1],
@@ -67,6 +68,11 @@ for (const input of [
   'spotify:track:37i9dQZF1DX7zqr9q1MPG7',
 ])
   assert.equal(playlistEmbedId(input), null);
+assert.deepEqual(nudgeDelta('ArrowLeft', false), {x: -1, y: 0});
+assert.deepEqual(nudgeDelta('ArrowDown', true), {x: 0, y: 5});
+assert.equal(nudgeDelta('a', false), null);
+assert.deepEqual(nudgedPosition({x: 50, y: 50}, {x: 1, y: 0}), {x: 51, y: 50});
+assert.deepEqual(nudgedPosition({x: 3, y: 97}, {x: -5, y: 5}), {x: 2, y: 98});
 console.log(
-  'Photo rows: 4/6 photos, mixed aspects, no overlap, preserved notes; Spotify links: valid and invalid inputs passed.',
+  'Photo rows: 4/6 photos, mixed aspects, no overlap, preserved notes; Spotify links: valid and invalid inputs; arrow nudging stays on the page passed.',
 );

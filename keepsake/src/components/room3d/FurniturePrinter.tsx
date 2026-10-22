@@ -1,6 +1,6 @@
 import {useEffect, useState, type ReactNode} from 'react';
 import * as THREE from 'three';
-import {loadFurniture} from './furnitureAssetCache';
+import {loadFurniture, retainFurniture} from './furnitureAssetCache';
 import {useApp} from '../../store/appStore';
 import {useActiveRoom} from './useActiveRoom';
 
@@ -12,15 +12,16 @@ export function FurniturePrinter({children}: {children: ReactNode}) {
     room === 'woodland' || room === 'beachfront' || room === 'cyberpunk'
       ? environment.furniture?.[room]?.printer
       : undefined;
-  const [model, setModel] = useState<THREE.Object3D | null>(null);
+  const [model, setModel] = useState<{object: THREE.Object3D; dispose: () => void} | null>(null);
   useEffect(() => {
     let live = true;
-    const materials: THREE.Material[] = [];
     setModel(null);
     if (id)
       loadFurniture(id)
         .then(asset => {
           if (!live) return;
+          const release = retainFurniture(id);
+          const materials: THREE.Material[] = [];
           const next = asset.scene.clone(true);
           next.traverse(o => {
             if (o instanceof THREE.Mesh) {
@@ -37,13 +38,20 @@ export function FurniturePrinter({children}: {children: ReactNode}) {
           });
           next.position.y = -0.023;
           next.scale.set(0.93, 0.85, 0.95);
-          setModel(next);
+          setModel({
+            object: next,
+            dispose: () => {
+              materials.forEach(m => m.dispose());
+              release();
+            },
+          });
         })
         .catch(() => {});
     return () => {
       live = false;
-      materials.forEach(m => m.dispose());
     };
   }, [id]);
-  return model ? <primitive object={model} /> : children;
+  // Free a model only after the commit that took it out of the scene.
+  useEffect(() => () => model?.dispose(), [model]);
+  return model ? <primitive object={model.object} /> : children;
 }

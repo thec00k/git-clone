@@ -1,7 +1,6 @@
 import poses from '../../generated/woodlandStudy.json';
 
 export type WoodlandStudyView = 'establishing' | 'desk' | 'window' | 'hearth';
-export const WOODLAND_STUDY_ASSET = '/room/woodland-study/woodland-study.glb';
 /** Review-only route; never writes a room ID or replaces a user's saved environment. */
 export function wantsWoodlandStudy(search: string) {
   return new URLSearchParams(search).get('study') === 'woodland';
