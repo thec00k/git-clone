@@ -380,7 +380,8 @@ export function parseRoomBackup(text: string): AppState {
       ),
   );
   ensure(
-    e.roomTheme === undefined || ['woodland', 'beachfront', 'cyberpunk'].includes(e.roomTheme as string),
+    e.roomTheme === undefined ||
+      ['woodland', 'beachfront', 'cyberpunk', 'sky-castle'].includes(e.roomTheme as string),
   );
   ensure(e.furniture === undefined || validFurnitureChoices(e.furniture));
   ensure(e.tidiedAt === undefined || (number(e.tidiedAt) && (e.tidiedAt as number) >= 0));
@@ -389,7 +390,9 @@ export function parseRoomBackup(text: string): AppState {
   ensure(
     s.ownedRoomThemes === undefined ||
       (strings(s.ownedRoomThemes) &&
-        (s.ownedRoomThemes as string[]).every(id => ['woodland', 'beachfront', 'cyberpunk'].includes(id)) &&
+        (s.ownedRoomThemes as string[]).every(id =>
+          ['woodland', 'beachfront', 'cyberpunk', 'sky-castle'].includes(id),
+        ) &&
         new Set(s.ownedRoomThemes as string[]).size === (s.ownedRoomThemes as string[]).length),
   );
   ensure(e.crtColor !== 'coastal' || ownsRoomTheme(s as unknown as AppState, 'beachfront'));
@@ -439,7 +442,7 @@ export function parseRoomBackup(text: string): AppState {
     ensure(object(s.roomDecor.layouts));
     const owned = s.roomDecor.owned as string[];
     for (const [theme, layout] of Object.entries(s.roomDecor.layouts)) {
-      ensure(['woodland', 'beachfront', 'cyberpunk'].includes(theme) && object(layout));
+      ensure(['woodland', 'beachfront', 'cyberpunk', 'sky-castle'].includes(theme) && object(layout));
       ensure(
         layout.crtColor === undefined ||
           (string(layout.crtColor) && Object.hasOwn(CRT_COLORS, layout.crtColor as string)),

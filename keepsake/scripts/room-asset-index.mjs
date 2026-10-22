@@ -2,7 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 // The Woodland cabin is built by art/woodland-study/build.py; the other rooms keep their own folder.
-const folders = {woodland: 'woodland-study', beachfront: 'beachfront', cyberpunk: 'cyberpunk'};
+const folders = {
+  woodland: 'woodland-study',
+  beachfront: 'beachfront',
+  cyberpunk: 'cyberpunk',
+  'sky-castle': 'sky-castle',
+};
 
 export function writeRoomAssetIndex(root) {
   const runtime = {};

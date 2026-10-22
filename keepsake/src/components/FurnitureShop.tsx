@@ -10,7 +10,9 @@ import {loadFurniture} from './room3d/furnitureAssetCache';
 
 export function FurnitureShop() {
   const {environment, update} = useApp();
-  const room = environment.roomTheme ?? 'woodland';
+  // Sky Castle's glass furniture is authored into the room model and is never swapped.
+  const builtIn = environment.roomTheme === 'sky-castle';
+  const room = environment.roomTheme === 'sky-castle' ? 'woodland' : (environment.roomTheme ?? 'woodland');
   const [category, setCategory] = useState<FurnitureCategory>('desk');
   const [preview, setPreview] = useState<FurnitureId | null>(null);
   const [busy, setBusy] = useState(false),
@@ -43,6 +45,14 @@ export function FurnitureShop() {
       setBusy(false);
     }
   };
+  if (builtIn)
+    return (
+      <section className="ks-furniture-shop" aria-label="Room furnishings">
+        <p>
+          Sky Castle's glass desk, chair and cabinets are part of the room, so there is nothing to swap here.
+        </p>
+      </section>
+    );
   return (
     <section className="ks-furniture-shop" aria-label="Room furnishings">
       <p>Choose a piece for this room. The first collection is included.</p>
