@@ -11,12 +11,17 @@ ks_lamp_bulb, ks_clock_digits ...), the heights things rest on (desk 0.75, cabin
 guestbook table 0.679, seat 0.52), moving parts as children of their drawers, and the CRT (approved).
 New parts carry o['ks_family'] for materials.py and o['ks_remodel'] so quality-pass.py leaves them.
 Coordinates are web metres (x, y up, z); Blender stores (x, -z, y).
+
+Beachfront runs the same shapes (art/beachfront/coastal-remodel.py sets KS_ROOM): it keeps its own
+coastal lamp, clock and arched window, and its chair keeps the Chair_* / Cozy_Chair_Cushion names.
 """
 import bpy, bmesh, math
 from mathutils import Vector, Matrix
 
 C = bpy.context
 scene = C.scene
+ROOM = globals().get('KS_ROOM', 'woodland')
+CABIN = ROOM == 'woodland'
 
 
 def w(p):
@@ -228,25 +233,29 @@ for side in (-1, 1):
 
 # ---------------------------------------------------------------- Chair (authored facing the desk; materials.py turns it 20 degrees)
 chair = obj('ks_chair')
-for n in ['Study_ChairBack', 'Study_ChairLeg', 'Study_ChairLeg.001', 'Study_ChairLeg.002', 'Study_ChairLeg.003']:
-    drop(n)
-seat_old = obj('Study_ChairSeat')
-cx, cz = -.54, -.78
+for o in list(chair.children_recursive):
+    if o.name.startswith(('Study_Chair', 'Chair_', 'Cozy_Chair', 'Cozy_Cushion')) and o.name not in ('Study_ChairSeat', 'Cozy_Chair_Cushion'):
+        bpy.data.objects.remove(o, do_unlink=True)
+turn = chair.rotation_euler.z
+chair.rotation_euler.z = 0  # built facing the desk, then turned back to the room's heading
+C.view_layer.update()
+cx, cz = chair.matrix_world.translation.x, -chair.matrix_world.translation.y
 leg = [(.0, 0), (.0145, 0), (.016, .03), (.019, .30), (.022, .345), (.022, .36), (.019, .372), (.02, .40), (0, .40)]
-for i, (x, z) in enumerate([(-.74, -.97), (-.34, -.97), (-.74, -.60), (-.34, -.60)]):
-    lathe('Study_ChairLeg', leg, (x, 0, z), 18, 'joinery', chair)
+for i, (dx, dz) in enumerate([(-.2, -.19), (.2, -.19), (-.2, .18), (.2, .18)]):
+    lathe('Study_ChairLeg', leg, (cx + dx, 0, cz + dz), 18, 'joinery', chair)
 box('Study_ChairRail', (cx, .385, cz), (.46, .05, .43), .008, 'joinery', chair)
-for x in (-.74, -.34):
-    tube('Study_ChairStretcher', [(x, .13, -.95), (x, .13, -.62)], .0085, 'joinery', chair)
-tube('Study_ChairStretcher', [(-.73, .13, cz), (-.35, .13, cz)], .0085, 'joinery', chair)
+for dx in (-.2, .2):
+    tube('Study_ChairStretcher', [(cx + dx, .13, cz - .17), (cx + dx, .13, cz + .16)], .0085, 'joinery', chair)
+tube('Study_ChairStretcher', [(cx - .19, .13, cz), (cx + .19, .13, cz)], .0085, 'joinery', chair)
 # Back posts rise from the rear legs and lean back a little; an arched crest rail joins them.
-for x in (-.74, -.34):
-    tube('Study_ChairPost', [(x, .40, -.60), (x, .66, -.585), (x, .93, -.56)], .016, 'joinery', chair, taper=[1, .92, .8])
-crest = [(-.74 + i * .40 / 10, .925 + .018 * math.sin(math.pi * i / 10), -.56 + .025 * math.sin(math.pi * i / 10)) for i in range(11)]
+for dx in (-.2, .2):
+    tube('Study_ChairPost', [(cx + dx, .40, cz + .18), (cx + dx, .66, cz + .195), (cx + dx, .93, cz + .22)], .016, 'joinery', chair, taper=[1, .92, .8])
+crest = [(cx - .2 + i * .40 / 10, .925 + .018 * math.sin(math.pi * i / 10), cz + .22 + .025 * math.sin(math.pi * i / 10)) for i in range(11)]
 tube('Study_ChairCrest', crest, .02, 'joinery', chair)
-tube('Study_ChairBackRail', [(-.74, .56, -.594), (-.34, .56, -.594)], .011, 'joinery', chair)
+tube('Study_ChairBackRail', [(cx - .2, .56, cz + .186), (cx + .2, .56, cz + .186)], .011, 'joinery', chair)
 pillow('Study_ChairSeat_New', (cx, .459, cz - .005), (.50, .098, .47), .05, .012, 'moss', chair, 'Study_ChairSeat')
-pillow('Study_ChairBack', (cx, .745, -.58), (.35, .27, .065), .03, .01, 'moss', chair, tilt=-.09)
+drop('Cozy_Chair_Cushion')
+pillow('Study_ChairBack', (cx, .745, cz + .2), (.35, .27, .065), .03, .01, 'moss', chair, tilt=-.09)
 # Piping round the seat's top edge.
 seat = obj('Study_ChairSeat')
 lo, hi = bounds(seat)
@@ -257,39 +266,47 @@ for (qx, qz, a0) in [(hi.x - rr, hi.z - rr, 0), (lo.x + rr, hi.z - rr, 90), (lo.
         a = math.radians(a0 + j * 15)
         ring.append((qx + rr * math.cos(a), y, qz + rr * math.sin(a)))
 tube('Study_ChairPiping', ring + ring[:1], .0035, 'moss', seat)
+chair.rotation_euler.z = turn
+if not CABIN:
+    # Beachfront's furniture swaps and hidden note look for these names.
+    for o in list(chair.children_recursive):
+        if o.name.startswith('Study_Chair'):
+            o.name = {'Study_ChairSeat': 'Cozy_Chair_Cushion', 'Study_ChairPiping': 'Cozy_Cushion_Piping'}.get(o.name, o.name.replace('Study_Chair', 'Chair_'))
 
 # ---------------------------------------------------------------- Lamp (slightly oversized shade, bible)
-lamp = obj('ks_lamp')
-for n in ['Lamp_Base', 'Lamp_Foot', 'Lamp_Neck', 'Lamp_Pole', 'Lamp_Shade']:
-    drop(n)
-lx, lz = -.9, -1.76
-lathe('Lamp_Foot', [(0, 0), (.067, 0), (.068, .004), (.066, .007), (0, .007)], (lx, .75, lz), 40, 'brass', lamp)
-lathe('Lamp_Base', [(0, .007), (.064, .007), (.063, .016), (.056, .026), (.04, .036), (.022, .043), (.014, .05), (0, .05)], (lx, .75, lz), 40, 'joinery', lamp)
-lathe('Lamp_Pole', [(0, .05), (.0065, .05), (.0065, .205), (0, .205)], (lx, .75, lz), 14, 'brass', lamp)
-lathe('Lamp_Neck', [(0, .195), (.012, .195), (.0155, .225), (.0115, .247), (0, .247)], (lx, .75, lz), 24, 'brass', lamp)
-sh = lathe('Lamp_Shade', [(.094, .262), (.093, .27), (.06, .352), (.057, .356)], (lx, .75, lz), 48, 'enamel', lamp, smooth=True, caps=False)
-sol = sh.modifiers.new('Shade wall', 'SOLIDIFY')
-sol.thickness = .0025
-sol.offset = -1
-# Harp and finial over the shade.
-for side in (-1, 1):
-    tube('Lamp_Harp', [(lx + side * .012, .99, lz), (lx + side * .05, 1.06, lz), (lx + side * .03, 1.11, lz), (lx, 1.118, lz)], .0018, 'brass', lamp)
-lathe('Lamp_Finial', [(0, 0), (.006, 0), (.011, .006), (.009, .013), (.004, .017), (0, .019)], (lx, 1.116, lz), 20, 'brass', lamp)
+if CABIN:
+    lamp = obj('ks_lamp')
+    for n in ['Lamp_Base', 'Lamp_Foot', 'Lamp_Neck', 'Lamp_Pole', 'Lamp_Shade']:
+        drop(n)
+    lx, lz = -.9, -1.76
+    lathe('Lamp_Foot', [(0, 0), (.067, 0), (.068, .004), (.066, .007), (0, .007)], (lx, .75, lz), 40, 'brass', lamp)
+    lathe('Lamp_Base', [(0, .007), (.064, .007), (.063, .016), (.056, .026), (.04, .036), (.022, .043), (.014, .05), (0, .05)], (lx, .75, lz), 40, 'joinery', lamp)
+    lathe('Lamp_Pole', [(0, .05), (.0065, .05), (.0065, .205), (0, .205)], (lx, .75, lz), 14, 'brass', lamp)
+    lathe('Lamp_Neck', [(0, .195), (.012, .195), (.0155, .225), (.0115, .247), (0, .247)], (lx, .75, lz), 24, 'brass', lamp)
+    sh = lathe('Lamp_Shade', [(.094, .262), (.093, .27), (.06, .352), (.057, .356)], (lx, .75, lz), 48, 'enamel', lamp, smooth=True, caps=False)
+    sol = sh.modifiers.new('Shade wall', 'SOLIDIFY')
+    sol.thickness = .0025
+    sol.offset = -1
+    # Harp and finial over the shade.
+    for side in (-1, 1):
+        tube('Lamp_Harp', [(lx + side * .012, .99, lz), (lx + side * .05, 1.06, lz), (lx + side * .03, 1.11, lz), (lx, 1.118, lz)], .0018, 'brass', lamp)
+    lathe('Lamp_Finial', [(0, 0), (.006, 0), (.011, .006), (.009, .013), (.004, .017), (0, .019)], (lx, 1.116, lz), 20, 'brass', lamp)
 
 # ---------------------------------------------------------------- Clock (a small sibling of the CRT)
-clock = obj('ks_clock')
-for n in ['Clock_Top', 'Clock_Bottom', 'Clock_Left', 'Clock_Right', 'Clock_Back']:
-    drop(n)
-ox, oz = -.73, -1.99
-box('Clock_Bottom', (ox, .7575, oz), (.172, .015, .082), .006, 'joinery', clock)
-box('Clock_Top', (ox, .8085, oz), (.166, .014, .078), .006, 'veneer', clock)
-for side, x in [('Left', ox - .073), ('Right', ox + .073)]:
-    box('Clock_' + side, (x, .783, oz), (.018, .038, .074), .007, 'veneer', clock)
-box('Clock_Back', (ox, .783, oz - .028), (.132, .038, .016), .004, 'veneer', clock)
-for i, (fx, fz) in enumerate([(-.068, -.03), (.068, -.03), (-.068, .03), (.068, .03)]):
-    lathe('Clock_Foot', [(0, 0), (.007, 0), (.008, .002), (.006, .004), (0, .004)], (ox + fx, .746, oz + fz), 14, 'brass', clock)
-# Feet lift the whole clock (digits and glass too) by 4 mm onto the desk.
-clock.location.z += .004
+if CABIN:
+    clock = obj('ks_clock')
+    for n in ['Clock_Top', 'Clock_Bottom', 'Clock_Left', 'Clock_Right', 'Clock_Back']:
+        drop(n)
+    ox, oz = -.73, -1.99
+    box('Clock_Bottom', (ox, .7575, oz), (.172, .015, .082), .006, 'joinery', clock)
+    box('Clock_Top', (ox, .8085, oz), (.166, .014, .078), .006, 'veneer', clock)
+    for side, x in [('Left', ox - .073), ('Right', ox + .073)]:
+        box('Clock_' + side, (x, .783, oz), (.018, .038, .074), .007, 'veneer', clock)
+    box('Clock_Back', (ox, .783, oz - .028), (.132, .038, .016), .004, 'veneer', clock)
+    for i, (fx, fz) in enumerate([(-.068, -.03), (.068, -.03), (-.068, .03), (.068, .03)]):
+        lathe('Clock_Foot', [(0, 0), (.007, 0), (.008, .002), (.006, .004), (0, .004)], (ox + fx, .746, oz + fz), 14, 'brass', clock)
+    # Feet lift the whole clock (digits and glass too) by 4 mm onto the desk.
+    clock.location.z += .004
 
 # ---------------------------------------------------------------- Archive cabinet
 arc = obj('ks_archive')
@@ -368,9 +385,9 @@ for o in list(sh_root.children):
 
 # ---------------------------------------------------------------- Corkboard map
 mp = obj('ks_map')
+mx = bounds(obj('Map_Frame'))[0].x  # back of the old frame: the log crowns in the cabin (-2.447)
 for n in ['Map_Frame', 'Map_Pin_0', 'Map_Pin_1', 'Map_Pin_2', 'Map_Pin_3']:
     drop(n)
-mx = -2.447  # back of the frame, on the log crowns (check-woodland-study-assets.mjs)
 ylo, yhi, zlo, zhi, bw = 1.1725, 2.5075, -.8725, .9725, .07
 for name, c, size in [('Map_Frame_T', (mx + .035, yhi - bw / 2, .05), (.07, bw, 1.845)), ('Map_Frame_B', (mx + .035, ylo + bw / 2, .05), (.07, bw, 1.845)),
                      ('Map_Frame_L', (mx + .035, 1.84, zhi - bw / 2), (.07, 1.335 - 2 * bw, bw)), ('Map_Frame_R', (mx + .035, 1.84, zlo + bw / 2), (.07, 1.335 - 2 * bw, bw))]:
@@ -402,7 +419,7 @@ for k in range(15):
     hit = logs.ray_cast(w((0, y, .05)), Vector((-1, 0, 0)), 3)
     if hit[0] is not None:
         hits.append((hit[0].x, y))
-nx, ny = max(hits)  # the log crown: the point closest to the room
+nx, ny = max(hits) if hits else (mx, yhi + .19)  # the log crown closest to the room; a plain wall has none
 tube('Map_Cord', [(mx + .006, yhi - .01, -.55), (max(nx, mx) + .004, ny, .05), (mx + .006, yhi - .01, .65)], .0016, 'clay', mp)
 nail = lathe('Map_Nail', [(0, 0), (.0015, 0), (.0015, .012), (.006, .012), (.006, .016), (0, .017)], (0, 0, 0), 12, 'iron')
 nail.data.transform(Matrix.Rotation(math.pi / 2, 4, 'Y'))
@@ -435,21 +452,23 @@ for y in (.25, 1.05, 1.85):
 box('Door_Sill', (.15, .015, 2.105), (.92, .03, .12), .01, 'joinery', door)
 
 # ---------------------------------------------------------------- Window joinery
-win = obj('ks_window')
-for o in list(win.children):
-    if o.name.startswith(('Study_WindowJamb', 'Study_WindowRail', 'Study_TransomFrame')) and not o.modifiers:
-        if o.name.startswith('Study_WindowJamb'):
-            o.data.transform(Matrix.Diagonal((1, .976, 1, 1)))  # .17 -> .166 deep
-        soften(o, .008)
-sill = obj('Win_Sill')
-if sill:
-    for m in list(sill.modifiers):
-        sill.modifiers.remove(m)
-    soften(sill, .012, 4)
+if CABIN:
+    win = obj('ks_window')
+    for o in list(win.children):
+        if o.name.startswith(('Study_WindowJamb', 'Study_WindowRail', 'Study_TransomFrame')) and not o.modifiers:
+            if o.name.startswith('Study_WindowJamb'):
+                o.data.transform(Matrix.Diagonal((1, .976, 1, 1)))  # .17 -> .166 deep
+            soften(o, .008)
+    sill = obj('Win_Sill')
+    if sill:
+        for m in list(sill.modifiers):
+            sill.modifiers.remove(m)
+        soften(sill, .012, 4)
 
 # ---------------------------------------------------------------- Beanbag (original; replaces the CC BY Sketchfab model)
 bean = obj('Beanbag')
 drop('Beanbag_StitchedSeams', 'Finish_Folded_Throw')
+lift = -bean.matrix_world.translation.z  # the root's height under (or over) the floor
 bm = bmesh.new()
 bmesh.ops.create_uvsphere(bm, u_segments=48, v_segments=24, radius=1)
 
@@ -472,7 +491,7 @@ for v in bm.verts:
     else:
         nz = .14 * (1 + z) ** 1.6  # flat base that turns up softly at the edge
         sag = 1 + .05 * (1 + z)
-    v.co = Vector((x * .47 * sag, y * .45 * sag, nz + .012))  # the object sits 12 mm below the floor
+    v.co = Vector((x * .47 * sag, y * .45 * sag, nz + lift))
 bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
 me = bpy.data.meshes.new('Beanbag')
 bm.to_mesh(me)
@@ -502,7 +521,7 @@ for i, line in enumerate(seams):
     tube('Beanbag_StitchedSeams' if i == 0 else 'Beanbag_Seam', [(p.x, p.z, -p.y) for p in pts], .0035, 'linen', bean)
 # A folded moss throw left on the seat.
 ty = -.12
-tz = top_height(.05 / .47 * .9, ty / .45 * .9) + .012
+tz = top_height(.05 / .47 * .9, ty / .45 * .9) + lift
 throw = pillow('Finish_Folded_Throw', (0, 0, 0), (.34, .04, .24), .018, .005, 'moss', None, cuts=6)
 throw.data.transform(Matrix.Translation((.05, ty, tz + .016)) @ Matrix.Rotation(.10, 4, 'X') @ Matrix.Rotation(.35, 4, 'Z'))
 throw.matrix_world = bean.matrix_world.copy()
