@@ -113,6 +113,12 @@ export async function adoptAccountRoom(
   const uid = await backend.userId();
   if (!uid) throw new Error('Sign in first.');
   const data = await backend.download();
+  // Photos or books can arrive before the room itself (the other device sends them first). Without the room
+  // row there is no profile, archive or settings to rebuild from, so wait rather than build a broken room.
+  if (data.revision === 0)
+    throw new Error(
+      'Your other device has not finished backing up its room yet. Give it a minute, then try again.',
+    );
   const restored = fromServer(data);
   await apply(restored.state);
   // Remember which server rows these are, so the next backup updates them instead of making copies.

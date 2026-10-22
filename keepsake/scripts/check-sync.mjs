@@ -422,6 +422,24 @@ await record({...added, books: [reopenedBook]}, local);
 await flush(disk.backend, local, now);
 assert.deepEqual(disk.calls, [], 'book pages reopened from disk keep their photos');
 
+// 15. The other device's photos can reach the account before its room row does. Bringing the room down then
+// would build a room without a profile or archive, so it waits instead, and nothing here changes.
+await fresh();
+const early = fakeServer();
+early.hasContent = true;
+early.photos = new Map(s.photos);
+await link(early.backend);
+assert.equal((await status()).paused, 'server-has-room');
+applied = null;
+await assert.rejects(
+  adoptAccountRoom(early.backend, local, async next => {
+    applied = next;
+  }),
+  /not finished backing up/,
+);
+assert.equal(applied, null, 'nothing is applied');
+assert.equal((await status()).paused, 'server-has-room', 'still waiting for the account’s room');
+
 console.log(
   'Sync: outbox sends the room without changing it, survives offline and mid-send edits, never duplicates, pauses on conflicts.',
 );

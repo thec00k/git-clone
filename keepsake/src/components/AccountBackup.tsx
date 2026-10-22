@@ -163,7 +163,10 @@ export function AccountBackup() {
                     ? `${sync.pending} change${sync.pending === 1 ? '' : 's'} waiting to be backed up.${
                         sync.lastError ? ' Will retry when the connection is back.' : ''
                       }`
-                    : `Backed up${sync.lastSyncedAt ? ` ${when(sync.lastSyncedAt)}` : ''}.`}
+                    : // Right after signing in, the room is linked a moment before its changes are queued.
+                      !sync.lastSyncedAt
+                      ? 'Getting ready to back up…'
+                      : `Backed up ${when(sync.lastSyncedAt)}.`}
           </p>
           {(sync?.paused === 'server-has-room' || sync?.paused === 'changed-elsewhere') && (
             <div className="ks-restore-preview">
