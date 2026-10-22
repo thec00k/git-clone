@@ -221,6 +221,10 @@ box('Desk_Apron_Rail', (-.15, .618, -1.326), (.72, .012, .022), .003, 'oak', des
 drawer_old = drawer.matrix_world.copy()
 box('Desk_Drawer_Box', (-.15, .669, -1.585), (.70, .07, .50), .002, 'oak', desk, 'Desk_Drawer')
 drawer = obj('Desk_Drawer')
+# Keep the drawer's pivot where the old drawer's was (an anchor contract; the geometry stays put).
+pivot = drawer.matrix_world.inverted() @ drawer_old.translation
+drawer.data.transform(Matrix.Translation(-pivot))
+drawer.matrix_world = drawer.matrix_world @ Matrix.Translation(pivot)
 box('Desk_DrawerFront', (-.15, .669, -1.326), (.716, .082, .022), .006, 'oak', drawer)
 box('Desk_DrawerPanel', (-.15, .669, -1.314), (.62, .052, .004), .002, 'oak', drawer)
 pull = [(-.15 + dx, .672, -1.308 + .02 * math.sin(math.pi * (dx + .07) / .14)) for dx in [i * .14 / 10 - .07 for i in range(11)]]
@@ -364,8 +368,8 @@ box('Guestbook_Pages', (gx + .006, .699, gz), (.244, .033, .31), .0015, 'paper',
 sh_root = obj('ks_shelf')
 for n in ['Shelf_Top', 'Shelf_SideL', 'Shelf_SideR', 'Shelf_Bot', 'Shelf_Kick', 'Shelf_Back']:
     drop(n)
-sx, sz = 2.2, -.34
-for side, z in [('L', .359), ('R', -1.039)]:
+sx, sz = 2.2, -sh_root.matrix_world.translation.y  # the shelf's own z (-0.34 in the cabin and Beachfront, -0.12 in Sky Castle)
+for side, z in [('L', sz + .699), ('R', sz - .699)]:
     box('Shelf_Side' + side, (sx, .93, z), (.28, 1.86, .028), .008, 'oak', sh_root)
 box('Shelf_Top', (sx - .012, 1.846, sz), (.304, .028, 1.484), .01, 'oak', sh_root)
 box('Shelf_Crown', (sx - .004, 1.822, sz), (.29, .02, 1.46), .008, 'joinery', sh_root)

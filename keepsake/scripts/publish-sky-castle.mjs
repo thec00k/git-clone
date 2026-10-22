@@ -1,19 +1,15 @@
 import fs from 'node:fs';
 import {createHash} from 'node:crypto';
-const bytes = fs.readFileSync('public/room/sky-castle/sky-castle.glb');
+import {fileURLToPath} from 'node:url';
+import {writeRoomAssetIndex} from './room-asset-index.mjs';
+const root = fileURLToPath(new URL('..', import.meta.url));
+const bytes = fs.readFileSync(new URL('../public/room/sky-castle/sky-castle.glb', import.meta.url));
 const sha256 = createHash('sha256').update(bytes).digest('hex');
 const asset = {file: 'sky-castle.glb', bytes: bytes.length, sha256};
 fs.writeFileSync(
-  'public/room/sky-castle/asset-manifest.json',
+  new URL('../public/room/sky-castle/asset-manifest.json', import.meta.url),
   JSON.stringify({room: 'sky-castle', qualities: {balanced: asset, high: asset}}, null, 2) + '\n',
 );
-const file = 'src/generated/roomAssets.ts',
-  text = fs.readFileSync(file, 'utf8');
-const entry = `  "sky-castle": {"balanced":"/room/sky-castle/sky-castle.glb?v=${sha256.slice(0, 12)}","high":"/room/sky-castle/sky-castle.glb?v=${sha256.slice(0, 12)}"},`;
-fs.writeFileSync(
-  file,
-  text.includes('"sky-castle":')
-    ? text.replace(/  "sky-castle":.*?,\n/, entry + '\n')
-    : text.replace('export const roomAssets = {', 'export const roomAssets = {\n' + entry),
-);
+// The shared writer: the old in-place regex stopped matching once roomAssets.ts was formatted.
+writeRoomAssetIndex(root);
 console.log(`Sky Castle asset: ${(bytes.length / 1024 / 1024).toFixed(2)} MiB, ${sha256.slice(0, 12)}`);
