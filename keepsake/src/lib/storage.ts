@@ -85,6 +85,36 @@ function fileUrl(key: string, blob: Blob): string {
   }
   return url;
 }
+/** The key a file is stored under: the SHA-256 of its data: URL, or the key a saved file's blob: URL was read
+ * from. The sync client uses the same keys (src/lib/sync/). */
+export async function assetKey(src: string): Promise<string> {
+  const saved = files.get(src);
+  if (saved) return saved.key;
+  const digest = crypto.subtle
+    ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(src))
+    : crypto.getRandomValues(new Uint8Array(32)).buffer;
+  return PREFIX + Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+}
+export const isAssetKey = (s: string) => s.startsWith(PREFIX);
+/** Whether a value is a file in the room (a new data: URL or a saved file's blob: URL), and which kind. */
+export function fileKind(src: string): 'image' | 'model' | undefined {
+  const type = src.startsWith('data:') ? src.slice(5) : files.get(src)?.blob.type;
+  return type?.startsWith('image/') ? 'image' : type?.startsWith('model/') ? 'model' : undefined;
+}
+/** One stored file by key as a data: URL, or undefined when the room no longer holds it. Read-only. */
+export async function readAsset(key: string): Promise<string | undefined> {
+  const url = urls.get(key);
+  if (url) return blobData(files.get(url)!.blob);
+  const db = await openDb();
+  let value: unknown;
+  try {
+    value = await request(db.transaction('images', 'readonly').objectStore('images').get(key));
+  } finally {
+    db.close();
+  }
+  if (value instanceof Blob) return blobData(value);
+  return typeof value === 'string' ? value : undefined;
+}
 /** Older saves kept each file as a data: string; rewrite those as files once, without changing their keys. */
 async function upgradeFiles(legacy: Map<string, Blob>): Promise<void> {
   const db = await openDb();
@@ -167,16 +197,7 @@ async function persist(state: AppState): Promise<void> {
     if (isFileData(s) || files.has(s)) found.add(s);
     return s;
   });
-  for (const src of found)
-    if (isFileData(src) && !hashes.has(src)) {
-      const digest = crypto.subtle
-        ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(src))
-        : crypto.getRandomValues(new Uint8Array(32)).buffer;
-      hashes.set(
-        src,
-        PREFIX + Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join(''),
-      );
-    }
+  for (const src of found) if (isFileData(src) && !hashes.has(src)) hashes.set(src, await assetKey(src));
   const keyOf = (s: string) => files.get(s)?.key ?? hashes.get(s) ?? s;
   const packed = mapStrings(state, keyOf);
   const referenced = new Set([...found].map(keyOf));

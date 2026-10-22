@@ -22,6 +22,7 @@ import type {CoverStyle, SaveStatus, Scrapbook, Visibility} from '../types/scrap
 import {uid} from '../lib/id';
 import {createSeed} from '../data/seed';
 import {loadState, saveState, SaveConflict} from '../lib/storage';
+import {syncAfterSave} from '../lib/sync';
 import {recordPhotoActivity} from '../lib/photoActivity';
 import {pruneOriginals, restoreOriginalFiles} from '../lib/originalPhotos';
 import {downloadRoom} from '../lib/roomBackup';
@@ -156,6 +157,7 @@ export function AppProvider({children}: {children: ReactNode}) {
       if (!initial.achievementBaseline) initial.achievementBaseline = baseline(initial);
       normalizeLegacyRooms(initial);
       setState(musicOnEntry(initial));
+      if (stored) syncAfterSave(stored);
       loadedRef.current = true;
       // Free full-size originals of photos deleted (or replaced by a restore) in earlier visits.
       if (stored) void pruneOriginals(stored).catch(() => {});
@@ -174,6 +176,8 @@ export function AppProvider({children}: {children: ReactNode}) {
     try {
       if (!(await saveState(snapshot, () => epoch === epochRef.current))) return false;
       savedRef.current = snapshot;
+      // Backup to the account (when signed in) only ever follows a successful save on this device.
+      syncAfterSave(snapshot);
       if (stateRef.current === snapshot) setSaveStatus('saved');
       return true;
     } catch (error) {
