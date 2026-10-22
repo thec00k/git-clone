@@ -186,19 +186,22 @@
         "public/room/furniture/display-case.glb",
         "public/room/furniture/time-capsule*.glb",
         "public/room/furniture/prop-refinements.glb",
-        "public/room/furniture/catalog.json"
+        "public/room/furniture/catalog.json",
+        "art/sky-castle/time-capsule.blend",
+        "public/room/sky-castle/time-capsule.glb"
       ],
       "kind": "model",
       "status": "original",
       "origin": "original",
-      "author": "Keepsake project (art/pipeline/build-*.py, art/cyberpunk/chest.py)",
+      "author": "Keepsake project (art/pipeline/build-*.py, art/cyberpunk/chest.py, art/sky-castle/chest.py)",
       "licence": "Original project work",
       "commercialUse": "yes",
       "proof": [
         "art/pipeline/build-display-case.py",
         "art/pipeline/build-time-capsule.py",
         "art/pipeline/build-prop-refinements.py",
-        "art/cyberpunk/chest.py"
+        "art/cyberpunk/chest.py",
+        "art/sky-castle/chest.py"
       ],
       "notes": "Built from scripts in the repository. Re-check that no inherited texture was used when these are next exported."
     },
@@ -377,6 +380,34 @@
       "notes": "Marbled sheepskin albedo for the Woodland hide rug, packed into public/room/woodland-study/woodland-study.glb by art/woodland-study/wall-mounts-and-rug.py. Resized to 1024 px from art/snowy-mountain/marbled-fur.png on branch codex/snowy-mountain-room; the prompt is in that branch's docs/snowy-mountain-room.md."
     },
     {
+      "id": "sky-castle-room",
+      "files": [
+        "public/room/sky-castle/sky-castle.glb",
+        "art/sky-castle/sky-castle.blend"
+      ],
+      "kind": "model",
+      "status": "unverified",
+      "origin": "mixed",
+      "author": "Keepsake project (art/sky-castle/build.py) built from an imported copy of the Woodland room, keeping the shared room anchors",
+      "licence": "Mixed",
+      "commercialUse": "unverified",
+      "blocker": "build.py imports public/room/woodland/woodland.glb and keeps its shared interaction anchors, so it inherits the Woodland provenance question.",
+      "action": "Audit which inherited Woodland objects remain when Sky Castle is next built."
+    },
+    {
+      "id": "sky-castle-atlas-parchment",
+      "files": [
+        "art/sky-castle/atlas-parchment.png"
+      ],
+      "kind": "image",
+      "status": "ai-generated",
+      "origin": "ai-generated",
+      "author": "Image-generation tool (prompt recorded in docs/sky-castle-room.md); embedded in public/maps/world-sky-castle.svg",
+      "licence": "Depends on the tool's terms; likely not copyrightable in the US",
+      "commercialUse": "unverified",
+      "action": "Owner to decide: confirm the tool's terms allow commercial use, or commission a replacement with the window scenery."
+    },
+    {
       "id": "room-prints-ai",
       "files": [
         "public/artwork/*.png"
@@ -494,10 +525,13 @@
         "art/room-screenshots/**",
         "art/woodland-study/review/**",
         "art/woodland/review/**",
+        "art/beachfront/review/**",
         "art/woodland-study/*.png",
         "art/stickers/*",
         "art/furniture/*.png",
-        "art/demos/*"
+        "art/demos/*",
+        "art/sky-castle/review/**",
+        "public/room/sky-castle/preview.png"
       ],
       "kind": "image",
       "status": "original",

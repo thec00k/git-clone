@@ -5,11 +5,15 @@ export const roomAssets = {
     "high": "/room/woodland-study/woodland-study.glb?v=ee10ac763be5"
   },
   "beachfront": {
-    "balanced": "/room/beachfront/beachfront.glb?v=ef5d69506828",
-    "high": "/room/beachfront/beachfront.high.glb?v=3c5740f7a1cc"
+    "balanced": "/room/beachfront/beachfront.glb?v=36d660afef85",
+    "high": "/room/beachfront/beachfront.high.glb?v=5b844a919a9a"
   },
   "cyberpunk": {
     "balanced": "/room/cyberpunk/cyberpunk.glb?v=53a6b320b269",
     "high": "/room/cyberpunk/cyberpunk.glb?v=53a6b320b269"
+  },
+  "sky-castle": {
+    "balanced": "/room/sky-castle/sky-castle.glb?v=af3242fe141d",
+    "high": "/room/sky-castle/sky-castle.glb?v=af3242fe141d"
   }
 } as const;

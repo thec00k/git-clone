@@ -38,7 +38,9 @@ export function RoomLights({
     environment.memoryLighting && bookPhase === 'editing' ? activeBook?.memoryMood : undefined;
   const coastal = useActiveRoom().id === 'beachfront';
   const neon = useActiveRoom().id === 'cyberpunk';
-  const woodland = useActiveRoom().id === 'woodland';
+  const activeId = useActiveRoom().id;
+  const woodland = activeId === 'woodland';
+  const skyCastle = activeId === 'sky-castle';
   const night = phase === 'night';
   const dusk = phase === 'dusk';
   const ceiling = useMemo(() => {
@@ -60,11 +62,25 @@ export function RoomLights({
   const lightColor = useMemo(() => {
     // Woodland dusk window light is a pale peach, not saturated orange: the room's warm pool comes from the desk lamp.
     const duskColor = woodland ? '#ffcfa6' : '#ffb070';
-    const color = new THREE.Color(neon ? '#939cff' : night ? '#c8d4f0' : dusk ? duskColor : '#ffe6b8');
+    const color = new THREE.Color(
+      neon
+        ? '#939cff'
+        : skyCastle
+          ? night
+            ? '#9bc5e8'
+            : dusk
+              ? '#efcbd8'
+              : '#eff5ff'
+          : night
+            ? '#c8d4f0'
+            : dusk
+              ? duskColor
+              : '#ffe6b8',
+    );
     if (memoryMood && memoryMood !== 'neutral' && MEMORY_MOODS[memoryMood])
       color.lerp(new THREE.Color(MEMORY_MOODS[memoryMood].light), 0.22);
     return color;
-  }, [night, dusk, memoryMood, neon, woodland]);
+  }, [night, dusk, memoryMood, neon, woodland, skyCastle]);
   // Woodland dusk gets a cool fill (the art bible's warm-pool-against-cool-room contrast); other rooms keep their warm fill.
   const coolDusk = woodland && dusk;
   // The same pass for Woodland's other hours: at night the room is cool and dim and the desk
@@ -76,12 +92,14 @@ export function RoomLights({
     [night, coolDusk, woodlandDay],
   );
   const skyColor = useMemo(
-    () => new THREE.Color(coolDusk ? '#8fa3bd' : woodlandNight ? '#5d6f8c' : '#bac4ba'),
-    [coolDusk, woodlandNight],
+    () =>
+      new THREE.Color(skyCastle ? '#c2dbf1' : coolDusk ? '#8fa3bd' : woodlandNight ? '#5d6f8c' : '#bac4ba'),
+    [coolDusk, woodlandNight, skyCastle],
   );
   const groundColor = useMemo(
-    () => new THREE.Color(coolDusk ? '#3a342c' : woodlandNight ? '#2a2622' : '#3f4931'),
-    [coolDusk, woodlandNight],
+    () =>
+      new THREE.Color(skyCastle ? '#9c97b3' : coolDusk ? '#3a342c' : woodlandNight ? '#2a2622' : '#3f4931'),
+    [coolDusk, woodlandNight, skyCastle],
   );
   useFrame((_, dt) => {
     const t = motionFactor(dt, MOTION.light, reduced);
@@ -93,7 +111,24 @@ export function RoomLights({
       [THREE.Light | null, number],
     ] = [
       [ambientRef.current, night ? (woodland ? 0.2 : 0.16) : dusk ? (woodland ? 0.3 : 0.24) : 0.34],
-      [sunRef.current, neon ? 0.65 : night ? 0.55 : dusk ? (woodland ? 0.9 : 1.35) : 2.1],
+      [
+        sunRef.current,
+        neon
+          ? 0.65
+          : skyCastle
+            ? night
+              ? 0.35
+              : dusk
+                ? 0.9
+                : 1.4
+            : night
+              ? 0.55
+              : dusk
+                ? woodland
+                  ? 0.9
+                  : 1.35
+                : 2.1,
+      ],
       [
         ceilingRef.current,
         // The Woodland ceiling light eases down at dusk and night so the desk lamp pool leads
@@ -105,16 +140,18 @@ export function RoomLights({
               ? 0.9
               : woodlandDay
                 ? 2.4
-                : coastal
-                  ? 2.3
-                  : 3.2
+                : skyCastle
+                  ? 1.25
+                  : coastal
+                    ? 2.3
+                    : 3.2
           : 0,
       ],
       [
         lampRef.current,
         environment.lampOn && !neon
           ? (night ? (woodland ? 2.5 : 3.8) : dusk ? (woodland ? 2.6 : 2.8) : woodland ? 1.0 : 1.6) *
-            (coastal ? 0.28 : 1)
+            (coastal || skyCastle ? 0.28 : 1)
           : 0,
       ],
       [skyRef.current, night ? (woodland ? 0.3 : 0.25) : coolDusk ? 0.6 : 0.55],

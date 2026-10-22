@@ -61,7 +61,21 @@ export const cyberpunkRoom: RoomTheme = {
   woodland: false,
   walkBounds: {...woodlandRoom.walkBounds, keepOut: undefined},
 };
-export const roomThemes = {woodland: woodlandRoom, beachfront: beachfrontRoom, cyberpunk: cyberpunkRoom};
+export const skyCastleRoom: RoomTheme = {
+  ...woodlandRoom,
+  id: 'sky-castle',
+  title: 'Sky Castle',
+  subtitle: 'A quiet home above the clouds.',
+  asset: '/room/sky-castle/sky-castle.glb',
+  woodland: false,
+  walkBounds: {...woodlandRoom.walkBounds, keepOut: undefined},
+};
+export const roomThemes = {
+  woodland: woodlandRoom,
+  beachfront: beachfrontRoom,
+  cyberpunk: cyberpunkRoom,
+  'sky-castle': skyCastleRoom,
+};
 
 export const qualityProfiles = {
   balanced: {dpr: 1.25, shadows: false, particles: 70},

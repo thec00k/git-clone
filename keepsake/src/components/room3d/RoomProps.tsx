@@ -483,7 +483,8 @@ export function LampFixture({
   onToggle: () => void;
 }) {
   const {environment} = useApp();
-  const lampChoice = environment.furniture?.[environment.roomTheme ?? 'woodland']?.lamp;
+  const theme = environment.roomTheme ?? 'woodland';
+  const lampChoice = theme === 'sky-castle' ? undefined : environment.furniture?.[theme]?.lamp;
   const ownBulb = environment.roomTheme === 'cyberpunk' || lampChoice === 'lamp-2' || lampChoice === 'lamp-3';
   const fixture = useRef<THREE.Group>(null);
   useFrame(() => {
