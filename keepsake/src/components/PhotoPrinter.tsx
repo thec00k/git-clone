@@ -149,7 +149,7 @@ export function PhotoPrinter({onClose}: {onClose: () => void}) {
                     setError('');
                   }}
                 >
-                  <img src={a.src} alt="" />
+                  <img src={a.src} alt="" loading="lazy" decoding="async" />
                 </button>
               ))}
             </div>

@@ -7,9 +7,10 @@ import type {HolidayId} from '../../types/app';
  * Seasonal dressing for the Woodland room, driven by the season engine (`useSeasonal().holiday`).
  * Deliberately simple paper-craft shapes in flat colours: they are placeholders for commissioned art
  * but real enough to judge placement and mood. Nothing here animates, so reduced motion needs no case.
- * Positions come from the Woodland study model: mantel top about y 1.04, front z about 1.74; window opening x -1.12..0.82, top rail y 3.05.
+ * Positions come from the Woodland study model: mantel top y 1.04, front edge z 1.65; the chimney stones start at z 1.73,
+ * so the shelf in front of them is only 8 cm deep. `z` is that stone face. Window opening x -1.12..0.82, top rail y 3.05.
  */
-const MANTEL = {minX: -1.4, maxX: -0.42, y: 1.04, z: 1.78};
+const MANTEL = {minX: -1.4, maxX: -0.42, y: 1.04, z: 1.74};
 const paper = (color: string, emissive = '#000000', ei = 0) =>
   new THREE.MeshStandardMaterial({
     color,
@@ -212,7 +213,7 @@ function Eggs() {
   const mats = useMemo(() => colors.map(c => paper(c)), []);
   const basket = useMemo(() => paper('#a77b45'), []);
   return (
-    <group position={[-1.12, MANTEL.y, MANTEL.z - 0.06]}>
+    <group position={[-1.12, MANTEL.y, MANTEL.z - 0.065]} scale={0.5}>
       <mesh material={basket} position={[0, 0.03, 0]}>
         <cylinderGeometry args={[0.1, 0.075, 0.07, 10]} />
       </mesh>
@@ -238,7 +239,7 @@ function Tulips() {
     petals = useMemo(() => ['#f08aa5', '#f7d36b', '#c9a2e8'].map(c => paper(c)), []),
     vase = useMemo(() => paper('#cfe0e6'), []);
   return (
-    <group position={[-0.62, MANTEL.y, MANTEL.z - 0.06]}>
+    <group position={[-0.62, MANTEL.y, MANTEL.z - 0.06]} scale={0.7}>
       <mesh material={vase} position={[0, 0.045, 0]}>
         <cylinderGeometry args={[0.04, 0.05, 0.09, 8]} />
       </mesh>
@@ -297,7 +298,7 @@ function HeartsOnMantel() {
           key={i}
           geometry={geo}
           material={mats[m]}
-          position={[x, MANTEL.y + s * 0.6, MANTEL.z - 0.08]}
+          position={[x, MANTEL.y + s * 0.7, MANTEL.z - 0.08]}
           scale={s * 1.3}
         />
       ))}
@@ -353,9 +354,9 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
   ),
   halloween: () => (
     <>
-      <Pumpkin position={[-1.25, MANTEL.y + 0.08, MANTEL.z - 0.06]} />
-      <Pumpkin position={[-0.95, MANTEL.y + 0.06, MANTEL.z - 0.06]} scale={0.75} />
-      <Pumpkin position={[-0.62, MANTEL.y + 0.07, MANTEL.z - 0.06]} scale={0.9} />
+      <Pumpkin position={[-1.25, MANTEL.y + 0.044, MANTEL.z - 0.07]} scale={0.6} />
+      <Pumpkin position={[-0.95, MANTEL.y + 0.037, MANTEL.z - 0.07]} scale={0.5} />
+      <Pumpkin position={[-0.62, MANTEL.y + 0.04, MANTEL.z - 0.07]} scale={0.55} />
       <Pumpkin position={[-0.05, 0.12, 1.62]} scale={1.4} />
       {[
         [-1.5, 2.6, 0.3, 1],

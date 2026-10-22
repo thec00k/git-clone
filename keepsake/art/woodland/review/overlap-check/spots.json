@@ -1,0 +1,3555 @@
+{
+ "eyes": 240,
+ "glb": "public/room/woodland-study/woodland-study.glb",
+ "eps": 0.001,
+ "meshes": 267,
+ "tris": 64210,
+ "spots": [
+  {
+   "where": "Cabin_Side_Log.009",
+   "tri_pairs": 14,
+   "area_cm2": 9424.32,
+   "centre": [
+    2.53,
+    0.0,
+    1.196
+   ],
+   "extent": [
+    0.04,
+    4.38,
+    0.292
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.004",
+   "tri_pairs": 17,
+   "area_cm2": 7751.76,
+   "centre": [
+    0.0,
+    -2.169,
+    1.198
+   ],
+   "extent": [
+    5.1,
+    0.042,
+    0.295
+   ],
+   "visible": "0/17",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.008",
+   "tri_pairs": 12,
+   "area_cm2": 7528.96,
+   "centre": [
+    -2.529,
+    0.0,
+    1.196
+   ],
+   "extent": [
+    0.041,
+    4.38,
+    0.294
+   ],
+   "visible": "0/12",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_Chimney_Core <-> Study_Chimney_Stone.032",
+   "tri_pairs": 19,
+   "area_cm2": 7154.16,
+   "centre": [
+    -0.91,
+    -2.038,
+    2.92
+   ],
+   "extent": [
+    0.243,
+    0.233,
+    1.92
+   ],
+   "visible": "0/19",
+   "nearest_m": null,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Cabin_Side_Log.001 <-> Cabin_Side_Log.005",
+   "tri_pairs": 7,
+   "area_cm2": 4667.71,
+   "centre": [
+    2.53,
+    0.0,
+    0.409
+   ],
+   "extent": [
+    0.041,
+    4.38,
+    0.067
+   ],
+   "visible": "0/7",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_Chimney_Core <-> Study_Chimney_Stone.025",
+   "tri_pairs": 18,
+   "area_cm2": 4491.24,
+   "centre": [
+    -0.91,
+    -2.155,
+    2.44
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.96
+   ],
+   "visible": "0/18",
+   "nearest_m": null,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Study_Chimney_Core <-> Study_Chimney_Stone.005",
+   "tri_pairs": 18,
+   "area_cm2": 4491.24,
+   "centre": [
+    -0.91,
+    -2.155,
+    2.44
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.96
+   ],
+   "visible": "0/18",
+   "nearest_m": null,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Study_Chimney_Core <-> Study_Chimney_Stone.012",
+   "tri_pairs": 19,
+   "area_cm2": 4116.06,
+   "centre": [
+    -0.91,
+    -2.155,
+    2.44
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.96
+   ],
+   "visible": "0/19",
+   "nearest_m": null,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Cabin_Side_Log.008 <-> Cabin_Side_Log.014",
+   "tri_pairs": 6,
+   "area_cm2": 3790.27,
+   "centre": [
+    -2.53,
+    0.0,
+    1.534
+   ],
+   "extent": [
+    0.041,
+    4.38,
+    0.068
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log",
+   "tri_pairs": 6,
+   "area_cm2": 3775.62,
+   "centre": [
+    0.0,
+    2.17,
+    0.182
+   ],
+   "extent": [
+    5.1,
+    0.04,
+    0.064
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.009 <-> Cabin_Side_Log.015",
+   "tri_pairs": 6,
+   "area_cm2": 3757.12,
+   "centre": [
+    2.53,
+    0.0,
+    1.533
+   ],
+   "extent": [
+    0.04,
+    4.38,
+    0.065
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.027",
+   "tri_pairs": 8,
+   "area_cm2": 3755.11,
+   "centre": [
+    2.53,
+    0.0,
+    3.221
+   ],
+   "extent": [
+    0.041,
+    4.38,
+    0.291
+   ],
+   "visible": "0/8",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.004",
+   "tri_pairs": 14,
+   "area_cm2": 3193.47,
+   "centre": [
+    0.0,
+    2.169,
+    1.197
+   ],
+   "extent": [
+    5.1,
+    0.041,
+    0.294
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.002",
+   "tri_pairs": 7,
+   "area_cm2": 2854.9,
+   "centre": [
+    0.0,
+    -2.17,
+    0.634
+   ],
+   "extent": [
+    5.1,
+    0.041,
+    0.067
+   ],
+   "visible": "0/7",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.002 <-> Cabin_Window_Log.004",
+   "tri_pairs": 6,
+   "area_cm2": 2852.88,
+   "centre": [
+    -0.85,
+    2.162,
+    0.861
+   ],
+   "extent": [
+    3.4,
+    0.056,
+    0.057
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.001",
+   "tri_pairs": 5,
+   "area_cm2": 2843.09,
+   "centre": [
+    2.53,
+    0.0,
+    0.182
+   ],
+   "extent": [
+    0.039,
+    4.38,
+    0.063
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.011 <-> Cabin_Door_Log.013",
+   "tri_pairs": 5,
+   "area_cm2": 2828.61,
+   "centre": [
+    0.0,
+    -2.17,
+    2.883
+   ],
+   "extent": [
+    5.1,
+    0.04,
+    0.066
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.023 <-> Cabin_Side_Log.027",
+   "tri_pairs": 5,
+   "area_cm2": 2826.55,
+   "centre": [
+    2.53,
+    0.0,
+    2.883
+   ],
+   "extent": [
+    0.04,
+    4.38,
+    0.064
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log <-> Cabin_Side_Log.004",
+   "tri_pairs": 5,
+   "area_cm2": 2822.83,
+   "centre": [
+    -2.53,
+    0.0,
+    0.408
+   ],
+   "extent": [
+    0.04,
+    4.38,
+    0.065
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.022",
+   "tri_pairs": 5,
+   "area_cm2": 2821.25,
+   "centre": [
+    -2.53,
+    0.0,
+    2.656
+   ],
+   "extent": [
+    0.039,
+    4.38,
+    0.062
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.005",
+   "tri_pairs": 5,
+   "area_cm2": 2818.61,
+   "centre": [
+    2.53,
+    0.0,
+    0.632
+   ],
+   "extent": [
+    0.039,
+    4.38,
+    0.063
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log <-> Cabin_Window_Log.002",
+   "tri_pairs": 5,
+   "area_cm2": 2815.33,
+   "centre": [
+    0.0,
+    2.17,
+    0.409
+   ],
+   "extent": [
+    5.1,
+    0.041,
+    0.067
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Archive_Plinth <-> Study_Floor",
+   "tri_pairs": 2,
+   "area_cm2": 2813.12,
+   "centre": [
+    -0.867,
+    0.733,
+    0.0
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "2/2",
+   "nearest_m": 0.92,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log",
+   "tri_pairs": 5,
+   "area_cm2": 2805.42,
+   "centre": [
+    -2.53,
+    0.0,
+    0.182
+   ],
+   "extent": [
+    0.04,
+    4.38,
+    0.063
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.023",
+   "tri_pairs": 5,
+   "area_cm2": 2794.59,
+   "centre": [
+    2.53,
+    0.0,
+    2.656
+   ],
+   "extent": [
+    0.04,
+    4.38,
+    0.063
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_Chimney_Core <-> Study_Chimney_Stone",
+   "tri_pairs": 13,
+   "area_cm2": 2775.24,
+   "centre": [
+    -0.91,
+    -2.155,
+    2.44
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.96
+   ],
+   "visible": "0/13",
+   "nearest_m": null,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Study_Chimney_Core <-> Study_Chimney_Stone.020",
+   "tri_pairs": 12,
+   "area_cm2": 2774.46,
+   "centre": [
+    -0.91,
+    -2.155,
+    2.44
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.96
+   ],
+   "visible": "0/12",
+   "nearest_m": null,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Cabin_Door_Log.011",
+   "tri_pairs": 5,
+   "area_cm2": 2773.63,
+   "centre": [
+    0.0,
+    -2.17,
+    2.656
+   ],
+   "extent": [
+    5.1,
+    0.04,
+    0.063
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log",
+   "tri_pairs": 7,
+   "area_cm2": 2466.95,
+   "centre": [
+    0.0,
+    -2.169,
+    0.185
+   ],
+   "extent": [
+    5.1,
+    0.042,
+    0.07
+   ],
+   "visible": "0/7",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.011",
+   "tri_pairs": 6,
+   "area_cm2": 2103.29,
+   "centre": [
+    0.0,
+    2.17,
+    2.656
+   ],
+   "extent": [
+    5.1,
+    0.039,
+    0.062
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.004 <-> Cabin_Door_Log.007",
+   "tri_pairs": 7,
+   "area_cm2": 1923.93,
+   "centre": [
+    0.0,
+    -2.169,
+    1.536
+   ],
+   "extent": [
+    5.1,
+    0.043,
+    0.071
+   ],
+   "visible": "0/7",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.026 <-> Cabin_Side_Log.032",
+   "tri_pairs": 4,
+   "area_cm2": 1911.41,
+   "centre": [
+    -2.53,
+    0.0,
+    3.557
+   ],
+   "extent": [
+    0.041,
+    4.38,
+    0.066
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.002",
+   "tri_pairs": 4,
+   "area_cm2": 1904.56,
+   "centre": [
+    0.0,
+    2.17,
+    0.632
+   ],
+   "extent": [
+    5.1,
+    0.04,
+    0.064
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.004",
+   "tri_pairs": 4,
+   "area_cm2": 1896.49,
+   "centre": [
+    -2.53,
+    0.0,
+    0.633
+   ],
+   "extent": [
+    0.04,
+    4.38,
+    0.065
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.002 <-> Cabin_Door_Log.004",
+   "tri_pairs": 7,
+   "area_cm2": 1892.2,
+   "centre": [
+    0.0,
+    -2.161,
+    0.86
+   ],
+   "extent": [
+    5.1,
+    0.058,
+    0.068
+   ],
+   "visible": "0/7",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.022 <-> Cabin_Side_Log.026",
+   "tri_pairs": 4,
+   "area_cm2": 1868.12,
+   "centre": [
+    -2.53,
+    0.0,
+    2.884
+   ],
+   "extent": [
+    0.041,
+    4.38,
+    0.067
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.005 <-> Cabin_Side_Log.009",
+   "tri_pairs": 4,
+   "area_cm2": 1866.06,
+   "centre": [
+    2.53,
+    0.0,
+    0.858
+   ],
+   "extent": [
+    0.04,
+    4.38,
+    0.067
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.004 <-> Cabin_Side_Log.008",
+   "tri_pairs": 4,
+   "area_cm2": 1862.63,
+   "centre": [
+    -2.53,
+    0.0,
+    0.858
+   ],
+   "extent": [
+    0.04,
+    4.38,
+    0.066
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.011 <-> Cabin_Window_Log.013",
+   "tri_pairs": 8,
+   "area_cm2": 1833.15,
+   "centre": [
+    0.0,
+    2.166,
+    2.868
+   ],
+   "extent": [
+    5.1,
+    0.049,
+    0.107
+   ],
+   "visible": "0/8",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log <-> Cabin_Door_Log.002",
+   "tri_pairs": 6,
+   "area_cm2": 1534.99,
+   "centre": [
+    0.0,
+    -2.169,
+    0.41
+   ],
+   "extent": [
+    5.1,
+    0.042,
+    0.07
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Joist <-> Cabin_Side_Log.033",
+   "tri_pairs": 71,
+   "area_cm2": 1525.94,
+   "centre": [
+    2.55,
+    0.0,
+    3.715
+   ],
+   "extent": [
+    0.0,
+    3.893,
+    0.087
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Joist <-> Cabin_Side_Log.032",
+   "tri_pairs": 66,
+   "area_cm2": 1497.7,
+   "centre": [
+    -2.55,
+    0.0,
+    3.715
+   ],
+   "extent": [
+    0.0,
+    3.893,
+    0.085
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.013 <-> Cabin_Window_Log.016",
+   "tri_pairs": 10,
+   "area_cm2": 1252.96,
+   "centre": [
+    0.0,
+    2.164,
+    3.551
+   ],
+   "extent": [
+    5.1,
+    0.053,
+    0.105
+   ],
+   "visible": "1/10",
+   "nearest_m": 2.46,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.004 <-> Cabin_Side_Log.008",
+   "tri_pairs": 46,
+   "area_cm2": 1216.56,
+   "centre": [
+    -2.505,
+    -2.068,
+    1.259
+   ],
+   "extent": [
+    0.091,
+    0.243,
+    0.618
+   ],
+   "visible": "0/16",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.004 <-> Cabin_Side_Log.009",
+   "tri_pairs": 44,
+   "area_cm2": 1171.31,
+   "centre": [
+    2.505,
+    -2.068,
+    1.224
+   ],
+   "extent": [
+    0.09,
+    0.243,
+    0.618
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Joist <-> Cabin_Window_Log.013",
+   "tri_pairs": 22,
+   "area_cm2": 1162.25,
+   "centre": [
+    -1.457,
+    2.19,
+    3.42
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.225
+   ],
+   "visible": "0/22",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.013 <-> Cabin_Side_Log.027",
+   "tri_pairs": 46,
+   "area_cm2": 1160.63,
+   "centre": [
+    2.505,
+    -1.947,
+    3.248
+   ],
+   "extent": [
+    0.091,
+    0.487,
+    0.618
+   ],
+   "visible": "0/16",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.009 <-> Cabin_Window_Log.004",
+   "tri_pairs": 44,
+   "area_cm2": 1152.98,
+   "centre": [
+    2.505,
+    2.068,
+    1.258
+   ],
+   "extent": [
+    0.089,
+    0.243,
+    0.616
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.013 <-> Cabin_Side_Log.026",
+   "tri_pairs": 45,
+   "area_cm2": 1142.96,
+   "centre": [
+    -2.505,
+    -1.947,
+    3.282
+   ],
+   "extent": [
+    0.091,
+    0.487,
+    0.617
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Beam.001 <-> Cabin_Door_Log.013",
+   "tri_pairs": 27,
+   "area_cm2": 1125.34,
+   "centre": [
+    1.457,
+    -2.19,
+    3.42
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.223
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.008 <-> Cabin_Window_Log.004",
+   "tri_pairs": 44,
+   "area_cm2": 1123.03,
+   "centre": [
+    -2.506,
+    2.068,
+    1.224
+   ],
+   "extent": [
+    0.088,
+    0.243,
+    0.614
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.026 <-> Cabin_Window_Log.013",
+   "tri_pairs": 43,
+   "area_cm2": 1117.25,
+   "centre": [
+    -2.505,
+    2.068,
+    3.248
+   ],
+   "extent": [
+    0.091,
+    0.243,
+    0.613
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.027 <-> Cabin_Window_Log.013",
+   "tri_pairs": 42,
+   "area_cm2": 1051.08,
+   "centre": [
+    2.505,
+    2.068,
+    3.282
+   ],
+   "extent": [
+    0.09,
+    0.243,
+    0.612
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.026",
+   "tri_pairs": 5,
+   "area_cm2": 943.48,
+   "centre": [
+    -2.529,
+    0.0,
+    3.219
+   ],
+   "extent": [
+    0.041,
+    4.38,
+    0.29
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.004 <-> Cabin_Window_Log.007",
+   "tri_pairs": 5,
+   "area_cm2": 897.3,
+   "centre": [
+    0.0,
+    2.169,
+    1.534
+   ],
+   "extent": [
+    5.1,
+    0.041,
+    0.069
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Beam.001 <-> Cabin_Window_Log.013",
+   "tri_pairs": 23,
+   "area_cm2": 877.68,
+   "centre": [
+    1.457,
+    2.19,
+    3.421
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.225
+   ],
+   "visible": "0/23",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.009",
+   "tri_pairs": 4,
+   "area_cm2": 857.08,
+   "centre": [
+    -0.971,
+    -2.161,
+    2.219
+   ],
+   "extent": [
+    3.157,
+    0.058,
+    0.043
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.013",
+   "tri_pairs": 23,
+   "area_cm2": 834.26,
+   "centre": [
+    0.0,
+    2.161,
+    3.297
+   ],
+   "extent": [
+    5.1,
+    0.059,
+    0.444
+   ],
+   "visible": "0/23",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.005 <-> Cabin_Window_Log.002",
+   "tri_pairs": 30,
+   "area_cm2": 790.03,
+   "centre": [
+    2.505,
+    1.947,
+    0.696
+   ],
+   "extent": [
+    0.089,
+    0.487,
+    0.392
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log <-> Cabin_Side_Log",
+   "tri_pairs": 29,
+   "area_cm2": 776.37,
+   "centre": [
+    -2.506,
+    -2.068,
+    0.245
+   ],
+   "extent": [
+    0.088,
+    0.243,
+    0.391
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.002 <-> Cabin_Side_Log.005",
+   "tri_pairs": 28,
+   "area_cm2": 763.61,
+   "centre": [
+    2.505,
+    -2.068,
+    0.659
+   ],
+   "extent": [
+    0.091,
+    0.243,
+    0.394
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log <-> Cabin_Window_Log",
+   "tri_pairs": 29,
+   "area_cm2": 760.45,
+   "centre": [
+    -2.505,
+    1.947,
+    0.21
+   ],
+   "extent": [
+    0.09,
+    0.487,
+    0.394
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.001 <-> Cabin_Window_Log",
+   "tri_pairs": 29,
+   "area_cm2": 755.58,
+   "centre": [
+    2.505,
+    1.947,
+    0.246
+   ],
+   "extent": [
+    0.09,
+    0.487,
+    0.393
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.022 <-> Cabin_Window_Log.011",
+   "tri_pairs": 28,
+   "area_cm2": 754.4,
+   "centre": [
+    -2.505,
+    2.068,
+    2.686
+   ],
+   "extent": [
+    0.09,
+    0.243,
+    0.392
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.011 <-> Cabin_Side_Log.023",
+   "tri_pairs": 29,
+   "area_cm2": 754.22,
+   "centre": [
+    2.505,
+    -1.947,
+    2.687
+   ],
+   "extent": [
+    0.09,
+    0.487,
+    0.393
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.002 <-> Cabin_Side_Log.004",
+   "tri_pairs": 28,
+   "area_cm2": 744.99,
+   "centre": [
+    -2.506,
+    -2.068,
+    0.695
+   ],
+   "extent": [
+    0.089,
+    0.243,
+    0.392
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.023 <-> Cabin_Window_Log.011",
+   "tri_pairs": 28,
+   "area_cm2": 734.94,
+   "centre": [
+    2.506,
+    2.068,
+    2.72
+   ],
+   "extent": [
+    0.087,
+    0.243,
+    0.39
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.015 <-> Cabin_Window_Log.007",
+   "tri_pairs": 27,
+   "area_cm2": 724.78,
+   "centre": [
+    2.505,
+    2.068,
+    1.819
+   ],
+   "extent": [
+    0.091,
+    0.243,
+    0.392
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.011 <-> Cabin_Side_Log.022",
+   "tri_pairs": 28,
+   "area_cm2": 717.94,
+   "centre": [
+    -2.505,
+    -1.947,
+    2.722
+   ],
+   "extent": [
+    0.09,
+    0.487,
+    0.392
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log <-> Cabin_Side_Log.001",
+   "tri_pairs": 27,
+   "area_cm2": 716.04,
+   "centre": [
+    2.505,
+    -2.068,
+    0.21
+   ],
+   "extent": [
+    0.091,
+    0.243,
+    0.393
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.019 <-> Cabin_Window_Log.009",
+   "tri_pairs": 27,
+   "area_cm2": 714.63,
+   "centre": [
+    2.505,
+    2.068,
+    2.269
+   ],
+   "extent": [
+    0.09,
+    0.243,
+    0.39
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.004 <-> Cabin_Window_Log.002",
+   "tri_pairs": 28,
+   "area_cm2": 713.74,
+   "centre": [
+    -2.505,
+    1.947,
+    0.66
+   ],
+   "extent": [
+    0.089,
+    0.487,
+    0.393
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.014 <-> Cabin_Window_Log.007",
+   "tri_pairs": 27,
+   "area_cm2": 713.69,
+   "centre": [
+    -2.505,
+    2.068,
+    1.785
+   ],
+   "extent": [
+    0.09,
+    0.243,
+    0.391
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.007 <-> Cabin_Side_Log.015",
+   "tri_pairs": 27,
+   "area_cm2": 710.65,
+   "centre": [
+    2.506,
+    -2.068,
+    1.786
+   ],
+   "extent": [
+    0.088,
+    0.243,
+    0.388
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.009 <-> Cabin_Side_Log.018",
+   "tri_pairs": 27,
+   "area_cm2": 708.75,
+   "centre": [
+    -2.505,
+    -2.068,
+    2.27
+   ],
+   "extent": [
+    0.089,
+    0.243,
+    0.39
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.009 <-> Cabin_Side_Log.019",
+   "tri_pairs": 26,
+   "area_cm2": 707.26,
+   "centre": [
+    2.505,
+    -2.068,
+    2.237
+   ],
+   "extent": [
+    0.09,
+    0.243,
+    0.39
+   ],
+   "visible": "0/13",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.018 <-> Cabin_Window_Log.009",
+   "tri_pairs": 27,
+   "area_cm2": 705.3,
+   "centre": [
+    -2.506,
+    2.068,
+    2.236
+   ],
+   "extent": [
+    0.089,
+    0.243,
+    0.389
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.007 <-> Cabin_Side_Log.014",
+   "tri_pairs": 26,
+   "area_cm2": 687.46,
+   "centre": [
+    -2.505,
+    -2.068,
+    1.819
+   ],
+   "extent": [
+    0.089,
+    0.243,
+    0.389
+   ],
+   "visible": "0/13",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Joist <-> Cabin_Door_Log.013",
+   "tri_pairs": 21,
+   "area_cm2": 665.92,
+   "centre": [
+    -1.457,
+    -2.19,
+    3.421
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.224
+   ],
+   "visible": "0/21",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Board.019 <-> Cabin_Door_Log.016",
+   "tri_pairs": 44,
+   "area_cm2": 604.78,
+   "centre": [
+    1.093,
+    -2.19,
+    3.715
+   ],
+   "extent": [
+    2.429,
+    0.0,
+    0.087
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Board <-> Cabin_Door_Log.016",
+   "tri_pairs": 43,
+   "area_cm2": 600.71,
+   "centre": [
+    -1.214,
+    -2.19,
+    3.715
+   ],
+   "extent": [
+    2.186,
+    0.0,
+    0.087
+   ],
+   "visible": "0/15",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Board <-> Cabin_Window_Log.016",
+   "tri_pairs": 42,
+   "area_cm2": 586.74,
+   "centre": [
+    -1.093,
+    2.19,
+    3.715
+   ],
+   "extent": [
+    2.429,
+    0.0,
+    0.087
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Board.019 <-> Cabin_Window_Log.016",
+   "tri_pairs": 42,
+   "area_cm2": 580.14,
+   "centre": [
+    1.214,
+    2.19,
+    3.715
+   ],
+   "extent": [
+    2.186,
+    0.0,
+    0.086
+   ],
+   "visible": "0/14",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Shelf_Back <-> Shelf_Bot",
+   "tri_pairs": 4,
+   "area_cm2": 574.24,
+   "centre": [
+    2.334,
+    0.34,
+    0.31
+   ],
+   "extent": [
+    0.012,
+    0.48,
+    0.62
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Joist <-> Cabin_Window_Log.016",
+   "tri_pairs": 8,
+   "area_cm2": 462.92,
+   "centre": [
+    -1.579,
+    2.19,
+    3.672
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/8",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Beam.001 <-> Cabin_Window_Log.016",
+   "tri_pairs": 8,
+   "area_cm2": 439.81,
+   "centre": [
+    1.336,
+    2.19,
+    3.673
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/8",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Beam.001 <-> Cabin_Door_Log.016",
+   "tri_pairs": 7,
+   "area_cm2": 430.08,
+   "centre": [
+    1.579,
+    -2.19,
+    3.671
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/7",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Joist <-> Cabin_Door_Log.016",
+   "tri_pairs": 7,
+   "area_cm2": 410.01,
+   "centre": [
+    -1.336,
+    -2.19,
+    3.671
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/7",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.032 <-> Cabin_Window_Log.016",
+   "tri_pairs": 12,
+   "area_cm2": 357.69,
+   "centre": [
+    -2.505,
+    2.068,
+    3.698
+   ],
+   "extent": [
+    0.09,
+    0.243,
+    0.169
+   ],
+   "visible": "0/12",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.033 <-> Cabin_Window_Log.016",
+   "tri_pairs": 12,
+   "area_cm2": 357.13,
+   "centre": [
+    2.505,
+    2.068,
+    3.732
+   ],
+   "extent": [
+    0.09,
+    0.243,
+    0.17
+   ],
+   "visible": "0/12",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.016 <-> Cabin_Side_Log.033",
+   "tri_pairs": 12,
+   "area_cm2": 350.99,
+   "centre": [
+    2.506,
+    -2.068,
+    3.698
+   ],
+   "extent": [
+    0.088,
+    0.243,
+    0.166
+   ],
+   "visible": "0/12",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.016 <-> Cabin_Side_Log.032",
+   "tri_pairs": 12,
+   "area_cm2": 350.81,
+   "centre": [
+    -2.506,
+    -2.068,
+    3.732
+   ],
+   "extent": [
+    0.087,
+    0.243,
+    0.165
+   ],
+   "visible": "0/12",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Shelf_Back <-> Shelf_Top",
+   "tri_pairs": 4,
+   "area_cm2": 315.84,
+   "centre": [
+    2.334,
+    0.34,
+    1.55
+   ],
+   "extent": [
+    0.012,
+    0.48,
+    0.62
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Shelf_Back <-> Shelf_SideR",
+   "tri_pairs": 2,
+   "area_cm2": 295.68,
+   "centre": [
+    2.34,
+    0.58,
+    1.24
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Shelf_Back <-> Shelf_SideL",
+   "tri_pairs": 2,
+   "area_cm2": 295.68,
+   "centre": [
+    2.34,
+    0.1,
+    0.62
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Shelf_Bot <-> Shelf_Kick",
+   "tri_pairs": 2,
+   "area_cm2": 162.84,
+   "centre": [
+    2.155,
+    0.101,
+    0.0
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "ks_shelf_book_35 <-> ks_shelf_book_36",
+   "tri_pairs": 3,
+   "area_cm2": 120.25,
+   "centre": [
+    2.175,
+    -0.226,
+    1.391
+   ],
+   "extent": [
+    0.057,
+    0.022,
+    0.0
+   ],
+   "visible": "0/3",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_WindowJamb <-> Study_WindowRail.001",
+   "tri_pairs": 2,
+   "area_cm2": 119.0,
+   "centre": [
+    -1.15,
+    2.072,
+    2.423
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_WindowJamb.001 <-> Study_WindowRail.001",
+   "tri_pairs": 2,
+   "area_cm2": 119.0,
+   "centre": [
+    0.85,
+    2.128,
+    2.423
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_WindowJamb <-> Study_WindowRail",
+   "tri_pairs": 2,
+   "area_cm2": 119.0,
+   "centre": [
+    -1.15,
+    2.128,
+    1.747
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_WindowJamb.001 <-> Study_WindowRail",
+   "tri_pairs": 2,
+   "area_cm2": 119.0,
+   "centre": [
+    0.85,
+    2.072,
+    1.747
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Archive_Inlay <-> Archive_Plinth",
+   "tri_pairs": 4,
+   "area_cm2": 115.2,
+   "centre": [
+    1.22,
+    1.559,
+    0.04
+   ],
+   "extent": [
+    0.12,
+    0.0,
+    0.005
+   ],
+   "visible": "4/4",
+   "nearest_m": 0.9,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Clock_Bottom <-> Clock_Well",
+   "tri_pairs": 4,
+   "area_cm2": 95.63,
+   "centre": [
+    -0.73,
+    1.99,
+    0.765
+   ],
+   "extent": [
+    0.051,
+    0.021,
+    0.0
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.4
+  },
+  {
+   "where": "Clock_Top <-> Clock_Well",
+   "tri_pairs": 4,
+   "area_cm2": 95.63,
+   "centre": [
+    -0.73,
+    1.988,
+    0.799
+   ],
+   "extent": [
+    0.051,
+    0.022,
+    0.0
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.4
+  },
+  {
+   "where": "Clock_Bottom <-> Desk_Top",
+   "tri_pairs": 2,
+   "area_cm2": 94.24,
+   "centre": [
+    -0.454,
+    1.807,
+    0.75
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "2/2",
+   "nearest_m": 0.16,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.001 <-> Cabin_Window_Log.002",
+   "tri_pairs": 6,
+   "area_cm2": 81.46,
+   "centre": [
+    2.521,
+    1.947,
+    0.369
+   ],
+   "extent": [
+    0.058,
+    0.487,
+    0.147
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.016 <-> Cabin_Side_Log.026",
+   "tri_pairs": 6,
+   "area_cm2": 81.1,
+   "centre": [
+    -2.521,
+    -1.947,
+    3.519
+   ],
+   "extent": [
+    0.058,
+    0.487,
+    0.142
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.011 <-> Cabin_Side_Log.027",
+   "tri_pairs": 6,
+   "area_cm2": 80.58,
+   "centre": [
+    2.307,
+    -2.162,
+    2.844
+   ],
+   "extent": [
+    0.486,
+    0.057,
+    0.144
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.013 <-> Cabin_Side_Log.022",
+   "tri_pairs": 6,
+   "area_cm2": 80.55,
+   "centre": [
+    -2.521,
+    -1.947,
+    2.844
+   ],
+   "extent": [
+    0.058,
+    0.487,
+    0.147
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.004 <-> Cabin_Window_Log",
+   "tri_pairs": 6,
+   "area_cm2": 80.52,
+   "centre": [
+    -2.307,
+    2.161,
+    0.369
+   ],
+   "extent": [
+    0.486,
+    0.058,
+    0.146
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.013 <-> Cabin_Side_Log.033",
+   "tri_pairs": 6,
+   "area_cm2": 80.17,
+   "centre": [
+    2.307,
+    -2.161,
+    3.52
+   ],
+   "extent": [
+    0.486,
+    0.058,
+    0.143
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Trim_Door <-> Cabin_Trim_Door.002",
+   "tri_pairs": 23,
+   "area_cm2": 71.6,
+   "centre": [
+    -0.391,
+    -2.09,
+    1.507
+   ],
+   "extent": [
+    0.029,
+    0.025,
+    1.505
+   ],
+   "visible": "8/23",
+   "nearest_m": 0.36,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.009 <-> Cabin_Side_Log.023",
+   "tri_pairs": 5,
+   "area_cm2": 49.06,
+   "centre": [
+    2.307,
+    -2.169,
+    2.395
+   ],
+   "extent": [
+    0.486,
+    0.041,
+    0.144
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Beanbag <-> Beanbag_StitchedSeams",
+   "tri_pairs": 248,
+   "area_cm2": 48.73,
+   "centre": [
+    -1.71,
+    -0.845,
+    0.214
+   ],
+   "extent": [
+    0.885,
+    0.838,
+    0.427
+   ],
+   "visible": "5/13",
+   "nearest_m": 0.83,
+   "gap_mm": 0.21
+  },
+  {
+   "where": "Shelf_Bot <-> Shelf_SideR",
+   "tri_pairs": 14,
+   "area_cm2": 45.86,
+   "centre": [
+    2.2,
+    0.579,
+    0.002
+   ],
+   "extent": [
+    0.279,
+    0.0,
+    0.003
+   ],
+   "visible": "6/14",
+   "nearest_m": 0.91,
+   "gap_mm": 0.52
+  },
+  {
+   "where": "Shelf_Bot <-> Shelf_SideL",
+   "tri_pairs": 14,
+   "area_cm2": 45.86,
+   "centre": [
+    2.2,
+    0.101,
+    0.002
+   ],
+   "extent": [
+    0.279,
+    0.0,
+    0.003
+   ],
+   "visible": "6/14",
+   "nearest_m": 1.06,
+   "gap_mm": 0.52
+  },
+  {
+   "where": "Shelf_SideL <-> Shelf_Top",
+   "tri_pairs": 2,
+   "area_cm2": 42.88,
+   "centre": [
+    2.2,
+    -0.359,
+    1.86
+   ],
+   "extent": [
+    0.089,
+    0.005,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Shelf_SideR <-> Shelf_Top",
+   "tri_pairs": 2,
+   "area_cm2": 42.88,
+   "centre": [
+    2.2,
+    1.039,
+    1.86
+   ],
+   "extent": [
+    0.089,
+    0.005,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log <-> Cabin_Side_Log.005",
+   "tri_pairs": 3,
+   "area_cm2": 41.37,
+   "centre": [
+    2.186,
+    -2.19,
+    0.34
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.085
+   ],
+   "visible": "0/3",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.007 <-> Cabin_Side_Log.008",
+   "tri_pairs": 3,
+   "area_cm2": 41.17,
+   "centre": [
+    -2.501,
+    -2.19,
+    1.546
+   ],
+   "extent": [
+    0.017,
+    0.0,
+    0.044
+   ],
+   "visible": "0/3",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.032 <-> Cabin_Window_Log.013",
+   "tri_pairs": 3,
+   "area_cm2": 40.85,
+   "centre": [
+    -2.186,
+    2.19,
+    3.49
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.085
+   ],
+   "visible": "0/3",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.002 <-> Cabin_Side_Log.009",
+   "tri_pairs": 3,
+   "area_cm2": 40.56,
+   "centre": [
+    2.186,
+    -2.19,
+    0.79
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.087
+   ],
+   "visible": "0/3",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.014 <-> Cabin_Window_Log.004",
+   "tri_pairs": 3,
+   "area_cm2": 40.27,
+   "centre": [
+    -2.186,
+    2.19,
+    1.464
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.085
+   ],
+   "visible": "0/3",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.009 <-> Cabin_Window_Log.007",
+   "tri_pairs": 3,
+   "area_cm2": 39.12,
+   "centre": [
+    2.502,
+    2.19,
+    1.544
+   ],
+   "extent": [
+    0.017,
+    0.0,
+    0.043
+   ],
+   "visible": "0/3",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.002 <-> Cabin_Side_Log",
+   "tri_pairs": 3,
+   "area_cm2": 38.91,
+   "centre": [
+    -2.502,
+    -2.19,
+    0.419
+   ],
+   "extent": [
+    0.017,
+    0.0,
+    0.043
+   ],
+   "visible": "0/3",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.004 <-> Cabin_Side_Log.015",
+   "tri_pairs": 3,
+   "area_cm2": 38.13,
+   "centre": [
+    2.186,
+    -2.19,
+    1.465
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.087
+   ],
+   "visible": "0/3",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log <-> Cabin_Side_Log.004",
+   "tri_pairs": 2,
+   "area_cm2": 36.53,
+   "centre": [
+    -2.55,
+    -2.141,
+    0.421
+   ],
+   "extent": [
+    0.0,
+    0.017,
+    0.044
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Clock_Back <-> Clock_Well",
+   "tri_pairs": 2,
+   "area_cm2": 32.24,
+   "centre": [
+    -0.73,
+    2.007,
+    0.782
+   ],
+   "extent": [
+    0.041,
+    0.0,
+    0.009
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Cabin_Trim_Door.001 <-> Cabin_Trim_Door.002",
+   "tri_pairs": 6,
+   "area_cm2": 27.45,
+   "centre": [
+    0.7,
+    -2.09,
+    2.258
+   ],
+   "extent": [
+    0.024,
+    0.025,
+    0.003
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.007 <-> Cabin_Door_Log.009",
+   "tri_pairs": 6,
+   "area_cm2": 26.39,
+   "centre": [
+    0.0,
+    -2.153,
+    1.981
+   ],
+   "extent": [
+    5.1,
+    0.045,
+    0.072
+   ],
+   "visible": "0/6",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Clock_Left <-> Clock_Well",
+   "tri_pairs": 4,
+   "area_cm2": 24.24,
+   "centre": [
+    -0.796,
+    1.99,
+    0.782
+   ],
+   "extent": [
+    0.0,
+    0.021,
+    0.009
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Clock_Right <-> Clock_Well",
+   "tri_pairs": 4,
+   "area_cm2": 24.24,
+   "centre": [
+    -0.664,
+    1.99,
+    0.782
+   ],
+   "extent": [
+    0.0,
+    0.021,
+    0.009
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.5
+  },
+  {
+   "where": "Cabin_Window_Log.009 <-> Cabin_Window_Log.011",
+   "tri_pairs": 5,
+   "area_cm2": 22.57,
+   "centre": [
+    0.0,
+    2.162,
+    2.432
+   ],
+   "extent": [
+    5.1,
+    0.027,
+    0.072
+   ],
+   "visible": "0/5",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.009",
+   "tri_pairs": 4,
+   "area_cm2": 17.9,
+   "centre": [
+    0.0,
+    2.162,
+    2.207
+   ],
+   "extent": [
+    5.1,
+    0.027,
+    0.066
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.007",
+   "tri_pairs": 4,
+   "area_cm2": 17.83,
+   "centre": [
+    0.0,
+    2.162,
+    1.758
+   ],
+   "extent": [
+    5.1,
+    0.027,
+    0.067
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Window_Log.007 <-> Cabin_Window_Log.009",
+   "tri_pairs": 4,
+   "area_cm2": 17.75,
+   "centre": [
+    0.0,
+    2.162,
+    1.983
+   ],
+   "extent": [
+    5.1,
+    0.027,
+    0.066
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.007",
+   "tri_pairs": 4,
+   "area_cm2": 17.68,
+   "centre": [
+    0.0,
+    -2.162,
+    1.759
+   ],
+   "extent": [
+    5.1,
+    0.027,
+    0.068
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.011 <-> Cabin_Side_Log.018",
+   "tri_pairs": 4,
+   "area_cm2": 17.33,
+   "centre": [
+    -2.53,
+    -1.947,
+    2.394
+   ],
+   "extent": [
+    0.04,
+    0.487,
+    0.142
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.013",
+   "tri_pairs": 4,
+   "area_cm2": 17.08,
+   "centre": [
+    0.0,
+    -2.162,
+    3.22
+   ],
+   "extent": [
+    5.1,
+    0.026,
+    0.291
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.008 <-> Cabin_Window_Log.002",
+   "tri_pairs": 4,
+   "area_cm2": 16.85,
+   "centre": [
+    -2.307,
+    2.17,
+    0.819
+   ],
+   "extent": [
+    0.486,
+    0.04,
+    0.142
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Board.019 <-> Cabin_Side_Log.033",
+   "tri_pairs": 2,
+   "area_cm2": 15.14,
+   "centre": [
+    2.5,
+    2.19,
+    3.795
+   ],
+   "extent": [
+    0.017,
+    0.0,
+    0.044
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Lamp_Shade <-> Quality_Lamp_Rolled_Rim",
+   "tri_pairs": 128,
+   "area_cm2": 14.24,
+   "centre": [
+    -0.9,
+    1.76,
+    1.02
+   ],
+   "extent": [
+    0.153,
+    0.153,
+    0.0
+   ],
+   "visible": "13/13",
+   "nearest_m": 0.12,
+   "gap_mm": 0.44
+  },
+  {
+   "where": "Cabin_Side_Log.022 <-> Cabin_Window_Log.009",
+   "tri_pairs": 2,
+   "area_cm2": 8.88,
+   "centre": [
+    -2.186,
+    2.19,
+    2.364
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.085
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.013 <-> Cabin_Door_Log.016",
+   "tri_pairs": 2,
+   "area_cm2": 8.88,
+   "centre": [
+    0.0,
+    -2.162,
+    3.558
+   ],
+   "extent": [
+    5.1,
+    0.027,
+    0.067
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.015 <-> Cabin_Window_Log.009",
+   "tri_pairs": 2,
+   "area_cm2": 8.85,
+   "centre": [
+    2.509,
+    2.19,
+    2.015
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.019",
+   "tri_pairs": 2,
+   "area_cm2": 8.82,
+   "centre": [
+    2.522,
+    0.0,
+    2.207
+   ],
+   "extent": [
+    0.026,
+    4.38,
+    0.066
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.009 <-> Cabin_Door_Log.011",
+   "tri_pairs": 2,
+   "area_cm2": 8.8,
+   "centre": [
+    0.0,
+    -2.162,
+    2.433
+   ],
+   "extent": [
+    5.1,
+    0.027,
+    0.067
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.018 <-> Cabin_Side_Log.022",
+   "tri_pairs": 2,
+   "area_cm2": 8.79,
+   "centre": [
+    -2.523,
+    0.0,
+    2.432
+   ],
+   "extent": [
+    0.026,
+    4.38,
+    0.066
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.005 <-> Cabin_Window_Log.004",
+   "tri_pairs": 2,
+   "area_cm2": 8.74,
+   "centre": [
+    2.51,
+    2.19,
+    0.892
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.015",
+   "tri_pairs": 2,
+   "area_cm2": 8.69,
+   "centre": [
+    2.522,
+    0.0,
+    1.758
+   ],
+   "extent": [
+    0.027,
+    4.38,
+    0.067
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.004 <-> Cabin_Side_Log.004",
+   "tri_pairs": 2,
+   "area_cm2": 8.66,
+   "centre": [
+    -2.51,
+    -2.19,
+    0.891
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.015 <-> Cabin_Side_Log.019",
+   "tri_pairs": 2,
+   "area_cm2": 8.65,
+   "centre": [
+    2.522,
+    0.0,
+    1.982
+   ],
+   "extent": [
+    0.026,
+    4.38,
+    0.066
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.009 <-> Cabin_Side_Log.014",
+   "tri_pairs": 2,
+   "area_cm2": 8.64,
+   "centre": [
+    -2.51,
+    -2.19,
+    2.014
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.014 <-> Cabin_Side_Log.018",
+   "tri_pairs": 2,
+   "area_cm2": 8.61,
+   "centre": [
+    -2.523,
+    0.0,
+    1.982
+   ],
+   "extent": [
+    0.026,
+    4.38,
+    0.064
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.018 <-> Cabin_Window_Log.007",
+   "tri_pairs": 2,
+   "area_cm2": 8.57,
+   "centre": [
+    -2.186,
+    2.19,
+    1.915
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.084
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.019 <-> Cabin_Side_Log.023",
+   "tri_pairs": 2,
+   "area_cm2": 8.55,
+   "centre": [
+    2.523,
+    0.0,
+    2.432
+   ],
+   "extent": [
+    0.025,
+    4.38,
+    0.063
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.014",
+   "tri_pairs": 2,
+   "area_cm2": 8.51,
+   "centre": [
+    -2.523,
+    0.0,
+    1.757
+   ],
+   "extent": [
+    0.025,
+    4.38,
+    0.064
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.007 <-> Cabin_Side_Log.019",
+   "tri_pairs": 2,
+   "area_cm2": 8.45,
+   "centre": [
+    2.186,
+    -2.19,
+    1.915
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.083
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.018",
+   "tri_pairs": 2,
+   "area_cm2": 8.44,
+   "centre": [
+    -2.523,
+    0.0,
+    2.206
+   ],
+   "extent": [
+    0.025,
+    4.38,
+    0.063
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.027 <-> Cabin_Side_Log.033",
+   "tri_pairs": 2,
+   "area_cm2": 8.41,
+   "centre": [
+    2.523,
+    0.0,
+    3.557
+   ],
+   "extent": [
+    0.025,
+    4.38,
+    0.062
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.023 <-> Cabin_Window_Log.013",
+   "tri_pairs": 2,
+   "area_cm2": 8.37,
+   "centre": [
+    2.51,
+    2.19,
+    2.915
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.026 <-> Cabin_Window_Log.011",
+   "tri_pairs": 2,
+   "area_cm2": 8.35,
+   "centre": [
+    -2.186,
+    2.19,
+    2.814
+   ],
+   "extent": [
+    0.243,
+    0.0,
+    0.086
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.027 <-> Cabin_Window_Log.016",
+   "tri_pairs": 2,
+   "area_cm2": 8.31,
+   "centre": [
+    2.511,
+    2.19,
+    3.588
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/2",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Desk_Drawer <-> Desk_DrawerFront",
+   "tri_pairs": 4,
+   "area_cm2": 5.28,
+   "centre": [
+    -0.15,
+    1.472,
+    0.671
+   ],
+   "extent": [
+    1.72,
+    0.0,
+    0.026
+   ],
+   "visible": "4/4",
+   "nearest_m": 0.4,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.027 <-> Cabin_Window_Log.011",
+   "tri_pairs": 1,
+   "area_cm2": 4.52,
+   "centre": [
+    2.55,
+    2.149,
+    2.919
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.015 <-> Cabin_Window_Log.004",
+   "tri_pairs": 1,
+   "area_cm2": 4.5,
+   "centre": [
+    2.55,
+    2.149,
+    1.568
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.022 <-> Cabin_Window_Log.013",
+   "tri_pairs": 1,
+   "area_cm2": 4.47,
+   "centre": [
+    -2.55,
+    1.947,
+    2.859
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.004 <-> Cabin_Side_Log.005",
+   "tri_pairs": 1,
+   "area_cm2": 4.46,
+   "centre": [
+    2.55,
+    -1.947,
+    0.833
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.007 <-> Cabin_Side_Log.009",
+   "tri_pairs": 1,
+   "area_cm2": 4.46,
+   "centre": [
+    2.55,
+    -1.947,
+    1.509
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.018 <-> Cabin_Window_Log.011",
+   "tri_pairs": 1,
+   "area_cm2": 4.45,
+   "centre": [
+    -2.55,
+    1.947,
+    2.407
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.004 <-> Cabin_Window_Log.004",
+   "tri_pairs": 1,
+   "area_cm2": 4.41,
+   "centre": [
+    -2.55,
+    1.947,
+    0.832
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.023 <-> Cabin_Window_Log.009",
+   "tri_pairs": 1,
+   "area_cm2": 4.37,
+   "centre": [
+    2.55,
+    2.15,
+    2.466
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.002 <-> Cabin_Side_Log.001",
+   "tri_pairs": 1,
+   "area_cm2": 4.37,
+   "centre": [
+    2.55,
+    -1.947,
+    0.384
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.026 <-> Cabin_Window_Log.016",
+   "tri_pairs": 1,
+   "area_cm2": 4.32,
+   "centre": [
+    -2.55,
+    1.947,
+    3.532
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.019 <-> Cabin_Window_Log.007",
+   "tri_pairs": 1,
+   "area_cm2": 4.28,
+   "centre": [
+    2.55,
+    2.15,
+    2.013
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.014 <-> Cabin_Window_Log.009",
+   "tri_pairs": 1,
+   "area_cm2": 4.27,
+   "centre": [
+    -2.55,
+    1.947,
+    1.957
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.008 <-> Cabin_Window_Log.007",
+   "tri_pairs": 1,
+   "area_cm2": 4.27,
+   "centre": [
+    -2.55,
+    1.947,
+    1.508
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.002 <-> Cabin_Side_Log.008",
+   "tri_pairs": 1,
+   "area_cm2": 4.2,
+   "centre": [
+    -2.55,
+    -2.15,
+    0.89
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.004 <-> Cabin_Side_Log.014",
+   "tri_pairs": 1,
+   "area_cm2": 4.19,
+   "centre": [
+    -2.55,
+    -2.15,
+    1.565
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Ceiling_Board <-> Cabin_Side_Log.032",
+   "tri_pairs": 1,
+   "area_cm2": 4.18,
+   "centre": [
+    -2.51,
+    -2.19,
+    3.814
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.019 <-> Cabin_Window_Log.011",
+   "tri_pairs": 1,
+   "area_cm2": 4.18,
+   "centre": [
+    2.51,
+    2.19,
+    2.464
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Side_Log.033 <-> Cabin_Window_Log.013",
+   "tri_pairs": 1,
+   "area_cm2": 4.16,
+   "centre": [
+    2.55,
+    2.15,
+    3.588
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.009 <-> Cabin_Side_Log.015",
+   "tri_pairs": 1,
+   "area_cm2": 4.14,
+   "centre": [
+    2.55,
+    -1.947,
+    1.957
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Cabin_Door_Log.007 <-> Cabin_Side_Log.018",
+   "tri_pairs": 1,
+   "area_cm2": 4.12,
+   "centre": [
+    -2.55,
+    -2.151,
+    2.012
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "0/1",
+   "nearest_m": null,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Desk_Leg_BR <-> Desk_Leg_BR_Ferrule",
+   "tri_pairs": 5,
+   "area_cm2": 3.84,
+   "centre": [
+    0.737,
+    2.009,
+    0.12
+   ],
+   "extent": [
+    0.011,
+    0.038,
+    0.24
+   ],
+   "visible": "1/5",
+   "nearest_m": 0.96,
+   "gap_mm": 0.8
+  },
+  {
+   "where": "Desk_Leg_FR <-> Desk_Leg_FR_Ferrule",
+   "tri_pairs": 4,
+   "area_cm2": 3.84,
+   "centre": [
+    0.737,
+    1.361,
+    0.12
+   ],
+   "extent": [
+    0.011,
+    0.038,
+    0.24
+   ],
+   "visible": "2/4",
+   "nearest_m": 0.83,
+   "gap_mm": 0.8
+  },
+  {
+   "where": "Desk_Leg_FL <-> Desk_Leg_FL_Ferrule",
+   "tri_pairs": 6,
+   "area_cm2": 3.84,
+   "centre": [
+    -1.037,
+    1.361,
+    0.12
+   ],
+   "extent": [
+    0.038,
+    0.038,
+    0.24
+   ],
+   "visible": "4/6",
+   "nearest_m": 0.8,
+   "gap_mm": 0.8
+  },
+  {
+   "where": "Desk_Leg_BL <-> Desk_Leg_BL_Ferrule",
+   "tri_pairs": 7,
+   "area_cm2": 3.84,
+   "centre": [
+    -1.037,
+    2.009,
+    0.12
+   ],
+   "extent": [
+    0.038,
+    0.038,
+    0.24
+   ],
+   "visible": "3/7",
+   "nearest_m": 0.82,
+   "gap_mm": 0.8
+  },
+  {
+   "where": "Clock_Bottom <-> Clock_Inlay",
+   "tri_pairs": 2,
+   "area_cm2": 3.0,
+   "centre": [
+    -0.73,
+    1.955,
+    0.758
+   ],
+   "extent": [
+    0.051,
+    0.0,
+    0.002
+   ],
+   "visible": "2/2",
+   "nearest_m": 0.29,
+   "gap_mm": 0.4
+  },
+  {
+   "where": "Archive_HandlePostL <-> ks_archive_drawer",
+   "tri_pairs": 2,
+   "area_cm2": 1.2,
+   "centre": [
+    1.127,
+    1.565,
+    0.555
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "2/2",
+   "nearest_m": 0.43,
+   "gap_mm": 1.0
+  },
+  {
+   "where": "Archive_HandlePostR <-> ks_archive_drawer",
+   "tri_pairs": 2,
+   "area_cm2": 1.2,
+   "centre": [
+    1.313,
+    1.565,
+    0.324
+   ],
+   "extent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "visible": "2/2",
+   "nearest_m": 0.64,
+   "gap_mm": 1.0
+  },
+  {
+   "where": "Beanbag_StitchedSeams",
+   "tri_pairs": 4,
+   "area_cm2": 0.32,
+   "centre": [
+    -1.655,
+    -0.944,
+    0.429
+   ],
+   "extent": [
+    0.16,
+    0.044,
+    0.142
+   ],
+   "visible": "0/4",
+   "nearest_m": null,
+   "gap_mm": 0.84
+  },
+  {
+   "where": "ks_archive_frame",
+   "tri_pairs": 96,
+   "area_cm2": 0.1,
+   "centre": [
+    1.32,
+    1.937,
+    0.923
+   ],
+   "extent": [
+    0.123,
+    0.041,
+    0.159
+   ],
+   "visible": "11/12",
+   "nearest_m": 0.17,
+   "gap_mm": 0.07
+  },
+  {
+   "where": "Study_ChairLeg",
+   "tri_pairs": 24,
+   "area_cm2": 0.08,
+   "centre": [
+    -0.663,
+    1.027,
+    0.21
+   ],
+   "extent": [
+    0.062,
+    0.062,
+    0.413
+   ],
+   "visible": "8/12",
+   "nearest_m": 0.95,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_ChairLeg.002",
+   "tri_pairs": 24,
+   "area_cm2": 0.08,
+   "centre": [
+    -0.287,
+    0.89,
+    0.21
+   ],
+   "extent": [
+    0.062,
+    0.062,
+    0.413
+   ],
+   "visible": "8/12",
+   "nearest_m": 1.01,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_ChairLeg.003",
+   "tri_pairs": 24,
+   "area_cm2": 0.08,
+   "centre": [
+    -0.414,
+    0.542,
+    0.21
+   ],
+   "extent": [
+    0.062,
+    0.062,
+    0.413
+   ],
+   "visible": "8/12",
+   "nearest_m": 0.98,
+   "gap_mm": 0.0
+  },
+  {
+   "where": "Study_ChairLeg.001",
+   "tri_pairs": 24,
+   "area_cm2": 0.08,
+   "centre": [
+    -0.79,
+    0.679,
+    0.21
+   ],
+   "extent": [
+    0.062,
+    0.062,
+    0.413
+   ],
+   "visible": "8/12",
+   "nearest_m": 1.12,
+   "gap_mm": 0.0
+  }
+ ]
+}

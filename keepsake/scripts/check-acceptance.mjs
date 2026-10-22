@@ -9,6 +9,7 @@ const scripts = [
   'check-workbench.mjs',
   'check-furniture.mjs',
   'check-woodland.mjs',
+  'check-woodland-study-assets.mjs',
   'check-room-assets.mjs',
   'check-editor.mjs',
   'check-photo-batch.mjs',
@@ -20,6 +21,7 @@ const scripts = [
   'check-room-music.mjs',
   'check-seasons.mjs',
   'check-storage.mjs',
+  'check-original-cleanup.mjs',
   'check-limits.mjs',
   'check-moderation.mjs',
   'check-licences.mjs',
@@ -33,6 +35,12 @@ const scripts = [
   'check-soundcloud.mjs',
   'check-spotify.mjs',
   'check-room-themes.mjs',
+  'check-display-case-leak.mjs',
+  'check-model-cache-eviction.mjs',
+  'check-frame-allocations.mjs',
+  'check-start-camera.mjs',
+  'check-constant-lights.mjs',
+  'check-render-stability.mjs',
 ];
 for (const script of scripts) {
   process.stdout.write(`\nChecking ${script}\n`);

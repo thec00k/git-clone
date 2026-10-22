@@ -4,7 +4,7 @@ export const PLACES = [
     id: 'guestbook',
     label: 'Beside the guestbook',
     hint: 'A paper corner peeks from the small round table.',
-    position: [-1.48, 0.704, -1.49],
+    position: [-1.48, 0.681, -1.49],
     rotation: [-Math.PI / 2, 0, 0.18],
   },
   {
@@ -25,7 +25,7 @@ export const PLACES = [
     id: 'chair',
     label: 'By the chair cushion',
     hint: 'A folded note rests on the chair cushion.',
-    position: [-0.34, 0.553, -0.9],
+    position: [-0.54, 0.522, -0.78],
     rotation: [-Math.PI / 2, 0, 0.18],
   },
   {
@@ -36,6 +36,8 @@ export const PLACES = [
     rotation: [-Math.PI / 2, 0, -0.15],
   },
 ] as const;
+/** Where a friend's note lies when it is delivered in the guestbook instead of at one of the places. */
+export const GUESTBOOK_BOOK_NOTE = [-1.48, 0.724, -1.61] as const;
 export type PlaceId = (typeof PLACES)[number]['id'];
 export interface Discovery {
   id: string;

@@ -44,8 +44,28 @@ save('stone',np.array([138,137,126])+stone[...,None],stone/70,.91+noise*.06,.6)
 print('Saved 15 seamless PBR maps to',OUT)
 
 # Bake color variants so Blender and glTF render the same tint without custom nodes.
-for tile,tints in [('oak',['b7a18d']),('linen',['718466','e4d3b5','fff4da','b37d61','62715b'])]:
+# oak b08868: medium walnut veneer (CRT cabinet); timber f2c99f: warm honey planks (archive drawer).
+for tile,tints in [('oak',['b7a18d','b08868']),('timber',['f2c99f']),('linen',['718466','e4d3b5','fff4da','b37d61','62715b'])]:
     base=np.asarray(Image.open(OUT/(tile+'-color.png')),dtype=float)/255
     for tint in tints:
         rgb=np.array([int(tint[i:i+2],16)/255 for i in (0,2,4)])
         Image.fromarray(np.uint8(np.clip(base*rgb*255,0,255))).save(OUT/(tile+'-'+tint+'-color.png'))
+
+# Log tile (cabin walls, joists, beams): the oak grain with seasoning checks (thin dark splits
+# along the grain that fade at both ends), a few small knots and broader tonal drift. Only the
+# colour map is new; logs reuse the oak normal and ORM maps.
+n=1024;y,x=np.mgrid[:n,:n]/n;t=2*np.pi;rng=np.random.default_rng(1017)
+oak=np.asarray(Image.open(OUT/'oak-color.png'),dtype=float)
+warp=y+.013*np.sin(t*x)+.007*np.sin(t*(2*x+y))+.004*np.sin(t*(3*x-2*y))
+shade=np.ones((n,n))+.07*field(n,63)
+for _ in range(9):
+    y0,x0,length=rng.uniform(0,1),rng.uniform(0,1),rng.uniform(.25,.6)
+    along=(x-x0)%1;inside=along<length
+    fade=np.sin(np.pi*np.clip(along/length,0,1))**.6
+    dist=np.abs(((warp-y0+.5)%1)-.5+.0018*np.sin(t*x*5))
+    shade-=inside*fade*.55*np.exp(-(dist/.0016)**2)
+for _ in range(5):
+    cy,cx=rng.uniform(0,1,2);dy=((y-cy+.5)%1)-.5;dx=((x-cx+.5)%1)-.5
+    r=np.sqrt((dx/.022)**2+(dy/.009)**2)
+    shade-=.35*np.exp(-r**2)+.08*np.exp(-((r-1.6)/.35)**2)
+Image.fromarray(np.uint8(np.clip(oak*shade[...,None],0,255))).save(OUT/'log-color.png')

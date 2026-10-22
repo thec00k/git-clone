@@ -180,6 +180,8 @@ export interface AppState {
     posterItem?: string;
     neonCherry?: boolean;
     neonSign?: 'neon-cherries' | 'neon-heart' | null;
+    /** Woodland wall mounts on display. Missing means none. */
+    wallMounts?: ('mount-deer' | 'mount-bear')[];
     snakePaused?: boolean;
     layouts?: Partial<
       Record<

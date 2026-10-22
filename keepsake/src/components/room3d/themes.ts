@@ -29,7 +29,7 @@ export const woodlandRoom: RoomTheme = {
   id: 'woodland',
   title: 'Woodland Writing Room',
   subtitle: 'A little room. A whole life to keep.',
-  asset: '/room/woodland/woodland.glb',
+  asset: '/room/woodland-study/woodland-study.glb',
   woodland: true,
   views: sharedViews,
   fov: 50,

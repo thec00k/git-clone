@@ -4,7 +4,6 @@ import {useNav} from '../store/nav';
 import {switchRoomTheme, type RoomThemeId} from '../lib/roomThemes';
 import {roomThemes} from './room3d/themes';
 import {roomAssets} from '../generated/roomAssets';
-import {WOODLAND_STUDY_ASSET} from './room3d/woodlandStudy';
 const descriptions = {
   cyberpunk: 'A neon skyline, holographic keepsakes and softly glowing lamps.',
   woodland: 'Moss-painted wood, layered forest views and warm lamplight.',
@@ -32,11 +31,7 @@ export function ShopRoomVariants() {
     setNote('Opening the windows…');
     try {
       const {loadRoomAsset} = await import('./room3d/roomAssetCache');
-      await loadRoomAsset(
-        preview === 'woodland'
-          ? WOODLAND_STUDY_ASSET
-          : roomAssets[preview][environment.roomQuality ?? 'balanced'],
-      );
+      await loadRoomAsset(roomAssets[preview][environment.roomQuality ?? 'balanced']);
       if (!alive.current) return;
       const saved = await flushSave(s => switchRoomTheme(s, preview));
       if (alive.current)

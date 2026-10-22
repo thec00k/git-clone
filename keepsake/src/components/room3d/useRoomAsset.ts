@@ -1,7 +1,7 @@
 import {use, useEffect, useMemo} from 'react';
-import {loadRoomAsset} from './roomAssetCache';
+import {loadRoomAsset, releaseRoomAssetsExcept} from './roomAssetCache';
 import * as THREE from 'three';
-import {LAMP_BULB} from '../../lib/roomHotspots';
+import {CEILING_FAN_BOWL, LAMP_BULB} from '../../lib/roomHotspots';
 import type {Environment} from '../../types/app';
 import type {Phase} from '../room/RoomFurniture';
 import {useActiveRoom} from './useActiveRoom';
@@ -30,6 +30,17 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
         return local;
       };
       obj.material = Array.isArray(obj.material) ? obj.material.map(copy) : copy(obj.material);
+      // Any transmissive material makes three.js render the whole room a second time each
+      // frame (with its own shader variants). Small glass pieces read the same as alpha glass.
+      for (const mat of Array.isArray(obj.material) ? obj.material : [obj.material]) {
+        if (mat instanceof THREE.MeshPhysicalMaterial && mat.transmission > 0) {
+          mat.opacity = Math.min(mat.opacity, Math.max(0.18, 1 - mat.transmission * 0.85));
+          mat.transmission = 0;
+          mat.transparent = true;
+          mat.depthWrite = false;
+          obj.castShadow = false;
+        }
+      }
       if (
         /Beachfront_Prop_(Fishbowl|Bowl_Rim|Bowl_Water|Waterline)|Beachfront_Casement_.*_Glass/.test(obj.name)
       ) {
@@ -81,6 +92,8 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
     return {cloned, materials};
   }, [scene, activeRoom.id, activeRoom.study]);
   useEffect(() => () => materials.forEach(material => material.dispose()), [materials]);
+  // Runs after the commit that swapped rooms, so the previous room is off screen.
+  useEffect(() => releaseRoomAssetsExcept(activeRoom.asset), [activeRoom.asset]);
   useEffect(() => {
     cloned.traverse(obj => {
       if (!(obj instanceof THREE.Mesh)) return;
@@ -104,12 +117,17 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
           mat.emissive.set(environment.musicOn ? '#3ec8c8' : '#102428');
           mat.emissiveIntensity = environment.musicOn ? 1.4 : 0.15;
         }
+        // The cabin fan's glass bowl glows while the ceiling light (which sits just below it) is on.
+        if (activeRoom.study && obj.name === CEILING_FAN_BOWL) {
+          mat.emissive.set(environment.ceilingOn !== false ? '#ffe9c4' : '#2e2924');
+          mat.emissiveIntensity = environment.ceilingOn !== false ? 1.6 : 0.05;
+        }
         if (obj.name === LAMP_BULB || /lamp.*bulb/i.test(obj.name)) {
           mat.emissive.set(environment.lampOn ? '#ffe6b0' : '#3a3228');
           mat.emissiveIntensity = environment.lampOn ? 2.4 : 0.08;
         }
       }
     });
-  }, [cloned, environment.musicOn, environment.lampOn, phase]);
+  }, [cloned, environment.musicOn, environment.lampOn, environment.ceilingOn, phase, activeRoom.study]);
   return cloned;
 }

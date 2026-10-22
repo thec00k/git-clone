@@ -3,7 +3,6 @@ import {Html, useGLTF} from '@react-three/drei';
 import {useFrame} from '@react-three/fiber';
 import type {ThreeEvent} from '@react-three/fiber';
 import * as THREE from 'three';
-import {RectAreaLightUniformsLib} from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import {useApp} from '../../store/appStore';
 import {useNav} from '../../store/nav';
 import {CRT_LIGHT_COLORS} from '../../lib/roomMusic';
@@ -15,7 +14,7 @@ import {
   modelDataUrl,
 } from '../../lib/displayModelImport';
 import {useReducedMotion} from '../../hooks/useReducedMotion';
-RectAreaLightUniformsLib.init();
+import {disposeGltf} from './disposeGltf';
 
 /** Shared placement: clear of shelf end, wall trim, and the central walking aisle. */
 export const DISPLAY_CASE_POSITION: [number, number, number] = [2.03, 0, 1.65];
@@ -23,6 +22,14 @@ export const DISPLAY_CASE_VIEW = {
   position: new THREE.Vector3(-0.35, 1.38, -0.65),
   target: new THREE.Vector3(2.03, 1.07, 1.65),
 };
+/** Parsed scans by source, kept while the scan is on a shelf so the doors reopen instantly. */
+const parsedScans = new Map<string, THREE.Object3D>();
+function releaseScan(src: string) {
+  const scene = parsedScans.get(src);
+  if (scene) disposeGltf({scene});
+  parsedScans.delete(src);
+  useGLTF.clear(src);
+}
 
 export function ArtifactDisplayCase() {
   const {environment, state, update} = useApp();
@@ -80,6 +87,22 @@ export function ArtifactDisplayCase() {
     return {copy, materials};
   }, [scene]);
   useEffect(() => () => model.materials.forEach(m => m.dispose()), [model]);
+  // A removed or replaced scan frees its parse; mounted copies have already unmounted.
+  const shownScans = useRef(new Set<string>());
+  useEffect(() => {
+    const live = new Set((state.displayCaseScans ?? []).map(scan => scan.modelSrc));
+    shownScans.current.forEach(src => {
+      if (!live.has(src)) releaseScan(src);
+    });
+    shownScans.current = live;
+  }, [state.displayCaseScans]);
+  useEffect(
+    () => () => {
+      shownScans.current.forEach(releaseScan);
+      shownScans.current = new Set();
+    },
+    [],
+  );
   useEffect(() => {
     const remove = (e: KeyboardEvent) => {
       const t = e.target;
@@ -238,18 +261,35 @@ export function ArtifactDisplayCase() {
           <meshBasicMaterial transparent opacity={0} />
         </mesh>
       ))}
-      {on &&
-        [0.6, 1.08, 1.58, 2.04].map(y => (
-          <rectAreaLight
-            key={y}
-            color={tint}
-            intensity={3.5}
-            width={0.65}
-            height={0.18}
-            position={[0, y - 0.018, 0.04]}
-            rotation={[-Math.PI / 2, 0, 0]}
+    </group>
+  );
+}
+
+/**
+ * The case's shelf lighting, mounted with the room rather than inside the lazily loaded case model: a light that
+ * appears a few seconds after the room changes the light count and rebuilds every shader (an 8 s stall). Glowing
+ * strips plus one small tinted light replace four rect-area lights, which made every shader in the room much slower
+ * to compile and draw. Always mounted: "Display case" off sets intensity 0, so the light count never changes.
+ */
+export function DisplayCaseLights() {
+  const {environment} = useApp();
+  const tint = CRT_LIGHT_COLORS[environment.crtColor ?? 'green'];
+  const on = environment.displayCaseLit !== false;
+  return (
+    <group position={DISPLAY_CASE_POSITION} rotation={[0, (-3 * Math.PI) / 4, 0]}>
+      {[0.6, 1.08, 1.58, 2.04].map(y => (
+        <mesh key={y} position={[0, y - 0.012, 0.04]}>
+          <boxGeometry args={[0.6, 0.006, 0.018]} />
+          <meshStandardMaterial
+            color="#2a2a26"
+            emissive={tint}
+            emissiveIntensity={on ? 1.8 : 0}
+            toneMapped={false}
           />
-        ))}
+        </mesh>
+      ))}
+      {/* Small and short-range so the tint stays inside the case instead of washing the walls. */}
+      <pointLight color={tint} intensity={on ? 0.45 : 0} distance={0.7} decay={2} position={[0, 1.3, 0.02]} />
     </group>
   );
 }
@@ -267,14 +307,24 @@ function DisplayScan({
   onDragEnd: () => void;
 }) {
   const {scene} = useGLTF(src);
-  const copy = useMemo(() => {
+  useEffect(() => {
+    parsedScans.set(src, scene);
+  }, [src, scene]);
+  const {copy, materials} = useMemo(() => {
+    const materials: THREE.Material[] = [];
+    const clone = (m: THREE.Material) => {
+      const next = m.clone();
+      materials.push(next);
+      return next;
+    };
     const root = scene.clone(true);
     root.traverse(o => {
       if (o instanceof THREE.Mesh)
-        o.material = Array.isArray(o.material) ? o.material.map(m => m.clone()) : o.material.clone();
+        o.material = Array.isArray(o.material) ? o.material.map(clone) : clone(o.material);
     });
-    return root;
+    return {copy: root, materials};
   }, [scene]);
+  useEffect(() => () => materials.forEach(m => m.dispose()), [materials]);
   useEffect(() => {
     copy.traverse(o => {
       if (o instanceof THREE.Mesh)

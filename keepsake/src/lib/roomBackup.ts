@@ -3,11 +3,12 @@ import {ownsRoomTheme, normalizeLegacyRooms} from './roomThemes.ts';
 import {isStickerFinish, validPaperSettings} from './materials.ts';
 import {BINDER_COLORS, MAX_BINDER_CARDS, validateCardGlb} from './cardBinders.ts';
 import {withOriginalFiles} from './originalPhotos.ts';
+import {inlineFiles} from './storage.ts';
 import {MEMORY_MOODS} from './memoryAtmosphere.ts';
 import {KEEPSAKE_PRINTS, isPaperStyle} from './stationery.ts';
 import {validFurnitureChoices} from './furniture.ts';
 import {CRT_COLORS} from './roomMusic.ts';
-import {ROOM_GOODS, SHOP_GOODS, POSTER_GOODS} from './roomShop.ts';
+import {ROOM_GOODS, SHOP_GOODS, POSTER_GOODS, WALL_MOUNTS} from './roomShop.ts';
 import {soundCloudUrl} from './soundcloud.ts';
 import type {AppState} from '../types/app';
 import {PLACES, REWARDS} from './discoveries.ts';
@@ -430,6 +431,12 @@ export function parseRoomBackup(text: string): AppState {
           (s.roomDecor.owned as string[]).includes(s.roomDecor.neonSign as string)),
     );
     ensure(s.roomDecor.snakePaused === undefined || typeof s.roomDecor.snakePaused === 'boolean');
+    ensure(
+      s.roomDecor.wallMounts === undefined ||
+        (strings(s.roomDecor.wallMounts) &&
+          (s.roomDecor.wallMounts as string[]).every(id => WALL_MOUNTS.some(m => m.id === id)) &&
+          new Set(s.roomDecor.wallMounts as string[]).size === (s.roomDecor.wallMounts as string[]).length),
+    );
   }
   if (object(s.roomDecor) && s.roomDecor.layouts !== undefined) {
     ensure(object(s.roomDecor.layouts));
@@ -511,15 +518,19 @@ export function parseRoomBackup(text: string): AppState {
 export function serializeRoom(state: AppState) {
   if (state.archive.some(p => p.original && !state.originalFiles?.[p.original.key]))
     throw new Error('Load preserved originals before serializing this backup.');
-  return JSON.stringify({
+  const text = JSON.stringify({
     format: 'keepsake-room',
     backupVersion: 1,
     savedAt: new Date().toISOString(),
     state,
   });
+  // Saved files are blob: links that only work in this tab; a backup needs their content (see inlineFiles).
+  if (/"(src|photoSrc|coverSrc|backSrc|modelSrc)":"blob:/.test(text))
+    throw new Error('Load saved files before serializing this backup.');
+  return text;
 }
 export async function downloadRoom(state: AppState) {
-  const text = serializeRoom(await withOriginalFiles(state));
+  const text = serializeRoom(await withOriginalFiles(await inlineFiles(state)));
   if (new Blob([text]).size > 250 * 1024 * 1024)
     throw new Error(
       'This room exceeds the current 250 MB backup limit. Download original files individually; large-library backup support is still needed.',

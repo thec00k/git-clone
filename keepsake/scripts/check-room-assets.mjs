@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {roomAssets} from '../src/generated/roomAssets.ts';
 import {roomDeviceTier, roomRenderProfile} from '../src/components/room3d/themes.ts';
-for (const room of ['woodland', 'beachfront']) {
+for (const room of ['beachfront']) {
   const directory = new URL(`../public/room/${room}/`, import.meta.url);
   const manifest = JSON.parse(fs.readFileSync(new URL('asset-manifest.json', directory), 'utf8'));
   for (const quality of ['balanced', 'high']) {
@@ -42,6 +42,27 @@ for (const room of ['woodland', 'beachfront']) {
     manifest.qualities.balanced.estimatedTextureBytes < manifest.qualities.high.estimatedTextureBytes,
   );
 }
+// The Woodland cabin is one model for both graphics levels (art/woodland-study/build.py).
+{
+  const directory = new URL('../public/room/woodland-study/', import.meta.url);
+  const manifest = JSON.parse(fs.readFileSync(new URL('asset-manifest.json', directory), 'utf8'));
+  const bytes = fs.readFileSync(new URL('woodland-study.glb', directory));
+  const hash = createHash('sha256').update(bytes).digest('hex');
+  for (const quality of ['balanced', 'high']) {
+    assert.equal(manifest.qualities[quality].bytes, bytes.length);
+    assert.equal(
+      manifest.qualities[quality].sha256,
+      hash,
+      'Run npm run assets:woodland after exporting the cabin',
+    );
+    assert.equal(
+      roomAssets.woodland[quality],
+      `/room/woodland-study/woodland-study.glb?v=${hash.slice(0, 12)}`,
+    );
+  }
+  // Both graphics levels load this one file, so it gets the High budget.
+  assert.ok(bytes.length <= 12 * 1048576);
+}
 assert.equal(roomDeviceTier(390), 'phone');
 assert.equal(roomDeviceTier(820), 'tablet');
 assert.equal(roomDeviceTier(1440), 'desktop');
@@ -62,5 +83,5 @@ assert.ok(
     .includes('Apache License'),
 );
 console.log(
-  'Room assets: both graphics levels, content hashes, detail UVs, local decoder and responsive render budgets passed.',
+  'Room assets: Woodland cabin revision, both graphics levels, content hashes, detail UVs, local decoder and responsive render budgets passed.',
 );

@@ -26,7 +26,21 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, onClose: () => 
           el.getClientRects().length > 0 &&
           getComputedStyle(el).visibility !== 'hidden',
       );
-    list()[0]?.focus();
+    // Content can arrive after mount (lazy panels, loaded lists): until something
+    // is focusable, watch the dialog and focus the first control once it appears.
+    let watcher: MutationObserver | null = null;
+    const first = list()[0];
+    if (first) first.focus();
+    else {
+      watcher = new MutationObserver(() => {
+        const late = list()[0];
+        if (!late) return;
+        if (!root.contains(document.activeElement)) late.focus();
+        watcher?.disconnect();
+        watcher = null;
+      });
+      watcher.observe(root, {childList: true, subtree: true, attributes: true});
+    }
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
@@ -45,6 +59,7 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, onClose: () => 
     root.addEventListener('keydown', onKey);
     return () => {
       root.removeEventListener('keydown', onKey);
+      watcher?.disconnect();
       prev?.focus();
     };
   }, [ref]);

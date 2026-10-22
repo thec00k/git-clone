@@ -5,27 +5,27 @@
   "qualities": {
     "balanced": {
       "file": "beachfront.glb",
-      "bytes": 5318176,
-      "sha256": "ef5d69506828452eed530a931752ec90adc8c7609cdf80e5f0390bfe6e110356",
-      "triangles": 134608,
-      "materials": 80,
-      "primitives": 309,
-      "images": 28,
+      "bytes": 5289992,
+      "sha256": "36d660afef85625d865866131da6b68f07dcc3922520f749c552c14d72ff3d4e",
+      "triangles": 172932,
+      "materials": 77,
+      "primitives": 331,
+      "images": 24,
       "maxTextureSize": 512,
-      "estimatedTextureBytes": 34125142,
-      "normalMappedMaterials": 38
+      "estimatedTextureBytes": 30900224,
+      "normalMappedMaterials": 37
     },
     "high": {
       "file": "beachfront.high.glb",
-      "bytes": 8489900,
-      "sha256": "3c5740f7a1cc60e6265f5619e322af6e8d43144a60af641ea4ed91b1bdf960f4",
-      "triangles": 134608,
-      "materials": 80,
-      "primitives": 309,
-      "images": 28,
+      "bytes": 8904212,
+      "sha256": "5b844a919a9a5e9de8a657510b542cd83d57353c8e696253195b5fd8ec67f524",
+      "triangles": 172932,
+      "materials": 77,
+      "primitives": 331,
+      "images": 24,
       "maxTextureSize": 1024,
-      "estimatedTextureBytes": 80882347,
-      "normalMappedMaterials": 38
+      "estimatedTextureBytes": 78468438,
+      "normalMappedMaterials": 37
     }
   }
 }
