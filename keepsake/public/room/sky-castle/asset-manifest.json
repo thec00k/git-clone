@@ -1,0 +1,15 @@
+{
+  "room": "sky-castle",
+  "qualities": {
+    "balanced": {
+      "file": "sky-castle.glb",
+      "bytes": 1463948,
+      "sha256": "af3242fe141dc0106606811c2992fba25903f6dc1a0354e4726bac164dc11577"
+    },
+    "high": {
+      "file": "sky-castle.glb",
+      "bytes": 1463948,
+      "sha256": "af3242fe141dc0106606811c2992fba25903f6dc1a0354e4726bac164dc11577"
+    }
+  }
+}

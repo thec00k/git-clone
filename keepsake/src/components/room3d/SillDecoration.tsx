@@ -1,10 +1,11 @@
 import {useApp} from '../../store/appStore';
 export function SillDecoration() {
   const {state} = useApp();
+  const sky = state.environment.roomTheme === 'sky-castle';
   const id = state.roomDecor?.sillItem;
   if (!id || !state.roomDecor?.owned.includes(id)) return null;
   return (
-    <group name="owned-sill-decoration" position={[-0.45, 1.138, -2.063]}>
+    <group name="owned-sill-decoration" position={sky ? [-0.88, 1.115, -2.063] : [-0.45, 1.138, -2.063]}>
       {id === 'fern' && (
         <>
           <mesh position={[0, 0.028, 0]}>

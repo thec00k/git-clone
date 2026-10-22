@@ -16,6 +16,14 @@
   --ks-ui-heading: Inter, 'Segoe UI', sans-serif;
   --ks-ui-heading-weight: 600;
 }
+:root[data-keepsake-theme='sky-castle'] {
+  --ks-ui-panel: #343549;
+  --ks-ui-paper: #f6f0e4;
+  --ks-ui-ink: #343549;
+  --ks-ui-metal: #dcc38e;
+  --ks-ui-heading: Georgia, serif;
+  --ks-ui-heading-weight: 400;
+}
 :root[data-keepsake-theme='snowy-mountain'] {
   --ks-ui-heading: Georgia, serif;
   --ks-ui-heading-weight: 400;

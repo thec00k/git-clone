@@ -34,6 +34,8 @@ const ALLOWED = new Set([
   'coastal',
   'neon',
   'neonMap',
+  'sky',
+  'skyCastle',
   'study',
   'woodland',
   // Whether a friend is visiting: fixed for the whole visit.

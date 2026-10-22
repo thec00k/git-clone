@@ -38,23 +38,27 @@ function hologramTexture(onLoad: (texture: THREE.Texture) => void) {
 export function RoomWorldMap({scene, onOpen}: {scene: THREE.Object3D; onOpen: () => void}) {
   const {environment} = useApp();
   const neon = environment.roomTheme === 'cyberpunk';
+  const sky = environment.roomTheme === 'sky-castle';
   const reduced = useReducedMotion();
-  const [loaded, setLoaded] = useState<{texture: THREE.Texture; neon: boolean} | null>(null);
+  const [loaded, setLoaded] = useState<{texture: THREE.Texture; neon: boolean; sky?: boolean} | null>(null);
   const material = useRef<THREE.MeshBasicMaterial>(null),
     scan = useRef<THREE.Mesh>(null),
     glow = useRef<THREE.MeshBasicMaterial>(null);
   useEffect(() => {
     if (neon) return hologramTexture(texture => setLoaded({texture, neon: true}));
     let live = true;
-    const map = new THREE.TextureLoader().load('/maps/world-room.svg', () => {
-      if (live) setLoaded({texture: map, neon: false});
-    });
+    const map = new THREE.TextureLoader().load(
+      sky ? '/maps/world-sky-castle.svg' : '/maps/world-room.svg',
+      () => {
+        if (live) setLoaded({texture: map, neon: false, sky});
+      },
+    );
     map.colorSpace = THREE.SRGBColorSpace;
     return () => {
       live = false;
       map.dispose();
     };
-  }, [neon]);
+  }, [neon, sky]);
   const surface = useMemo(() => {
     const sheet = scene.getObjectByName('Map_Sheet');
     if (!sheet) return null;
@@ -105,7 +109,7 @@ export function RoomWorldMap({scene, onOpen}: {scene: THREE.Object3D; onOpen: ()
         ? 0
         : ((time * 0.19) % (surface.height - 0.024)) - (surface.height - 0.024) / 2;
   });
-  if (!surface || !loaded || loaded.neon !== neon) return null;
+  if (!surface || !loaded || loaded.neon !== neon || !!loaded.sky !== sky) return null;
   const texture = loaded.texture;
   const color = CRT_LIGHT_COLORS[environment.crtColor ?? 'blue'];
   if (!neon)

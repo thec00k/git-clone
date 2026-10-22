@@ -1,13 +1,14 @@
 import type {AppState} from '../types/app';
-export type RoomThemeId = 'woodland' | 'beachfront' | 'cyberpunk';
+export type RoomThemeId = 'woodland' | 'beachfront' | 'cyberpunk' | 'sky-castle';
 /** Rooms are freely swappable (owner decision, October 2026): nothing is bought or unlocked. Kept so callers need no change. */
 export function ownsRoomTheme(_state: AppState, _room: RoomThemeId): boolean {
   return true;
 }
 /** Room ids that no longer exist fall back to Woodland; users' memories are unaffected. */
-export const LEGACY_ROOM_IDS = ['classic', 'snowy-mountain', 'snowy', 'sky-castle'];
+const LIVE_ROOMS = ['woodland', 'beachfront', 'cyberpunk', 'sky-castle'];
+export const LEGACY_ROOM_IDS = ['classic', 'snowy-mountain', 'snowy'];
 export function switchRoomTheme(state: AppState, next: RoomThemeId): AppState {
-  if (!['woodland', 'beachfront', 'cyberpunk'].includes(next)) return state;
+  if (!LIVE_ROOMS.includes(next)) return state;
   const current = state.environment.roomTheme ?? 'woodland';
   if (current === next) return state;
   const decor = state.roomDecor ?? {owned: []};
@@ -41,7 +42,6 @@ export function switchRoomTheme(state: AppState, next: RoomThemeId): AppState {
   };
 }
 
-const LIVE_ROOMS = ['woodland', 'beachfront', 'cyberpunk'];
 /** Rewrites retired room ids (in the saved theme, ownership list and per-room layouts) so old saves load and their backups restore. Mutates a plain parsed state. */
 export function normalizeLegacyRooms(state: any): void {
   const env = state?.environment;

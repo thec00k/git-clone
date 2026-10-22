@@ -11,5 +11,9 @@ export const roomAssets = {
   "cyberpunk": {
     "balanced": "/room/cyberpunk/cyberpunk.glb?v=53a6b320b269",
     "high": "/room/cyberpunk/cyberpunk.glb?v=53a6b320b269"
+  },
+  "sky-castle": {
+    "balanced": "/room/sky-castle/sky-castle.glb?v=af3242fe141d",
+    "high": "/room/sky-castle/sky-castle.glb?v=af3242fe141d"
   }
 } as const;
