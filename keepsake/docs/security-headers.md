@@ -16,7 +16,7 @@ The CSP in `public/_headers` lists exactly these. `scripts/check-security-header
 ## Report-only for now
 The policy is sent as `Content-Security-Policy-Report-Only`. Switch it to enforcing once a hosted build has run through Spotify, SoundCloud and scan import without reports. Known compromise: `style-src 'unsafe-inline'` because React sets inline styles.
 
-When the backend arrives, add its origin to `connect-src` and `img-src`.
+The Supabase API (`https://*.supabase.co`, `wss://*.supabase.co`) is in `connect-src` for account sign-in and backup; it is only contacted once someone signs in. Add it to `img-src` when visiting a friend shows server photos.
 
 ## Permissions the app does not use
 The app never uses location, camera, microphone or notifications (no code references them). `Permissions-Policy` switches them off, which also backs the rule that Keepsake never reads photo or user location.

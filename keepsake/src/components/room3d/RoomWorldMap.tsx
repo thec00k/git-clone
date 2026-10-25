@@ -5,6 +5,16 @@ import {useApp} from '../../store/appStore';
 import {CRT_LIGHT_COLORS} from '../../lib/roomMusic';
 import {useReducedMotion} from '../../hooks/useReducedMotion';
 
+// The map page draws /maps/world.svg. Load and decode it while the room is open and keep it referenced, so the page
+// opens with the map already drawn instead of a blank board for a second or two (owner: "vanishes like a broken png").
+let atlasImage: HTMLImageElement | null = null;
+function preloadAtlasMap() {
+  if (atlasImage) return;
+  atlasImage = new Image();
+  atlasImage.src = '/maps/world.svg';
+  atlasImage.decode().catch(() => {});
+}
+
 function hologramTexture(onLoad: (texture: THREE.Texture) => void) {
   const image = new Image();
   let disposed = false;
@@ -37,6 +47,7 @@ function hologramTexture(onLoad: (texture: THREE.Texture) => void) {
 
 export function RoomWorldMap({scene, onOpen}: {scene: THREE.Object3D; onOpen: () => void}) {
   const {environment} = useApp();
+  useEffect(preloadAtlasMap, []);
   const neon = environment.roomTheme === 'cyberpunk';
   const sky = environment.roomTheme === 'sky-castle';
   const reduced = useReducedMotion();

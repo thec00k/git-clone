@@ -8,6 +8,7 @@ import App from './App';
 import {AppProvider} from './store/appStore';
 import {NavProvider} from './store/nav';
 import {ListenProvider} from './store/listen';
+import {startSync} from './lib/sync';
 
 // Spotify forbids `localhost` as a redirect URI. Stay on 127.0.0.1 so the
 // PKCE verifier and the OAuth return land on the same origin.
@@ -17,6 +18,7 @@ if (window.location.hostname === 'localhost') {
     `http://127.0.0.1${port}${window.location.pathname}${window.location.search}${window.location.hash}`,
   );
 } else {
+  startSync();
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <AppProvider>

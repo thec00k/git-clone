@@ -354,9 +354,11 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
   ),
   halloween: () => (
     <>
-      <Pumpkin position={[-1.25, MANTEL.y + 0.044, MANTEL.z - 0.07]} scale={0.6} />
-      <Pumpkin position={[-0.95, MANTEL.y + 0.037, MANTEL.z - 0.07]} scale={0.5} />
-      <Pumpkin position={[-0.62, MANTEL.y + 0.04, MANTEL.z - 0.07]} scale={0.55} />
+      {/* In front of the chimney the shelf is only 8 cm deep, so the two larger pumpkins sit at the mantel's
+          ends, clear of the stones and level with the front, and only a small one sits in the middle. */}
+      <Pumpkin position={[-1.357, MANTEL.y + 0.036, 1.7]} scale={0.5} />
+      <Pumpkin position={[-0.464, MANTEL.y + 0.036, 1.7]} scale={0.5} />
+      <Pumpkin position={[-0.95, MANTEL.y + 0.029, MANTEL.z - 0.05]} scale={0.4} />
       <Pumpkin position={[-0.05, 0.12, 1.62]} scale={1.4} />
       {[
         [-1.5, 2.6, 0.3, 1],

@@ -243,6 +243,16 @@ for n in ['ks_archive_drawer', 'Archive_Back', 'Archive_Deck', 'Archive_Header',
         for f in o.data.polygons:
             f.material_index = 0
         project(o, (.5, .3))
+# The rug's field in the room's whitewash sand (owner, 2026-10-22). The app sets the same colour at runtime
+# (useRoomAsset.ts); this keeps the source and renders honest. Its own material: the terracotta has another user.
+rug = bpy.data.objects.get('Semantic_Rug_terracotta')
+if rug:
+    sand = solid('Coastal | whitewash sand rug', (.769, .737, .675), .95)  # sRGB #c4bcac
+    rug.data.materials.clear()
+    rug.data.materials.append(sand)
+    for f in rug.data.polygons:
+        f.material_index = 0
+
 # Beachfront's budget is 350 draws: merge small static parts that share a material into one mesh each.
 # Moving parts, interaction anchors and anything the app looks up by name stay separate.
 

@@ -1,4 +1,5 @@
 import {RoomBackup} from '../RoomBackup';
+import {AccountBackup} from '../AccountBackup';
 import {MemoryAtmosphereSettings} from '../MemoryAtmosphereSettings';
 import {OfflineRoom} from '../OfflineRoom';
 import {AssetCredits} from '../AssetCredits';
@@ -196,6 +197,7 @@ export function EnvironmentPanel({
                 Existing resized photos need re-importing to preserve their source files.
               </p>
               <StorageSummary />
+              <AccountBackup />
               <RoomBackup />
               <OfflineRoom />
               <p className="text-sm mt-4">
