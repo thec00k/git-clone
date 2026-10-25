@@ -1,12 +1,13 @@
-import {useEffect, useMemo, useRef, type ReactNode} from 'react';
+import {Suspense, useEffect, useMemo, useRef, type ReactNode} from 'react';
+import {useGLTF} from '@react-three/drei';
 import * as THREE from 'three';
 import {useSeasonal} from '../../hooks/useSeasonal';
 import type {HolidayId} from '../../types/app';
 
 /**
  * Seasonal dressing for the Woodland room, driven by the season engine (`useSeasonal().holiday`).
- * Deliberately simple paper-craft shapes in flat colours: they are placeholders for commissioned art
- * but real enough to judge placement and mood. Nothing here animates, so reduced motion needs no case.
+ * The tree, pumpkins, jack-o'-lantern and stockings are modelled props (`art/holiday/build.py`); the garlands, bats,
+ * hearts, eggs, tulips and flag are still simple paper-craft shapes. Nothing here animates, so reduced motion needs no case.
  * Positions come from the Woodland study model: mantel top y 1.04, front edge z 1.65; the chimney stones start at z 1.73,
  * so the shelf in front of them is only 8 cm deep. `z` is that stone face. Window opening x -1.12..0.82, top rail y 3.05.
  */
@@ -113,19 +114,34 @@ const WIN_A = new THREE.Vector3(-1.1, 3.0, -2.06),
 const MANTEL_A = new THREE.Vector3(MANTEL.minX + 0.02, MANTEL.y - 0.04, MANTEL.z - 0.13),
   MANTEL_B = new THREE.Vector3(MANTEL.maxX - 0.02, MANTEL.y - 0.04, MANTEL.z - 0.13);
 
-function Pumpkin({position, scale = 1}: {position: [number, number, number]; scale?: number}) {
-  const body = useMemo(() => paper('#e0762a', '#ff8a2a', 0.25), []),
-    stem = useMemo(() => paper('#5b6b2e'), []);
-  return (
-    <group position={position} scale={scale}>
-      <mesh material={body} scale={[1, 0.8, 1]}>
-        <sphereGeometry args={[0.09, 12, 8]} />
-      </mesh>
-      <mesh material={stem} position={[0, 0.08, 0]}>
-        <boxGeometry args={[0.02, 0.04, 0.02]} />
-      </mesh>
-    </group>
-  );
+/** The modelled props (`art/holiday/build.py`). Clones share the cached GLB's geometry and materials, which are
+ * marked `shared` so that unmounting a holiday set does not dispose them. */
+function useProp(name: 'pumpkin' | 'jack-o-lantern' | 'tree' | 'stocking') {
+  const {scene} = useGLTF(`/room/holiday/${name}.glb`);
+  return useMemo(() => {
+    scene.traverse(o => {
+      if (o instanceof THREE.Mesh) {
+        o.geometry.userData.shared = true;
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => (m.userData.shared = true));
+      }
+    });
+    return scene.clone(true);
+  }, [scene]);
+}
+function Pumpkin({
+  position,
+  scale = 1,
+  carved = false,
+  rot = 0,
+}: {
+  position: [number, number, number];
+  scale?: number;
+  /** A jack-o'-lantern with a glowing carved face, turned by `rot` (0 faces -z, towards the room). */
+  carved?: boolean;
+  rot?: number;
+}) {
+  const model = useProp(carved ? 'jack-o-lantern' : 'pumpkin');
+  return <primitive object={model} position={position} scale={scale} rotation={[0, rot, 0]} />;
 }
 function Bat({position, rot = 0, s = 1}: {position: [number, number, number]; rot?: number; s?: number}) {
   const geo = useMemo(() => {
@@ -154,66 +170,22 @@ function Bat({position, rot = 0, s = 1}: {position: [number, number, number]; ro
   return <mesh geometry={geo} material={mat} position={position} rotation={[0, 0, rot]} scale={s * 1.6} />;
 }
 function Tree({position}: {position: [number, number, number]}) {
-  const green = useMemo(() => paper('#2f5a3c'), []),
-    trunk = useMemo(() => paper('#5a4129'), []),
-    stand = useMemo(() => paper('#8c2f2a'), []),
-    star = useMemo(() => paper('#f2d36b', '#ffd35a', 1.2), []);
-  const bulbs = useMemo(() => ['#c0392b', '#f2d36b', '#e8e1cc', '#3b6fb0'].map(c => paper(c, c, 0.5)), []);
-  const spots: [number, number, number, number][] = [
-    [0.15, 0.2, 0.1, 0],
-    [-0.12, 0.3, 0.1, 1],
-    [0.05, 0.45, 0.12, 2],
-    [-0.1, 0.55, 0.07, 3],
-    [0.1, 0.13, -0.14, 1],
-    [-0.02, 0.62, 0.09, 0],
-  ];
-  return (
-    <group position={position}>
-      {/* A bucket stand and a short bare trunk under the branches. */}
-      <mesh material={stand} position={[0, 0.04, 0]}>
-        <cylinderGeometry args={[0.1, 0.085, 0.08, 10]} />
-      </mesh>
-      <mesh material={trunk} position={[0, 0.12, 0]}>
-        <cylinderGeometry args={[0.025, 0.03, 0.12, 6]} />
-      </mesh>
-      <group position={[0, 0.12, 0]}>
-        <mesh material={green} position={[0, 0.2, 0]}>
-          <coneGeometry args={[0.23, 0.3, 9]} />
-        </mesh>
-        <mesh material={green} position={[0, 0.4, 0]}>
-          <coneGeometry args={[0.18, 0.28, 9]} />
-        </mesh>
-        <mesh material={green} position={[0, 0.58, 0]}>
-          <coneGeometry args={[0.12, 0.24, 9]} />
-        </mesh>
-        <mesh material={star} position={[0, 0.73, 0]}>
-          <octahedronGeometry args={[0.04]} />
-        </mesh>
-        {spots.map(([x, y, z, m], i) => (
-          <mesh key={i} material={bulbs[m]} position={[x, y, z]}>
-            <sphereGeometry args={[0.017, 6, 5]} />
-          </mesh>
-        ))}
-      </group>
-    </group>
-  );
+  return <primitive object={useProp('tree')} position={position} />;
 }
+/** Hangs from its origin (the top of the cuff), just under the mantel shelf. */
 function Stocking({x, color}: {x: number; color: string}) {
-  const red = useMemo(() => paper(color), [color]),
-    cuff = useMemo(() => paper('#f4efe2'), []);
-  return (
-    <group position={[x, 0.84, MANTEL.z - 0.15]}>
-      <mesh material={red} position={[0, 0.02, 0]}>
-        <boxGeometry args={[0.07, 0.17, 0.035]} />
-      </mesh>
-      <mesh material={red} position={[0.03, -0.07, 0]}>
-        <boxGeometry args={[0.11, 0.06, 0.035]} />
-      </mesh>
-      <mesh material={cuff} position={[0, 0.11, 0]}>
-        <boxGeometry args={[0.08, 0.035, 0.04]} />
-      </mesh>
-    </group>
-  );
+  const base = useProp('stocking');
+  const model = useMemo(() => {
+    base.traverse(o => {
+      if (o instanceof THREE.Mesh && o.material.name === 'Stocking_Sock') {
+        o.material = o.material.clone();
+        o.material.userData.shared = false;
+        o.material.color.set(color);
+      }
+    });
+    return base;
+  }, [base, color]);
+  return <primitive object={model} position={[x, 0.97, MANTEL.z - 0.15]} />;
 }
 function Eggs() {
   const colors = ['#f4b6c2', '#bfe3d0', '#f7e2a0', '#c7c3f0', '#f4b6c2', '#bfe3d0'];
@@ -318,7 +290,11 @@ export function HolidayDecor({room = 'woodland'}: {room?: DecorRoom}) {
   const {holiday} = useSeasonal();
   return (
     <group name="Holiday_Decor" userData={{holiday}}>
-      {holiday && <HolidaySet key={room + '-' + holiday} holiday={holiday} room={room} />}
+      {holiday && (
+        <Suspense fallback={null}>
+          <HolidaySet key={room + '-' + holiday} holiday={holiday} room={room} />
+        </Suspense>
+      )}
     </group>
   );
 }
@@ -337,8 +313,10 @@ function HolidaySet({holiday, room}: {holiday: HolidayId; room: DecorRoom}) {
     const owned = new Set<{dispose(): void}>();
     group.current?.traverse(o => {
       if (o instanceof THREE.Mesh) {
-        owned.add(o.geometry);
-        (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => owned.add(m));
+        if (!o.geometry.userData.shared) owned.add(o.geometry);
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(
+          m => m.userData.shared || owned.add(m),
+        );
       }
     });
     return () => owned.forEach(x => x.dispose());
@@ -379,7 +357,12 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
       <Pumpkin position={[-1.357, MANTEL.y + 0.036, 1.7]} scale={0.5} />
       <Pumpkin position={[-0.464, MANTEL.y + 0.036, 1.7]} scale={0.5} />
       <Pumpkin position={[-0.95, MANTEL.y + 0.029, MANTEL.z - 0.05]} scale={0.4} />
-      <Pumpkin position={[WOODLAND_CORNER[0], 0.2, WOODLAND_CORNER[2]]} scale={2.8} />
+      <Pumpkin
+        position={[WOODLAND_CORNER[0], 0.2, WOODLAND_CORNER[2]]}
+        scale={2.8}
+        carved
+        rot={-Math.PI / 4}
+      />
       {[
         [-1.5, 2.6, 0.3, 1],
         [-1.3, 2.35, -0.4, 0.8],
@@ -434,7 +417,7 @@ function Pumpkins() {
   const [x, , z] = HEARTH_SPOT;
   return (
     <>
-      <Pumpkin position={[x, 0.2, z]} scale={2.8} />
+      <Pumpkin position={[x, 0.2, z]} scale={2.8} carved rot={-0.45} />
       <Pumpkin position={[x - 0.15, 0.06, z - 0.33]} scale={0.8} />
       <Pumpkin position={[x + 0.2, 0.05, z - 0.3]} scale={0.6} />
     </>
