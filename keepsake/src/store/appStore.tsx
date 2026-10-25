@@ -112,6 +112,12 @@ export function AppProvider({children}: {children: ReactNode}) {
   const loadedRef = useRef(false);
   // Set when the reload follows another tab's save, so this tab's music is not restarted by the entry rule.
   const followingRef = useRef(false);
+  // True once the user changed something that is not saved yet. Housekeeping (daily stamps, a message marked
+  // as seen, a progress flag) does not count: it is idempotent, so it is kept in `housekeepingRef` and
+  // replayed on a room reloaded from another tab, and it rides the next real save or the page hide
+  // instead of claiming the shared revision on its own.
+  const dirtyRef = useRef(false);
+  const housekeepingRef = useRef<((prev: AppState) => AppState)[]>([]);
   const saveTimer = useRef<number | undefined>(undefined);
   const stateRef = useRef<AppState | null>(null);
   stateRef.current = state;
@@ -174,7 +180,8 @@ export function AppProvider({children}: {children: ReactNode}) {
       // Saving them at once would bump the shared revision, so merely opening a second tab would lock the
       // first behind the conflict screen on its next small save.
       if (stored) savedRef.current = prepared;
-      setState(prepared);
+      if (!current) housekeepingRef.current = [];
+      setState(housekeepingRef.current.reduce((room, fn) => fn(room), prepared));
       // A reload that follows another tab's save needs no sync: that tab queued it when it saved.
       if (stored && !current) syncAfterSave(stored);
       loadedRef.current = true;
@@ -189,13 +196,14 @@ export function AppProvider({children}: {children: ReactNode}) {
     };
   }, [retry]);
 
-  // Another tab saved. A tab with nothing unsaved follows it, so its own next change is made on the newer
-  // room instead of being refused. A tab with unsaved changes keeps them; its save is refused if it is stale.
+  // Another tab saved. A tab with no unsaved edits follows it (keeping its housekeeping), so its own next
+  // change is made on the newer room instead of being refused. A tab with unsaved edits keeps them; its save
+  // is refused if it is stale.
   useEffect(
     () =>
       onOtherTabSaved(() => {
         if (blockedRef.current || restoringRef.current || !stateRef.current) return;
-        if (stateRef.current !== savedRef.current) return;
+        if (dirtyRef.current) return;
         followingRef.current = true;
         setRetry(r => r + 1);
       }),
@@ -208,6 +216,10 @@ export function AppProvider({children}: {children: ReactNode}) {
     try {
       if (!(await saveState(snapshot, () => epoch === epochRef.current))) return false;
       savedRef.current = snapshot;
+      if (stateRef.current === snapshot) {
+        dirtyRef.current = false;
+        housekeepingRef.current = [];
+      }
       // Backup to the account (when signed in) only ever follows a successful save on this device.
       syncAfterSave(snapshot);
       if (stateRef.current === snapshot) setSaveStatus('saved');
@@ -234,7 +246,7 @@ export function AppProvider({children}: {children: ReactNode}) {
       if (document.hidden) flush();
     };
     const leave = (event: BeforeUnloadEvent) => {
-      if (pending()) {
+      if (pending() && dirtyRef.current) {
         flush();
         event.preventDefault();
         event.returnValue = '';
@@ -267,7 +279,7 @@ export function AppProvider({children}: {children: ReactNode}) {
       setState(prev => (prev ? {...prev, achievements: merged, achievementsAt: at} : prev));
       return;
     }
-    if (state === savedRef.current) {
+    if (state === savedRef.current || !dirtyRef.current) {
       setSaveStatus('saved');
       return;
     }
@@ -297,6 +309,8 @@ export function AppProvider({children}: {children: ReactNode}) {
         if (epoch === epochRef.current) restoringRef.current = false;
       }
       stateRef.current = next;
+      dirtyRef.current = false;
+      housekeepingRef.current = [];
       setState(next);
       setNewlyUnlocked([]);
       setSaveStatus('saved');
@@ -304,7 +318,17 @@ export function AppProvider({children}: {children: ReactNode}) {
     [persist],
   );
   const update = useCallback((fn: (prev: AppState) => AppState) => {
-    setState(prev => (prev ? recordPhotoActivity(prev, fn(prev)) : prev));
+    setState(prev => {
+      if (!prev) return prev;
+      const next = recordPhotoActivity(prev, fn(prev));
+      if (next !== prev) dirtyRef.current = true;
+      return next;
+    });
+  }, []);
+  // Housekeeping: `fn` must be idempotent, as it may be replayed on a newer room (see `dirtyRef`).
+  const housekeep = useCallback((fn: (prev: AppState) => AppState) => {
+    housekeepingRef.current.push(fn);
+    setState(prev => (prev ? fn(prev) : prev));
   }, []);
   // Daily stamps: once when the room opens and again if the tab is left open past midnight.
   const loadedState = !!state;
@@ -312,7 +336,7 @@ export function AppProvider({children}: {children: ReactNode}) {
     if (!loadedState) return;
     const claim = () => {
       if (!document.hidden)
-        update(p => {
+        housekeep(p => {
           const c = claimDailyStamps(p, new Date());
           return c.environment.tidiedAt === undefined
             ? {...c, environment: {...c.environment, tidiedAt: Date.now()}}
@@ -329,11 +353,12 @@ export function AppProvider({children}: {children: ReactNode}) {
       window.clearTimeout(timer);
       document.removeEventListener('visibilitychange', claim);
     };
-  }, [loadedState, update]);
+  }, [loadedState, housekeep]);
 
   const updateActiveBook = useCallback((fn: (b: Scrapbook) => Scrapbook) => {
     setState(prev => {
       if (!prev || !prev.activeBookId) return prev;
+      dirtyRef.current = true;
       return recordPhotoActivity(prev, {
         ...prev,
         books: prev.books.map(b => (b.id === prev.activeBookId ? {...fn(b), updatedAt: Date.now()} : b)),
@@ -658,8 +683,7 @@ export function AppProvider({children}: {children: ReactNode}) {
 
   const recordProgress = useCallback(
     (patch: Partial<Progress>) =>
-      setState(prev => {
-        if (!prev) return prev;
+      housekeep(prev => {
         const next = {...prev.progress, ...patch};
         // avoid needless updates (keeps the save/eval loop calm)
         if (
@@ -671,12 +695,13 @@ export function AppProvider({children}: {children: ReactNode}) {
         }
         return {...prev, progress: next};
       }),
-    [],
+    [housekeep],
   );
 
   const markAchievementsSeen = useCallback(
-    (ids: string[]) => update(p => ({...p, achievementsSeen: [...new Set([...p.achievementsSeen, ...ids])]})),
-    [update],
+    (ids: string[]) =>
+      housekeep(p => ({...p, achievementsSeen: [...new Set([...p.achievementsSeen, ...ids])]})),
+    [housekeep],
   );
 
   const recordReceipt = useCallback(
