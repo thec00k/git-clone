@@ -156,6 +156,7 @@ function Bat({position, rot = 0, s = 1}: {position: [number, number, number]; ro
 function Tree({position}: {position: [number, number, number]}) {
   const green = useMemo(() => paper('#2f5a3c'), []),
     trunk = useMemo(() => paper('#5a4129'), []),
+    stand = useMemo(() => paper('#8c2f2a'), []),
     star = useMemo(() => paper('#f2d36b', '#ffd35a', 1.2), []);
   const bulbs = useMemo(() => ['#c0392b', '#f2d36b', '#e8e1cc', '#3b6fb0'].map(c => paper(c, c, 0.5)), []);
   const spots: [number, number, number, number][] = [
@@ -168,26 +169,32 @@ function Tree({position}: {position: [number, number, number]}) {
   ];
   return (
     <group position={position}>
-      <mesh material={trunk} position={[0, 0.05, 0]}>
-        <cylinderGeometry args={[0.025, 0.03, 0.1, 6]} />
+      {/* A bucket stand and a short bare trunk under the branches. */}
+      <mesh material={stand} position={[0, 0.04, 0]}>
+        <cylinderGeometry args={[0.1, 0.085, 0.08, 10]} />
       </mesh>
-      <mesh material={green} position={[0, 0.2, 0]}>
-        <coneGeometry args={[0.23, 0.3, 9]} />
+      <mesh material={trunk} position={[0, 0.12, 0]}>
+        <cylinderGeometry args={[0.025, 0.03, 0.12, 6]} />
       </mesh>
-      <mesh material={green} position={[0, 0.4, 0]}>
-        <coneGeometry args={[0.18, 0.28, 9]} />
-      </mesh>
-      <mesh material={green} position={[0, 0.58, 0]}>
-        <coneGeometry args={[0.12, 0.24, 9]} />
-      </mesh>
-      <mesh material={star} position={[0, 0.73, 0]}>
-        <octahedronGeometry args={[0.04]} />
-      </mesh>
-      {spots.map(([x, y, z, m], i) => (
-        <mesh key={i} material={bulbs[m]} position={[x, y, z]}>
-          <sphereGeometry args={[0.017, 6, 5]} />
+      <group position={[0, 0.12, 0]}>
+        <mesh material={green} position={[0, 0.2, 0]}>
+          <coneGeometry args={[0.23, 0.3, 9]} />
         </mesh>
-      ))}
+        <mesh material={green} position={[0, 0.4, 0]}>
+          <coneGeometry args={[0.18, 0.28, 9]} />
+        </mesh>
+        <mesh material={green} position={[0, 0.58, 0]}>
+          <coneGeometry args={[0.12, 0.24, 9]} />
+        </mesh>
+        <mesh material={star} position={[0, 0.73, 0]}>
+          <octahedronGeometry args={[0.04]} />
+        </mesh>
+        {spots.map(([x, y, z, m], i) => (
+          <mesh key={i} material={bulbs[m]} position={[x, y, z]}>
+            <sphereGeometry args={[0.017, 6, 5]} />
+          </mesh>
+        ))}
+      </group>
     </group>
   );
 }
@@ -315,6 +322,13 @@ export function HolidayDecor({room = 'woodland'}: {room?: DecorRoom}) {
     </group>
   );
 }
+/** A small pumpkin on the left of each windowsill, clear of the sill's own props (Neon's lava lamp and hologram car). */
+const SILL_PUMPKIN: Record<DecorRoom, [number, number, number]> = {
+  woodland: [-0.8, 1.19, -2.0],
+  beachfront: [-0.8, 1.18, -2.05],
+  cyberpunk: [-0.78, 1.18, -2.02],
+  'sky-castle': [-0.85, 1.16, -2.05],
+};
 /** Keyed by holiday so a change unmounts the old set. Materials and geometries are created in useMemo and passed
  * as props, which react-three-fiber does not dispose, so collect them after mount and free them on unmount. */
 function HolidaySet({holiday, room}: {holiday: HolidayId; room: DecorRoom}) {
@@ -331,6 +345,7 @@ function HolidaySet({holiday, room}: {holiday: HolidayId; room: DecorRoom}) {
   }, []);
   return (
     <group ref={group}>
+      {holiday === 'halloween' && <Pumpkin position={SILL_PUMPKIN[room]} scale={0.6} />}
       {room === 'woodland' ? DECOR[holiday]() : room === 'beachfront' ? COASTAL[holiday]() : LIGHT[holiday]()}
     </group>
   );
@@ -364,7 +379,7 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
       <Pumpkin position={[-1.357, MANTEL.y + 0.036, 1.7]} scale={0.5} />
       <Pumpkin position={[-0.464, MANTEL.y + 0.036, 1.7]} scale={0.5} />
       <Pumpkin position={[-0.95, MANTEL.y + 0.029, MANTEL.z - 0.05]} scale={0.4} />
-      <Pumpkin position={[WOODLAND_CORNER[0], 0.1, WOODLAND_CORNER[2]]} scale={1.4} />
+      <Pumpkin position={[WOODLAND_CORNER[0], 0.2, WOODLAND_CORNER[2]]} scale={2.8} />
       {[
         [-1.5, 2.6, 0.3, 1],
         [-1.3, 2.35, -0.4, 0.8],
@@ -419,9 +434,9 @@ function Pumpkins() {
   const [x, , z] = HEARTH_SPOT;
   return (
     <>
-      <Pumpkin position={[x, 0.1, z]} scale={1.4} />
-      <Pumpkin position={[x - 0.2, 0.06, z - 0.12]} scale={0.8} />
-      <Pumpkin position={[x + 0.18, 0.05, z - 0.16]} scale={0.6} />
+      <Pumpkin position={[x, 0.2, z]} scale={2.8} />
+      <Pumpkin position={[x - 0.15, 0.06, z - 0.33]} scale={0.8} />
+      <Pumpkin position={[x + 0.2, 0.05, z - 0.3]} scale={0.6} />
     </>
   );
 }
