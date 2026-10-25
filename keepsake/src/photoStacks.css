@@ -151,11 +151,18 @@
 .ks-photo-inbox.is-folded {
   max-height: 60px;
 }
+/* In the room the open inbox hangs over the next-page arrow; move the arrow inward beside it. */
+.ks-workbench-controls:has(.ks-photo-inbox:not(.is-folded)) .ks-page-turn--next {
+  right: 240px;
+}
 @media (max-width: 900px) {
   .ks-photo-inbox {
     width: 160px;
     right: 8px;
     top: 65px;
+  }
+  .ks-workbench-controls:has(.ks-photo-inbox:not(.is-folded)) .ks-page-turn--next {
+    right: 204px;
   }
   .ks-photo-inbox .ks-photo-stack {
     height: 110px;
