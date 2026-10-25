@@ -206,6 +206,23 @@
       "notes": "Built from scripts in the repository. Re-check that no inherited texture was used when these are next exported."
     },
     {
+      "id": "holiday-props",
+      "files": [
+        "art/holiday/build.py",
+        "public/room/holiday/*.glb"
+      ],
+      "kind": "model",
+      "status": "original",
+      "origin": "original",
+      "author": "Keepsake project (art/holiday/build.py)",
+      "licence": "Original project work",
+      "commercialUse": "yes",
+      "proof": [
+        "art/holiday/build.py"
+      ],
+      "notes": "Christmas tree, pumpkin, jack-o'-lantern, stocking, mantel garland, pennant, heart, bat, Easter basket, tulips and flag, built from scratch by the script with plain materials and vertex colours; no textures or downloaded assets."
+    },
+    {
       "id": "scrapbook-model",
       "files": [
         "art/workbench/scrapbook.blend",
