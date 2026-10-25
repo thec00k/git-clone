@@ -37,7 +37,6 @@ Model guide: Opus 5.5 for database permissions, safety, data-loss and audits; So
 | Finish Woodland against the art bible before more room work: Phase 4 illustrated window layers (needs art, `docs/scenery-brief.md`), Phase 6 lighting comparisons across views, times and seasons, Phase 7 measurements on an ordinary laptop and a phone | Sonnet 5.5 (art by owner or commission) |
 | Neon City furniture remodel in the same style as Beachfront and Sky Castle (the only room with no furniture remodel yet) | Sonnet 5.5 |
 | Replace the paper-craft holiday placeholders with finished holiday art | Sonnet 5.5 |
-| Remove Sky Castle from the "Coming later" list in `ShopRoomVariants.tsx`; it is already selectable above it | Sonnet 5.5 |
 | Save proof copies of licence pages into `licences/proof/` (5 entries known but unproven) | Sonnet 5.5 |
 | Enforce the 5-photo share minimum on the server too (the app enforces it since October 11; the database does not check it yet) | Opus 5.5 |
 
