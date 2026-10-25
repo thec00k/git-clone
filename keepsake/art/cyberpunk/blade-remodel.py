@@ -11,7 +11,8 @@ the published source instead, exports the room and records it:
 
 It runs art/woodland-study/furniture-remodel.py with KS_ROOM = 'cyberpunk' (same shapes and footprints;
 Neon City keeps its lava lamp, clock, CRT, rounded window, holograms, jellyfish and skyline), then gives
-each new part a Neon City material by its ks_family.
+each new part a Neon City material by its ks_family. The map keeps its original frame and pins, and the
+ceiling is left as it was (owner).
 """
 import bpy, bmesh, math, tempfile
 import numpy as np
@@ -23,12 +24,31 @@ if bpy.context.mode != 'OBJECT':
     bpy.ops.object.mode_set(mode='OBJECT')
 if bpy.data.objects.get('Desk_HandleRose'):
     raise RuntimeError('cyberpunk.blend is already remodelled; run this on the unremodelled source.')
+# The owner keeps Neon City's map style (2026-10-25): set the original frame and pins aside, so the shared
+# remodel's new frame, pins, cord and nail can be swapped back for them afterwards.
+MAP_PARTS = ['Map_Frame', 'Map_Pin_0', 'Map_Pin_1', 'Map_Pin_2', 'Map_Pin_3']
+kept_map = {}
+for n in MAP_PARTS:
+    o = bpy.data.objects[n]
+    c = o.copy()
+    c.data = o.data.copy()
+    c.name = 'Keep_' + n
+    bpy.context.collection.objects.link(c)
+    kept_map[n] = (c, o.matrix_world.copy())
 shapes = {'__name__': 'furniture_remodel', 'KS_ROOM': 'cyberpunk'}
 exec(compile(SHAPES.read_text(encoding='utf8'), str(SHAPES), 'exec'), shapes)
 box = shapes['box']
 
 M = bpy.data.materials
 O = bpy.data.objects
+for n in MAP_PARTS + ['Map_Cord', 'Map_Nail']:
+    if O.get(n):
+        O.remove(O[n], do_unlink=True)
+for n, (c, mw) in kept_map.items():
+    c.name = n
+    c.data.name = n
+    c.parent = O['ks_map']
+    c.matrix_world = mw
 rng = np.random.default_rng(2510)
 
 

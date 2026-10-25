@@ -198,7 +198,7 @@ export function RoomLights({
           ref={ceilingRef}
           position={ceiling.toArray()}
           intensity={3.2}
-          color={neon ? '#a9d4d6' : '#fff6ea'}
+          color={neon ? '#cac3ff' : '#fff6ea'}
           distance={9}
         />
       }

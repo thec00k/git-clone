@@ -3,13 +3,13 @@
   "qualities": {
     "balanced": {
       "file": "cyberpunk.glb",
-      "bytes": 4178664,
-      "sha256": "acb5186239f845bcbcc7895cc1b9f2c74de06407d5713a5bb86ebc8f59aeb630"
+      "bytes": 4165844,
+      "sha256": "c008bbd338409b4f5efca48124c4c27caf2c9d32312005e6bde4e3e76adba3af"
     },
     "high": {
       "file": "cyberpunk.glb",
-      "bytes": 4178664,
-      "sha256": "acb5186239f845bcbcc7895cc1b9f2c74de06407d5713a5bb86ebc8f59aeb630"
+      "bytes": 4165844,
+      "sha256": "c008bbd338409b4f5efca48124c4c27caf2c9d32312005e6bde4e3e76adba3af"
     }
   }
 }
