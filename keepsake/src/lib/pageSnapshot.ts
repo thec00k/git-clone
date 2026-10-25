@@ -130,6 +130,7 @@ export async function snapshotPage(page: HTMLElement, signal?: AbortSignal): Pro
   });
   host.append(clone);
   document.body.append(host);
+  alignTextBaselines(clone);
   try {
     await bounded(
       Promise.all(Array.from(clone.querySelectorAll('img')).map(image => image.decode().catch(() => {}))),
@@ -151,5 +152,68 @@ export async function snapshotPage(page: HTMLElement, signal?: AbortSignal): Pro
     );
   } finally {
     host.remove();
+  }
+}
+
+const PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+/** The baseline html2canvas will use for a font: its own probe, appended to <body> exactly as html2canvas does. */
+function html2canvasBaseline(fontFamily: string, fontSize: string) {
+  const container = document.createElement('div'),
+    img = document.createElement('img'),
+    span = document.createElement('span');
+  Object.assign(container.style, {
+    visibility: 'hidden',
+    fontFamily,
+    fontSize,
+    margin: '0',
+    padding: '0',
+    whiteSpace: 'nowrap',
+  });
+  Object.assign(img, {src: PIXEL, width: 1, height: 1});
+  Object.assign(img.style, {margin: '0', padding: '0', verticalAlign: 'baseline'});
+  Object.assign(span.style, {fontFamily, fontSize, margin: '0', padding: '0'});
+  span.append('Hidden Text');
+  container.append(span, img);
+  document.body.append(container);
+  const baseline = img.offsetTop - span.offsetTop + 2;
+  container.remove();
+  return baseline;
+}
+/**
+ * html2canvas draws text at (top of the text box + its own baseline estimate). The base styles make its probe image
+ * a block, so the estimate comes out near a full line height and captions land low in the picture, then visibly
+ * jump when the turned page hands over to the live one. Measure each text run's real baseline in the laid-out copy
+ * and nudge the run by the difference.
+ */
+function alignTextBaselines(root: HTMLElement) {
+  const estimates = new Map<string, number>();
+  for (const el of [root, ...root.querySelectorAll<HTMLElement>('*')]) {
+    const nodes = Array.from(el.childNodes);
+    const text = nodes.find((n): n is Text => n instanceof Text && !!n.data.trim());
+    if (!text || nodes.some(n => n instanceof Element)) continue;
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 1);
+    const top = range.getClientRects()[0]?.top;
+    if (top === undefined) continue;
+    const probe = document.createElement('img');
+    Object.assign(probe, {src: PIXEL, width: 1, height: 1});
+    // Inline explicitly: the base styles make images blocks (which is also what skews html2canvas's own probe).
+    Object.assign(probe.style, {display: 'inline', verticalAlign: 'baseline'});
+    el.prepend(probe);
+    const baseline = probe.getBoundingClientRect().bottom - top;
+    probe.remove();
+    const {fontFamily, fontSize} = el.style;
+    const key = `${fontFamily} ${fontSize}`;
+    if (!estimates.has(key)) estimates.set(key, html2canvasBaseline(fontFamily, fontSize));
+    const shift = baseline - estimates.get(key)!;
+    if (Math.abs(shift) < 0.5) continue;
+    const position = el.style.position;
+    if (position === 'absolute' || position === 'fixed')
+      el.style.marginTop = `${(parseFloat(el.style.marginTop) || 0) + shift}px`;
+    else {
+      el.style.top = `${(position === 'relative' ? parseFloat(el.style.top) || 0 : 0) + shift}px`;
+      el.style.position = 'relative';
+    }
   }
 }

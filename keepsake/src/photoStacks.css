@@ -75,7 +75,7 @@
   justify-content: center;
   margin: 12px 0;
 }
-.ks-review-actions button:first-child {
+.ks-review-actions button[aria-pressed='true'] {
   background: #435d49;
   color: #fffaf0;
 }
@@ -216,4 +216,12 @@
   #ks-workbench-controls .ks-photo-inbox > button {
     width: 100%;
   }
+}
+.ks-import-problem {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #f6e1d6;
+  border: 1px solid #c98a6b;
+  color: #6b2e17;
+  font-size: 13px;
 }

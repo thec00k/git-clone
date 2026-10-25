@@ -198,7 +198,9 @@ export function SnapshotPrefetch({
         const node = host.current?.children[index]?.firstElementChild;
         if (!(node instanceof HTMLElement)) continue;
         try {
-          rememberSnapshot(page, key, await snapshotPage(node, controller.signal));
+          const canvas = await snapshotPage(node, controller.signal);
+          rememberSnapshot(page, key, canvas);
+          physical.prepare?.(canvas);
         } catch {
           // Too slow this time (the first paper texture can take seconds): try the next page, not nothing.
           if (controller.signal.aborted) return;

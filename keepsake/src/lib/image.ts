@@ -10,7 +10,32 @@ export async function loadImageFile(file: File, keepOriginal = true): Promise<Lo
     return Promise.reject(new Error('This image exceeds the 25 MB file limit.'));
   if (file.type === 'image/gif' && file.size > 8 * 1024 * 1024)
     return Promise.reject(new Error('Animated GIF cards must be 8 MB or smaller.'));
-  const image = await new Promise<LoadedImage>((resolve, reject) => {
+  let image: LoadedImage;
+  try {
+    image = await decodeImage(file);
+  } catch (error) {
+    // Chrome, Edge and Firefox cannot open HEIC (iPhone photos copied to a computer); convert those in the
+    // browser. The converter only downloads the first time someone picks a HEIC photo.
+    if (!isHeic(file)) throw error;
+    image = await decodeImage(await heicToJpeg(file));
+  }
+  // A GIF is already retained byte-for-byte as the displayed card. Avoid
+  // storing a second identical copy in the originals database.
+  return keepOriginal && file.type !== 'image/gif'
+    ? {...image, original: await preserveOriginal(file)}
+    : image;
+}
+const isHeic = (file: File) => /\.(heic|heif)$/i.test(file.name) || /hei[cf]/i.test(file.type);
+async function heicToJpeg(file: File) {
+  const {default: heic2any} = await import('heic2any');
+  const converted = await heic2any({blob: file, toType: 'image/jpeg', quality: 0.92}).catch(() => {
+    throw new Error('This HEIC photo could not be converted. Export it as JPEG.');
+  });
+  const blob = Array.isArray(converted) ? converted[0] : converted;
+  return new File([blob], file.name.replace(/\.hei[cf]$/i, '.jpg'), {type: 'image/jpeg'});
+}
+function decodeImage(file: File) {
+  return new Promise<LoadedImage>((resolve, reject) => {
     const url = URL.createObjectURL(file),
       img = new Image();
     img.onload = () => {
@@ -46,9 +71,4 @@ export async function loadImageFile(file: File, keepOriginal = true): Promise<Lo
     };
     img.src = url;
   });
-  // A GIF is already retained byte-for-byte as the displayed card. Avoid
-  // storing a second identical copy in the originals database.
-  return keepOriginal && file.type !== 'image/gif'
-    ? {...image, original: await preserveOriginal(file)}
-    : image;
 }

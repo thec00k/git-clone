@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {useApp} from '../store/appStore';
 import {useFocusTrap} from '../hooks/useFocusTrap';
 import {checkImportCapacity, checkStorageCapacity} from '../lib/importLimits';
+import {LIMITS} from '../lib/limits';
 import {loadImageFile} from '../lib/image';
 import {BatchPhotoReview} from './BatchPhotoReview';
 
@@ -12,6 +13,7 @@ export function PhotoImportDialog({onClose}: {onClose: () => void}) {
     alive = useRef(true);
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState(''),
+    [problem, setProblem] = useState(false),
     [reviewIds, setReviewIds] = useState<string[]>([]),
     [selected, setSelected] = useState<string[]>([]),
     [category, setCategory] = useState('all');
@@ -27,37 +29,59 @@ export function PhotoImportDialog({onClose}: {onClose: () => void}) {
   async function files(input: FileList | null) {
     if (!input?.length) return;
     // The input is cleared right after this starts, which empties a live FileList.
-    const list = Array.from(input);
+    const chosen = Array.from(input);
+    // One photo the browser cannot use should not stop the rest of the batch: set it aside with a reason.
+    const skipped: string[] = [];
+    const list = chosen.filter(file => {
+      if (file.size <= LIMITS.uploadBytes) return true;
+      skipped.push(`${file.name} (over 25 MB)`);
+      return false;
+    });
     setBusy(true);
-    setMessage('Preparing your photographs…');
+    setProblem(false);
+    setMessage(`Preparing photo 1 of ${list.length}…`);
     const ids: string[] = [];
-    let failed = 0;
+    let stopped = '';
     try {
-      await checkImportCapacity(list, state.archive.length);
-      for (const file of list) {
+      if (list.length) await checkImportCapacity(list, state.archive.length);
+      for (const [i, file] of list.entries()) {
         if (!alive.current) return;
+        setMessage(`Preparing photo ${i + 1} of ${list.length}…`);
         let photo;
         try {
           photo = await loadImageFile(file, state.profile.preserveOriginals !== false);
-        } catch {
-          failed++;
+        } catch (error) {
+          skipped.push(`${file.name} (${error instanceof Error ? error.message : 'could not be read'})`);
           continue;
         }
         if (!alive.current) return;
         await checkStorageCapacity(photo.src.length);
         ids.push(addArchivePhoto(photo.src, photo.aspect, [], photo.original));
-        setMessage(`Saved ${ids.length} of ${list.length} photographs.`);
       }
     } catch (error) {
-      if (alive.current) setMessage(error instanceof Error ? error.message : 'Import could not finish.');
+      stopped = error instanceof Error ? error.message : 'Import could not finish.';
     }
     if (!alive.current) return;
     setBusy(false);
-    if (failed)
-      setMessage(`${failed} of ${list.length} photographs could not be read. Try another image file.`);
+    const parts = [
+      ids.length ? `Added ${ids.length} of ${chosen.length} photographs.` : 'No photographs were added.',
+      skipped.length ? `Skipped: ${skipped.join(', ')}.` : '',
+      stopped,
+    ].filter(Boolean);
+    setMessage(parts.join(' '));
+    setProblem(!!skipped.length || !!stopped);
     if (ids.length) setReviewIds(ids);
   }
-  if (reviewIds.length) return <BatchPhotoReview photoIds={reviewIds} notice={message} onClose={onClose} />;
+  if (reviewIds.length)
+    return (
+      <BatchPhotoReview
+        photoIds={reviewIds}
+        notice={message}
+        noticeIsProblem={problem}
+        defaultBookId={state.activeBookId ?? undefined}
+        onClose={onClose}
+      />
+    );
   return (
     <div className="ks-import-backdrop">
       <section
@@ -92,7 +116,13 @@ export function PhotoImportDialog({onClose}: {onClose: () => void}) {
             e.target.value = '';
           }}
         />
-        <p role="status">{message}</p>
+        {problem ? (
+          <p role="alert" className="ks-import-problem">
+            {message}
+          </p>
+        ) : (
+          <p role="status">{message}</p>
+        )}
         <label>
           Archive category{' '}
           <select disabled={busy} value={category} onChange={e => setCategory(e.target.value)}>
