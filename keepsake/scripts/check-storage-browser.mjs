@@ -244,18 +244,31 @@ try {
   await second.getByLabel('Your name', {exact: true}).fill('Second tab');
   await second.getByRole('button', {name: 'Storage', exact: true}).click();
   await second.getByRole('status').filter({hasText: 'All changes saved on this device.'}).waitFor();
+  // The first tab had nothing unsaved, so it followed the second tab's save instead of going stale.
   await openSettings(page);
   await page.getByRole('button', {name: 'Help', exact: true}).click();
-  await page.getByLabel('Your name', {exact: true}).fill('Unsaved first tab');
-  await page
-    .getByRole('heading', {name: 'This room changed in another tab'})
-    .waitFor()
-    .catch(async error => {
-      console.log('FIRST', await page.locator('body').innerText());
-      console.log('SECOND', await second.locator('body').innerText());
-      throw error;
-    });
-  assert.ok(await page.getByRole('button', {name: 'Download this tab’s room'}).isVisible());
+  assert.equal(await page.getByLabel('Your name', {exact: true}).inputValue(), 'Second tab');
+  // Both tabs now edit at the same moment, each with the other's change still unsaved, so the second save to
+  // land is stale: that tab shows the recovery screen, the other keeps working.
+  await second.getByRole('button', {name: 'Help', exact: true}).click();
+  await Promise.all([
+    second.getByLabel('Your name', {exact: true}).fill('Second tab, again', {force: true}),
+    page.getByLabel('Your name', {exact: true}).fill('First tab, again', {force: true}),
+  ]);
+  const recovery = tab => tab.getByRole('heading', {name: 'This room changed in another tab'});
+  const stale = await Promise.any([
+    recovery(page)
+      .waitFor()
+      .then(() => page),
+    recovery(second)
+      .waitFor()
+      .then(() => second),
+  ]).catch(async error => {
+    console.log('FIRST', await page.locator('body').innerText());
+    console.log('SECOND', await second.locator('body').innerText());
+    throw error;
+  });
+  assert.ok(await stale.getByRole('button', {name: 'Download this tab’s room'}).isVisible());
   await ui.close();
   console.log('PASS: consolidated settings, persistent graphics option, user-facing conflict recovery.');
   const fail = await browser.newContext();

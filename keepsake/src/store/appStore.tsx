@@ -23,7 +23,7 @@ import {setSaveStatus} from './saveStatus';
 export {useSaveStatus} from './saveStatus';
 import {uid} from '../lib/id';
 import {createSeed} from '../data/seed';
-import {loadState, saveState, SaveConflict} from '../lib/storage';
+import {loadState, onOtherTabSaved, saveState, SaveConflict} from '../lib/storage';
 import {recordPhotoActivity} from '../lib/photoActivity';
 import {pruneOriginals, restoreOriginalFiles} from '../lib/originalPhotos';
 import {downloadRoom} from '../lib/roomBackup';
@@ -109,6 +109,8 @@ export function AppProvider({children}: {children: ReactNode}) {
   const restoringRef = useRef(false);
   const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
   const loadedRef = useRef(false);
+  // Set when the reload follows another tab's save, so this tab's music is not restarted by the entry rule.
+  const followingRef = useRef(false);
   const saveTimer = useRef<number | undefined>(undefined);
   const stateRef = useRef<AppState | null>(null);
   stateRef.current = state;
@@ -155,7 +157,18 @@ export function AppProvider({children}: {children: ReactNode}) {
         : createSeed();
       if (!initial.achievementBaseline) initial.achievementBaseline = baseline(initial);
       normalizeLegacyRooms(initial);
-      const prepared = musicOnEntry(initial);
+      const current = followingRef.current ? stateRef.current : null;
+      followingRef.current = false;
+      const prepared = current
+        ? {
+            ...initial,
+            environment: {
+              ...initial.environment,
+              musicOn: current.environment.musicOn,
+              musicProvider: current.environment.musicProvider,
+            },
+          }
+        : musicOnEntry(initial);
       // A stored room counts as saved as loaded: the defaults filled in above go out with the next real change.
       // Saving them at once would bump the shared revision, so merely opening a second tab would lock the
       // first behind the conflict screen on its next small save.
@@ -172,6 +185,19 @@ export function AppProvider({children}: {children: ReactNode}) {
       cancelled = true;
     };
   }, [retry]);
+
+  // Another tab saved. A tab with nothing unsaved follows it, so its own next change is made on the newer
+  // room instead of being refused. A tab with unsaved changes keeps them; its save is refused if it is stale.
+  useEffect(
+    () =>
+      onOtherTabSaved(() => {
+        if (blockedRef.current || restoringRef.current || !stateRef.current) return;
+        if (stateRef.current !== savedRef.current) return;
+        followingRef.current = true;
+        setRetry(r => r + 1);
+      }),
+    [],
+  );
 
   const persist = useCallback(async (snapshot: AppState, epoch = epochRef.current, restoring = false) => {
     if (blockedRef.current || epoch !== epochRef.current || (restoringRef.current && !restoring))

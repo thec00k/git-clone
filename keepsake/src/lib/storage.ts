@@ -226,6 +226,17 @@ async function persist(state: AppState): Promise<void> {
     db.close();
   }
 }
+// Every open tab hears when another one saved, so a tab with nothing unsaved can follow instead of going stale.
+const saves = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('keepsake-saves');
+// Node (the check scripts) would otherwise stay alive waiting on the channel.
+(saves as {unref?: () => void} | null)?.unref?.();
+export function onOtherTabSaved(listener: () => void): () => void {
+  if (!saves) return () => {};
+  const handler = () => listener();
+  saves.addEventListener('message', handler);
+  return () => saves.removeEventListener('message', handler);
+}
+
 /** Serialize writes within a tab; compare revisions atomically across tabs. `isCurrent` is checked when the
  * write's turn comes: a save queued before a restore must not land after it, so it resolves false unwritten. */
 export function saveState(state: AppState, isCurrent: () => boolean = () => true): Promise<boolean> {
@@ -234,6 +245,7 @@ export function saveState(state: AppState, isCurrent: () => boolean = () => true
     .then(async () => {
       if (!isCurrent()) return false;
       await persist(state);
+      saves?.postMessage(revision);
       return true;
     });
   queue = next;
