@@ -18,10 +18,12 @@ import type {
 } from '../types/app';
 import {canLeaveBookNote} from '../lib/permissions';
 import {PIN_NOTE_MAX, TIDY_ROOM, STICKY_NOTE_MAX} from '../types/app';
-import type {CoverStyle, SaveStatus, Scrapbook, Visibility} from '../types/scrapbook';
+import type {CoverStyle, Scrapbook, Visibility} from '../types/scrapbook';
+import {setSaveStatus} from './saveStatus';
+export {useSaveStatus} from './saveStatus';
 import {uid} from '../lib/id';
 import {createSeed} from '../data/seed';
-import {loadState, saveState, SaveConflict} from '../lib/storage';
+import {loadState, onOtherTabSaved, saveState, SaveConflict} from '../lib/storage';
 import {syncAfterSave} from '../lib/sync';
 import {recordPhotoActivity} from '../lib/photoActivity';
 import {pruneOriginals, restoreOriginalFiles} from '../lib/originalPhotos';
@@ -33,7 +35,6 @@ import {EVERYDAY_PACK_ID, STARTING_STAMPS, packById} from '../lib/stickerPacks';
 
 interface AppContextValue {
   state: AppState;
-  saveStatus: SaveStatus;
   newlyUnlocked: string[];
   clearNewlyUnlocked: () => void;
   activeBook: Scrapbook | null;
@@ -107,9 +108,16 @@ export function AppProvider({children}: {children: ReactNode}) {
   // autosave of the room as it was before a restore can never overwrite the restored room.
   const epochRef = useRef(0);
   const restoringRef = useRef(false);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
   const loadedRef = useRef(false);
+  // Set when the reload follows another tab's save, so this tab's music is not restarted by the entry rule.
+  const followingRef = useRef(false);
+  // True once the user changed something that is not saved yet. Housekeeping (daily stamps, a message marked
+  // as seen, a progress flag) does not count: it is idempotent, so it is kept in `housekeepingRef` and
+  // replayed on a room reloaded from another tab, and it rides the next real save or the page hide
+  // instead of claiming the shared revision on its own.
+  const dirtyRef = useRef(false);
+  const housekeepingRef = useRef<((prev: AppState) => AppState)[]>([]);
   const saveTimer = useRef<number | undefined>(undefined);
   const stateRef = useRef<AppState | null>(null);
   stateRef.current = state;
@@ -156,8 +164,26 @@ export function AppProvider({children}: {children: ReactNode}) {
         : createSeed();
       if (!initial.achievementBaseline) initial.achievementBaseline = baseline(initial);
       normalizeLegacyRooms(initial);
-      setState(musicOnEntry(initial));
-      if (stored) syncAfterSave(stored);
+      const current = followingRef.current ? stateRef.current : null;
+      followingRef.current = false;
+      const prepared = current
+        ? {
+            ...initial,
+            environment: {
+              ...initial.environment,
+              musicOn: current.environment.musicOn,
+              musicProvider: current.environment.musicProvider,
+            },
+          }
+        : musicOnEntry(initial);
+      // A stored room counts as saved as loaded: the defaults filled in above go out with the next real change.
+      // Saving them at once would bump the shared revision, so merely opening a second tab would lock the
+      // first behind the conflict screen on its next small save.
+      if (stored) savedRef.current = prepared;
+      if (!current) housekeepingRef.current = [];
+      setState(housekeepingRef.current.reduce((room, fn) => fn(room), prepared));
+      // A reload that follows another tab's save needs no sync: that tab queued it when it saved.
+      if (stored && !current) syncAfterSave(stored);
       loadedRef.current = true;
       // Free full-size originals of photos deleted (or replaced by a restore) in earlier visits.
       if (stored) void pruneOriginals(stored).catch(() => {});
@@ -170,12 +196,30 @@ export function AppProvider({children}: {children: ReactNode}) {
     };
   }, [retry]);
 
+  // Another tab saved. A tab with no unsaved edits follows it (keeping its housekeeping), so its own next
+  // change is made on the newer room instead of being refused. A tab with unsaved edits keeps them; its save
+  // is refused if it is stale.
+  useEffect(
+    () =>
+      onOtherTabSaved(() => {
+        if (blockedRef.current || restoringRef.current || !stateRef.current) return;
+        if (dirtyRef.current) return;
+        followingRef.current = true;
+        setRetry(r => r + 1);
+      }),
+    [],
+  );
+
   const persist = useCallback(async (snapshot: AppState, epoch = epochRef.current, restoring = false) => {
     if (blockedRef.current || epoch !== epochRef.current || (restoringRef.current && !restoring))
       return false;
     try {
       if (!(await saveState(snapshot, () => epoch === epochRef.current))) return false;
       savedRef.current = snapshot;
+      if (stateRef.current === snapshot) {
+        dirtyRef.current = false;
+        housekeepingRef.current = [];
+      }
       // Backup to the account (when signed in) only ever follows a successful save on this device.
       syncAfterSave(snapshot);
       if (stateRef.current === snapshot) setSaveStatus('saved');
@@ -202,7 +246,7 @@ export function AppProvider({children}: {children: ReactNode}) {
       if (document.hidden) flush();
     };
     const leave = (event: BeforeUnloadEvent) => {
-      if (pending()) {
+      if (pending() && dirtyRef.current) {
         flush();
         event.preventDefault();
         event.returnValue = '';
@@ -235,6 +279,10 @@ export function AppProvider({children}: {children: ReactNode}) {
       setState(prev => (prev ? {...prev, achievements: merged, achievementsAt: at} : prev));
       return;
     }
+    if (state === savedRef.current || !dirtyRef.current) {
+      setSaveStatus('saved');
+      return;
+    }
     setSaveStatus('saving');
     window.clearTimeout(saveTimer.current);
     const epoch = epochRef.current;
@@ -261,6 +309,8 @@ export function AppProvider({children}: {children: ReactNode}) {
         if (epoch === epochRef.current) restoringRef.current = false;
       }
       stateRef.current = next;
+      dirtyRef.current = false;
+      housekeepingRef.current = [];
       setState(next);
       setNewlyUnlocked([]);
       setSaveStatus('saved');
@@ -268,7 +318,17 @@ export function AppProvider({children}: {children: ReactNode}) {
     [persist],
   );
   const update = useCallback((fn: (prev: AppState) => AppState) => {
-    setState(prev => (prev ? recordPhotoActivity(prev, fn(prev)) : prev));
+    setState(prev => {
+      if (!prev) return prev;
+      const next = recordPhotoActivity(prev, fn(prev));
+      if (next !== prev) dirtyRef.current = true;
+      return next;
+    });
+  }, []);
+  // Housekeeping: `fn` must be idempotent, as it may be replayed on a newer room (see `dirtyRef`).
+  const housekeep = useCallback((fn: (prev: AppState) => AppState) => {
+    housekeepingRef.current.push(fn);
+    setState(prev => (prev ? fn(prev) : prev));
   }, []);
   // Daily stamps: once when the room opens and again if the tab is left open past midnight.
   const loadedState = !!state;
@@ -276,7 +336,7 @@ export function AppProvider({children}: {children: ReactNode}) {
     if (!loadedState) return;
     const claim = () => {
       if (!document.hidden)
-        update(p => {
+        housekeep(p => {
           const c = claimDailyStamps(p, new Date());
           return c.environment.tidiedAt === undefined
             ? {...c, environment: {...c.environment, tidiedAt: Date.now()}}
@@ -293,11 +353,12 @@ export function AppProvider({children}: {children: ReactNode}) {
       window.clearTimeout(timer);
       document.removeEventListener('visibilitychange', claim);
     };
-  }, [loadedState, update]);
+  }, [loadedState, housekeep]);
 
   const updateActiveBook = useCallback((fn: (b: Scrapbook) => Scrapbook) => {
     setState(prev => {
       if (!prev || !prev.activeBookId) return prev;
+      dirtyRef.current = true;
       return recordPhotoActivity(prev, {
         ...prev,
         books: prev.books.map(b => (b.id === prev.activeBookId ? {...fn(b), updatedAt: Date.now()} : b)),
@@ -622,8 +683,7 @@ export function AppProvider({children}: {children: ReactNode}) {
 
   const recordProgress = useCallback(
     (patch: Partial<Progress>) =>
-      setState(prev => {
-        if (!prev) return prev;
+      housekeep(prev => {
         const next = {...prev.progress, ...patch};
         // avoid needless updates (keeps the save/eval loop calm)
         if (
@@ -635,12 +695,13 @@ export function AppProvider({children}: {children: ReactNode}) {
         }
         return {...prev, progress: next};
       }),
-    [],
+    [housekeep],
   );
 
   const markAchievementsSeen = useCallback(
-    (ids: string[]) => update(p => ({...p, achievementsSeen: [...new Set([...p.achievementsSeen, ...ids])]})),
-    [update],
+    (ids: string[]) =>
+      housekeep(p => ({...p, achievementsSeen: [...new Set([...p.achievementsSeen, ...ids])]})),
+    [housekeep],
   );
 
   const recordReceipt = useCallback(
@@ -678,6 +739,97 @@ export function AppProvider({children}: {children: ReactNode}) {
 
   const activeBook = useMemo(() => state?.books.find(b => b.id === state.activeBookId) ?? null, [state]);
 
+  // One object per state change (not per render), so the room re-renders once per click, not three times.
+  const value = useMemo<AppContextValue | null>(
+    () =>
+      state
+        ? {
+            state,
+            newlyUnlocked,
+            clearNewlyUnlocked,
+            activeBook,
+            environment: state.environment,
+            update,
+            updateActiveBook,
+            setProfile,
+            setActiveBook,
+            addBook,
+            renameBook,
+            deleteBook,
+            setBookVisibility,
+            setBookCover,
+            setBookPlaylist,
+            setBookShelf,
+            addArchivePhoto,
+            toggleFavorite,
+            setCategories,
+            addArchiveTab,
+            renameArchiveTab,
+            removeArchiveTab,
+            setEnvironment,
+            tidyRoom,
+            flushSave,
+            restoreRoom,
+            addGuestEntry,
+            addNote,
+            approveNote,
+            deleteNote,
+            addPin,
+            updatePin,
+            removePin,
+            addPinNote,
+            updatePinNote,
+            deletePinNote,
+            recordProgress,
+            markAchievementsSeen,
+            recordReceipt,
+            buyStickerPack,
+          }
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- every callback above is a stable useCallback
+    [
+      state,
+      newlyUnlocked,
+      clearNewlyUnlocked,
+      activeBook,
+      update,
+      updateActiveBook,
+      setProfile,
+      setActiveBook,
+      addBook,
+      renameBook,
+      deleteBook,
+      setBookVisibility,
+      setBookCover,
+      setBookPlaylist,
+      setBookShelf,
+      addArchivePhoto,
+      toggleFavorite,
+      setCategories,
+      addArchiveTab,
+      renameArchiveTab,
+      removeArchiveTab,
+      setEnvironment,
+      tidyRoom,
+      flushSave,
+      restoreRoom,
+      addGuestEntry,
+      addNote,
+      approveNote,
+      deleteNote,
+      addPin,
+      updatePin,
+      removePin,
+      addPinNote,
+      updatePinNote,
+      deletePinNote,
+      recordProgress,
+      markAchievementsSeen,
+      recordReceipt,
+      buyStickerPack,
+    ],
+  );
+
   if (loadError)
     return (
       <div className="ks-save-recovery" role="alert">
@@ -697,55 +849,11 @@ export function AppProvider({children}: {children: ReactNode}) {
         </button>
       </div>
     );
-  if (!state) {
+  if (!state || !value) {
     return (
       <div className="ks-room flex h-dvh items-center justify-center text-paper/60">Opening the room…</div>
     );
   }
-
-  const value: AppContextValue = {
-    state,
-    saveStatus,
-    newlyUnlocked,
-    clearNewlyUnlocked,
-    activeBook,
-    environment: state.environment,
-    update,
-    updateActiveBook,
-    setProfile,
-    setActiveBook,
-    addBook,
-    renameBook,
-    deleteBook,
-    setBookVisibility,
-    setBookCover,
-    setBookPlaylist,
-    setBookShelf,
-    addArchivePhoto,
-    toggleFavorite,
-    setCategories,
-    addArchiveTab,
-    renameArchiveTab,
-    removeArchiveTab,
-    setEnvironment,
-    tidyRoom,
-    flushSave,
-    restoreRoom,
-    addGuestEntry,
-    addNote,
-    approveNote,
-    deleteNote,
-    addPin,
-    updatePin,
-    removePin,
-    addPinNote,
-    updatePinNote,
-    deletePinNote,
-    recordProgress,
-    markAchievementsSeen,
-    recordReceipt,
-    buyStickerPack,
-  };
 
   return (
     <AppContext.Provider value={value}>

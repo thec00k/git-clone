@@ -17,7 +17,7 @@ Safety rules are in [safety-model.md](safety-model.md). Size limits shared by ap
 | People | `profiles` (username, display name), `profile_private` (birth date, email preference) | Strangers can't list profiles; exact-username lookup via `find_profile()` |
 | Rooms | `rooms` (theme, visibility, settings JSON, revision), `room_private` (owner-only JSON), `room_invites` | Visibility: private / invite (default) / friends / open (adults only). `settings` is only what visitors see |
 | Photos | `photos` (storage path, size, hash, caption, moderation state, trash date) | Max 2048 px, 500 per person, 30-day trash |
-| Books | `books`, `pages` (elements JSON: captions, stickers, ink; position 0 is the title page), `page_photos` (slots 0-3) | 12 books, 10 pages, 4 photos a page, 40 a book; only your own photos |
+| Books | `books`, `pages` (elements JSON: captions, stickers, ink; position 0 is the title page), `page_photos` (slots 0-5) | 12 books, 10 pages, 6 photos a page, 40 a book; only your own photos |
 | Map | `pins` (GeoNames city id, label, caption, optional photo) | 100 pins |
 | Social | `friendships`, `blocks`, `guestbook_notes`, `photo_tags` | See safety model |
 | Safety | `reports`, `moderation_log`, `rate_events` | Reports are write-only for people |

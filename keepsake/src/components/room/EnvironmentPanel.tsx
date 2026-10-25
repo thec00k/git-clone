@@ -9,7 +9,7 @@ import {ShopRoomVariants} from '../ShopRoomVariants';
 import {MusicSettings} from './MusicPanel';
 import {StorageSummary} from '../StorageSummary';
 import {useRef, useState} from 'react';
-import {useApp} from '../../store/appStore';
+import {useApp, useSaveStatus} from '../../store/appStore';
 import {useNav} from '../../store/nav';
 import {useListen} from '../../store/listen';
 import {useFocusTrap} from '../../hooks/useFocusTrap';
@@ -31,7 +31,8 @@ export function EnvironmentPanel({
   onClose: () => void;
   initialSection?: Section;
 }) {
-  const {state, environment, setEnvironment, setProfile, saveStatus, flushSave} = useApp();
+  const {state, environment, setEnvironment, setProfile, flushSave} = useApp();
+  const saveStatus = useSaveStatus();
   const {startTour, isVisitor} = useNav();
   const {preview, setPreview} = useListen();
   const [section, setSection] = useState<Section>(initialSection);
@@ -174,9 +175,11 @@ export function EnvironmentPanel({
                     ? 'Saving failed. Retry or download a backup before leaving.'
                     : 'Saving your latest changes…'}
               </p>
-              <button className="ks-tool my-3" onClick={() => void flushSave()}>
-                Save now
-              </button>
+              {saveStatus === 'error' && (
+                <button className="ks-tool my-3" onClick={() => void flushSave()}>
+                  Try again
+                </button>
+              )}
               <label className="block my-3">
                 New photo uploads
                 <select

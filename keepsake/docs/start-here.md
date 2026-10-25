@@ -19,7 +19,7 @@ Written for the next agent (for example the Claude desktop agent) picking this u
 ## Done in the October 10–11 stretch
 - Fire and sound, free room swapping, stamps (30 to start, daily grant), seasons and holidays, room ageing, caption lettering, Beachfront seasonal grade.
 - Supabase design (schema, row level security, teen rules, silent blocks, tag consent, rate limits, server-owned stamps, storage, trash), tested on every push (CI job "database"). Oct 11: live free project `keepsake` (us-east-1), most migrations applied, `moderate-photo` deployed with photo processing; sign-in, sync with an outbox, and bringing a room to a new device (`src/lib/sync/`, `check-sync`). See `backend-design.md` → The live project.
-- Shared size limits (`src/lib/limits.ts`): 4 photos a page, 10 pages, 40 a book, 12 books, 100 pins, 500 photos, 25 MB, 2048 px. Page cap changed from 6 to 4.
+- Shared size limits (`src/lib/limits.ts`): 6 photos a page, 10 pages, 40 a book, 12 books, 100 pins, 500 photos, 25 MB, 2048 px. Page cap went 6 → 4 → 6 (Oct 25, Tom).
 - Photos, card art and 3D scans stored once by hash outside the room record. GPS/EXIF stripped from originals.
 - Moderation decision logic (tested); the edge function is a stub.
 - Images load on demand (Oct 11): photos, card art and scans are stored as Blobs and reach the app as `blob:` URLs, so a 500-photo archive opens in about 0.15 s instead of 0.75 s with almost nothing in memory (was about 195 MB). Older saves upgrade themselves on first open.

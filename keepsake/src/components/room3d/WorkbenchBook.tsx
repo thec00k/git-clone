@@ -1,7 +1,7 @@
 import {lazy, Suspense, use, useEffect, useMemo, useRef, useState, type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
 import {Html, useContextBridge} from '@react-three/drei';
-import {useFrame} from '@react-three/fiber';
+import {useFrame, useThree} from '@react-three/fiber';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {useApp, AppContext} from '../../store/appStore';
@@ -27,6 +27,10 @@ const loadBook = () =>
   }));
 const TURN_TARGETS = [1, 2, 3, 4].map(i => `Turn_${String(i * 25).padStart(3, '0')}`);
 // Per-frame scratch: useFrame must not allocate.
+/** Page pictures kept as GPU textures for the turning leaf (each is a few MB). */
+const LEAF_TEXTURES = 6;
+/** Seconds the finished leaf takes to fade into the live pages beneath it. */
+const LEAF_FADE_S = 0.2;
 const frame = {
   pose: {rotation: 0, x: 0, y: 0},
   weights: [0, 0, 0, 0] as [number, number, number, number],
@@ -87,12 +91,42 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
     update(s => ({...s, cardBinders: s.cardBinders?.map(b => (b.id === binder?.id ? {...b, ...patch} : b))}));
   const reduced = useReducedMotion();
   const [turn, setTurn] = useState<PhysicalTurn | null>(null);
+  const gl = useThree(s => s.gl);
+  // The last few page pictures stay on the GPU, so turning back and forth (and pictures taken ahead of time)
+  // do not upload two fresh textures at the moment of the click.
+  const textures = useMemo(() => new Map<HTMLCanvasElement, THREE.CanvasTexture>(), []);
+  useEffect(() => () => textures.forEach(map => map.dispose()), [textures]);
+  const textureFor = useMemo(
+    () => (canvas: HTMLCanvasElement) => {
+      let map = textures.get(canvas);
+      if (map) textures.delete(canvas);
+      else {
+        map = new THREE.CanvasTexture(canvas);
+        map.colorSpace = THREE.SRGBColorSpace;
+        map.flipY = false;
+        map.anisotropy = 4;
+      }
+      textures.set(canvas, map);
+      for (const [old, oldMap] of textures) {
+        if (textures.size <= LEAF_TEXTURES) break;
+        oldMap.dispose();
+        textures.delete(old);
+      }
+      return map;
+    },
+    [textures],
+  );
   const turnApi = useMemo(
-    () => ({start: (next: PhysicalTurn) => setTurn(next), cancel: () => setTurn(null)}),
-    [],
+    () => ({
+      start: (next: PhysicalTurn) => setTurn(next),
+      cancel: () => setTurn(null),
+      prepare: (canvas: HTMLCanvasElement) => gl.initTexture(textureFor(canvas)),
+    }),
+    [gl, textureFor],
   );
   const turnTime = useRef(0),
-    turnFinished = useRef(false);
+    turnFinished = useRef(false),
+    fade = useRef(0);
   const group = useRef<THREE.Group>(null);
   const chair = useMemo(() => {
     const object = roomScene.getObjectByName('ks_chair');
@@ -163,41 +197,38 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
     });
     return meshes;
   }, [leaf]);
-  const maps = useMemo(
-    () =>
-      turn
-        ? [turn.front, turn.back].map(canvas => {
-            const map = new THREE.CanvasTexture(canvas);
-            map.colorSpace = THREE.SRGBColorSpace;
-            map.flipY = false;
-            map.anisotropy = 4;
-            return map;
-          })
-        : null,
-    [turn],
-  );
+  const leafMaterials = useMemo(() => {
+    const found: THREE.MeshStandardMaterial[] = [];
+    leaf?.traverse(o => {
+      if (o instanceof THREE.Mesh)
+        for (const m of Array.isArray(o.material) ? o.material : [o.material])
+          if (m instanceof THREE.MeshStandardMaterial && !found.includes(m)) found.push(m);
+    });
+    return found;
+  }, [leaf]);
   useEffect(() => {
+    // A finished turn hands over to the live pages by fading the leaf out over them, so the picture's slightly
+    // different text and paper do not snap to the real page.
+    const handOver = !turn && turnFinished.current && !reduced;
     turnTime.current = 0;
     turnFinished.current = false;
-    if (leaf) {
-      leaf.visible = !!turn;
-      leaf.position.y = 0.002;
-      leaf.traverse(o => {
-        if (o instanceof THREE.Mesh) {
-          const mats = Array.isArray(o.material) ? o.material : [o.material];
-          mats.forEach(m => {
-            if (m instanceof THREE.MeshStandardMaterial) {
-              const index = m.name === 'Page_Front_Content' ? 0 : 1;
-              m.map = maps?.[turn?.direction === 'prev' ? 1 - index : index] ?? null;
-              m.color.set('#ffffff');
-              m.needsUpdate = true;
-            }
-          });
-        }
-      });
+    if (!leaf) return;
+    fade.current = handOver ? 1 : 0;
+    leaf.visible = !!turn || handOver;
+    leaf.position.y = 0.002;
+    if (!turn) return;
+    const maps = [textureFor(turn.front), textureFor(turn.back)];
+    for (const m of leafMaterials) {
+      const index = m.name === 'Page_Front_Content' ? 0 : 1;
+      const map = maps[turn.direction === 'prev' ? 1 - index : index];
+      // Only the first picture (and making the leaf fadeable) changes the shader; later turns just swap maps.
+      if (!m.map || !m.transparent) m.needsUpdate = true;
+      m.map = map;
+      m.transparent = true;
+      m.opacity = 1;
+      m.color.set('#ffffff');
     }
-    return () => maps?.forEach(map => map.dispose());
-  }, [turn, maps, leaf]);
+  }, [turn, leaf, leafMaterials, textureFor, reduced]);
   const opened = phase === 'opening' || phase === 'editing';
   useEffect(() => {
     const old = roomScene.getObjectByName('ks_book');
@@ -232,6 +263,11 @@ export function WorkbenchBook({roomScene}: {roomScene: THREE.Object3D}) {
       resting.y += Number(chair.object.userData.floorLift ?? 0);
       chair.object.position.lerp(active ? frame.seat.set(-0.15, resting.y, -0.78) : resting, t);
       chair.object.quaternion.slerp(active ? frame.facing.identity() : chair.rotation, t);
+    }
+    if (!turn && leaf && fade.current > 0) {
+      fade.current = Math.max(0, fade.current - delta / LEAF_FADE_S);
+      for (const m of leafMaterials) m.opacity = fade.current;
+      if (!fade.current) leaf.visible = false;
     }
     if (turn && leaf && !turnFinished.current) {
       turnTime.current += Math.min(delta, 0.05);

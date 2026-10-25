@@ -40,10 +40,14 @@ assert.equal(photosThatFit(full, 5), 0);
 assert.throws(() => insertPhotoBatch(full, 'pg9', [{src: '/samples/coffee.jpg', aspect: 1}]), /book is full/);
 const nine = book(Array.from({length: 9}, (_, p) => ({id: 'pg' + p, elements: []})));
 assert.equal(canAddPage(nine), true);
-assert.equal(photosThatFit(nine, 20), 8, 'new pages are added after the target, so room is counted in pages');
+assert.equal(
+  photosThatFit(nine, 20),
+  12,
+  'new pages are added after the target, so room is counted in pages',
+);
 assert.equal(photosThatFit(book([{id: 'a', elements: []}]), 20), 20);
 const tenEmpty = book(Array.from({length: 10}, (_, p) => ({id: 'pg' + p, elements: []})));
-assert.equal(photosThatFit(tenEmpty, 8), 4, 'only the reusable empty target page is left');
+assert.equal(photosThatFit(tenEmpty, 8), 6, 'only the reusable empty target page is left');
 assert.equal(canShareBook(book([{id: 'a', elements: [0, 1, 2, 3].map(photo)}])), false);
 assert.equal(
   canShareBook(

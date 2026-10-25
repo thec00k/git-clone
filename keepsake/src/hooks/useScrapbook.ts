@@ -26,7 +26,7 @@ import {clamp} from '../lib/clamp';
 import {nudgedPosition} from '../lib/pageCoordinates';
 import {computeLayout, type LayoutPreset} from '../lib/layout';
 import {thenNowPage} from '../lib/thenNow';
-import {useApp} from '../store/appStore';
+import {useApp, useSaveStatus} from '../store/appStore';
 import {photoRows} from '../lib/photoRows';
 
 export interface ElementLocation {
@@ -40,7 +40,8 @@ export interface ElementLocation {
  * and exposes the mutation API the scrapbook editor uses.
  */
 export function useScrapbook() {
-  const {activeBook, updateActiveBook, saveStatus, state} = useApp();
+  const {activeBook, updateActiveBook, state} = useApp();
+  const saveStatus = useSaveStatus();
   const book = activeBook;
 
   const [spread, setSpread] = useState(0);

@@ -75,7 +75,7 @@
   justify-content: center;
   margin: 12px 0;
 }
-.ks-review-actions button:first-child {
+.ks-review-actions button[aria-pressed='true'] {
   background: #435d49;
   color: #fffaf0;
 }
@@ -87,6 +87,20 @@
 }
 .ks-review-grid button[aria-pressed='true'] {
   outline: 2px solid #526849;
+}
+/* Where each photo is headed: a filled leaf for a scrapbook, a hollow one for the archive. */
+.ks-review-dest::before {
+  content: '';
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 5px;
+  border: 1.5px solid currentColor;
+  border-radius: 50% 0;
+  vertical-align: -1px;
+}
+.ks-review-dest[data-dest='scrapbook']::before {
+  background: currentColor;
 }
 .ks-photo-inbox {
   position: absolute;
@@ -137,11 +151,18 @@
 .ks-photo-inbox.is-folded {
   max-height: 60px;
 }
+/* In the room the open inbox hangs over the next-page arrow; move the arrow inward beside it. */
+.ks-workbench-controls:has(.ks-photo-inbox:not(.is-folded)) .ks-page-turn--next {
+  right: 240px;
+}
 @media (max-width: 900px) {
   .ks-photo-inbox {
     width: 160px;
     right: 8px;
     top: 65px;
+  }
+  .ks-workbench-controls:has(.ks-photo-inbox:not(.is-folded)) .ks-page-turn--next {
+    right: 204px;
   }
   .ks-photo-inbox .ks-photo-stack {
     height: 110px;
@@ -195,4 +216,12 @@
   #ks-workbench-controls .ks-photo-inbox > button {
     width: 100%;
   }
+}
+.ks-import-problem {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #f6e1d6;
+  border: 1px solid #c98a6b;
+  color: #6b2e17;
+  font-size: 13px;
 }

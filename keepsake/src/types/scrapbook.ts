@@ -125,8 +125,8 @@ export const COVER_STYLES: Record<CoverStyle, {label: string; leather: string; i
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-/** Owner decision: 4 photos per page (see src/lib/limits.ts). */
-export const MAX_PHOTOS_PER_PAGE = 4;
+/** Owner decision: 6 photos per page (see src/lib/limits.ts). */
+export const MAX_PHOTOS_PER_PAGE = 6;
 
 export const SHARPIE_COLORS = [
   '#2c2418', // ink
