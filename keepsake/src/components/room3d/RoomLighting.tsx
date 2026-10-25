@@ -64,7 +64,7 @@ export function RoomLights({
     const duskColor = woodland ? '#ffcfa6' : '#ffb070';
     const color = new THREE.Color(
       neon
-        ? '#939cff'
+        ? '#ffa463' // sodium-amber city haze through the window (Blade Runner pass, 2026-10-25)
         : skyCastle
           ? night
             ? '#9bc5e8'
