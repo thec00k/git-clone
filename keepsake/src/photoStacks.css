@@ -88,6 +88,20 @@
 .ks-review-grid button[aria-pressed='true'] {
   outline: 2px solid #526849;
 }
+/* Where each photo is headed: a filled leaf for a scrapbook, a hollow one for the archive. */
+.ks-review-dest::before {
+  content: '';
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 5px;
+  border: 1.5px solid currentColor;
+  border-radius: 50% 0;
+  vertical-align: -1px;
+}
+.ks-review-dest[data-dest='scrapbook']::before {
+  background: currentColor;
+}
 .ks-photo-inbox {
   position: absolute;
   z-index: 35;

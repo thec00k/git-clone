@@ -30,6 +30,8 @@ import {
 import './CardBinders.css';
 import {BinderPageTurn} from './BinderPageTurn';
 import {useReducedMotion} from '../hooks/useReducedMotion';
+// Only phones and tablets open a camera for a `capture` file input; a desktop shows a plain file picker.
+const hasCamera = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 const BinderScan = lazy(() => import('./BinderScan').then(m => ({default: m.BinderScan})));
 
 export function CardBinders({
@@ -229,7 +231,11 @@ export function CardBinders({
     if (Frame && !reduced) setTurn({from: spread, to});
     else setSpread(to);
   };
-  const pages = binderSpreadCount(placedCards);
+  // One empty spread past the last card, so a full spread can be turned to a fresh one.
+  const pages = Math.min(
+    MAX_BINDER_CARDS / 18,
+    binderSpreadCount(placedCards) + (placedCards.length ? 1 : 0),
+  );
   const header = (
     <div className="ks-binder-dialog ks-binder-controls">
       {' '}
@@ -339,20 +345,22 @@ export function CardBinders({
                   }}
                 />
               </label>
-              <label className="ks-binder-file">
-                Photograph a card
-                <input
-                  disabled={busy}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  aria-label="Photograph a real card"
-                  onChange={e => {
-                    void images(e.target.files);
-                    e.target.value = '';
-                  }}
-                />
-              </label>
+              {hasCamera && (
+                <label className="ks-binder-file">
+                  Photograph a card
+                  <input
+                    disabled={busy}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    aria-label="Photograph a real card"
+                    onChange={e => {
+                      void images(e.target.files);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+              )}
               <label className="ks-binder-file">
                 Import 3D scan (.glb)
                 <input

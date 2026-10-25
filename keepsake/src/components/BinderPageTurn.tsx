@@ -50,8 +50,18 @@ export function BinderPageTurn({
       {Array.from({length: 9}, (_, i) => {
         const c = binderCardAt(binder.cards, index * 9 + i);
         return (
-          <div className="ks-card-pocket" key={i}>
-            {c?.src ? <img src={c.src} alt="" /> : <span>{c?.modelSrc ? c.title : index * 9 + i + 1}</span>}
+          <div className={`ks-card-pocket ${c?.finish === 'foil' ? 'is-foil' : ''}`} key={i}>
+            {c?.src ? (
+              <img src={c.src} alt="" />
+            ) : c?.modelSrc ? (
+              <span>
+                ◇<br />
+                {c.title}
+                <small>3D scan</small>
+              </span>
+            ) : (
+              <span className="ks-pocket-add">＋</span>
+            )}
           </div>
         );
       })}

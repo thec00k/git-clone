@@ -26,7 +26,15 @@ export function BatchPhotoReview({
     [bookId, setBookId] = useState(state.activeBookId ?? state.books[0]?.id ?? '');
   const [choices, setChoices] = useState<Record<string, string>>({}),
     [history, setHistory] = useState<Record<string, string>[]>([]);
+  // Tiles picked in the grid; the choice buttons then act on all of them instead of the stack's top photo.
+  const [picked, setPicked] = useState<string[]>([]);
   const current = photos[Math.min(index, photos.length - 1)];
+  const targets = grid && picked.length ? picked : current ? [current.id] : [];
+  const decide = (destination: string) => {
+    choose(targets, destination);
+    if (grid && picked.length) setPicked([]);
+    else setIndex((index + 1) % photos.length);
+  };
   const choose = (ids: string[], destination: string) => {
     setHistory(old => [...old, choices]);
     setChoices(old => ({...old, ...Object.fromEntries(ids.map(id => [id, destination]))}));
@@ -70,14 +78,13 @@ export function BatchPhotoReview({
             {photos.map((p, i) => (
               <button
                 key={p.id}
-                aria-pressed={!!choices[p.id]}
-                onClick={() => {
-                  setIndex(i);
-                  setGrid(false);
-                }}
+                aria-pressed={picked.includes(p.id)}
+                onClick={() =>
+                  setPicked(old => (old.includes(p.id) ? old.filter(id => id !== p.id) : [...old, p.id]))
+                }
               >
                 <img src={p.src} alt={`Photograph ${i + 1}`} loading="lazy" />
-                <span>
+                <span className="ks-review-dest" data-dest={choices[p.id] ? 'scrapbook' : 'archive'}>
                   {choices[p.id]
                     ? (state.books.find(b => b.id === choices[p.id])?.title ?? 'Archive')
                     : 'In archive'}
@@ -97,33 +104,36 @@ export function BatchPhotoReview({
           </select>
         </label>
         <p className="ks-review-choice" role="status">
-          {current &&
-            (choices[current.id]
-              ? `Waiting for ${state.books.find(b => b.id === choices[current.id])?.title ?? 'a scrapbook'}`
-              : 'Kept in archive')}
+          {grid && picked.length
+            ? `${picked.length} selected`
+            : current &&
+              (choices[current.id]
+                ? `Waiting for ${state.books.find(b => b.id === choices[current.id])?.title ?? 'a scrapbook'}`
+                : 'Kept in archive')}
         </p>
         <div className="ks-review-actions">
-          <button
-            disabled={!current || !bookId}
-            onClick={() => {
-              choose([current.id], bookId);
-              setIndex((index + 1) % photos.length);
-            }}
-          >
+          <button disabled={!targets.length || !bookId} onClick={() => decide(bookId)}>
             Add to scrapbook
           </button>
-          <button
-            disabled={!current}
-            onClick={() => {
-              choose([current.id], '');
-              setIndex((index + 1) % photos.length);
-            }}
-          >
+          <button disabled={!targets.length} onClick={() => decide('')}>
             Keep in archive
           </button>
         </div>
         <div className="ks-review-secondary">
-          <button aria-pressed={grid} onClick={() => setGrid(!grid)}>
+          <button
+            aria-pressed={grid}
+            onClick={() => {
+              // Leaving the grid opens the stack on the first picked photo.
+              if (grid && picked.length)
+                setIndex(
+                  Math.max(
+                    0,
+                    photos.findIndex(p => p.id === picked[0]),
+                  ),
+                );
+              setGrid(!grid);
+            }}
+          >
             {grid ? 'View stack' : 'View all'}
           </button>
           <button
