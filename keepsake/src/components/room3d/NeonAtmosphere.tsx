@@ -240,7 +240,7 @@ export function NeonAtmosphere({scene}: {scene: THREE.Object3D}) {
         decay={2}
       />
       <pointLight
-        position={[-0.965, 1.02, -1.96]}
+        position={[-0.965, 1.02, -1.91]}
         color="#e94ab7"
         intensity={environment.lampOn ? 0.35 : 0}
         distance={1.3}

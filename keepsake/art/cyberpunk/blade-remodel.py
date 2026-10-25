@@ -1,6 +1,6 @@
 """Neon City furniture remodel (owner, 2026-10-25): the Woodland cabin's new shapes, with a cyberpunk,
 Blade Runner mood: gunmetal and black enamel instead of wood, worn black leather, amber brass, a thin
-cyan underglow on the desk and an amber strip under the shelf crown, cast textile-block walls and a
+cyan underglow on the desk and an amber strip under the shelf crown, stained concrete walls and a
 dark, wet-looking floor.
 
 art/cyberpunk/build.py starts from the retired public/room/woodland/woodland.glb, so this runs once on
@@ -143,28 +143,28 @@ def wool(name, tone):
     return material(name, rgb, .85, 0)
 
 
-def textile_block():
-    """Cast concrete wall blocks with a stepped geometric relief (an original pattern), four 40 cm blocks
-    per texture side. Raised steps catch the window and neon light; the joints stay dark."""
-    n, k = 1024, 4
-    t = n // k
-    u, v = np.mgrid[0:t, 0:t] / t * 2 - 1  # one block, -1..1
-    a, b = np.abs(u), np.abs(v)
-    sq = np.maximum(a, b)
-    h = np.where(sq > .94, 0.0, .6)                       # joint
-    h = np.where((sq < .78) & (sq > .62), .35, h)         # sunk channel
-    h = np.where(sq < .5, .85, h)                          # raised boss
-    h = np.where((sq < .5) & (np.minimum(a, b) < .08), .55, h)   # stepped cross cut into the boss
-    h = np.where((a + b < .34), 1.0, h)                    # centre diamond
-    h = np.where((a + b < .2), .7, h)
-    h = np.tile(h, (k, k))
-    fy, fx = np.meshgrid(np.fft.fftfreq(n), np.fft.fftfreq(n), indexing='ij')
-    h = np.fft.ifft2(np.fft.fft2(h) * np.exp(-2 * (math.pi * 1.6) ** 2 * (fx ** 2 + fy ** 2))).real  # soften the steps
-    grime = field(n, 1.2, 1.2, 2.2)
-    pores = field(n, 30, 30, .7)
-    val = .24 + .13 * h + .015 * pores - .03 * np.clip(grime, 0, None)
-    rgb = val[..., None] * np.array([1.05, 1.0, .95])
-    return material('Neon • textile block', rgb, .82, 0, h * 6 + pores * .2, 2.5)
+def stained_concrete():
+    """Studio-apartment poured concrete (owner, 2026-10-25): smooth, mottled and stained, with a few drips
+    running down, faint formwork seams every 1.2 m by 0.6 m and the odd tie hole. One texture covers 2.4 m."""
+    n = 1024
+    px = n / 2.4  # pixels per metre
+    y, x = np.mgrid[0:n, 0:n] / px  # metres; rows run up the wall
+    low = field(n, 1.4, 1.4, 2.3)       # broad clouding
+    mid = field(n, 6, 6, 1.6)           # trowel mottling
+    pores = field(n, 40, 40, .6)
+    drips = np.clip(field(n, .05, 30, 1.0), 0, None) * np.clip(field(n, 2, 2, 2.0) + .3, 0, None)  # vertical streaks in patches
+    seam = (np.minimum(x % 1.2, 1.2 - x % 1.2) < .004) | (np.minimum(y % .6, .6 - y % .6) < .004)
+    tie = np.zeros((n, n), bool)
+    for cx in (.15, 1.05, 1.35, 2.25):
+        for cy in (.15, .45, .75, 1.05, 1.35, 1.65, 1.95, 2.25):
+            tie |= (x - cx) ** 2 + (y - cy) ** 2 < .011 ** 2
+    val = .42 + .025 * mid + .008 * pores - .06 * np.clip(low, 0, None) - .05 * drips
+    val = np.where(seam, val - .05, val)
+    val = np.where(tie, val - .14, val)
+    rgb = val[..., None] * np.array([1.0, .97, .93])
+    rgb -= np.clip(low - .8, 0, None)[..., None] * np.array([.02, .03, .045])  # warm rust-brown stain where the clouding is darkest
+    height = pores * .15 - seam * 1.5 - tie * 3.0
+    return material('Neon • stained concrete', rgb, .72, 0, height, 1.5)
 
 
 def wet_deck():
@@ -176,7 +176,7 @@ def wet_deck():
     return material('Neon • wet deck', rgb, .2, .2)
 
 
-walls = textile_block()
+walls = stained_concrete()
 steel, black, floor = gunmetal(), enamel(), wet_deck()
 leather_black = leather('Neon • worn black leather', (.15, .13, .12), (.22, .18, .15))
 leather_normal = next(x for x in leather_black.node_tree.nodes if x.type == 'TEX_IMAGE' and x.image.name.endswith('normal')).image
@@ -251,13 +251,13 @@ for n in ['ks_archive_drawer', 'Archive_Back', 'Archive_Deck', 'Archive_Header',
         assign(o, steel)
         project(o, (.8, .8))
 
-# Room shell: textile-block walls, a wet deck floor and black wainscot boards with steel rails.
+# Room shell: stained concrete walls, a wet deck floor and black wainscot boards with steel rails.
 for o in bpy.context.scene.objects:
     if o.type != 'MESH':
         continue
     if o.name.startswith('Room_Wall_'):
         assign(o, walls)
-        world_project(o, 1.6)
+        world_project(o, 2.4)
     elif o.name.startswith('Woodland_Static_oak_plank_'):
         assign(o, floor)
         project(o, (1.2, 1.2))
@@ -267,6 +267,23 @@ for o in bpy.context.scene.objects:
     elif o.name == 'Woodland_Static_moss_painted_joinery' or o.name.startswith('Trim_'):
         assign(o, steel)
         project(o, (.8, .8))
+
+# The lava lamp's glass and cap reached 3 cm into the window sill's front edge (owner): move it 5 cm forward
+# on the desk, so they clear the sill by 2 cm. The wax blobs are not parented to the lamp, so they move too.
+LAMP_FORWARD = .05
+for o in [O['ks_lamp']] + [o for o in O if o.name.startswith('Neon_Lava_')]:
+    o.location.y -= LAMP_FORWARD  # web +z, toward the room
+
+# CRT and clock in Neon City colours (owner): smoked graphite plastic shells, black enamel bezel and clock
+# case, amber brass knobs and clock lip, a glowing cyan power toggle and a magenta clock inlay.
+plastic = material('Neon • smoked graphite plastic', (.27 + .01 * field(256, 8, 8, 1.2))[..., None] * np.array([.95, .98, 1.08]), .5, .1)
+for name, m in [('CRT_Body', plastic), ('CRT_Base', plastic), ('CRT_Back', black), ('CRT_Bezel', black),
+                ('CRT_Knob_1', brass), ('CRT_Knob_2', brass), ('CRT_Toggle', M['Neon Cyan']),
+                ('Clock_Back', black), ('Clock_Bottom', black), ('Clock_Left', black), ('Clock_Right', black), ('Clock_Top', black),
+                ('Clock_BrassLip', brass), ('Clock_Inlay', M['Neon Magenta'])]:
+    o = O[name]
+    assign(o, m)
+    project(o, (.3, .3))
 
 # Thin light strips: cyan under the desk top's front lip, amber under the shelf crown.
 desk_strip = box('Neon_Desk_Underglow', (-.15, .7105, -1.3095), (1.70, .005, .007), .002, 'neon', O['Desk'])

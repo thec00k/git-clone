@@ -8,5 +8,6 @@
   "lamp_supported": true,
   "fan_support_clearance": true,
   "window_desk_clearance": true,
+  "lamp_sill_clearance": true,
   "window_sill_clearance": true
 }
