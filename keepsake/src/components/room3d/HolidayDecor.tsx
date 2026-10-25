@@ -470,9 +470,10 @@ const COASTAL: Record<HolidayId, () => ReactNode> = {
         colors={['#e0762a', '#1d1722']}
         size={0.11}
       />
+      {/* On open wall above the two framed prints, clear of the curtains (x -1.57..-1.33 and 1.03..1.27). */}
       {[
-        [-1.45, 2.4, 0.3],
-        [1.15, 2.5, -0.3],
+        [-1.95, 2.45, 0.3],
+        [1.65, 2.45, -0.3],
       ].map(([x, y, r], i) => (
         <Bat key={i} position={[x, y, -2.0]} rot={r} />
       ))}
