@@ -53,8 +53,9 @@ export function PhotoImportDialog({onClose}: {onClose: () => void}) {
     }
     if (!alive.current) return;
     setBusy(false);
+    if (failed)
+      setMessage(`${failed} of ${list.length} photographs could not be read. Try another image file.`);
     if (ids.length) setReviewIds(ids);
-    else if (failed) setMessage(`${failed} photographs could not be read. Try another image file.`);
   }
   if (reviewIds.length) return <BatchPhotoReview photoIds={reviewIds} notice={message} onClose={onClose} />;
   return (

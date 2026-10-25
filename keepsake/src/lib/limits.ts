@@ -4,7 +4,7 @@ import type {Scrapbook, Visibility} from '../types/scrapbook';
  * (supabase/migrations/*_social_and_safety.sql and functions/_shared/moderation.ts); keep them in step.
  */
 export const LIMITS = {
-  photosPerPage: 4,
+  photosPerPage: 6,
   pagesPerBook: 10, // content pages; the title page does not count
   photosPerBook: 40,
   minPhotosToShare: 5, // a book needs this many photos before it can be shared with friends

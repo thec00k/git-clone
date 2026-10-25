@@ -107,9 +107,11 @@ export function BatchPhotoReview({
           {grid && picked.length
             ? `${picked.length} selected`
             : current &&
-              (choices[current.id]
-                ? `Waiting for ${state.books.find(b => b.id === choices[current.id])?.title ?? 'a scrapbook'}`
-                : 'Kept in archive')}
+              `Photograph ${photos.indexOf(current) + 1} of ${photos.length}: ${
+                choices[current.id]
+                  ? `waiting for ${state.books.find(b => b.id === choices[current.id])?.title ?? 'a scrapbook'}`
+                  : 'kept in archive'
+              }`}
         </p>
         <div className="ks-review-actions">
           <button disabled={!targets.length || !bookId} onClick={() => decide(bookId)}>
