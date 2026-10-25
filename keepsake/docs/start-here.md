@@ -14,7 +14,7 @@ Written for the next agent (for example the Claude desktop agent) picking this u
 - Oct 18: Woodland cabin rebuilt with solid log walls and a beamed ceiling (#28).
 - Oct 20: old Woodland model retired, cabin has its own asset manifest (#32); Snowy's mounts and fur rug in Woodland, holiday decor off the chimney, `blender-asset-qa` skill (#31).
 - Oct 22: Neon City lighting calmed (#15), Sky Castle ported as a live room keeping its real-world map and glass furniture (#14), Neon/Sky Castle art review (#11), Beachfront furniture in whitewashed driftwood.
-- Oct 25: Sky Castle furniture in crystal, marble and gold; Beachfront rug in driftwood greige, pumpkins clear of the mantel, deer/bear mounts in the Furniture tab, map page preloaded; sign-in and backup ([PR #10](https://github.com/thec00k/git-clone/pull/10)) after the live second-browser restore passed.
+- Oct 25: Sky Castle furniture in crystal, marble and gold; Beachfront rug in driftwood greige, pumpkins clear of the mantel, deer/bear mounts in the Furniture tab, map page preloaded; Neon City furniture remodel with a Blade Runner mood (`claude/neon-city-remodel`, `art/cyberpunk/review/blade-remodel/`); sign-in and backup ([PR #10](https://github.com/thec00k/git-clone/pull/10)) after the live second-browser restore passed.
 
 ## Done in the October 10–11 stretch
 - Fire and sound, free room swapping, stamps (30 to start, daily grant), seasons and holidays, room ageing, caption lettering, Beachfront seasonal grade.
@@ -35,7 +35,6 @@ Model guide: Opus 5.5 for database permissions, safety, data-loss and audits; So
 | Remaining audit findings (below) | Opus 5.5 |
 | Moderation vendors, image processing, moderator screen, in-app safety links, Terms/Privacy, account deletion/export | Opus 5.5 (legal review by a lawyer) |
 | Finish Woodland against the art bible before more room work: Phase 4 illustrated window layers (needs art, `docs/scenery-brief.md`), Phase 6 lighting comparisons across views, times and seasons, Phase 7 measurements on an ordinary laptop and a phone | Sonnet 5.5 (art by owner or commission) |
-| Neon City furniture remodel in the same style as Beachfront and Sky Castle (the only room with no furniture remodel yet) | Sonnet 5.5 |
 | Replace the paper-craft holiday placeholders with finished holiday art | Sonnet 5.5 |
 | Save proof copies of licence pages into `licences/proof/` (5 entries known but unproven) | Sonnet 5.5 |
 | Enforce the 5-photo share minimum on the server too (the app enforces it since October 11; the database does not check it yet) | Opus 5.5 |

@@ -9,7 +9,7 @@ The phase table below is the September 26 record. Since then, on `codex/foundati
 - Phase 5: Woodland's inherited furniture was restyled in the owner-approved CRT Illustrated Nostalgia style (Oct 17), and the cabin shell was rebuilt as solid logs with a beamed ceiling (Oct 18). Snowy Mountain's mounts, fur rug and hearth fire were consolidated into Woodland.
 - Phase 6: dusk, day, night and winter lighting passes for Woodland (Oct 17). The full approved-view comparison across every lighting and season state is still open.
 - Phase 7: shader warm-up, stable light counts and on-demand photo loading removed the load and settings freezes (Oct 17); draft PR #29 targets the remaining room freezes. Measurements on ordinary hardware and phones are still open.
-- Phase 8: started ahead of Woodland's full acceptance at the owner's request. Beachfront (Oct 22) and Sky Castle (Oct 25) furniture were remodelled from Woodland's shapes; Neon City has a lighting cleanup only.
+- Phase 8: started ahead of Woodland's full acceptance at the owner's request. Beachfront (Oct 22) and Sky Castle (Oct 25) furniture were remodelled from Woodland's shapes; Neon City (Oct 25) got the same shapes with a cyberpunk, Blade Runner mood (`art/cyberpunk/review/blade-remodel/`).
 - Phase 4 is unchanged: the finished illustrated window layers (Tasks 14 to 19) still need the artwork.
 
 ## Reporting convention

@@ -2,14 +2,14 @@
   "room": "cyberpunk",
   "qualities": {
     "balanced": {
-      "bytes": 3077468,
-      "sha256": "53a6b320b2693b80ef30553ff8bc60c5d55442eb4b041e9d6eceda857aaf40a5",
-      "file": "cyberpunk.glb"
+      "file": "cyberpunk.glb",
+      "bytes": 4178664,
+      "sha256": "acb5186239f845bcbcc7895cc1b9f2c74de06407d5713a5bb86ebc8f59aeb630"
     },
     "high": {
-      "bytes": 3077468,
-      "sha256": "53a6b320b2693b80ef30553ff8bc60c5d55442eb4b041e9d6eceda857aaf40a5",
-      "file": "cyberpunk.glb"
+      "file": "cyberpunk.glb",
+      "bytes": 4178664,
+      "sha256": "acb5186239f845bcbcc7895cc1b9f2c74de06407d5713a5bb86ebc8f59aeb630"
     }
   }
 }

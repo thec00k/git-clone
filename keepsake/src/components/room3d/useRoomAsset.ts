@@ -66,7 +66,7 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
               activeRoom.id === 'beachfront'
                 ? '#c4bcac' // whitewashed-driftwood greige, matching the furniture (owner, 2026-10-22)
                 : activeRoom.id === 'cyberpunk'
-                  ? '#554166'
+                  ? '#263b3d' // dark teal-charcoal under the amber light (Blade Runner pass, 2026-10-25)
                   : '#909577',
             );
         });

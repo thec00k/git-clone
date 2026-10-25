@@ -9,8 +9,8 @@ export const roomAssets = {
     "high": "/room/beachfront/beachfront.high.glb?v=df947ce61e49"
   },
   "cyberpunk": {
-    "balanced": "/room/cyberpunk/cyberpunk.glb?v=53a6b320b269",
-    "high": "/room/cyberpunk/cyberpunk.glb?v=53a6b320b269"
+    "balanced": "/room/cyberpunk/cyberpunk.glb?v=acb5186239f8",
+    "high": "/room/cyberpunk/cyberpunk.glb?v=acb5186239f8"
   },
   "sky-castle": {
     "balanced": "/room/sky-castle/sky-castle.glb?v=c1927ec7c458",
