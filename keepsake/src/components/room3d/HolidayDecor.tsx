@@ -153,7 +153,7 @@ function Bat({position, rot = 0, s = 1}: {position: [number, number, number]; ro
   );
   return <mesh geometry={geo} material={mat} position={position} rotation={[0, 0, rot]} scale={s * 1.6} />;
 }
-function Tree() {
+function Tree({position}: {position: [number, number, number]}) {
   const green = useMemo(() => paper('#2f5a3c'), []),
     trunk = useMemo(() => paper('#5a4129'), []),
     star = useMemo(() => paper('#f2d36b', '#ffd35a', 1.2), []);
@@ -167,7 +167,7 @@ function Tree() {
     [-0.02, 0.62, 0.09, 0],
   ];
   return (
-    <group position={[-0.06, 0, 1.66]}>
+    <group position={position}>
       <mesh material={trunk} position={[0, 0.05, 0]}>
         <cylinderGeometry args={[0.025, 0.03, 0.1, 6]} />
       </mesh>
@@ -306,19 +306,18 @@ function HeartsOnMantel() {
   );
 }
 
-export function HolidayDecor({coastal = false}: {coastal?: boolean}) {
+type DecorRoom = 'woodland' | 'beachfront' | 'cyberpunk' | 'sky-castle';
+export function HolidayDecor({room = 'woodland'}: {room?: DecorRoom}) {
   const {holiday} = useSeasonal();
   return (
     <group name="Holiday_Decor" userData={{holiday}}>
-      {holiday && (
-        <HolidaySet key={(coastal ? 'coast-' : '') + holiday} holiday={holiday} coastal={coastal} />
-      )}
+      {holiday && <HolidaySet key={room + '-' + holiday} holiday={holiday} room={room} />}
     </group>
   );
 }
 /** Keyed by holiday so a change unmounts the old set. Materials and geometries are created in useMemo and passed
  * as props, which react-three-fiber does not dispose, so collect them after mount and free them on unmount. */
-function HolidaySet({holiday, coastal}: {holiday: HolidayId; coastal: boolean}) {
+function HolidaySet({holiday, room}: {holiday: HolidayId; room: DecorRoom}) {
   const group = useRef<THREE.Group>(null);
   useEffect(() => {
     const owned = new Set<{dispose(): void}>();
@@ -330,8 +329,14 @@ function HolidaySet({holiday, coastal}: {holiday: HolidayId; coastal: boolean}) 
     });
     return () => owned.forEach(x => x.dispose());
   }, []);
-  return <group ref={group}>{coastal ? COASTAL[holiday]() : DECOR[holiday]()}</group>;
+  return (
+    <group ref={group}>
+      {room === 'woodland' ? DECOR[holiday]() : room === 'beachfront' ? COASTAL[holiday]() : LIGHT[holiday]()}
+    </group>
+  );
 }
+/** The owner's spot for the tree and the large pumpkin: the corner between the beanbag (x < -1.02, z < 1.48) and the hearth (x > -1.41). */
+const WOODLAND_CORNER: [number, number, number] = [-1.85, 0, 1.85];
 const DECOR: Record<HolidayId, () => ReactNode> = {
   christmas: () => (
     <>
@@ -349,7 +354,7 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
       <Stocking x={-1.2} color="#b23a3a" />
       <Stocking x={-0.91} color="#2f6b4f" />
       <Stocking x={-0.62} color="#b23a3a" />
-      <Tree />
+      <Tree position={WOODLAND_CORNER} />
     </>
   ),
   halloween: () => (
@@ -359,7 +364,7 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
       <Pumpkin position={[-1.357, MANTEL.y + 0.036, 1.7]} scale={0.5} />
       <Pumpkin position={[-0.464, MANTEL.y + 0.036, 1.7]} scale={0.5} />
       <Pumpkin position={[-0.95, MANTEL.y + 0.029, MANTEL.z - 0.05]} scale={0.4} />
-      <Pumpkin position={[-0.05, 0.12, 1.62]} scale={1.4} />
+      <Pumpkin position={[WOODLAND_CORNER[0], 0.1, WOODLAND_CORNER[2]]} scale={1.4} />
       {[
         [-1.5, 2.6, 0.3, 1],
         [-1.3, 2.35, -0.4, 0.8],
@@ -407,23 +412,40 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
   ),
 };
 
-/** Beachfront has no hearth: one garland across the arched window (below the string lights, which run y 2.0-3.08). */
+/** The other rooms have no hearth. The tree and pumpkins stand where Woodland's hearth would be, between the beanbag
+ * (x < -1.22) and the door jamb (x > -0.36), clear of the door's swing. */
+const HEARTH_SPOT: [number, number, number] = [-0.85, 0, 1.75];
+function Pumpkins() {
+  const [x, , z] = HEARTH_SPOT;
+  return (
+    <>
+      <Pumpkin position={[x, 0.1, z]} scale={1.4} />
+      <Pumpkin position={[x - 0.2, 0.06, z - 0.12]} scale={0.8} />
+      <Pumpkin position={[x + 0.18, 0.05, z - 0.16]} scale={0.6} />
+    </>
+  );
+}
+/** Beachfront: one garland across the arched window (below the string lights, which run y 2.0-3.08). */
 const ARCH_A = new THREE.Vector3(-1.0, 2.62, -2.0),
   ARCH_B = new THREE.Vector3(0.78, 2.62, -2.0);
 const COASTAL: Record<HolidayId, () => ReactNode> = {
   christmas: () => (
-    <Garland
-      a={ARCH_A}
-      b={ARCH_B}
-      depth={0.12}
-      count={11}
-      kind="flag"
-      colors={['#b23a3a', '#2f6b4f', '#f2d36b']}
-      size={0.11}
-    />
+    <>
+      <Garland
+        a={ARCH_A}
+        b={ARCH_B}
+        depth={0.12}
+        count={11}
+        kind="flag"
+        colors={['#b23a3a', '#2f6b4f', '#f2d36b']}
+        size={0.11}
+      />
+      <Tree position={HEARTH_SPOT} />
+    </>
   ),
   halloween: () => (
     <>
+      <Pumpkins />
       <Garland
         a={ARCH_A}
         b={ARCH_B}
@@ -474,4 +496,28 @@ const COASTAL: Record<HolidayId, () => ReactNode> = {
       size={0.11}
     />
   ),
+};
+
+/** Neon City and Sky Castle: a lighter set. One garland across the top of the window, plus the tree or pumpkins. */
+const TOP_A = new THREE.Vector3(-1.05, 2.9, -2.0),
+  TOP_B = new THREE.Vector3(0.75, 2.9, -2.0);
+const topGarland = (colors: string[], kind: 'flag' | 'heart' = 'flag') => (
+  <Garland a={TOP_A} b={TOP_B} depth={0.12} count={11} kind={kind} colors={colors} size={0.11} />
+);
+const LIGHT: Record<HolidayId, () => ReactNode> = {
+  christmas: () => (
+    <>
+      {topGarland(['#b23a3a', '#2f6b4f', '#f2d36b'])}
+      <Tree position={HEARTH_SPOT} />
+    </>
+  ),
+  halloween: () => (
+    <>
+      {topGarland(['#e0762a', '#1d1722'])}
+      <Pumpkins />
+    </>
+  ),
+  valentines: () => topGarland(['#c9374f', '#f08aa5', '#e8566e', '#f4c6d0'], 'heart'),
+  easter: () => topGarland(['#f4b6c2', '#bfe3d0', '#f7e2a0', '#c7c3f0']),
+  'independence-day': () => topGarland(['#b8312f', '#f4efe2', '#2a4a8c']),
 };
