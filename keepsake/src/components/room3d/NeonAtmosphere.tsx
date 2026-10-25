@@ -1,4 +1,4 @@
-import {useEffect, useMemo} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import {useFrame} from '@react-three/fiber';
 import * as THREE from 'three';
 import {useApp} from '../../store/appStore';
@@ -240,14 +240,128 @@ export function NeonAtmosphere({scene}: {scene: THREE.Object3D}) {
         decay={2}
       />
       <pointLight
-        position={[-0.965, 1.02, -1.96]}
+        position={[-0.965, 1.02, -1.91]}
         color="#e94ab7"
         intensity={environment.lampOn ? 0.35 : 0}
         distance={1.3}
       />
       <pointLight position={[1.07, 1.1, -1.8]} color="#26d8ff" intensity={0.25} distance={1.2} />
-      <pointLight position={[-1, 2.35, 0]} color="#25c9ff" intensity={0.8} distance={5} />
-      <pointLight position={[1.8, 2.35, 0]} color="#dd37a2" intensity={0.7} distance={5} />
+      {/* Blade Runner palette (owner, 2026-10-25): a teal fill on the desk side, sodium amber by the shelf. */}
+      <pointLight position={[-1, 2.35, 0]} color="#2fb7bd" intensity={0.8} distance={5} />
+      <pointLight position={[1.8, 2.35, 0]} color="#ff8a3a" intensity={0.75} distance={5} />
+      <SpinnerSweep reduced={reduced} />
+    </>
+  );
+}
+
+const SWEEP_PERIOD = 28; // seconds between passes
+const SWEEP_LENGTH = 8; // seconds a pass takes
+
+/** The searchlight's beam in the smog: brightest along its axis and near the car, fading into the room. */
+const BEAM_SHADER = {
+  vertexShader: `varying vec2 vUv;varying vec3 vN;varying vec3 vP;
+   void main(){vUv=uv;vN=normalize(normalMatrix*normal);vec4 p=modelViewMatrix*vec4(position,1.);vP=-p.xyz;gl_Position=projectionMatrix*p;}`,
+  fragmentShader: `varying vec2 vUv;varying vec3 vN;varying vec3 vP;uniform float strength;
+   void main(){float core=pow(abs(dot(normalize(vN),normalize(vP))),3.);float along=smoothstep(0.,.75,vUv.y);
+    gl_FragColor=vec4(vec3(1.,.88,.7)*core*along*strength,1.);}`,
+};
+
+/**
+ * Now and then a spinner drifts past outside the window and its searchlight sweeps the floor and walls,
+ * with a faint beam through the smog. No shadow map: the back wall faces away from the light, so only the
+ * room is lit. Off with reduced motion (kept mounted at zero, so the room's light count never changes).
+ */
+function SpinnerSweep({reduced}: {reduced: boolean}) {
+  const light = useRef<THREE.SpotLight>(null);
+  const car = useRef<THREE.Group>(null);
+  const beam = useRef<THREE.Mesh>(null);
+  const blink = useRef<THREE.MeshBasicMaterial>(null);
+  const target = useMemo(() => new THREE.Object3D(), []);
+  const beamGeometry = useMemo(() => {
+    // An open cone 4 m long, apex at the origin, opening along +z (so lookAt aims it).
+    const g = new THREE.CylinderGeometry(0.03, 0.45, 4, 24, 1, true);
+    g.translate(0, -2, 0);
+    g.rotateX(-Math.PI / 2);
+    return g;
+  }, []);
+  const beamMaterial = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        ...BEAM_SHADER,
+        uniforms: {strength: {value: 0}},
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+      }),
+    [],
+  );
+  useEffect(
+    () => () => {
+      beamGeometry.dispose();
+      beamMaterial.dispose();
+    },
+    [beamGeometry, beamMaterial],
+  );
+  useFrame(({clock}) => {
+    const t = (clock.elapsedTime + 6) % SWEEP_PERIOD;
+    const k = Math.min(1, t / SWEEP_LENGTH);
+    const passing = !reduced && t < SWEEP_LENGTH;
+    const on = passing ? Math.sin(Math.PI * k) ** 1.5 : 0;
+    const x = THREE.MathUtils.lerp(-3.4, 3.0, k);
+    const y = 2.15 + Math.sin(k * Math.PI) * 0.1;
+    car.current?.position.set(x, y, -3.6);
+    if (car.current) car.current.visible = passing;
+    target.position.set(THREE.MathUtils.lerp(-2.2, 2.0, k), 0, THREE.MathUtils.lerp(1.6, 0.6, k));
+    target.updateMatrixWorld();
+    light.current?.position.set(x, y - 0.08, -3.5);
+    if (light.current) light.current.intensity = on * 30;
+    if (beam.current) {
+      beam.current.position.set(x, y - 0.08, -3.5);
+      beam.current.lookAt(target.position);
+      (beam.current.material as THREE.ShaderMaterial).uniforms.strength.value = on * 0.09;
+    }
+    if (blink.current) blink.current.color.set(Math.floor(clock.elapsedTime * 2) % 2 ? '#ff2a1a' : '#300805');
+  });
+  return (
+    <>
+      <primitive object={target} />
+      <spotLight
+        ref={light}
+        target={target}
+        color="#ffe9c9"
+        angle={0.24}
+        penumbra={0.6}
+        distance={10}
+        decay={1.2}
+        intensity={0}
+      />
+      <mesh ref={beam} geometry={beamGeometry} material={beamMaterial} renderOrder={2} />
+      <group ref={car} visible={false}>
+        {/* A long, low wedge of a car with a smoked canopy lit from inside. */}
+        <mesh rotation={[0, 0, -0.06]}>
+          <boxGeometry args={[1.1, 0.13, 0.42]} />
+          <meshStandardMaterial color="#1c2028" roughness={0.35} metalness={0.5} emissive="#0b0d12" />
+        </mesh>
+        <mesh position={[0.1, 0.1, 0]} rotation={[0, 0, -0.18]}>
+          <boxGeometry args={[0.46, 0.09, 0.34]} />
+          <meshBasicMaterial color="#3a5560" />
+        </mesh>
+        <mesh position={[0.54, -0.02, 0.1]}>
+          <sphereGeometry args={[0.035, 8, 6]} />
+          <meshBasicMaterial color="#fff3da" />
+        </mesh>
+        <mesh position={[-0.54, 0.02, 0.1]}>
+          <sphereGeometry args={[0.03, 8, 6]} />
+          <meshBasicMaterial ref={blink} color="#ff2a1a" />
+        </mesh>
+        {[-0.3, -0.1, 0.1, 0.3].map(dx => (
+          <mesh key={dx} position={[dx, -0.1, 0.12]}>
+            <sphereGeometry args={[0.018, 6, 4]} />
+            <meshBasicMaterial color="#5fe6ff" />
+          </mesh>
+        ))}
+      </group>
     </>
   );
 }

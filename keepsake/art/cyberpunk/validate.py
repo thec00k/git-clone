@@ -32,13 +32,18 @@ print(json.dumps(report))
 
 # The window reveal must stay behind desk objects; its opening clears the sill.
 wmin,wmax=bounds('Neon_Window_Frame')
+smin,smax=bounds('Win_Sill')
 for name in ['CRT_Body','CRT_Back','Neon_Lamp_glass','Neon_Lamp_cap']:
  low,high=bounds(name)
  assert wmin[1]-high[1]>.05, 'Window protrudes into '+name
-smin,smax=bounds('Win_Sill')
 rmin,rmax=bounds('Neon_Window_Reveal')
 assert rmin[2]>=smax[2], 'Old sill protrudes into window opening'
 assert rmin[0]>-1.1 and rmax[0]<.8 and rmin[2]>1.125 and rmax[2]<2.625, 'Reveal crosses wall aperture'
 report['window_desk_clearance']=True
+# The lava lamp's glass and cap stay at least 1 cm in front of the window sill.
+for name in ['Neon_Lamp_glass','Neon_Lamp_cap']:
+ low,high=bounds(name)
+ assert smin[1]-high[1]>.01, name+' touches the window sill'
+report['lamp_sill_clearance']=True
 report['window_sill_clearance']=True
 with open(os.path.join(root,'art/cyberpunk/validation.json'),'w') as f:json.dump(report,f,indent=2)

@@ -342,7 +342,7 @@
       "kind": "model",
       "status": "documented",
       "origin": "mixed",
-      "author": "Keepsake project (art/cyberpunk/build.py, built in Blender for Keepsake); textures by Poly Haven",
+      "author": "Keepsake project (art/cyberpunk/build.py, built in Blender for Keepsake; furniture remodel and room materials by art/cyberpunk/blade-remodel.py, procedural textures made by that script); textures by Poly Haven",
       "licence": "Original geometry; textures CC0 from Poly Haven",
       "commercialUse": "yes",
       "action": "Save dated copies of the Poly Haven pages listed in licences/proof/polyhaven-textures/ to move this to verified.",
@@ -531,6 +531,7 @@
         "art/furniture/*.png",
         "art/demos/*",
         "art/sky-castle/review/**",
+        "art/cyberpunk/review/**",
         "public/room/sky-castle/preview.png"
       ],
       "kind": "image",
