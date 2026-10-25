@@ -8,7 +8,7 @@ Written for the next agent (for example the Claude desktop agent) picking this u
 
 ## Done in this stretch
 - Fire and sound, free room swapping, stamps (30 to start, daily grant), seasons and holidays, room ageing, caption lettering, Beachfront seasonal grade.
-- Supabase design (schema, row level security, teen rules, silent blocks, tag consent, rate limits, server-owned stamps, storage, trash), tested on every push (CI job "database"). Not deployed; the app does not talk to a server.
+- Supabase design (schema, row level security, teen rules, silent blocks, tag consent, rate limits, server-owned stamps, storage, trash), tested on every push (CI job "database"). Oct 11: live free project `keepsake` (us-east-1), most migrations applied, `moderate-photo` deployed with photo processing; sign-in, sync with an outbox, and bringing a room to a new device (`src/lib/sync/`, `check-sync`). See `backend-design.md` → The live project.
 - Shared size limits (`src/lib/limits.ts`): 4 photos a page, 10 pages, 40 a book, 12 books, 100 pins, 500 photos, 25 MB, 2048 px. Page cap changed from 6 to 4.
 - Photos, card art and 3D scans stored once by hash outside the room record. GPS/EXIF stripped from originals.
 - Moderation decision logic (tested); the edge function is a stub.
@@ -20,7 +20,7 @@ Model guide: Opus 5.5 for database permissions, safety, data-loss and audits; So
 
 | Task | Model |
 | --- | --- |
-| Connect the app to Supabase (project, auth, sync client with outbox) | Opus 5.5 |
+| Connect the app to Supabase: sign-in, sync client with outbox, photo processing and the new-device choice are built (PR 10, a draft into this branch); the live project has every migration. Still to do: sign-in redirect URLs in the dashboard, then the owner's real sign-in test. See `backend-design.md` → Sync | Opus 5.5 |
 | Remaining audit findings (below) | Opus 5.5 |
 | Moderation vendors, image processing, moderator screen, in-app safety links, Terms/Privacy, account deletion/export | Opus 5.5 (legal review by a lawyer) |
 | Remodel the 14 inherited Woodland objects, replace unverified assets, Beachfront remodel (needs Blender on the owner's computer) | Sonnet 5.5 |

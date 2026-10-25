@@ -20,6 +20,9 @@ alter table storage.objects enable row level security;
 create or replace function storage.foldername(name text) returns text[] language sql immutable as
   $$ select (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1) - 1] $$;
 grant usage on schema auth, storage to anon, authenticated, service_role;
+-- Like Supabase: new tables in public are granted to every API role unless a migration revokes it.
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
 grant select, insert, update, delete on storage.objects to authenticated, service_role;
 grant select on storage.buckets to authenticated, service_role;
 grant execute on function auth.uid(), auth.role() to anon, authenticated, service_role;

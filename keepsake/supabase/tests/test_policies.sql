@@ -96,8 +96,8 @@ insert into books (id, owner_id, title) values ('20000000-0000-0000-0000-0000000
 insert into pages (id, book_id, position) values ('30000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000002', 0);
 select pg_temp.expect_error($$insert into page_photos (page_id, photo_id, slot) values ('30000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001', 0)$$, 'own photos');
 
--- Pages: 10 per book, 4 photo slots per page.
-select pg_temp.expect_error($$insert into pages (book_id, position) values ('20000000-0000-0000-0000-000000000002', 10)$$, 'check constraint');
+-- Pages: a title page (position 0) and 10 content pages per book, 4 photo slots per page.
+select pg_temp.expect_error($$insert into pages (book_id, position) values ('20000000-0000-0000-0000-000000000002', 11)$$, 'check constraint');
 select pg_temp.act_as(null);
 insert into photos (id, owner_id, storage_path, width, height, bytes, sha256) values
   ('10000000-0000-0000-0000-000000000002', :ben, :ben || '/p2.webp', 800, 600, 90000, repeat('c', 64));
