@@ -155,7 +155,12 @@ export function AppProvider({children}: {children: ReactNode}) {
         : createSeed();
       if (!initial.achievementBaseline) initial.achievementBaseline = baseline(initial);
       normalizeLegacyRooms(initial);
-      setState(musicOnEntry(initial));
+      const prepared = musicOnEntry(initial);
+      // A stored room counts as saved as loaded: the defaults filled in above go out with the next real change.
+      // Saving them at once would bump the shared revision, so merely opening a second tab would lock the
+      // first behind the conflict screen on its next small save.
+      if (stored) savedRef.current = prepared;
+      setState(prepared);
       loadedRef.current = true;
       // Free full-size originals of photos deleted (or replaced by a restore) in earlier visits.
       if (stored) void pruneOriginals(stored).catch(() => {});
@@ -229,6 +234,10 @@ export function AppProvider({children}: {children: ReactNode}) {
       });
       setNewlyUnlocked(n => [...n, ...added]);
       setState(prev => (prev ? {...prev, achievements: merged, achievementsAt: at} : prev));
+      return;
+    }
+    if (state === savedRef.current) {
+      setSaveStatus('saved');
       return;
     }
     setSaveStatus('saving');
