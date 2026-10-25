@@ -38,6 +38,8 @@ const room = () => ({
     createdAt: n,
     categories: [],
     favorite: false,
+    // The full-size original stays on the device it was added on (see originalPhotos.ts).
+    ...(n === 1 ? {original: {key: 'orig-1', name: 'one.jpg', type: 'image/jpeg', size: 10}} : {}),
   })),
   archiveTabs: [],
   books: [
@@ -343,6 +345,10 @@ assert.equal(applied.archive.length, 3, 'archive is back');
 assert.ok(
   applied.archive.every(a => a.src.startsWith('data:image/')),
   'every archive photo has its file',
+);
+assert.ok(
+  applied.archive.every(a => !a.original),
+  'no photo points at a full-size original that is only on the other device',
 );
 assert.equal(applied.guestbook[0].message, 'hi', 'private details are back');
 assert.equal(applied.environment.roomTheme, 'woodland');

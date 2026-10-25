@@ -128,5 +128,8 @@ export function fromServer(data: ServerRoomData): Restored {
     ...(resolve(data.settings) as Record<string, unknown>),
     books,
   } as unknown as AppState;
+  // Full-size originals never leave the device they were added on; the account holds the display copy only,
+  // so a photo must not point at an original this device does not have.
+  if (Array.isArray(state.archive)) state.archive = state.archive.map(({original: _original, ...p}) => p);
   return {state, ids, photoIdByData, missing};
 }
