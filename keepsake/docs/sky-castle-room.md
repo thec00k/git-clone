@@ -11,6 +11,8 @@ Work is isolated under `.worktrees/sky-castle-room/keepsake`; unfinished changes
 - Licence ledger entries added: the room model is `unverified` (built from an imported Woodland copy), the parchment is `ai-generated`, the chest variant is original.
 - Not yet done: holidays, room ageing and seasonal variants for Sky Castle; the art-direction rework listed in the review (warmer light, darker night interior, painted/pixel-art exterior).
 
+**Furniture remodel, October 22, 2026** (owner): the Woodland cabin's new shapes, the glass furniture kept as faceted crystal with sparkle specks and chipped edges, marble with gold for the other pieces. Made by `art/sky-castle/crystal-remodel.py` on `sky-castle.blend` (`build.py` can no longer run: it starts from the retired Woodland GLB). Details and before/after renders: [`art/sky-castle/review/crystal-remodel/`](../art/sky-castle/review/crystal-remodel/README.md).
+
 ## Scope and art direction
 
 A fourth room using the existing theme registry, shop selection, GLB cache, interaction anchors, and saved-room layout architecture. Pearl-white stone, champagne-gold mouldings, a deep circular window, transparent quartz desk and chair, cloud-silk floor, floating castle with pointed crystal spires, cloud banks and five falling-water ribbons. Existing time controls select daylight, rose dusk, or a darker teal night with luminous windows and stars.
