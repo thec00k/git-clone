@@ -213,6 +213,7 @@ export function Atlas() {
                 <>
                   <img
                     src="/maps/world.svg"
+                    decoding="sync"
                     alt="Holographic world map"
                     className="ks-world-map ks-holo-map-source pointer-events-none absolute inset-0 h-full w-full object-cover"
                   />
@@ -224,6 +225,7 @@ export function Atlas() {
               ) : (
                 <img
                   src="/maps/world.svg"
+                  decoding="sync"
                   alt="World map"
                   className="ks-world-map pointer-events-none absolute inset-0 h-full w-full object-cover"
                 />

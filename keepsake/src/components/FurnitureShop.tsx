@@ -7,6 +7,7 @@ import {
   type FurnitureId,
 } from '../lib/furniture';
 import {loadFurniture} from './room3d/furnitureAssetCache';
+import {WallMounts} from './ShopCreativeExtras';
 
 export function FurnitureShop() {
   const {environment, update} = useApp();
@@ -116,6 +117,7 @@ export function FurnitureShop() {
         </div>
       )}
       {message && <p role="status">{message}</p>}
+      {room === 'woodland' && <WallMounts />}
     </section>
   );
 }

@@ -3,13 +3,13 @@
   "qualities": {
     "balanced": {
       "file": "sky-castle.glb",
-      "bytes": 1463948,
-      "sha256": "af3242fe141dc0106606811c2992fba25903f6dc1a0354e4726bac164dc11577"
+      "bytes": 2549396,
+      "sha256": "c1927ec7c45817773598d9e4efee5a3219180fbbb9d328286d99c5368ba88600"
     },
     "high": {
       "file": "sky-castle.glb",
-      "bytes": 1463948,
-      "sha256": "af3242fe141dc0106606811c2992fba25903f6dc1a0354e4726bac164dc11577"
+      "bytes": 2549396,
+      "sha256": "c1927ec7c45817773598d9e4efee5a3219180fbbb9d328286d99c5368ba88600"
     }
   }
 }

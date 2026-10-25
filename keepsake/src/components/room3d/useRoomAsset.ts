@@ -64,7 +64,7 @@ export function useRoomAsset(phase: Phase, environment: Environment) {
           if (mat instanceof THREE.MeshStandardMaterial)
             mat.color.set(
               activeRoom.id === 'beachfront'
-                ? '#b5b49b'
+                ? '#c4bcac' // whitewashed-driftwood greige, matching the furniture (owner, 2026-10-22)
                 : activeRoom.id === 'cyberpunk'
                   ? '#554166'
                   : '#909577',

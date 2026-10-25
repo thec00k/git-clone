@@ -35,9 +35,12 @@ assert abs(bounds(bpy.data.objects['Sky_Sill_Bowl'])[0][1]-1.115)<.001,'planter 
 for o in bpy.data.objects:
     if o.type=='MESH' and o.name.startswith('Sky_Castle_'):
         assert bounds(o)[1][2]<-20,'castle placed farther back'
-assert bpy.data.objects['Shelf_Back'].data.materials[0].name=='Sky • lagoon enamel'
+# Remodel (owner, 2026-10-22): marble and gold for the non-glass furniture.
+assert bpy.data.objects['Shelf_Back'].data.materials[0].name=='Sky • white marble'
 assert bpy.data.objects['Beanbag'].data.materials[0].name=='Sky • lilac satin'
-back=bounds(bpy.data.objects['Chair_Back']);assert back[1][1]-back[0][1]>.50,'substantial chair back'
+# The remodelled chair's back is its cushion between two posts under an arched crest.
+back_parts=[o for o in bpy.data.objects if o.type=='MESH' and o.name.startswith(('Chair_Back','Chair_Post','Chair_Crest'))]
+back=[[f(b[i][k] for b in map(bounds,back_parts)) for k in range(3)] for i,f in [(0,min),(1,max)]];assert back[1][1]-back[0][1]>.50,'substantial chair back'
 assert bpy.data.objects['Chair_Back'].parent.name=='ks_chair'
 floor=bounds(bpy.data.objects['Sky_Cloud_Floor']);assert floor[0][1]>=-.001 and floor[1][1]<.13
 assert bpy.data.objects['Sky_Cloud_Floor'].data.uv_layers,'cloud surface has UVs'
