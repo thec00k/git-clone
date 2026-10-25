@@ -127,7 +127,9 @@ export function RoomModel({
       {!study && <ChairFloorContact scene={cloned} />}
       {study && <HolidayDecor />}
       {study && <WoodlandKeepsakes scene={cloned} />}
-      {coastal && <HolidayDecor coastal />}
+      {coastal && <HolidayDecor room="beachfront" />}
+      {neon && <HolidayDecor room="cyberpunk" />}
+      {skyCastle && <HolidayDecor room="sky-castle" />}
       {(study || coastal) && <DustBunnies />}
       {study && <WindowDustMotes phase={phase} />}
       {study && hearthPosition && (

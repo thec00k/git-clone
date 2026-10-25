@@ -1,12 +1,13 @@
-import {useEffect, useMemo, useRef, type ReactNode} from 'react';
+import {Suspense, useEffect, useMemo, useRef, type ReactNode} from 'react';
+import {useGLTF} from '@react-three/drei';
 import * as THREE from 'three';
 import {useSeasonal} from '../../hooks/useSeasonal';
 import type {HolidayId} from '../../types/app';
 
 /**
  * Seasonal dressing for the Woodland room, driven by the season engine (`useSeasonal().holiday`).
- * Deliberately simple paper-craft shapes in flat colours: they are placeholders for commissioned art
- * but real enough to judge placement and mood. Nothing here animates, so reduced motion needs no case.
+ * Every prop is a small model built by `art/holiday/build.py`; only the garland strings are drawn here, because their
+ * length depends on the window. Nothing here animates, so reduced motion needs no case.
  * Positions come from the Woodland study model: mantel top y 1.04, front edge z 1.65; the chimney stones start at z 1.73,
  * so the shelf in front of them is only 8 cm deep. `z` is that stone face. Window opening x -1.12..0.82, top rail y 3.05.
  */
@@ -25,13 +26,6 @@ function sag(a: THREE.Vector3, b: THREE.Vector3, depth: number, t: number) {
   const p = a.clone().lerp(b, t);
   p.y -= depth * 4 * t * (1 - t);
   return p;
-}
-function heartShape() {
-  const s = new THREE.Shape();
-  s.moveTo(0, -0.5);
-  s.bezierCurveTo(-0.7, 0.1, -0.45, 0.62, 0, 0.3);
-  s.bezierCurveTo(0.45, 0.62, 0.7, 0.1, 0, -0.5);
-  return s;
 }
 function Garland({
   a,
@@ -54,27 +48,11 @@ function Garland({
   thickness?: number;
   lineColor?: string;
 }) {
-  const geo = useMemo(() => {
-    if (kind === 'heart') return new THREE.ShapeGeometry(heartShape());
-    const s = new THREE.Shape();
-    s.moveTo(-0.5, 0);
-    s.lineTo(0.5, 0);
-    s.lineTo(0, -1.15);
-    s.closePath();
-    return new THREE.ShapeGeometry(s);
-  }, [kind]);
-  const mats = useMemo(
-    () =>
-      colors.map(
-        c =>
-          new THREE.MeshStandardMaterial({
-            color: c,
-            roughness: 0.95,
-            side: THREE.DoubleSide,
-            flatShading: true,
-          }),
-      ),
-    [colors.join(',')],
+  const piece = useModel(kind === 'heart' ? 'heart' : 'pennant');
+  const mats = useTints(piece, 'Paper', colors);
+  const items = useMemo(
+    () => Array.from({length: count}, (_, i) => tint(piece.clone(true), 'Paper', mats[i % mats.length])),
+    [piece, mats, count],
   );
   const line = useMemo(
     () =>
@@ -90,15 +68,15 @@ function Garland({
   return (
     <group>
       <mesh geometry={line} material={lineMat} />
-      {Array.from({length: count}, (_, i) => {
+      {items.map((item, i) => {
         const t = (i + 0.5) / count,
           p = sag(a, b, depth, t);
+        // Pennants hang from a sleeve around the string; hearts hang just below it.
         return (
-          <mesh
+          <primitive
             key={i}
-            geometry={geo}
-            material={mats[i % mats.length]}
-            position={[p.x, p.y - (kind === 'heart' ? size * 0.55 : 0), p.z + 0.005]}
+            object={item}
+            position={[p.x, p.y - (kind === 'heart' ? size * 0.5 : 0), p.z + (kind === 'heart' ? 0.005 : 0)]}
             scale={size * (kind === 'heart' ? 1 : 0.95)}
             rotation={[0, 0, i % 2 ? 0.05 : -0.05]}
           />
@@ -110,246 +88,193 @@ function Garland({
 const WIN_A = new THREE.Vector3(-1.1, 3.0, -2.06),
   WIN_B = new THREE.Vector3(0.8, 3.0, -2.06);
 // Drape the Christmas garland across the mantel's front face so it reads from the room (on top it hid behind the edge).
-const MANTEL_A = new THREE.Vector3(MANTEL.minX + 0.02, MANTEL.y - 0.04, MANTEL.z - 0.13),
-  MANTEL_B = new THREE.Vector3(MANTEL.maxX - 0.02, MANTEL.y - 0.04, MANTEL.z - 0.13);
+// The model spans 94 cm from this point, the width of the mantel less 2 cm at each end.
+const MANTEL_A = new THREE.Vector3(MANTEL.minX + 0.02, MANTEL.y - 0.04, MANTEL.z - 0.13);
 
-function Pumpkin({position, scale = 1}: {position: [number, number, number]; scale?: number}) {
-  const body = useMemo(() => paper('#e0762a', '#ff8a2a', 0.25), []),
-    stem = useMemo(() => paper('#5b6b2e'), []);
-  return (
-    <group position={position} scale={scale}>
-      <mesh material={body} scale={[1, 0.8, 1]}>
-        <sphereGeometry args={[0.09, 12, 8]} />
-      </mesh>
-      <mesh material={stem} position={[0, 0.08, 0]}>
-        <boxGeometry args={[0.02, 0.04, 0.02]} />
-      </mesh>
-    </group>
-  );
+/** The modelled props (`art/holiday/build.py`). Clones share the cached GLB's geometry and materials, which are
+ * marked `shared` so that unmounting a holiday set does not dispose them. */
+type PropName =
+  | 'pumpkin'
+  | 'jack-o-lantern'
+  | 'tree'
+  | 'stocking'
+  | 'pennant'
+  | 'heart'
+  | 'bat'
+  | 'mantel-garland'
+  | 'easter-basket'
+  | 'tulips'
+  | 'flag';
+function useModel(name: PropName) {
+  const {scene} = useGLTF(`/room/holiday/${name}.glb`);
+  return useMemo(() => {
+    scene.traverse(o => {
+      if (o instanceof THREE.Mesh) {
+        o.geometry.userData.shared = true;
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => (m.userData.shared = true));
+      }
+    });
+    return scene;
+  }, [scene]);
+}
+function useProp(name: PropName) {
+  const scene = useModel(name);
+  return useMemo(() => scene.clone(true), [scene]);
+}
+/** Copies of the model's material `name`, one per colour. They belong to the holiday set, which disposes them. */
+function useTints(scene: THREE.Object3D, name: string, colors: string[]) {
+  const key = colors.join(',');
+  return useMemo(() => {
+    let source: THREE.Material | undefined;
+    scene.traverse(o => {
+      if (o instanceof THREE.Mesh && o.material.name === name) source = o.material;
+    });
+    return key.split(',').map(c => {
+      const m = source!.clone() as THREE.MeshStandardMaterial;
+      m.userData.shared = false;
+      m.color.set(c);
+      return m;
+    });
+  }, [scene, name, key]);
+}
+function tint(model: THREE.Object3D, name: string, material: THREE.Material) {
+  model.traverse(o => {
+    if (o instanceof THREE.Mesh && o.material.name === name) o.material = material;
+  });
+  return model;
+}
+function Pumpkin({
+  position,
+  scale = 1,
+  carved = false,
+  rot = 0,
+}: {
+  position: [number, number, number];
+  scale?: number;
+  /** A jack-o'-lantern with a glowing carved face, turned by `rot` (0 faces -z, towards the room). */
+  carved?: boolean;
+  rot?: number;
+}) {
+  const model = useProp(carved ? 'jack-o-lantern' : 'pumpkin');
+  return <primitive object={model} position={position} scale={scale} rotation={[0, rot, 0]} />;
 }
 function Bat({position, rot = 0, s = 1}: {position: [number, number, number]; rot?: number; s?: number}) {
-  const geo = useMemo(() => {
-    const sh = new THREE.Shape();
-    sh.moveTo(0, 0.02);
-    sh.lineTo(0.05, 0.06);
-    sh.lineTo(0.16, 0.08);
-    sh.lineTo(0.12, 0.02);
-    sh.lineTo(0.1, -0.03);
-    sh.lineTo(0.06, 0);
-    sh.lineTo(0.03, -0.05);
-    sh.lineTo(0, -0.02);
-    sh.lineTo(-0.03, -0.05);
-    sh.lineTo(-0.06, 0);
-    sh.lineTo(-0.1, -0.03);
-    sh.lineTo(-0.12, 0.02);
-    sh.lineTo(-0.16, 0.08);
-    sh.lineTo(-0.05, 0.06);
-    sh.closePath();
-    return new THREE.ShapeGeometry(sh);
-  }, []);
-  const mat = useMemo(
-    () => new THREE.MeshStandardMaterial({color: '#1d1722', roughness: 1, side: THREE.DoubleSide}),
-    [],
-  );
-  return <mesh geometry={geo} material={mat} position={position} rotation={[0, 0, rot]} scale={s * 1.6} />;
+  return <primitive object={useProp('bat')} position={position} rotation={[0, 0, rot]} scale={s * 1.6} />;
 }
-function Tree() {
-  const green = useMemo(() => paper('#2f5a3c'), []),
-    trunk = useMemo(() => paper('#5a4129'), []),
-    star = useMemo(() => paper('#f2d36b', '#ffd35a', 1.2), []);
-  const bulbs = useMemo(() => ['#c0392b', '#f2d36b', '#e8e1cc', '#3b6fb0'].map(c => paper(c, c, 0.5)), []);
-  const spots: [number, number, number, number][] = [
-    [0.15, 0.2, 0.1, 0],
-    [-0.12, 0.3, 0.1, 1],
-    [0.05, 0.45, 0.12, 2],
-    [-0.1, 0.55, 0.07, 3],
-    [0.1, 0.13, -0.14, 1],
-    [-0.02, 0.62, 0.09, 0],
-  ];
-  return (
-    <group position={[-0.06, 0, 1.66]}>
-      <mesh material={trunk} position={[0, 0.05, 0]}>
-        <cylinderGeometry args={[0.025, 0.03, 0.1, 6]} />
-      </mesh>
-      <mesh material={green} position={[0, 0.2, 0]}>
-        <coneGeometry args={[0.23, 0.3, 9]} />
-      </mesh>
-      <mesh material={green} position={[0, 0.4, 0]}>
-        <coneGeometry args={[0.18, 0.28, 9]} />
-      </mesh>
-      <mesh material={green} position={[0, 0.58, 0]}>
-        <coneGeometry args={[0.12, 0.24, 9]} />
-      </mesh>
-      <mesh material={star} position={[0, 0.73, 0]}>
-        <octahedronGeometry args={[0.04]} />
-      </mesh>
-      {spots.map(([x, y, z, m], i) => (
-        <mesh key={i} material={bulbs[m]} position={[x, y, z]}>
-          <sphereGeometry args={[0.017, 6, 5]} />
-        </mesh>
-      ))}
-    </group>
-  );
+function Tree({position}: {position: [number, number, number]}) {
+  return <primitive object={useProp('tree')} position={position} />;
 }
+/** Hangs from its origin (the top of the cuff), just under the mantel shelf. */
+/** Hangs from its origin (the top of the cuff), just under the mantel shelf. */
 function Stocking({x, color}: {x: number; color: string}) {
-  const red = useMemo(() => paper(color), [color]),
-    cuff = useMemo(() => paper('#f4efe2'), []);
+  const base = useProp('stocking');
+  const [sock] = useTints(base, 'Stocking_Sock', [color]);
   return (
-    <group position={[x, 0.84, MANTEL.z - 0.15]}>
-      <mesh material={red} position={[0, 0.02, 0]}>
-        <boxGeometry args={[0.07, 0.17, 0.035]} />
-      </mesh>
-      <mesh material={red} position={[0.03, -0.07, 0]}>
-        <boxGeometry args={[0.11, 0.06, 0.035]} />
-      </mesh>
-      <mesh material={cuff} position={[0, 0.11, 0]}>
-        <boxGeometry args={[0.08, 0.035, 0.04]} />
-      </mesh>
-    </group>
+    <primitive
+      object={useMemo(() => tint(base, 'Stocking_Sock', sock), [base, sock])}
+      position={[x, 0.97, MANTEL.z - 0.15]}
+    />
   );
 }
+function MantelGarland() {
+  return <primitive object={useProp('mantel-garland')} position={MANTEL_A} />;
+}
+// The shelf in front of the chimney is 8 cm deep (z 1.65..1.73): these stand on its middle line.
 function Eggs() {
-  const colors = ['#f4b6c2', '#bfe3d0', '#f7e2a0', '#c7c3f0', '#f4b6c2', '#bfe3d0'];
-  const mats = useMemo(() => colors.map(c => paper(c)), []);
-  const basket = useMemo(() => paper('#a77b45'), []);
   return (
-    <group position={[-1.12, MANTEL.y, MANTEL.z - 0.065]} scale={0.5}>
-      <mesh material={basket} position={[0, 0.03, 0]}>
-        <cylinderGeometry args={[0.1, 0.075, 0.07, 10]} />
-      </mesh>
-      {colors.map((_, i) => (
-        <mesh
-          key={i}
-          material={mats[i]}
-          position={[
-            ((i % 3) - 1) * 0.045,
-            0.09 + Math.floor(i / 3) * 0.02,
-            (Math.floor(i / 3) - 0.5) * 0.04,
-          ]}
-          scale={[1, 1.25, 1]}
-        >
-          <sphereGeometry args={[0.028, 8, 6]} />
-        </mesh>
-      ))}
-    </group>
+    <primitive object={useProp('easter-basket')} position={[-1.12, MANTEL.y, MANTEL.z - 0.05]} scale={1.3} />
   );
 }
 function Tulips() {
-  const stem = useMemo(() => paper('#4f7a43'), []),
-    petals = useMemo(() => ['#f08aa5', '#f7d36b', '#c9a2e8'].map(c => paper(c)), []),
-    vase = useMemo(() => paper('#cfe0e6'), []);
-  return (
-    <group position={[-0.62, MANTEL.y, MANTEL.z - 0.06]} scale={0.7}>
-      <mesh material={vase} position={[0, 0.045, 0]}>
-        <cylinderGeometry args={[0.04, 0.05, 0.09, 8]} />
-      </mesh>
-      {[-0.03, 0, 0.03].map((x, i) => (
-        <group key={i} position={[x, 0.09, 0]} rotation={[0, 0, x * 2.5]}>
-          <mesh material={stem} position={[0, 0.08, 0]}>
-            <cylinderGeometry args={[0.004, 0.004, 0.16, 4]} />
-          </mesh>
-          <mesh material={petals[i]} position={[0, 0.17, 0]}>
-            <coneGeometry args={[0.026, 0.06, 6]} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
+  return <primitive object={useProp('tulips')} position={[-0.62, MANTEL.y, MANTEL.z - 0.05]} scale={1.3} />;
 }
 function Flag() {
-  const pole = useMemo(() => paper('#8a6b45'), []);
-  const mats = useMemo(
-    () =>
-      ['#b8312f', '#f4efe2', '#2a4a8c'].map(
-        c => new THREE.MeshStandardMaterial({color: c, roughness: 0.95, side: THREE.DoubleSide}),
-      ),
-    [],
-  );
+  // Turned so the room sees the front, with the stars at the top left.
   return (
-    <group position={[-0.7, MANTEL.y, MANTEL.z - 0.06]}>
-      <mesh material={pole} position={[0, 0.13, 0]}>
-        <cylinderGeometry args={[0.005, 0.005, 0.26, 4]} />
-      </mesh>
-      {[0, 1, 2].map(i => (
-        <mesh key={i} material={mats[i]} position={[0.07, 0.2 - i * 0.03, 0]}>
-          <planeGeometry args={[0.14, 0.03]} />
-        </mesh>
-      ))}
-    </group>
+    <primitive
+      object={useProp('flag')}
+      position={[-0.7, MANTEL.y, MANTEL.z - 0.05]}
+      rotation={[0, Math.PI, 0]}
+    />
   );
 }
 function HeartsOnMantel() {
-  const geo = useMemo(() => new THREE.ShapeGeometry(heartShape()), []);
-  const mats = useMemo(
-    () =>
-      ['#c9374f', '#f08aa5', '#e8566e'].map(
-        c => new THREE.MeshStandardMaterial({color: c, roughness: 0.9, side: THREE.DoubleSide}),
-      ),
-    [],
-  );
+  const heart = useModel('heart');
+  const mats = useTints(heart, 'Paper', ['#c9374f', '#f08aa5', '#e8566e']);
+  const items = useMemo(() => mats.map(m => tint(heart.clone(true), 'Paper', m)), [heart, mats]);
+  // Standing on their points, turned a little towards the middle.
   return (
     <group>
       {[
-        [-1.2, 0.1, 0],
-        [-0.9, 0.14, 1],
-        [-0.62, 0.09, 2],
-      ].map(([x, s, m], i) => (
-        <mesh
+        [-1.2, 0.1],
+        [-0.9, 0.14],
+        [-0.62, 0.09],
+      ].map(([x, s], i) => (
+        <primitive
           key={i}
-          geometry={geo}
-          material={mats[m]}
-          position={[x, MANTEL.y + s * 0.7, MANTEL.z - 0.08]}
+          object={items[i]}
+          position={[x, MANTEL.y + 0.47 * s * 1.3, MANTEL.z - 0.06]}
           scale={s * 1.3}
+          rotation={[0, (1 - i) * 0.25, 0]}
         />
       ))}
     </group>
   );
 }
 
-export function HolidayDecor({coastal = false}: {coastal?: boolean}) {
+type DecorRoom = 'woodland' | 'beachfront' | 'cyberpunk' | 'sky-castle';
+export function HolidayDecor({room = 'woodland'}: {room?: DecorRoom}) {
   const {holiday} = useSeasonal();
   return (
     <group name="Holiday_Decor" userData={{holiday}}>
       {holiday && (
-        <HolidaySet key={(coastal ? 'coast-' : '') + holiday} holiday={holiday} coastal={coastal} />
+        <Suspense fallback={null}>
+          <HolidaySet key={room + '-' + holiday} holiday={holiday} room={room} />
+        </Suspense>
       )}
     </group>
   );
 }
+/** A small pumpkin on the left of each windowsill, clear of the sill's own props (Neon's lava lamp and hologram car). */
+const SILL_PUMPKIN: Record<DecorRoom, [number, number, number]> = {
+  woodland: [-0.8, 1.19, -2.0],
+  beachfront: [-0.8, 1.18, -2.05],
+  cyberpunk: [-0.78, 1.18, -2.02],
+  'sky-castle': [-0.85, 1.16, -2.05],
+};
 /** Keyed by holiday so a change unmounts the old set. Materials and geometries are created in useMemo and passed
  * as props, which react-three-fiber does not dispose, so collect them after mount and free them on unmount. */
-function HolidaySet({holiday, coastal}: {holiday: HolidayId; coastal: boolean}) {
+function HolidaySet({holiday, room}: {holiday: HolidayId; room: DecorRoom}) {
   const group = useRef<THREE.Group>(null);
   useEffect(() => {
     const owned = new Set<{dispose(): void}>();
     group.current?.traverse(o => {
       if (o instanceof THREE.Mesh) {
-        owned.add(o.geometry);
-        (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => owned.add(m));
+        if (!o.geometry.userData.shared) owned.add(o.geometry);
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(
+          m => m.userData.shared || owned.add(m),
+        );
       }
     });
     return () => owned.forEach(x => x.dispose());
   }, []);
-  return <group ref={group}>{coastal ? COASTAL[holiday]() : DECOR[holiday]()}</group>;
+  return (
+    <group ref={group}>
+      {holiday === 'halloween' && <Pumpkin position={SILL_PUMPKIN[room]} scale={0.6} />}
+      {room === 'woodland' ? DECOR[holiday]() : room === 'beachfront' ? COASTAL[holiday]() : LIGHT[holiday]()}
+    </group>
+  );
 }
+/** The owner's spot for the tree and the large pumpkin: the corner between the beanbag (x < -1.02, z < 1.48) and the hearth (x > -1.41). */
+const WOODLAND_CORNER: [number, number, number] = [-1.85, 0, 1.85];
 const DECOR: Record<HolidayId, () => ReactNode> = {
   christmas: () => (
     <>
-      <Garland
-        a={MANTEL_A}
-        b={MANTEL_B}
-        depth={0.09}
-        count={9}
-        kind="flag"
-        colors={['#b23a3a', '#f2d36b']}
-        size={0.035}
-        thickness={0.024}
-        lineColor="#3f6b45"
-      />
+      <MantelGarland />
       <Stocking x={-1.2} color="#b23a3a" />
       <Stocking x={-0.91} color="#2f6b4f" />
       <Stocking x={-0.62} color="#b23a3a" />
-      <Tree />
+      <Tree position={WOODLAND_CORNER} />
     </>
   ),
   halloween: () => (
@@ -359,7 +284,12 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
       <Pumpkin position={[-1.357, MANTEL.y + 0.036, 1.7]} scale={0.5} />
       <Pumpkin position={[-0.464, MANTEL.y + 0.036, 1.7]} scale={0.5} />
       <Pumpkin position={[-0.95, MANTEL.y + 0.029, MANTEL.z - 0.05]} scale={0.4} />
-      <Pumpkin position={[-0.05, 0.12, 1.62]} scale={1.4} />
+      <Pumpkin
+        position={[WOODLAND_CORNER[0], 0.2, WOODLAND_CORNER[2]]}
+        scale={2.8}
+        carved
+        rot={-Math.PI / 4}
+      />
       {[
         [-1.5, 2.6, 0.3, 1],
         [-1.3, 2.35, -0.4, 0.8],
@@ -367,7 +297,8 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
         [1.15, 2.55, -0.3, 1],
         [1.35, 2.3, 0.4, 0.8],
       ].map(([x, y, r, s], i) => (
-        <Bat key={i} position={[x, y, -2.08]} rot={r} s={s} />
+        // In front of the log wall (z -2.09), allowing for the wings folding back 5 cm.
+        <Bat key={i} position={[x, y, -2.03]} rot={r} s={s} />
       ))}
     </>
   ),
@@ -407,23 +338,40 @@ const DECOR: Record<HolidayId, () => ReactNode> = {
   ),
 };
 
-/** Beachfront has no hearth: one garland across the arched window (below the string lights, which run y 2.0-3.08). */
+/** The other rooms have no hearth. The tree and pumpkins stand where Woodland's hearth would be, between the beanbag
+ * (x < -1.22) and the door jamb (x > -0.36), clear of the door's swing. */
+const HEARTH_SPOT: [number, number, number] = [-0.85, 0, 1.75];
+function Pumpkins() {
+  const [x, , z] = HEARTH_SPOT;
+  return (
+    <>
+      <Pumpkin position={[x, 0.2, z]} scale={2.8} carved rot={-0.45} />
+      <Pumpkin position={[x - 0.15, 0.06, z - 0.33]} scale={0.8} />
+      <Pumpkin position={[x + 0.2, 0.05, z - 0.3]} scale={0.6} />
+    </>
+  );
+}
+/** Beachfront: one garland across the arched window (below the string lights, which run y 2.0-3.08). */
 const ARCH_A = new THREE.Vector3(-1.0, 2.62, -2.0),
   ARCH_B = new THREE.Vector3(0.78, 2.62, -2.0);
 const COASTAL: Record<HolidayId, () => ReactNode> = {
   christmas: () => (
-    <Garland
-      a={ARCH_A}
-      b={ARCH_B}
-      depth={0.12}
-      count={11}
-      kind="flag"
-      colors={['#b23a3a', '#2f6b4f', '#f2d36b']}
-      size={0.11}
-    />
+    <>
+      <Garland
+        a={ARCH_A}
+        b={ARCH_B}
+        depth={0.12}
+        count={11}
+        kind="flag"
+        colors={['#b23a3a', '#2f6b4f', '#f2d36b']}
+        size={0.11}
+      />
+      <Tree position={HEARTH_SPOT} />
+    </>
   ),
   halloween: () => (
     <>
+      <Pumpkins />
       <Garland
         a={ARCH_A}
         b={ARCH_B}
@@ -433,9 +381,10 @@ const COASTAL: Record<HolidayId, () => ReactNode> = {
         colors={['#e0762a', '#1d1722']}
         size={0.11}
       />
+      {/* On open wall above the two framed prints, clear of the curtains (x -1.57..-1.33 and 1.03..1.27). */}
       {[
-        [-1.45, 2.4, 0.3],
-        [1.15, 2.5, -0.3],
+        [-1.95, 2.45, 0.3],
+        [1.65, 2.45, -0.3],
       ].map(([x, y, r], i) => (
         <Bat key={i} position={[x, y, -2.0]} rot={r} />
       ))}
@@ -474,4 +423,28 @@ const COASTAL: Record<HolidayId, () => ReactNode> = {
       size={0.11}
     />
   ),
+};
+
+/** Neon City and Sky Castle: a lighter set. One garland across the top of the window, plus the tree or pumpkins. */
+const TOP_A = new THREE.Vector3(-1.05, 2.9, -2.0),
+  TOP_B = new THREE.Vector3(0.75, 2.9, -2.0);
+const topGarland = (colors: string[], kind: 'flag' | 'heart' = 'flag') => (
+  <Garland a={TOP_A} b={TOP_B} depth={0.12} count={11} kind={kind} colors={colors} size={0.11} />
+);
+const LIGHT: Record<HolidayId, () => ReactNode> = {
+  christmas: () => (
+    <>
+      {topGarland(['#b23a3a', '#2f6b4f', '#f2d36b'])}
+      <Tree position={HEARTH_SPOT} />
+    </>
+  ),
+  halloween: () => (
+    <>
+      {topGarland(['#e0762a', '#1d1722'])}
+      <Pumpkins />
+    </>
+  ),
+  valentines: () => topGarland(['#c9374f', '#f08aa5', '#e8566e', '#f4c6d0'], 'heart'),
+  easter: () => topGarland(['#f4b6c2', '#bfe3d0', '#f7e2a0', '#c7c3f0']),
+  'independence-day': () => topGarland(['#b8312f', '#f4efe2', '#2a4a8c']),
 };
