@@ -4,9 +4,9 @@ A calm digital scrapbook in a handcrafted 3D room. React/TypeScript/Vite applica
 
 ## Current build
 
-Woodland Writing Room is the playable local prototype and now follows the real date: spring, summer, autumn and winter automatically (Room settings > Season to override or freeze). See the [current handoff](docs/handoff-current.md). It includes a scrapbook editor, interactive shelf books, photo archive and printer, visible memory map, guestbook/discoveries, day/night and weather, CRT music, and a drawer shop.
+Status, October 25, 2026: four rooms are playable and freely swappable, with memories kept on every switch: **Woodland** (the default log cabin, restyled in the Illustrated Nostalgia direction, with Snowy Mountain's fire, mounts and fur rug folded in), **Beachfront** (driftwood furniture), **Neon City** and **Sky Castle** (crystal, marble and gold furniture, real-world map). Woodland follows the real date: spring, summer, autumn and winter automatically, plus five holidays (Room settings > Season to override or freeze). Optional sign-in and backup to Supabase are built and tested but stay off until the host is configured. Nothing is publicly deployed yet. See the [current handoff](docs/handoff-current.md) for what is open. The app includes a scrapbook editor, interactive shelf books, photo archive and printer, visible memory map, guestbook/discoveries, day/night and weather, CRT music, and a drawer shop.
 
-For a clean handoff, start with [start here](docs/start-here.md), the [October 11 handoff](docs/handoff-2026-10-11.md) and [current handoff status](docs/handoff-current.md), then use this index to find the product direction and implementation records. The [September project checklist](docs/project-status.md) is a dated acceptance snapshot, not the latest branch/room status. [Prototype notes](docs/woodland-prototype.md) retain historical implementation details; [asset provenance](art/woodland/asset-ledger.json) tracks room sources.
+For a clean handoff, start with [start here](docs/start-here.md) and the [current handoff status](docs/handoff-current.md), then the dated [October 11 handoff](docs/handoff-2026-10-11.md), then use this index to find the product direction and implementation records. The [September project checklist](docs/project-status.md) is a dated acceptance snapshot, not the latest branch/room status. [Prototype notes](docs/woodland-prototype.md) retain historical implementation details; [asset provenance](art/woodland/asset-ledger.json) tracks room sources.
 
 ## Handoff reading order
 
@@ -43,7 +43,7 @@ The development server requests port 5174; use the URL it actually reports if th
 
 ## What is local
 
-Books, photographs, settings, inventory and discoveries persist in IndexedDB. Room backup/restore is available in Settings. There is no account or shared database. View as, visibility and guestbook delivery demonstrate behavior locally; they are not real privacy enforcement or multiplayer.
+Books, photographs, settings, inventory and discoveries persist in IndexedDB. Room backup/restore is available in Settings. Optional account sign-in backs the room, books and photos up to Supabase and can bring the room to a new device; it appears only when `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are set (see [backend design](docs/backend-design.md)). Visiting friends' rooms is not built yet: View as, visibility and guestbook delivery demonstrate behavior locally.
 
 Spotify is optional. SoundCloud plays public links; account OAuth is pending. The ambient Mellow Skies playlist starts with Day's End by Purrple Cat and needs an internet connection. Browser/provider restrictions can require pressing Play. Attribution is shown in the player. No music album is bundled for offline playback.
 
@@ -52,13 +52,12 @@ Spotify is optional. SoundCloud plays public links; account OAuth is pending. Th
 - Default: public/room/woodland-study/woodland-study.glb, built by art/woodland-study/build.py and recorded with `npm run assets:woodland`
 - Blender sources: art/woodland/woodland.blend (furniture the cabin build starts from) and art/woodland-study/
 - Modular runtime: src/components/room3d/
-- Previous room: ?theme=classic
 - CSS fallbacks: ?room=chamber and ?room=flat
 - Performance display: ?perf=1
 
-Beachfront is available as a first playable coastal slice in Drawer shop > Room variants. Switching preserves memories and per-room decoration choices. See [Beachfront notes](docs/beachfront-prototype.md). Cyberpunk Cityscape, Snowy Mountain and Stormy Lighthouse Room remain planned.
+Beachfront, Neon City and Sky Castle are in Drawer shop > Room variants. Switching preserves memories and per-room decoration choices. See [Beachfront notes](docs/beachfront-prototype.md) and [Sky Castle notes](docs/sky-castle-room.md). Snowy Mountain is merged into the seasonal Woodland room. Stormy Lighthouse Room remains an idea.
 
-After Blender edits, export the Woodland asset to its own path and run npm run check:room. Follow the source/export instructions in the prototype notes; do not overwrite the original asset inadvertently.
+After re-exporting the Woodland cabin, run `npm run assets:woodland` and commit the updated manifest, then `npm run check:room`. Follow the source/export instructions in the prototype notes; do not overwrite the original asset inadvertently.
 
 ## Provider configuration
 

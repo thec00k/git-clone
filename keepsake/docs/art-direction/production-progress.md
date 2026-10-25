@@ -2,6 +2,16 @@
 
 Updated 25 September 2026. Source: Keepsake New Art Direction and Room Production Bible, section 20 (pages 28-29), with section 24 (page 33) as workflow guidance. The owner's current instruction is to reduce room changes while focusing on the production pipeline and announce completion of each numbered step.
 
+## Status update, October 25, 2026
+
+The phase table below is the September 26 record. Since then, on `codex/foundations-and-seasons`:
+
+- Phase 5: Woodland's inherited furniture was restyled in the owner-approved CRT Illustrated Nostalgia style (Oct 17), and the cabin shell was rebuilt as solid logs with a beamed ceiling (Oct 18). Snowy Mountain's mounts, fur rug and hearth fire were consolidated into Woodland.
+- Phase 6: dusk, day, night and winter lighting passes for Woodland (Oct 17). The full approved-view comparison across every lighting and season state is still open.
+- Phase 7: shader warm-up, stable light counts and on-demand photo loading removed the load and settings freezes (Oct 17); draft PR #29 targets the remaining room freezes. Measurements on ordinary hardware and phones are still open.
+- Phase 8: started ahead of Woodland's full acceptance at the owner's request. Beachfront (Oct 22) and Sky Castle (Oct 25) furniture were remodelled from Woodland's shapes; Neon City has a lighting cleanup only.
+- Phase 4 is unchanged: the finished illustrated window layers (Tasks 14 to 19) still need the artwork.
+
 ## Reporting convention
 
 Use the PDF's Phase 0-8 numbering. Where it explicitly numbers tasks, include that number (for example Phase 4 / Task 14: create the Woodland illustration). Other completed deliverables use the phase number plus their exact name, without inventing PDF task numbers. Sections 20 and 24 are document section numbers, not completion milestones.

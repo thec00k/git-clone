@@ -105,18 +105,6 @@ export function ShopRoomVariants() {
       <p role="status" className="my-3 text-sm">
         {note}
       </p>
-      <p className="ks-handnote mt-4">Coming later…</p>
-      <ul className="ks-sticker-shop-list">
-        {[['Sky Castle', 'A little room among the clouds']].map(([name, description]) => (
-          <li key={name} className="ks-sticker-pack">
-            <div className="flex-1">
-              <p className="font-display">{name}</p>
-              <small>{description}</small>
-            </div>
-            <span className="ks-sticker-owned">Coming later</span>
-          </li>
-        ))}
-      </ul>
     </>
   );
 }
