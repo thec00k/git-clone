@@ -21,6 +21,41 @@ import {MEMORY_MOODS} from '../../lib/memoryAtmosphere';
 const CEILING_FALLBACK = new THREE.Vector3(0, 3.02, 0);
 const WINDOW_SUN_FALLBACK = new THREE.Vector3(-0.15, 2.28, -2.63);
 
+/**
+ * Light strengths per room and time of day (intensities only; lights are never mounted or removed, see
+ * check-constant-lights). Each room follows the art bible's hierarchy: by day the window leads and the
+ * lamp is a quiet accent; at dusk and night the ceiling eases down and the desk lamp pool leads, so the
+ * scrapbook reads first against a cooler room. Woodland's values are its October 17 lighting pass; the
+ * other rooms got the same pass on October 26.
+ */
+type Grade = {ambient: number; sun: number; ceiling: number; lamp: number; sky: number};
+const GRADES: Record<string, Record<'day' | 'dusk' | 'night', Grade>> = {
+  woodland: {
+    day: {ambient: 0.34, sun: 2.1, ceiling: 2.4, lamp: 1.0, sky: 0.55},
+    dusk: {ambient: 0.3, sun: 0.9, ceiling: 1.1, lamp: 2.6, sky: 0.6},
+    night: {ambient: 0.2, sun: 0.55, ceiling: 0.9, lamp: 2.5, sky: 0.3},
+  },
+  // Beachfront's lamp has a small pale shade, so it needs less power than Woodland's for the same pool.
+  beachfront: {
+    day: {ambient: 0.34, sun: 2.1, ceiling: 2.3, lamp: 0.45, sky: 0.55},
+    dusk: {ambient: 0.26, sun: 1.2, ceiling: 1.3, lamp: 1.5, sky: 0.5},
+    night: {ambient: 0.18, sun: 0.5, ceiling: 0.85, lamp: 1.9, sky: 0.3},
+  },
+  // Neon City is always night outside; the window haze stays constant and only the room's own lights grade.
+  // The lava lamp doubles as the task light so the book is lit on the dark desk.
+  cyberpunk: {
+    day: {ambient: 0.34, sun: 0.65, ceiling: 2.0, lamp: 1.3, sky: 0.55},
+    dusk: {ambient: 0.24, sun: 0.65, ceiling: 1.6, lamp: 1.6, sky: 0.5},
+    night: {ambient: 0.16, sun: 0.65, ceiling: 1.3, lamp: 1.8, sky: 0.3},
+  },
+  // Sky Castle is white marble and crystal: it clips with Woodland's strengths, so everything is lower.
+  'sky-castle': {
+    day: {ambient: 0.26, sun: 1.0, ceiling: 1.0, lamp: 0.7, sky: 0.4},
+    dusk: {ambient: 0.2, sun: 0.7, ceiling: 0.8, lamp: 1.6, sky: 0.38},
+    night: {ambient: 0.14, sun: 0.35, ceiling: 0.55, lamp: 2.0, sky: 0.22},
+  },
+};
+
 /** Window carries day / dusk / night. The ceiling fan is a plain on/off, like the lamp. */
 export function RoomLights({
   phase,
@@ -91,70 +126,48 @@ export function RoomLights({
     () => new THREE.Color(night ? '#8a9bb8' : coolDusk ? '#b9c6dc' : woodlandDay ? '#f6f1e8' : '#fff4e6'),
     [night, coolDusk, woodlandDay],
   );
+  // At night Beachfront and Sky Castle take a cool, dim sky fill as well, so the lamp pool reads warm against it.
+  const otherNight = night && (coastal || skyCastle);
   const skyColor = useMemo(
     () =>
-      new THREE.Color(skyCastle ? '#c2dbf1' : coolDusk ? '#8fa3bd' : woodlandNight ? '#5d6f8c' : '#bac4ba'),
-    [coolDusk, woodlandNight, skyCastle],
+      new THREE.Color(
+        otherNight
+          ? '#5e7090'
+          : skyCastle
+            ? '#c2dbf1'
+            : coolDusk
+              ? '#8fa3bd'
+              : woodlandNight
+                ? '#5d6f8c'
+                : '#bac4ba',
+      ),
+    [coolDusk, woodlandNight, skyCastle, otherNight],
   );
   const groundColor = useMemo(
     () =>
-      new THREE.Color(skyCastle ? '#9c97b3' : coolDusk ? '#3a342c' : woodlandNight ? '#2a2622' : '#3f4931'),
-    [coolDusk, woodlandNight, skyCastle],
+      new THREE.Color(
+        otherNight
+          ? '#2b2c36'
+          : skyCastle
+            ? '#9c97b3'
+            : coolDusk
+              ? '#3a342c'
+              : woodlandNight
+                ? '#2a2622'
+                : '#3f4931',
+      ),
+    [coolDusk, woodlandNight, skyCastle, otherNight],
   );
   useFrame((_, dt) => {
     const t = motionFactor(dt, MOTION.light, reduced);
-    const lights: [
-      [THREE.Light | null, number],
-      [THREE.Light | null, number],
-      [THREE.Light | null, number],
-      [THREE.Light | null, number],
-      [THREE.Light | null, number],
-    ] = [
-      [ambientRef.current, night ? (woodland ? 0.2 : 0.16) : dusk ? (woodland ? 0.3 : 0.24) : 0.34],
-      [
-        sunRef.current,
-        neon
-          ? 0.65
-          : skyCastle
-            ? night
-              ? 0.35
-              : dusk
-                ? 0.9
-                : 1.4
-            : night
-              ? 0.55
-              : dusk
-                ? woodland
-                  ? 0.9
-                  : 1.35
-                : 2.1,
-      ],
-      [
-        ceilingRef.current,
-        // The Woodland ceiling light eases down at dusk and night so the desk lamp pool leads
-        // (scrapbook first), and a little by day so the window light leads.
-        environment.ceilingOn !== false
-          ? coolDusk
-            ? 1.1
-            : woodlandNight
-              ? 0.9
-              : woodlandDay
-                ? 2.4
-                : skyCastle
-                  ? 1.25
-                  : coastal
-                    ? 2.3
-                    : 3.2
-          : 0,
-      ],
-      [
-        lampRef.current,
-        environment.lampOn && !neon
-          ? (night ? (woodland ? 2.5 : 3.8) : dusk ? (woodland ? 2.6 : 2.8) : woodland ? 1.0 : 1.6) *
-            (coastal || skyCastle ? 0.28 : 1)
-          : 0,
-      ],
-      [skyRef.current, night ? (woodland ? 0.3 : 0.25) : coolDusk ? 0.6 : 0.55],
+    const g = GRADES[activeId] ?? GRADES.woodland;
+    const grade = g[night ? 'night' : dusk ? 'dusk' : 'day'];
+    const lights: [THREE.Light | null, number][] = [
+      [ambientRef.current, grade.ambient],
+      [sunRef.current, grade.sun],
+      [ceilingRef.current, environment.ceilingOn !== false ? grade.ceiling : 0],
+      [lampRef.current, environment.lampOn ? grade.lamp : 0],
+      [skyRef.current, grade.sky],
     ];
     lights.forEach(([light, target]) => {
       if (light) light.intensity = THREE.MathUtils.lerp(light.intensity, target, t);
@@ -207,7 +220,17 @@ export function RoomLights({
           ref={lampRef}
           position={(scene ? lampShadePos(scene) : deskLampCorner(STAND_IN_DESK)).toArray()}
           intensity={1.6}
-          color={coastal ? '#ffe1b5' : woodlandDay ? '#ffd9b0' : woodland ? '#ffcc9c' : '#ffb56a'}
+          color={
+            coastal || skyCastle
+              ? '#ffe1b5'
+              : neon
+                ? '#ffd0c4' // the lava lamp's peach-pink glow on the desk, pale enough for paper to stay paper
+                : woodlandDay
+                  ? '#ffd9b0'
+                  : woodland
+                    ? '#ffcc9c'
+                    : '#ffb56a'
+          }
           distance={1.85}
         />
       }
