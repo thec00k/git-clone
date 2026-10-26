@@ -58,6 +58,11 @@ export function SkyCastleFinish({scene, phase}: {scene: THREE.Object3D; phase: P
   useEffect(() => {
     const night = phase === 'night',
       dusk = phase === 'dusk';
+    // The studio reflection lights the white plaster and marble far more than the room's own lights do
+    // (walls measured at a clipped 228/255 at every hour, and the per-material envMapIntensity above had
+    // no visible effect on them), so the room grades it as a whole: bright marble by day, a dim cool fill at
+    // night against which the desk lamp pool reads warm (October 26 lighting pass).
+    world.environmentIntensity = night ? 0.07 : dusk ? 0.2 : 0.45;
     scene.traverse(o => {
       if (!(o instanceof THREE.Mesh)) return;
       for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
@@ -73,6 +78,12 @@ export function SkyCastleFinish({scene, phase}: {scene: THREE.Object3D; phase: P
         }
       }
     });
-  }, [scene, phase]);
+  }, [scene, phase, world]);
+  useEffect(
+    () => () => {
+      world.environmentIntensity = 1;
+    },
+    [world],
+  );
   return null;
 }
