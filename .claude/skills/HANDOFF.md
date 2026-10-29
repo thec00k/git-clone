@@ -151,6 +151,18 @@ blender-game-skills 2026-09-23.
 **Prompt to paste:**
 > Use blender-asset-qa to check the Woodland room model (woodland-study.glb) for z-fighting and floating parts. List each finding in plain English with a screenshot of the spot, say which ones a visitor would actually notice, and do not change anything until I pick which to fix.
 
+## 11. meshopt-compress (smaller model files)
+
+- **Installed:** `meshopt-compress` (added 2026-10-29). Written for Keepsake; meshoptimizer has no skill of its own, so this one only wraps its `gltfpack` tool.
+- **Source:** https://github.com/zeux/meshoptimizer · MIT · checked at commit `f0a684f` (2026-10-14). Widely used; three.js ships its decoder.
+- **What it is:** steps for shrinking `.glb` models with `gltfpack` and loading them with three.js's built-in meshopt decoder.
+- **Gaps it fills:** item 6 of `/mnt/project-files/keepsake/performance-review.md` (compress `woodland-study.glb` and the furniture). A test on 2026-10-29 took the Woodland room from 8.9 MB to 6.1 MB (gzipped download 6.3 MB to 5.6 MB) with geometry compression only; the rest is texture images.
+- **Cautions:** keep node, material and extras names (`-kn -km -ke`) or rooms fail to load. The npm build cannot shrink textures; that needs the native gltfpack build or glTF-Transform. Beachfront already uses Draco, and its check expects Draco. Visuals must be compared before and after.
+- **Done looks like:** one PR per model group with sizes before and after, passing checks, and matching screenshots.
+
+**Prompt to paste:**
+> Use meshopt-compress to shrink the Woodland room model and the furniture models. Add the meshopt decoder to the app, keep every name the app uses, re-run the asset and room checks, and show me before and after screenshots plus the file sizes in plain words. Make a draft PR into codex/foundations-and-seasons and do not change textures yet.
+
 ---
 
 ## Not in this set (decided against, 2026-10-15)
