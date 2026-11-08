@@ -47,13 +47,58 @@ try {
       validateCardGlb(glb);
       sizes.push(glb.byteLength);
     }
-    return sizes;
+    const {largeScanFile, pointCloudPly} = await import('/src/tests/displayModelFixture.ts');
+    const {DISPLAY_ROOM_TRIANGLES, DISPLAY_ROOM_TEXTURE} = await import('/src/lib/displayModelImport.ts');
+    const big = await largeScanFile();
+    const started = performance.now();
+    const reduced = await importDisplayModel(big);
+    const seconds = (performance.now() - started) / 1000;
+    const json = validateCardGlb(reduced);
+    let triangles = 0;
+    for (const m of json.meshes)
+      for (const p of m.primitives) triangles += json.accessors[p.indices ?? p.attributes.POSITION].count / 3;
+    const image = json.images[0];
+    const view = json.bufferViews[image.bufferView];
+    const bin = new Uint8Array(reduced, 20 + new DataView(reduced).getUint32(12, true) + 8);
+    const bitmap = await createImageBitmap(
+      new Blob([bin.slice(view.byteOffset ?? 0, (view.byteOffset ?? 0) + view.byteLength)], {
+        type: image.mimeType,
+      }),
+    );
+    let pointCloud = '';
+    try {
+      await importDisplayModel(pointCloudPly());
+    } catch (e) {
+      pointCloud = e.message;
+    }
+    return {
+      sizes,
+      big: {
+        before: big.size,
+        after: reduced.byteLength,
+        triangles,
+        limit: DISPLAY_ROOM_TRIANGLES,
+        texture: Math.max(bitmap.width, bitmap.height),
+        textureLimit: DISPLAY_ROOM_TEXTURE,
+        mimeType: image.mimeType,
+        seconds,
+      },
+      pointCloud,
+    };
   });
-  assert.equal(result.length, 4);
-  assert.ok(result.every(n => n > 28 && n < 5 * 1024 * 1024));
+  const {sizes, big, pointCloud} = result;
+  assert.equal(sizes.length, 4);
+  assert.ok(sizes.every(n => n > 28 && n < 5 * 1024 * 1024));
+  assert.ok(big.before > 5 * 1024 * 1024, 'fixture must exceed the 5 MB budget');
+  assert.ok(big.triangles <= big.limit * 1.25, `reduced to ${big.triangles} triangles`);
+  assert.ok(big.texture <= big.textureLimit && big.mimeType === 'image/jpeg', JSON.stringify(big));
+  assert.match(pointCloud, /point cloud/);
   assert.deepEqual(errors, []);
   console.log(
-    `PASS display case: OBJ, PLY, STL and USDZ convert locally to validated GLB (${result.join(', ')} bytes).`,
+    `PASS display case: OBJ, PLY, STL and USDZ convert locally to validated GLB (${sizes.join(', ')} bytes).`,
+  );
+  console.log(
+    `PASS large scan: ${(big.before / 1048576).toFixed(1)} MB -> ${(big.after / 1048576).toFixed(2)} MB, ${big.triangles} triangles, ${big.texture} px ${big.mimeType} texture, ${big.seconds.toFixed(1)} s. Point-cloud PLY refused.`,
   );
 } finally {
   await browser.close();
