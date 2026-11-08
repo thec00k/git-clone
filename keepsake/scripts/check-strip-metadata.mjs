@@ -113,6 +113,12 @@ assert.ok(!ws.includes('GPS') && !ws.includes('loc') && ws.includes('VP8 '));
 assert.equal(w[20] & 0x0c, 0, 'VP8X metadata flags cleared');
 assert.equal(w[4] | (w[5] << 8), w.length - 8, 'RIFF size fixed');
 assert.equal(stripMetadataBytes(Uint8Array.from([1, 2, 3])).length, 3);
+// Fill bytes (0xFF 0xFF...) before a marker are allowed in JPEG: the EXIF after them is still removed.
+const filled = Uint8Array.from([0xff, 0xd8, 0xff, ...seg(0xe1, exif), 0xff, 0xda, 0, 2, 1, 0xff, 0xd9]);
+assert.ok(!String.fromCharCode(...stripJpeg(filled)).includes('GPS'), 'EXIF after fill bytes removed');
+// A file that is not understood comes back as the same array, which tells the app not to keep it as an original.
+const heic = Uint8Array.from([0, 0, 0, 24, ...enc('ftypheic'), ...enc('GPS 51.5N 0.12W')]);
+assert.equal(stripMetadataBytes(heic), heic, 'unknown formats are reported as not stripped');
 console.log(
-  'Original photos: location/EXIF/IPTC/XMP stripped from JPEG, PNG and WebP; orientation kept; malformed files untouched.',
+  'Original photos: location/EXIF/IPTC/XMP stripped from JPEG, PNG and WebP; orientation kept; unknown or malformed files are not kept as originals.',
 );

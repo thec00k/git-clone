@@ -147,7 +147,7 @@ select pg_temp.ok(buy_item('fern-stamp') = 31, 'buying spends the server price')
 select pg_temp.ok(buy_item('fern-stamp') = 31, 'buying twice is free and harmless');
 select pg_temp.expect_error($$select buy_item('big-thing')$$, 'not enough stamps');
 select pg_temp.expect_error($$insert into stamp_events (user_id, kind, amount) values (auth.uid(), 'start', 1000)$$, 'permission denied');
-select pg_temp.act_as(null); insert into stamp_events (user_id, kind, amount, day) values (:sam, 'daily', 68, current_date - 5);
+select pg_temp.act_as(null); insert into stamp_events (user_id, kind, amount, day, created_at) values (:sam, 'daily', 68, current_date - 5, now() - interval '5 days');
 select pg_temp.act_as(:sam); select pg_temp.ok(claim_daily_stamps('Not/AZone') = 100, 'balance is capped at 100; bad time zone falls back to UTC');
 
 -- Storage: raw uploads only into your own folder; processed photos follow the photo's visibility.

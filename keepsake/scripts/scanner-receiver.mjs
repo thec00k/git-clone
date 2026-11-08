@@ -60,7 +60,13 @@ function filename(value) {
 }
 
 const server = createServer(async (request, response) => {
-  const url = new URL(request.url || '/', `http://${request.headers.host || 'localhost'}`);
+  // Only the path matters, so the Host header is never parsed; a malformed request gets 400 instead of a crash.
+  let url;
+  try {
+    url = new URL(request.url || '/', 'http://localhost');
+  } catch {
+    return send(response, 400, {error: 'Bad request'});
+  }
   if (request.method === 'OPTIONS')
     return send(response, 204, '', 'text/plain', {
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -69,6 +75,10 @@ const server = createServer(async (request, response) => {
     });
   if (request.method === 'GET' && url.pathname === '/health')
     return send(response, 200, {ready: true, maxBytes, pairCodeHint: pairCode.slice(0, 2) + '••••••'});
+  // Reading a scan needs the pairing code too, so others on the network cannot download it.
+  if (request.method === 'GET' && (url.pathname === '/inbox' || url.pathname === '/latest'))
+    if (!safeEquals(request.headers['x-keepsake-pair-code'], pairCode))
+      return send(response, 401, {error: 'The pairing code does not match.'});
   if (request.method === 'GET' && url.pathname === '/inbox')
     return send(response, 200, {
       ready: true,
@@ -111,9 +121,13 @@ const server = createServer(async (request, response) => {
   request.on('end', async () => {
     const scan = Buffer.concat(parts);
     if (!isGlb(scan)) return send(response, 422, {error: 'That file is not a valid GLB 2.0 container.'});
-    await mkdir(outputDirectory, {recursive: true});
     const path = join(outputDirectory, filename(request.headers['x-keepsake-scan-name']));
-    await writeFile(path, scan, {flag: 'wx'});
+    try {
+      await mkdir(outputDirectory, {recursive: true});
+      await writeFile(path, scan, {flag: 'wx'});
+    } catch {
+      return send(response, 500, {error: 'Could not save the scan on this computer.'});
+    }
     latest = {
       path,
       name: path.split(/[\\/]/).pop(),
