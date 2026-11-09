@@ -33,7 +33,8 @@ function send(response, status, body, contentType = 'application/json', headers 
     'Access-Control-Allow-Origin': '*',
     ...headers,
   });
-  response.end(typeof body === 'string' ? body : JSON.stringify(body));
+  // Files (Buffers) go out as raw bytes; anything else that is not text is sent as JSON.
+  response.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
 }
 
 function safeEquals(a, b) {
