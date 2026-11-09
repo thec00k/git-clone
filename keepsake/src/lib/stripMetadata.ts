@@ -76,6 +76,10 @@ export function stripJpeg(b: Uint8Array): Uint8Array {
     scan = false;
   while (i + 4 <= b.length) {
     if (b[i] !== 0xff) return b; // not a marker where one should be: leave the file alone
+    if (b[i + 1] === 0xff) {
+      i++; // fill byte before a marker (allowed by the JPEG standard)
+      continue;
+    }
     const marker = b[i + 1];
     if (marker === 0xda) {
       out.splice(1, 0, ...(orientation !== 1 ? [orientationApp1(orientation)] : []));
@@ -163,10 +167,12 @@ export function stripWebp(b: Uint8Array): Uint8Array {
 export function stripMetadataBytes(b: Uint8Array): Uint8Array {
   return stripPng(stripWebp(stripJpeg(b)));
 }
-export async function stripMetadata(file: File): Promise<File> {
+/** The file without location and other metadata, or null when its format or structure was not understood
+ * (HEIC, AVIF, an unusual JPEG): such a file may still carry its GPS position, so it must not be kept. */
+export async function stripMetadata(file: File): Promise<File | null> {
   const bytes = new Uint8Array(await file.arrayBuffer()),
     clean = stripMetadataBytes(bytes);
   return clean === bytes
-    ? file
+    ? null
     : new File([clean as BlobPart], file.name, {type: file.type, lastModified: file.lastModified});
 }

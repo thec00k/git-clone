@@ -83,16 +83,17 @@ Deno.serve(async req => {
     .eq('sha256', sha256)
     .maybeSingle();
   if (existing) {
-    // Added again after being deleted: take it back out of the trash.
-    await admin.from('photos').update({deleted_at: null}).eq('id', existing.id);
+    // Added again after being deleted: take it back out of the trash (the photo limit still applies).
+    const {error: restoreError} = await admin.from('photos').update({deleted_at: null}).eq('id', existing.id);
     await admin.storage.from('uploads').remove([path]);
+    if (restoreError) return json({error: restoreError.message}, 422);
     return json({id: existing.id, state: existing.moderation});
   }
   const decision = decide(await signalsFor(webp));
   const id = crypto.randomUUID(),
     storagePath = `${owner}/${id}.webp`;
   await admin.storage.from('photos').upload(storagePath, webp, {contentType: 'image/webp'});
-  await admin.from('photos').insert({
+  const {error: insertError} = await admin.from('photos').insert({
     id,
     owner_id: owner,
     storage_path: storagePath,
@@ -104,6 +105,12 @@ Deno.serve(async req => {
     source_key: /^[0-9a-f]{64}$/.exec(path.split('/').pop()!.split('.')[0])?.[0] ?? null,
     moderation: decision.state,
   });
+  if (insertError) {
+    // Over the daily upload limit (try again later) or the photo limit: keep no files behind.
+    await admin.storage.from('photos').remove([storagePath]);
+    await admin.storage.from('uploads').remove([path]);
+    return json({error: insertError.message}, /rate limit/.test(insertError.message) ? 429 : 422);
+  }
   await admin.from('moderation_log').insert({
     actor: 'pipeline',
     target_type: 'photo',

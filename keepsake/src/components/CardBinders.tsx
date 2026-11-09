@@ -196,15 +196,22 @@ export function CardBinders({
   async function receiveFromDesktop() {
     const address = window.prompt('Receiver address shown in the desktop terminal:', 'http://127.0.0.1:4318');
     if (!address) return;
+    const code = window.prompt('Pairing code shown in the desktop terminal:');
+    if (!code) return;
     setBusy(true);
     setMessage('Looking for the latest phone scan…');
     try {
-      const response = await fetch(scanReceiverUrl(address), {signal: AbortSignal.timeout(30_000)});
+      const response = await fetch(scanReceiverUrl(address), {
+        headers: {'X-Keepsake-Pair-Code': code.trim().toUpperCase()},
+        signal: AbortSignal.timeout(30_000),
+      });
       if (!response.ok)
         throw new Error(
           response.status === 404
             ? 'No scan has arrived yet. Send one from Keepsake Scanner first.'
-            : 'Could not reach the receiver. Keep it running on this desktop.',
+            : response.status === 401
+              ? 'That pairing code does not match the one in the desktop terminal.'
+              : 'Could not reach the receiver. Keep it running on this desktop.',
         );
       const bytes = await readCappedBody(response);
       const disposition = response.headers.get('content-disposition') ?? '';
@@ -385,7 +392,7 @@ export function CardBinders({
             <p>
               In the Keepsake folder on this desktop, run <code>npm run scanner:receive</code>. Keep that
               window open, then enter the shown local address and pairing code in Keepsake Scanner on your
-              phone.
+              phone. Importing here asks for the same address and code.
             </p>
             <button disabled={busy} onClick={() => void receiveFromDesktop()}>
               Import latest phone scan

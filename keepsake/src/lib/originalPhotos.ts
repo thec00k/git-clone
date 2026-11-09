@@ -34,8 +34,10 @@ async function put(key: string, blob: Blob) {
     d.close();
   }
 }
-export async function preserveOriginal(input: File): Promise<OriginalPhoto> {
+/** Keeps a metadata-free copy of the photo, or nothing when its location could not be removed. */
+export async function preserveOriginal(input: File): Promise<OriginalPhoto | undefined> {
   const file = await stripMetadata(input);
+  if (!file) return undefined;
   await checkStorageCapacity(file.size);
   const key = await digest(file);
   await put(key, file);
