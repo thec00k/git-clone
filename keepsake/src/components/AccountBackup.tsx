@@ -21,6 +21,8 @@ const PAUSED: Record<NonNullable<SyncStatus['paused']>, string> = {
     'Your room was changed on another device. Backup is paused so neither copy is overwritten; this room is still saved here.',
   'other-account':
     'This device’s room is backed up to a different account. Sign in with that account to keep backing it up.',
+  'confirm-link':
+    'This sign-in did not start on this device, so nothing has been sent yet. Only back up if this is your own account.',
 };
 
 function useSyncStatus() {
@@ -168,6 +170,15 @@ export function AccountBackup() {
                       ? 'Getting ready to back up…'
                       : `Backed up ${when(sync.lastSyncedAt)}.`}
           </p>
+          {sync?.paused === 'confirm-link' && (
+            <button
+              className="ks-tool"
+              disabled={busy}
+              onClick={() => void act(keepRoomHere, 'Backing up the room on this device.')}
+            >
+              Back up this room to {account.username ? `@${account.username}` : 'this account'}
+            </button>
+          )}
           {(sync?.paused === 'server-has-room' || sync?.paused === 'changed-elsewhere') && (
             <div className="ks-restore-preview">
               <strong>Which room should this device use?</strong>

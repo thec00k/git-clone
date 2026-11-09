@@ -24,6 +24,11 @@ const hostsIn = text => [...text.matchAll(/https?:\/\/([a-z0-9*.-]+)/gi)].map(m 
 
 const policy = /Content-Security-Policy(?:-Report-Only)?:\s*(.+)/.exec(headers)?.[1];
 assert.ok(policy, 'a Content-Security-Policy header is present');
+assert.doesNotMatch(
+  headers,
+  /Content-Security-Policy-Report-Only/,
+  'the policy is enforced, not report-only',
+);
 for (const host of hostsIn(policy)) assert.ok(ALLOWED.has(host), `CSP names an unexpected host: ${host}`);
 for (const directive of [
   "default-src 'self'",

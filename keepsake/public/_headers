@@ -1,12 +1,13 @@
 # Security and caching headers. Read by Cloudflare Pages and Netlify (same format);
 # any other host needs the equivalent configured. See docs/security-headers.md.
 #
-# The Content-Security-Policy is REPORT-ONLY for now: browsers log what it would
-# block without blocking anything. Tighten and switch it to enforcing once a
-# real hosted build has been exercised (Spotify, SoundCloud, scan import).
+# The Content-Security-Policy is enforced (switched from report-only on Nov 9 2026,
+# after the built app loaded with no violations under it). Spotify and SoundCloud
+# could not be exercised from the build machine: if either stops playing on the
+# hosted site, the browser console names the blocked address to add here.
 
 /*
-  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://sdk.scdn.co https://open.spotify.com https://w.soundcloud.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.scdn.co https://*.sndcdn.com; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob: https://api.spotify.com https://accounts.spotify.com https://open.spotify.com https://*.supabase.co wss://*.supabase.co http://127.0.0.1:* http://localhost:*; frame-src https://open.spotify.com https://w.soundcloud.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://sdk.scdn.co https://open.spotify.com https://w.soundcloud.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.scdn.co https://*.sndcdn.com; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob: https://api.spotify.com https://accounts.spotify.com https://open.spotify.com https://*.supabase.co wss://*.supabase.co http://127.0.0.1:* http://localhost:*; frame-src https://open.spotify.com https://sdk.scdn.co https://w.soundcloud.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

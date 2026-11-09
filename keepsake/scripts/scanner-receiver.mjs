@@ -152,6 +152,7 @@ server.listen(port, '0.0.0.0', () => {
   (addresses.length ? addresses : ['<your computer’s local IP address>']).forEach(address =>
     console.log(`  http://${address}:${port}`),
   );
+  console.log(`In Keepsake on this computer, import from http://127.0.0.1:${port}`);
   console.log(
     '\nAfter transfer, Keepsake can import it directly from “Receive a scan from your phone”. Keep this window open. Use only on a trusted home/local network.\n',
   );

@@ -10,7 +10,8 @@ const outPath = path.join(process.cwd(), ".env");
 // eslint-disable-next-line no-console
 console.log("Writing to .env");
 
+// Only the names, never the values: they can be secrets and this may run in CI logs.
 // eslint-disable-next-line no-console
-console.log(env);
+console.log(Object.keys(process.env).filter(key => key.startsWith("ENV_")).join("\n"));
  
 fs.writeFileSync(outPath, env);

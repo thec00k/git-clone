@@ -168,9 +168,21 @@ await saveState(state);
 await record(state, local);
 assert.equal((await status()).pending, 0, 'nothing queued before an account is linked');
 
-// 2. First sync into an empty account sends the whole room; the local room is untouched.
+// 1b. A sign-in this browser did not ask for (a link someone else sent) waits for the person to agree.
 let s = fakeServer();
 await link(s.backend);
+assert.equal((await status()).paused, 'confirm-link', 'an unrequested sign-in asks before backing up');
+assert.equal((await status()).linked, false, 'nothing is linked until the person agrees');
+await record(state, local);
+assert.equal((await status()).pending, 0, 'nothing queued while waiting for the person');
+await keepThisRoom(s.backend);
+assert.equal((await status()).linked, true, 'agreeing links the room');
+await fresh();
+await saveState(state);
+
+// 2. First sync into an empty account sends the whole room; the local room is untouched.
+s = fakeServer();
+await link(s.backend, true);
 const before = JSON.stringify(state);
 await record(state, local);
 assert.equal((await status()).pending, 5, '3 photos, the room and 1 book queued');
@@ -265,7 +277,7 @@ assert.equal(s.rooms.at(-1).settings.environment.lampOn, true, 'the other device
 // 8. A photo the server refuses is reported and dropped; the rest continues.
 await fresh();
 s = fakeServer();
-await link(s.backend);
+await link(s.backend, true);
 const key3 = await assetKey(photo(3));
 s.refuse = key3;
 await record(state, local);
@@ -280,7 +292,7 @@ await fresh();
 s = fakeServer();
 s.hasContent = true;
 s.revision = 3;
-await link(s.backend);
+await link(s.backend, true);
 await record(state, local);
 await flush(s.backend, local, now);
 assert.equal((await status()).paused, 'server-has-room');
@@ -289,21 +301,21 @@ assert.deepEqual(s.calls, [], 'nothing sent into an account that already has a r
 // 10. A different account on the same device: paused, never mixed.
 await fresh();
 s = fakeServer('user-1');
-await link(s.backend);
+await link(s.backend, true);
 const other = fakeServer('user-2');
-await link(other.backend);
+await link(other.backend, true);
 await record(state, local);
 await flush(other.backend, local, now);
 assert.equal((await status()).paused, 'other-account');
 assert.equal(other.uploads + other.calls.length, 0, 'nothing sent to the other account');
-await link(s.backend);
+await link(s.backend, true);
 assert.equal((await status()).paused, null, 'signing back in with the right account resumes');
 
 // 11. A new device brings the room down from the account: books, pages, photos and private details come back,
 // and the next backup from there sends nothing again (no duplicate photos or books).
 await fresh();
 s = fakeServer();
-await link(s.backend);
+await link(s.backend, true);
 await record(state, local);
 await flush(s.backend, local, now);
 const uploadsBefore = s.uploads;
@@ -317,7 +329,7 @@ Object.assign(newDevice, {
   photos: s.photos,
   uploads: s.uploads,
 });
-await link(newDevice.backend);
+await link(newDevice.backend, true);
 assert.equal((await status()).paused, 'server-has-room', 'the account already has a room: nothing is sent');
 let applied = null;
 const {missing} = await adoptAccountRoom(newDevice.backend, local, async next => {
@@ -389,7 +401,7 @@ await fresh();
 const kept = fakeServer();
 kept.hasContent = true;
 kept.revision = 4;
-await link(kept.backend);
+await link(kept.backend, true);
 assert.equal((await status()).paused, 'server-has-room');
 await keepThisRoom(kept.backend);
 await record(state, local);
@@ -401,7 +413,7 @@ assert.equal(kept.revision, 5, 'saved on top of the account’s latest revision'
 await fresh();
 const disk = fakeServer();
 await saveState(state);
-await link(disk.backend);
+await link(disk.backend, true);
 await record(state, local);
 await flush(disk.backend, local, now);
 const reopened = await loadState();
@@ -434,7 +446,7 @@ await fresh();
 const early = fakeServer();
 early.hasContent = true;
 early.photos = new Map(s.photos);
-await link(early.backend);
+await link(early.backend, true);
 assert.equal((await status()).paused, 'server-has-room');
 applied = null;
 await assert.rejects(

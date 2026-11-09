@@ -16,7 +16,7 @@ export interface OutboxEntry {
   attempts: number;
   notBefore: number;
 }
-export type Pause = 'other-account' | 'server-has-room' | 'changed-elsewhere';
+export type Pause = 'other-account' | 'server-has-room' | 'changed-elsewhere' | 'confirm-link';
 export interface Meta {
   account?: string;
   revision?: number;

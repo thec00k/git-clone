@@ -40,6 +40,8 @@ async function signalsFor(_webp: Uint8Array): Promise<Signals> {
   };
 }
 
+const UPLOAD_PATH = /^[0-9a-f-]{36}\/[A-Za-z0-9_-]{1,128}\.(jpg|png|webp|gif|heic)$/;
+
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return reply(null);
   // The owner is whoever is signed in (from their access token), never a value the caller sends.
@@ -47,8 +49,11 @@ Deno.serve(async req => {
   const {data: auth} = await admin.auth.getUser(token);
   if (!auth?.user) return reply('sign in first', 401);
   const owner = auth.user.id;
-  const {path} = (await req.json()) as {path: string};
-  if (typeof path !== 'string' || !path.startsWith(owner + '/') || path.includes('..'))
+  const body = (await req.json().catch(() => null)) as {path?: unknown} | null;
+  const path = body?.path;
+  // Exactly `<owner>/<name>.<ext>` as the app names uploads: no other folder, dots or percent-encoding, so the
+  // path cannot be made to point at someone else's file (for example with an encoded '..').
+  if (typeof path !== 'string' || !UPLOAD_PATH.test(path) || path.slice(0, path.indexOf('/')) !== owner)
     return reply('bad path', 400);
   const {data: file, error} = await admin.storage.from('uploads').download(path);
   if (error || !file) return reply('missing upload', 404);

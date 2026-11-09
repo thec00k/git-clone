@@ -34,7 +34,8 @@ do $$ declare f record; begin
            where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute')
              and not exists (select 1 from pg_depend d where d.objid = p.oid and d.deptype = 'e')
              and p.proname not in ('is_blocked', 'are_friends', 'can_view_room', 'can_view_book', 'can_view_photo',
-               'complete_signup', 'find_profile', 'claim_daily_stamps', 'buy_item', 'save_room', 'save_book') loop
+               'complete_signup', 'find_profile', 'claim_daily_stamps', 'buy_item', 'save_room', 'save_book',
+               'my_pending_uploads') loop
     raise exception 'signed-in people can execute %', f.proname;
   end loop;
 end $$;
