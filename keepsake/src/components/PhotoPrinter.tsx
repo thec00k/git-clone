@@ -11,29 +11,33 @@ import type {PhotoElement} from '../types/scrapbook';
 import {playPageTurn} from '../lib/audio';
 import {useReducedMotion} from '../hooks/useReducedMotion';
 import {MOTION} from '../lib/motion';
+type PrintPhoto = {src: string; photoId?: string; aspect: number};
+
 export function PhotoPrinter({onClose}: {onClose: () => void}) {
   const {state, activeBook, addArchivePhoto, update, setActiveBook} = useApp();
   const {go, setPendingPrint, setBookPageId} = useNav();
   const ref = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   useFocusTrap(ref, onClose);
-  const [photo, setPhoto] = useState<{src: string; photoId?: string; aspect: number} | null>(null);
-  const [printed, setPrinted] = useState(false);
-  const [printing, setPrinting] = useState(false);
+  // choosing -> printing (the print slides out) -> printed (place it in a book or take it to the map)
+  const [print, setPrint] = useState<
+    {step: 'choosing'; photo: PrintPhoto | null} | {step: 'printing' | 'printed'; photo: PrintPhoto}
+  >({step: 'choosing', photo: null});
+  const photo = print.photo;
   const reduced = useReducedMotion();
   useEffect(() => {
-    if (!printing || !photo) return;
+    if (print.step !== 'printing') return;
+    const photo = print.photo;
     playPageTurn(state.environment.ambienceVolume);
     const timer = window.setTimeout(
       () => {
         update(s => ({...s, latestPrint: {src: photo.src, photoId: photo.photoId, printedAt: Date.now()}}));
-        setPrinted(true);
-        setPrinting(false);
+        setPrint({step: 'printed', photo});
       },
       reduced ? 0 : MOTION.printMs,
     );
     return () => window.clearTimeout(timer);
-  }, [printing, photo, reduced, update, state.environment.ambienceVolume]);
+  }, [print, reduced, update, state.environment.ambienceVolume]);
   const [bookId, setBookId] = useState(activeBook?.id ?? state.books[0]?.id ?? '');
   const [pageId, setPageId] = useState('new');
   const [error, setError] = useState('');
@@ -44,8 +48,7 @@ export function PhotoPrinter({onClose}: {onClose: () => void}) {
       checkArchiveRoom(state.archive.length, 1);
       const image = await loadImageFile(file, state.profile.preserveOriginals !== false);
       const id = addArchivePhoto(image.src, image.aspect, [], image.original);
-      setPhoto({src: image.src, aspect: image.aspect, photoId: id});
-      setPrinted(false);
+      setPrint({step: 'choosing', photo: {src: image.src, aspect: image.aspect, photoId: id}});
       setError('');
     } catch (e) {
       setError(
@@ -125,17 +128,17 @@ export function PhotoPrinter({onClose}: {onClose: () => void}) {
             <X size={20} />
           </button>
         </header>
-        {printing ? (
+        {print.step === 'printing' ? (
           <div className="ks-printing" role="status">
             <div className="ks-printer-body">KEEPSAKE</div>
             <div className="ks-print-slot">
               <div className="ks-emerging-photo">
-                <img src={photo!.src} alt="Your photograph emerging from the printer" />
+                <img src={print.photo.src} alt="Your photograph emerging from the printer" />
               </div>
             </div>
             <p>Making a little memory…</p>
           </div>
-        ) : !printed ? (
+        ) : print.step === 'choosing' ? (
           <>
             <p>Choose a photograph to make an instant-style print for your scrapbook or memory map.</p>
             <div className="ks-print-picker" role="group" aria-label="Photographs to print">
@@ -145,7 +148,7 @@ export function PhotoPrinter({onClose}: {onClose: () => void}) {
                   aria-label={`Choose photograph ${i + 1}`}
                   aria-pressed={photo?.photoId === a.id}
                   onClick={() => {
-                    setPhoto({src: a.src, photoId: a.id, aspect: a.aspect});
+                    setPrint({step: 'choosing', photo: {src: a.src, photoId: a.id, aspect: a.aspect}});
                     setError('');
                   }}
                 >
@@ -167,7 +170,11 @@ export function PhotoPrinter({onClose}: {onClose: () => void}) {
               <button onClick={() => input.current?.click()}>
                 <Upload size={16} /> Upload photo
               </button>
-              <button className="is-primary" disabled={!photo} onClick={() => setPrinting(true)}>
+              <button
+                className="is-primary"
+                disabled={!print.photo}
+                onClick={() => print.photo && setPrint({step: 'printing', photo: print.photo})}
+              >
                 <Printer size={16} /> Make print
               </button>
             </footer>
@@ -175,7 +182,7 @@ export function PhotoPrinter({onClose}: {onClose: () => void}) {
         ) : (
           <>
             <div className="ks-ready-print">
-              <img src={photo!.src} alt="Your instant-style photo print" />
+              <img src={print.photo.src} alt="Your instant-style photo print" />
               <span>one small memory</span>
             </div>
             <p role="status">Your print is ready. Where would you like to keep it?</p>
@@ -230,7 +237,7 @@ export function PhotoPrinter({onClose}: {onClose: () => void}) {
               </button>
               <button
                 onClick={() => {
-                  setPendingPrint({src: photo!.src, photoId: photo!.photoId});
+                  setPendingPrint({src: print.photo.src, photoId: print.photo.photoId});
                   onClose();
                   go('atlas');
                 }}
@@ -238,7 +245,10 @@ export function PhotoPrinter({onClose}: {onClose: () => void}) {
                 <MapPin size={16} /> Take to map
               </button>
             </footer>
-            <button className="ks-print-again" onClick={() => setPrinted(false)}>
+            <button
+              className="ks-print-again"
+              onClick={() => setPrint({step: 'choosing', photo: print.photo})}
+            >
               Choose a different photo
             </button>
           </>
