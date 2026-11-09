@@ -1,4 +1,5 @@
 import {useEffect, useState, useSyncExternalStore} from 'react';
+import '../photoStacks.css';
 import {useNav} from '../store/nav';
 import {useApp} from '../store/appStore';
 import {downloadRoom} from '../lib/roomBackup';
@@ -59,20 +60,24 @@ export function AccountBackup() {
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [bornOn, setBornOn] = useState('');
-  const [message, setMessage] = useState('');
-  const [busy, setBusy] = useState(false);
+  // idle -> working -> done or failed. A failure shows as an alert, a success as a status line.
+  const [request, setRequest] = useState<
+    {step: 'idle'} | {step: 'working'} | {step: 'done' | 'failed'; text: string}
+  >({step: 'idle'});
+  const busy = request.step === 'working';
   if (isVisitor || account.state === 'off') return null;
 
+  /** Runs one account action. fn may return its own success text in place of `done`. */
   const act = async (fn: () => Promise<unknown>, done = '') => {
-    setBusy(true);
-    setMessage('');
+    setRequest({step: 'working'});
     try {
-      await fn();
-      setMessage(done);
+      const said = await fn();
+      setRequest({step: 'done', text: typeof said === 'string' && said ? said : done});
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Something went wrong. Your room here is unchanged.');
-    } finally {
-      setBusy(false);
+      setRequest({
+        step: 'failed',
+        text: e instanceof Error ? e.message : 'Something went wrong. Your room here is unchanged.',
+      });
     }
   };
 
@@ -195,11 +200,9 @@ export function AccountBackup() {
                         await downloadRoom(state);
                         const {missing} = await bringAccountRoom(restoreRoom);
                         setChoosing(null);
-                        setMessage(
-                          missing
-                            ? `Your room is here. ${missing} item${missing === 1 ? '' : 's'} could not come over yet (still processing or not backed up); they are still on your other device.`
-                            : 'Your room from your account is here.',
-                        );
+                        return missing
+                          ? `Your room is here. ${missing} item${missing === 1 ? '' : 's'} could not come over yet (still processing or not backed up); they are still on your other device.`
+                          : 'Your room from your account is here.';
                       })
                     }
                   >
@@ -251,7 +254,12 @@ export function AccountBackup() {
           <p className="text-sm">Signing out keeps your room on this device.</p>
         </>
       )}
-      {message && <p role="status">{message}</p>}
+      {request.step === 'failed' && (
+        <p role="alert" className="ks-import-problem">
+          {request.text}
+        </p>
+      )}
+      {request.step === 'done' && request.text && <p role="status">{request.text}</p>}
     </details>
   );
 }
