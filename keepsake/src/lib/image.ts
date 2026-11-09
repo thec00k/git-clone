@@ -10,20 +10,25 @@ export async function loadImageFile(file: File, keepOriginal = true): Promise<Lo
     return Promise.reject(new Error('This image exceeds the 25 MB file limit.'));
   if (file.type === 'image/gif' && file.size > 8 * 1024 * 1024)
     return Promise.reject(new Error('Animated GIF cards must be 8 MB or smaller.'));
-  let image: LoadedImage;
+  let image: LoadedImage,
+    source = file;
   try {
     image = await decodeImage(file);
   } catch (error) {
     // Chrome, Edge and Firefox cannot open HEIC (iPhone photos copied to a computer); convert those in the
     // browser. The converter only downloads the first time someone picks a HEIC photo.
     if (!isHeic(file)) throw error;
-    image = await decodeImage(await heicToJpeg(file));
+    // The full-size converted JPEG is kept as the original: it carries no location, unlike the HEIC.
+    source = await heicToJpeg(file);
+    image = await decodeImage(source);
   }
   // A GIF is already retained byte-for-byte as the displayed card. Avoid
   // storing a second identical copy in the originals database.
-  return keepOriginal && file.type !== 'image/gif'
-    ? {...image, original: await preserveOriginal(file)}
-    : image;
+  if (!keepOriginal || file.type === 'image/gif') return image;
+  // Safari opens HEIC directly; its original is still kept as the converted JPEG, for the same reason.
+  if (source === file && isHeic(file)) source = await heicToJpeg(file);
+  const original = await preserveOriginal(source);
+  return original ? {...image, original} : image;
 }
 const isHeic = (file: File) => /\.(heic|heif)$/i.test(file.name) || /hei[cf]/i.test(file.type);
 async function heicToJpeg(file: File) {

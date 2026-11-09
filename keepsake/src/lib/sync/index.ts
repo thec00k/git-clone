@@ -1,6 +1,7 @@
 import type {AppState} from '../../types/app';
 import {assetKey, fileKind, readAsset} from '../storage.ts';
 import {syncConfigured} from './config.ts';
+import {logout as spotifyLogout} from '../spotify.ts';
 import {flush, keepThisRoom, link, record, adoptAccountRoom, type Local} from './engine.ts';
 
 // The Supabase library loads only when a project is configured, so the local-only app stays as small as before.
@@ -118,11 +119,13 @@ export async function completeSignup(username: string, displayName: string, born
   await refresh();
 }
 
-/** Signs out on this device only. The room stays here, and so does anything still waiting to be sent. */
+/** Signs out on this device only. The room stays here, and so does anything still waiting to be sent.
+ * Spotify is disconnected too, so the next person on a shared computer cannot control this person's music. */
 export async function signOut() {
   const sb = (await connection())?.sb;
   if (!sb) return;
   active = false;
+  spotifyLogout();
   await sb.auth.signOut({scope: 'local'});
   setAccount({state: 'signed-out'});
 }
