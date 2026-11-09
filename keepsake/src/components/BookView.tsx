@@ -82,16 +82,16 @@ export function BookView({
     setBookPageId(null);
   }, [bookPageId, sb.pages, sb.setSpread, sb.setActivePageId, setBookPageId]);
   const [turn, setTurn] = useState<{dir: 'next' | 'prev'} | null>(null);
-  const [showPresets, setShowPresets] = useState(false);
+  // One toolbar tray and one dialog at a time. Sticky notes and the drawing ink are separate toggles.
+  const [tray, setTray] = useState<'none' | 'cover' | 'presets' | 'stickers'>(
+    sb.book?.title === 'New book' ? 'cover' : 'none',
+  );
+  const toggleTray = (next: 'cover' | 'presets' | 'stickers') => setTray(t => (t === next ? 'none' : next));
+  const [dialog, setDialog] = useState<'shop' | 'keys' | 'print' | 'photos' | null>(null);
+  const closeDialog = () => setDialog(null);
   const [arrangeNote, setArrangeNote] = useState('');
-  const [showStickers, setShowStickers] = useState(false);
-  const [showPrint, setShowPrint] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
-  const [showKeys, setShowKeys] = useState(false);
-  const [showCover, setShowCover] = useState(sb.book?.title === 'New book');
-  const [showShop, setShowShop] = useState(false);
   const [drawInk, setDrawInk] = useState<string | null>(null);
-  const [showPhotos, setShowPhotos] = useState(false);
   const [drawWidth, setDrawWidth] = useState(1.7);
   const turningRef = useRef(false);
 
@@ -130,7 +130,7 @@ export function BookView({
             : 'Photos aligned in two columns. Undo restores your previous arrangement.',
       );
     }
-    setShowPresets(false);
+    setTray('none');
   };
 
   const requestTurn = (dir: 'next' | 'prev') => {
@@ -159,7 +159,7 @@ export function BookView({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
-      if (showPrint || showKeys || printerOpen || showPhotos || showShop || showNotes) return;
+      if (dialog || printerOpen || showNotes) return;
       if (ignorePageKey(e) || t?.closest('[role="dialog"]')) return;
       const mod = e.metaKey || e.ctrlKey;
       if (!isVisitor && !turn && mod && e.key.toLowerCase() === 'z') {
@@ -175,7 +175,7 @@ export function BookView({
       }
       if (e.key === '?' || (e.shiftKey && e.key === '/')) {
         e.preventDefault();
-        setShowKeys(v => !v);
+        setDialog('keys');
         return;
       }
       const nudge = !mod && !e.altKey ? nudgeDelta(e.key, e.shiftKey) : null;
@@ -192,9 +192,7 @@ export function BookView({
       } else if (e.key === 'Escape') {
         sb.setSelectedId(null);
         setDrawInk(null);
-        setShowStickers(false);
-        setShowPresets(false);
-        setShowCover(false);
+        setTray('none');
       }
     };
     window.addEventListener('keydown', onKey);
@@ -257,7 +255,7 @@ export function BookView({
               <button
                 className="ks-chip"
                 style={{width: 'auto', paddingInline: 12}}
-                onClick={() => setShowShop(true)}
+                onClick={() => setDialog('shop')}
               >
                 Drawer shop
               </button>
@@ -267,12 +265,12 @@ export function BookView({
                 className="ks-chip"
                 aria-label="Edit cover and title page"
                 title="Cover & title page"
-                aria-expanded={showCover}
+                aria-expanded={tray === 'cover'}
                 onClick={() => {
-                  if (onClose) onClose();
-                  else setShowCover(v => !v);
-                  setShowStickers(false);
-                  setShowPresets(false);
+                  if (onClose) {
+                    onClose();
+                    setTray(t => (t === 'cover' ? t : 'none'));
+                  } else toggleTray('cover');
                 }}
               >
                 <BookMarked size={16} /> Cover & title
@@ -282,7 +280,7 @@ export function BookView({
               className="ks-chip"
               aria-label="Keyboard shortcuts"
               title="Keyboard shortcuts (?)"
-              onClick={() => setShowKeys(true)}
+              onClick={() => setDialog('keys')}
             >
               <Keyboard size={16} />
             </button>
@@ -300,7 +298,7 @@ export function BookView({
               className="ks-chip"
               aria-label="Export or print this book"
               title="Export / print book"
-              onClick={() => setShowPrint(true)}
+              onClick={() => setDialog('print')}
             >
               <Printer size={16} />
             </button>
@@ -319,11 +317,11 @@ export function BookView({
       footer={
         isVisitor ? null : (
           <div className="ks-editor-dock">
-            {showCover && sb.book && (
+            {tray === 'cover' && sb.book && (
               <div className="ks-panel ks-cover-editor p-4">
                 <div className="flex justify-between mb-2">
                   <p className="font-display text-paper">Make this book yours</p>
-                  <button className="ks-chip" onClick={() => setShowCover(false)}>
+                  <button className="ks-chip" onClick={() => setTray('none')}>
                     Done
                   </button>
                 </div>
@@ -353,7 +351,7 @@ export function BookView({
                 onFinish={sb.setStickerFinish}
               />
             )}
-            {showPresets && (
+            {tray === 'presets' && (
               <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-full bg-[rgb(28_22_16/0.92)] px-2 py-1.5 shadow-lg">
                 <span className="px-1 text-sm text-paper/60">Two columns · room for 4–6 photos</span>
                 <button className="ks-tool" onClick={() => applyPreset('grid')}>
@@ -364,7 +362,7 @@ export function BookView({
                 </button>
               </div>
             )}
-            {showStickers && (
+            {tray === 'stickers' && (
               <div className="flex max-w-xl flex-col items-center gap-1.5 rounded-2xl bg-[rgb(28_22_16/0.92)] px-3 py-2 shadow-lg">
                 <div className="flex flex-wrap items-center justify-center gap-1">
                   {stickerGlyphs.map(g => (
@@ -374,7 +372,7 @@ export function BookView({
                       aria-label={`Add sticker ${stickerLabel(g) ?? (g === 'keepsake:fern-stamp' ? 'Woodland fern stamp' : (Object.values(REWARDS).find(r => r.glyph === g)?.title ?? g))}`}
                       onClick={() => {
                         if (targetPageId) sb.addSticker(targetPageId, g);
-                        setShowStickers(false);
+                        setTray('none');
                       }}
                     >
                       <KeepsakeGlyph glyph={g} />
@@ -434,7 +432,7 @@ export function BookView({
                   <Redo2 size={17} /> Redo
                 </button>
               </div>
-              <button className="ks-tool ks-tool--accent" onClick={() => setShowPhotos(true)}>
+              <button className="ks-tool ks-tool--accent" onClick={() => setDialog('photos')}>
                 <ImagePlus size={18} /> Add photo
               </button>
               <button className="ks-tool" onClick={() => targetPageId && sb.addCaption(targetPageId)}>
@@ -442,23 +440,15 @@ export function BookView({
               </button>
               <button
                 className="ks-tool"
-                aria-expanded={showStickers}
-                onClick={() => {
-                  setShowStickers(v => !v);
-                  setShowPresets(false);
-                  setShowCover(false);
-                }}
+                aria-expanded={tray === 'stickers'}
+                onClick={() => toggleTray('stickers')}
               >
                 <Smile size={18} /> Stickers
               </button>
               <button
                 className="ks-tool"
-                aria-expanded={showPresets}
-                onClick={() => {
-                  setShowPresets(v => !v);
-                  setShowStickers(false);
-                  setShowCover(false);
-                }}
+                aria-expanded={tray === 'presets'}
+                onClick={() => toggleTray('presets')}
               >
                 <Wand2 size={18} /> Arrange
               </button>
@@ -529,7 +519,7 @@ export function BookView({
         )
       }
     >
-      {showShop && !isVisitor && overlay(<StickerStore onClose={() => setShowShop(false)} />)}
+      {dialog === 'shop' && !isVisitor && overlay(<StickerStore onClose={closeDialog} />)}
       <div
         className={`ks-desk-top${showNotes ? ' ks-desk-top--notes' : ''}`}
         data-desk-top
@@ -541,9 +531,9 @@ export function BookView({
             thickness={drawWidth}
             onThickness={setDrawWidth}
             onPickInk={isVisitor ? undefined : setDrawInk}
-            onPrint={() => (isVisitor ? setShowPrint(true) : setPrinterOpen(true))}
+            onPrint={() => (isVisitor ? setDialog('print') : setPrinterOpen(true))}
             onSnap={() => {
-              if (!isVisitor) setShowPhotos(true);
+              if (!isVisitor) setDialog('photos');
             }}
           />,
         )}
@@ -659,9 +649,9 @@ export function BookView({
             />,
           )}
       </div>
-      {showPhotos && !isVisitor && overlay(<PhotoImportDialog onClose={() => setShowPhotos(false)} />)}
-      {showKeys && overlay(<ShortcutsHelp onClose={() => setShowKeys(false)} />)}
-      {showPrint && sb.book && overlay(<PrintView book={sb.book} onClose={() => setShowPrint(false)} />)}
+      {dialog === 'photos' && !isVisitor && overlay(<PhotoImportDialog onClose={closeDialog} />)}
+      {dialog === 'keys' && overlay(<ShortcutsHelp onClose={closeDialog} />)}
+      {dialog === 'print' && sb.book && overlay(<PrintView book={sb.book} onClose={closeDialog} />)}
     </Frame>
   );
 }
