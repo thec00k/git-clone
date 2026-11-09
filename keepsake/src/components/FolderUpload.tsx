@@ -1,7 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {useApp} from '../store/appStore';
-import {checkImportCapacity, checkStorageCapacity} from '../lib/importLimits';
-import {loadImageFile} from '../lib/image';
+import {describeImport, importBusy, importPhotos, type ImportState} from '../lib/photoImport';
 import {useFocusTrap} from '../hooks/useFocusTrap';
 import {BatchPhotoReview} from './BatchPhotoReview';
 export function FolderUpload({onImported}: {onImported: (category: string) => void}) {
@@ -39,8 +38,9 @@ function FolderDialog({
 }) {
   const {state, addArchivePhoto, addArchiveTab} = useApp();
   const root = useRef<HTMLDivElement>(null);
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState('');
+  const [upload, setUpload] = useState<ImportState>({step: 'idle'});
+  const busy = importBusy(upload),
+    status = describeImport(upload).text;
   const stop = useRef(false),
     alive = useRef(true);
   useEffect(() => {
@@ -55,44 +55,27 @@ function FolderDialog({
   useFocusTrap(root, () => {
     if (!busy && !reviewIds.length) onClose();
   });
-  async function upload() {
-    setBusy(true);
+  async function importFolder() {
     stop.current = false;
-    let category = '',
-      count = 0,
-      failed = 0;
-    let reason = '';
-    const ids: string[] = [];
-    try {
-      await checkImportCapacity(files, state.archive.length);
-      for (let i = 0; i < files.length; i++) {
-        if (stop.current) break;
-        setStatus(`Reading ${i + 1} of ${files.length}…`);
-        let photo;
-        try {
-          photo = await loadImageFile(files[i], state.profile.preserveOriginals !== false);
-        } catch {
-          failed++;
-          continue;
-        }
-        if (stop.current) break;
-        await checkStorageCapacity(photo.src.length);
+    setUpload({step: 'preparing', done: 0, total: files.length});
+    let category = '';
+    const result = await importPhotos(files, {
+      archiveCount: state.archive.length,
+      preserveOriginals: state.profile.preserveOriginals !== false,
+      add: photo => {
         if (!category) category = addArchiveTab(name.trim());
-        ids.push(addArchivePhoto(photo.src, photo.aspect, [category], photo.original));
-        count++;
-      }
-    } catch (error) {
-      reason = error instanceof Error ? error.message : 'Import could not finish.';
-    }
+        return addArchivePhoto(photo.src, photo.aspect, [category], photo.original);
+      },
+      shouldStop: () => stop.current,
+      onProgress: (done, total) =>
+        setUpload(s => (s.step === 'stopping' ? s : {step: 'preparing', done, total})),
+    });
     if (!alive.current) return;
-    setBusy(false);
-    setStatus(
-      `${stop.current ? 'Import stopped. ' : ''}${count} photo(s) imported${failed ? `; ${failed} unsupported or unreadable file(s) skipped` : ''}. ${reason}`,
-    );
+    setUpload({step: 'finished', result});
     if (category) {
       onImported(category);
       setImported(true);
-      setReviewIds(ids);
+      setReviewIds(result.ids);
     }
   }
   const [imported, setImported] = useState(false);
@@ -127,7 +110,7 @@ function FolderDialog({
             <button
               onClick={() => {
                 stop.current = true;
-                setStatus('Stopping after the current image…');
+                setUpload(s => (s.step === 'preparing' ? {...s, step: 'stopping'} : s));
               }}
             >
               Stop import
@@ -137,7 +120,7 @@ function FolderDialog({
             {imported ? 'Done' : 'Cancel'}
           </button>
           {!imported && (
-            <button disabled={busy || !name.trim()} onClick={() => void upload()}>
+            <button disabled={busy || !name.trim()} onClick={() => void importFolder()}>
               Import folder
             </button>
           )}

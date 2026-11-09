@@ -14,6 +14,7 @@ const scripts = [
   'check-editor.mjs',
   'check-photo-batch.mjs',
   'check-import-limits.mjs',
+  'check-photo-import.mjs',
   'check-friend-notes.mjs',
   'check-memory-features.mjs',
   'check-discoveries.mjs',

@@ -3,8 +3,7 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {BookPlus, Check, Heart, Lock, Pencil, Plus, Search, Upload, X} from 'lucide-react';
 import {useApp} from '../../store/appStore';
 import {useNav} from '../../store/nav';
-import {checkImportCapacity, checkStorageCapacity} from '../../lib/importLimits';
-import {loadImageFile} from '../../lib/image';
+import {describeImport, importBusy, importPhotos, type ImportState} from '../../lib/photoImport';
 import {uid} from '../../lib/id';
 import type {PhotoElement} from '../../types/scrapbook';
 import {ViewShell} from './ViewShell';
@@ -38,8 +37,10 @@ export function Archive() {
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [reviewIds, setReviewIds] = useState<string[]>([]);
-  const [uploadStatus, setUploadStatus] = useState('');
-  const [uploading, setUploading] = useState(false);
+  const [upload, setUpload] = useState<ImportState>({step: 'idle'});
+  const uploading = importBusy(upload);
+  const [downloadProblem, setDownloadProblem] = useState('');
+  const uploadStatus = downloadProblem || describeImport(upload).text;
   const stopUpload = useRef(false);
   useEffect(
     () => () => {
@@ -67,40 +68,23 @@ export function Archive() {
     return names.toLowerCase().includes(q);
   });
 
-  async function upload(files: FileList | null) {
+  async function uploadFiles(files: FileList | null) {
     if (!files || uploading) return;
     const list = Array.from(files),
       cats = tab !== 'all' && tab !== 'favorites' ? [tab] : [];
-    setUploading(true);
     stopUpload.current = false;
-    let count = 0,
-      failed = 0;
-    const imported: string[] = [];
-    try {
-      await checkImportCapacity(list, state.archive.length);
-      for (const file of list) {
-        if (stopUpload.current) break;
-        let photo;
-        try {
-          photo = await loadImageFile(file, state.profile.preserveOriginals !== false);
-        } catch {
-          failed++;
-          continue;
-        }
-        if (stopUpload.current) break;
-        await checkStorageCapacity(photo.src.length);
-        imported.push(addArchivePhoto(photo.src, photo.aspect, cats, photo.original));
-        count++;
-        setUploadStatus(`Imported ${count} of ${list.length}…`);
-      }
-      setUploadStatus(
-        `${count} imported; ${failed} unreadable. ${stopUpload.current ? 'Import stopped.' : ''}`,
-      );
-    } catch (error) {
-      setUploadStatus(`${count} imported. ${error instanceof Error ? error.message : 'Import failed.'}`);
-    }
-    setUploading(false);
-    if (imported.length) setReviewIds(imported);
+    setDownloadProblem('');
+    setUpload({step: 'preparing', done: 0, total: list.length});
+    const result = await importPhotos(list, {
+      archiveCount: state.archive.length,
+      preserveOriginals: state.profile.preserveOriginals !== false,
+      add: photo => addArchivePhoto(photo.src, photo.aspect, cats, photo.original),
+      shouldStop: () => stopUpload.current,
+      onProgress: (done, total) =>
+        setUpload(s => (s.step === 'stopping' ? s : {step: 'preparing', done, total})),
+    });
+    setUpload({step: 'finished', result});
+    if (result.ids.length) setReviewIds(result.ids);
   }
 
   function placeInBook(src: string, photoId: string) {
@@ -178,6 +162,7 @@ export function Archive() {
               className="ks-tool"
               onClick={() => {
                 stopUpload.current = true;
+                setUpload(s => (s.step === 'preparing' ? {...s, step: 'stopping'} : s));
               }}
             >
               Stop import
@@ -198,7 +183,7 @@ export function Archive() {
         hidden
         aria-label="Upload photographs"
         onChange={e => {
-          upload(e.target.files);
+          uploadFiles(e.target.files);
           e.target.value = '';
         }}
       />
@@ -354,7 +339,7 @@ export function Archive() {
                   className="ks-tool"
                   onClick={() =>
                     void downloadOriginal(a.original!).catch(e =>
-                      setUploadStatus(e instanceof Error ? e.message : 'Download failed.'),
+                      setDownloadProblem(e instanceof Error ? e.message : 'Download failed.'),
                     )
                   }
                 >
