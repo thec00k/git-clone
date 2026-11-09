@@ -18,15 +18,21 @@ export interface ImageLib {
     raw: Uint8Array,
     fit: (width: number, height: number) => {width: number; height: number},
     quality: number,
+    /** The format the header check found; the decoder reads the file only as that format. */
+    format?: 'jpeg' | 'png',
   ): Promise<{webp: Uint8Array<ArrayBuffer>; width: number; height: number}>;
 }
 
 /** The parts of @imagemagick/magick-wasm used here, so this file needs no import of it. */
 interface Magick {
   ImageMagick: {read<T>(data: Uint8Array, settings: unknown, func: (image: MagickImage) => T): T};
-  MagickReadSettings: new () => {setDefine(format: string, name: string, value: string): void};
+  MagickReadSettings: new () => {
+    setDefine(format: string, name: string, value: string): void;
+    format?: string;
+  };
   MagickGeometry: new (width: number, height: number) => {ignoreAspectRatio: boolean};
-  MagickFormat: {Jpeg: string; WebP: string};
+  MagickFormat: {Jpeg: string; Png: string; WebP: string};
+  ResourceLimits: {width: bigint; height: bigint; memory: bigint; disk: bigint};
   FilterType: {Triangle: number};
 }
 interface MagickImage {
@@ -45,9 +51,17 @@ interface MagickImage {
  * inside the edge function's limit: JPEGs decode straight to near the target size, a triangle filter
  * resizes, and WebP uses a fast encoder method. */
 export function magickLib(m: Magick): ImageLib {
+  // The decoder's own limits, in case a file gets past the header check: a decoded image wider or taller than
+  // 16384 px, or needing more than 256 MB, fails with an error instead of using up the function's memory
+  // (no spilling to disk either).
+  m.ResourceLimits.width = 16384n;
+  m.ResourceLimits.height = 16384n;
+  m.ResourceLimits.memory = 256n * 1024n * 1024n;
+  m.ResourceLimits.disk = 0n;
   return {
-    async toWebp(raw, fit, quality) {
+    async toWebp(raw, fit, quality, format) {
       const settings = new m.MagickReadSettings();
+      if (format) settings.format = format === 'png' ? m.MagickFormat.Png : m.MagickFormat.Jpeg;
       settings.setDefine(m.MagickFormat.Jpeg, 'size', `${MAX_EDGE}x${MAX_EDGE}`);
       return m.ImageMagick.read(raw, settings, image => {
         image.autoOrient(); // phones store sideways pixels plus a turn-me tag that strip() removes
@@ -86,6 +100,12 @@ export function headerSize(b: Uint8Array): {type: 'png' | 'jpeg'; width: number;
         i++; // padding
         continue;
       }
+      // Markers with no length field (TEM, RST0-7, SOI), which the decoder skips: reading a length here would
+      // jump past the real frame header to a decoy one.
+      if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd8)) {
+        i += 2;
+        continue;
+      }
       const length = (b[i + 2] << 8) | b[i + 3];
       // SOF0-SOF15 hold the frame size (C4 DHT, C8 JPG and CC DAC are not frames).
       if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc)
@@ -108,7 +128,7 @@ export async function toWebp(raw: Uint8Array, lib: ImageLib) {
   if (!header.width || !header.height || header.width * header.height > MAX_PIXELS)
     throw new UnsupportedImage('This photo is too large to process.');
   try {
-    return await lib.toWebp(raw, fitWithin, WEBP_QUALITY);
+    return await lib.toWebp(raw, fitWithin, WEBP_QUALITY, header.type);
   } catch {
     throw new UnsupportedImage('This photo could not be read.');
   }

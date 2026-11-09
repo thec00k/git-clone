@@ -134,6 +134,25 @@ assert.throws(() => parseRoomBackup(serializeRoom(bad)));
 const missingDeskBinder = structuredClone(state);
 missingDeskBinder.deskBinderId = 'missing';
 assert.throws(() => parseRoomBackup(serializeRoom(missingDeskBinder)));
+// Display-case models in a backup get the same checks as importing one directly.
+const caseScan = model => ({
+  ...state,
+  displayCaseScans: [
+    {
+      id: 'd',
+      title: 'Scan',
+      modelSrc: 'data:model/gltf-binary;base64,' + model.toString('base64'),
+      shelf: 0,
+      slot: 0,
+    },
+  ],
+});
+assert.deepEqual(parseRoomBackup(serializeRoom(caseScan(cardFixture()))).displayCaseScans.length, 1);
+assert.throws(() =>
+  parseRoomBackup(
+    serializeRoom(caseScan(cardFixture(j => ({...j, images: [{uri: 'https://example.com/track'}]})))),
+  ),
+);
 console.log(
   'PASS card scans: valid embedded GLB and backup round-trip; reject remote assets, cycles, excessive geometry and unsupported compression.',
 );

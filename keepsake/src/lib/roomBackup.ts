@@ -379,6 +379,10 @@ export function parseRoomBackup(text: string): AppState {
           (x.slot as number) < 4,
       ),
   );
+  // The same checks as importing a model into the case directly: no links to outside files, no compressed
+  // payloads, no excessive geometry.
+  for (const scan of (s.displayCaseScans ?? []) as {modelSrc: string}[])
+    validateCardGlb(Uint8Array.from(atob(scan.modelSrc.split(',')[1]), c => c.charCodeAt(0)).buffer);
   ensure(
     e.roomTheme === undefined ||
       ['woodland', 'beachfront', 'cyberpunk', 'sky-castle'].includes(e.roomTheme as string),

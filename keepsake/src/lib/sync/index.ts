@@ -17,6 +17,7 @@ async function connection() {
  * Everything is a no-op when no Supabase project is configured (see config.ts).
  */
 const local: Local = {keyOf: assetKey, readFile: readAsset, kindOf: fileKind};
+const REQUESTED_KEY = 'keepsake-sign-in-requested';
 let active = false;
 let latest: AppState | null = null;
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -54,7 +55,7 @@ async function refresh() {
     active = false;
     return setAccount({state: 'needs-profile', email});
   } else setAccount({state: 'signed-in', email, username: profile.username});
-  await link(backend);
+  await link(backend, !!email && localStorage.getItem(REQUESTED_KEY) === email.toLowerCase());
   active = true;
   if (latest) await record(latest, local);
   await flush(backend, local);
@@ -105,6 +106,8 @@ export async function sendSignInLink(email: string) {
     options: {emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true},
   });
   if (error) throw new Error(error.message);
+  // A sign-in this browser asked for may back up the room straight away; any other one asks first (link()).
+  localStorage.setItem(REQUESTED_KEY, email.trim().toLowerCase());
 }
 
 export async function completeSignup(username: string, displayName: string, bornOn: string) {

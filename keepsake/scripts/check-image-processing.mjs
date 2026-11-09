@@ -105,6 +105,14 @@ await assert.rejects(
 );
 assert.ok(!decoded, 'never decoded');
 await assert.rejects(toWebp(new TextEncoder().encode('not an image at all'), lib), UnsupportedImage);
+// A marker with no length (RST0) before the real frame header cannot make the size check read a decoy instead.
+const sof = (w, h) => [0xff, 0xc0, 0, 11, 8, h >> 8, h & 255, w >> 8, w & 255, 1, 1, 0x11, 0];
+const desync = new Uint8Array([0xff, 0xd8, 0xff, 0xd0, ...sof(60000, 60000), ...sof(16, 16), 0, 0, 0, 0]);
+assert.equal(headerSize(desync)?.width, 60000, 'the real frame size is read, not the decoy');
+await assert.rejects(toWebp(desync, lib), UnsupportedImage, 'desynchronised JPEG refused');
+// The decoder refuses an oversized image by itself, even if the header check were fooled.
+const tall = await new Image(200, 20000).encode();
+await assert.rejects(lib.toWebp(tall, fitWithin, 80, 'png'), 'decoder height limit');
 await assert.rejects(
   toWebp(new Uint8Array([0xff, 0xd8, 0xff, 0xc0, 0, 17, 8, 0, 10, 0, 10, 3, 1, 2, 3]), lib),
   UnsupportedImage,

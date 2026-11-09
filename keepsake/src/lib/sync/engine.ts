@@ -74,8 +74,10 @@ export async function status(): Promise<SyncStatus> {
 }
 
 /** Connects this device's room to the signed-in account, once. Never uploads into an account that already
- * holds a room from somewhere else, and never mixes two accounts on one device. */
-export async function link(backend: SyncBackend): Promise<void> {
+ * holds a room from somewhere else, and never mixes two accounts on one device. Unless `confirmed` (this
+ * browser asked for this sign-in), the first link waits for the person to agree ('confirm-link'), so a sign-in
+ * link someone else sent cannot quietly copy this room into their account. */
+export async function link(backend: SyncBackend, confirmed = false): Promise<void> {
   const uid = await backend.userId();
   if (!uid) return;
   const meta = await store.readMeta();
@@ -86,6 +88,7 @@ export async function link(backend: SyncBackend): Promise<void> {
   } else {
     const server = await backend.room();
     if (server.hasContent) await store.writeMeta({paused: 'server-has-room'});
+    else if (!confirmed) await store.writeMeta({paused: 'confirm-link'});
     else await store.writeMeta({account: uid, revision: server.revision, snapshot: null, paused: null});
   }
   changed();

@@ -70,7 +70,9 @@ Then, in the Supabase dashboard under Authentication → URL Configuration, set 
 3. Put the project URL and publishable key in `.env.local` (development) or the host's environment as `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Never the service role key.
 4. Seed `shop_items` with the drawer catalogue prices.
 5. Deploy `supabase/functions/moderate-photo` once image processing is in and a moderation provider and hash-matching service are chosen (it currently holds every upload for review).
-6. Schedule `purge_trash()` daily with pg_cron (command in `supabase/migrations/*_trash.sql`).
+6. Deploy `supabase/functions/purge-trash` and run it once a day. It deletes the Storage files of photos that have been in the trash for 30 days and raw uploads never processed, then the trashed rows (`purge_trash()`). Storage files cannot be deleted with SQL (Supabase's `protect_objects_delete`), which is why it is a function. To schedule it, turn on the `pg_cron` and `pg_net` extensions (Database → Extensions), store the service role key in Vault as `service_role_key`, then run:
+   `select cron.schedule('purge-trash', '17 3 * * *', $$select net.http_post(url := 'https://<project-ref>.supabase.co/functions/v1/purge-trash', headers := jsonb_build_object('Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'service_role_key')))$$);`
+   Do not schedule `purge_trash()` on its own: that deletes the rows and leaves their files behind.
 7. Cloudflare Pages for the site; the `_headers` CSP already allows `*.supabase.co`; switch the CSP from report-only to enforcing.
 
 ## Running the tests locally

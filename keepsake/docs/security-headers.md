@@ -13,8 +13,8 @@ Nothing at page load. Fonts are self-hosted (`public/fonts`, `src/fonts.css`), s
 
 The CSP in `public/_headers` lists exactly these. `scripts/check-security-headers.mjs` fails if the page, the stylesheet or the headers file mention any other host.
 
-## Report-only for now
-The policy is sent as `Content-Security-Policy-Report-Only`. Switch it to enforcing once a hosted build has run through Spotify, SoundCloud and scan import without reports. Known compromise: `style-src 'unsafe-inline'` because React sets inline styles.
+## Enforced
+Since November 9, 2026 the policy is enforced (`Content-Security-Policy`). The built app was loaded under it in Chromium with no violations. Spotify and SoundCloud could not be reached from the build machine, so check them once on the hosted site: if one stops playing, the browser console names the blocked address to add. `frame-src` includes `sdk.scdn.co` because the Spotify playback SDK runs in an iframe from there. Importing a phone scan works at `http://127.0.0.1` or `localhost` (the receiver runs on the same computer); a LAN address typed into the app is blocked. Known compromise: `style-src 'unsafe-inline'` because React sets inline styles.
 
 The Supabase API (`https://*.supabase.co`, `wss://*.supabase.co`) is in `connect-src` for account sign-in and backup; it is only contacted once someone signs in. Add it to `img-src` when visiting a friend shows server photos.
 
