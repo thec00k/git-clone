@@ -2,6 +2,7 @@ import {WaitingPhotos} from './WaitingPhotos';
 import {PhotoImportDialog} from './PhotoImportDialog';
 import '../photoStacks.css';
 import {PaperControls} from './MaterialControls';
+import {PaperSlipSelect} from './PaperSlipSelect';
 import {PAPER_STYLES, stickerLabel, type PaperStyle} from '../lib/stationery';
 import {MAX_PHOTOS_PER_PAGE} from '../types/scrapbook';
 import {StickerStore} from './StickerStore';
@@ -468,23 +469,13 @@ export function BookView({
                   Pages <ChevronRight size={14} />
                 </summary>
                 <div>
-                  <label className="ks-paper-picker">
-                    Paper for selected page
-                    <select
-                      aria-label="Paper for selected page"
-                      disabled={!targetPageId || !!turn}
-                      value={sb.pages.find(p => p.id === targetPageId)?.backgroundStyle ?? 'plain'}
-                      onChange={e =>
-                        targetPageId && sb.setPagePaper(targetPageId, e.target.value as PaperStyle)
-                      }
-                    >
-                      {Object.entries(PAPER_STYLES).map(([id, label]) => (
-                        <option key={id} value={id}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <PaperSlipSelect
+                    label="Paper for selected page"
+                    disabled={!targetPageId || !!turn}
+                    value={sb.pages.find(p => p.id === targetPageId)?.backgroundStyle ?? 'plain'}
+                    options={Object.entries(PAPER_STYLES).map(([id, label]) => ({value: id, label}))}
+                    onChange={v => targetPageId && sb.setPagePaper(targetPageId, v as PaperStyle)}
+                  />
                   <PaperControls
                     key={targetPageId}
                     settings={sb.pages.find(p => p.id === targetPageId)?.paper}

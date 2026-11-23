@@ -7,6 +7,7 @@ import {
   type StickerFinish,
 } from '../lib/materials';
 import {StickerSurface} from './StickerSurface';
+import {PaperSlipSelect} from './PaperSlipSelect';
 /** One slider adjustment is one saved edit. */
 export function AmountSlider({
   label,
@@ -108,27 +109,18 @@ export function PaperControls({
   return (
     <fieldset disabled={disabled} className="ks-material-controls">
       <legend>Paper feel</legend>
-      <label className="ks-paper-picker">
-        Stock
-        <select
-          aria-label="Paper stock"
-          value={settings ? p.material : 'original'}
-          onChange={e =>
-            onChange(
-              e.target.value === 'original'
-                ? undefined
-                : paperSettings({material: e.target.value as PaperSettings['material']}),
-            )
-          }
-        >
-          <option value="original">Original paper</option>
-          {Object.entries(PAPER_MATERIALS).map(([id, s]) => (
-            <option key={id} value={id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <PaperSlipSelect
+        label="Paper stock"
+        disabled={disabled}
+        value={settings ? p.material : 'original'}
+        options={[
+          {value: 'original', label: 'Original paper'},
+          ...Object.entries(PAPER_MATERIALS).map(([id, s]) => ({value: id, label: s.name, swatch: s.color})),
+        ]}
+        onChange={v =>
+          onChange(v === 'original' ? undefined : paperSettings({material: v as PaperSettings['material']}))
+        }
+      />
       {settings && (
         <>
           <AmountSlider
