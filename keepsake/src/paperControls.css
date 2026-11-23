@@ -1,0 +1,323 @@
+/* Paper controls: slip dropdown (PaperSlipSelect) and petal ink picker (PetalInkPicker). */
+
+/* ---------- Paper slip dropdown ---------- */
+.ks-spill {
+  --tag: 56px;
+  --slip: 40px;
+  --gap: 12px;
+  --spring: cubic-bezier(0.34, 1.45, 0.5, 1);
+  position: relative;
+  width: 100%;
+  min-width: 190px;
+  height: var(--tag);
+  margin: 4px 0 8px;
+  font-family: Inter, sans-serif;
+  color: #3a2e22;
+}
+.ks-spill.is-open {
+  z-index: 40;
+}
+.ks-spill-paper {
+  position: absolute;
+  inset: -12px;
+  padding: 12px;
+  pointer-events: none;
+}
+.ks-spill-blob {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: calc(100% - 24px);
+  background: #f5ebd6 url('/textures/paper-warm-cream.webp');
+  background-size: 260px;
+}
+.ks-spill-tag {
+  height: var(--tag);
+  border-radius: 12px 12px 14px 10px;
+}
+.ks-spill-slip,
+.ks-spill-options li {
+  --close-delay: calc((var(--n) - 1 - var(--i)) * 30ms);
+  --open-delay: calc(var(--i) * 40ms);
+  --y: calc(var(--tag) + 12px + var(--i) * (var(--slip) + var(--gap)));
+  --tilt: calc((var(--i) - (var(--n) - 1) / 2) * 0.6deg);
+}
+.ks-spill-slip {
+  left: 16px;
+  width: calc(100% - 32px);
+  height: var(--slip);
+  border-radius: 10px;
+  transform: translateY(8px) scale(0.6);
+  opacity: 0;
+  transition:
+    transform 0.42s var(--spring) var(--close-delay),
+    opacity 0.2s var(--close-delay);
+}
+.ks-spill.is-open .ks-spill-slip {
+  transform: translateY(var(--y)) rotate(var(--tilt));
+  opacity: 1;
+  transition-delay: var(--open-delay);
+}
+.ks-spill-trigger {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: var(--tag);
+  padding: 7px 14px 7px 16px;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+.ks-spill-trigger:disabled {
+  cursor: default;
+}
+.ks-spill.is-disabled {
+  opacity: 0.55;
+}
+.ks-spill-trigger small {
+  display: block;
+  font:
+    600 10px Inter,
+    sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.7;
+}
+.ks-spill-trigger span,
+.ks-spill-options li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    600 22px/1.05 'Caveat',
+    cursive;
+  white-space: nowrap;
+}
+.ks-spill-trigger span {
+  padding-right: 22px;
+  overflow: hidden;
+}
+.ks-spill i {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  border-radius: 50% 45% 55% 50%;
+  border: 1.5px solid #3a2e22;
+}
+.ks-spill-caret {
+  position: absolute;
+  right: 16px;
+  top: 32px;
+  width: 15px;
+  fill: none;
+  stroke: #3a2e22;
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: transform 0.35s var(--spring);
+}
+.ks-spill.is-open .ks-spill-caret {
+  transform: rotate(180deg);
+}
+.ks-spill-trigger:focus-visible {
+  outline: 2px dashed #b07933;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+.ks-spill-options {
+  position: absolute;
+  inset: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+.ks-spill.is-open .ks-spill-options {
+  pointer-events: auto;
+}
+.ks-spill-options li {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  width: calc(100% - 8px);
+  height: var(--slip);
+  box-sizing: border-box;
+  padding: 0 14px;
+  font-size: 21px;
+  cursor: pointer;
+  transform: translateY(8px);
+  opacity: 0;
+  transition:
+    transform 0.42s var(--spring) var(--close-delay),
+    opacity 0.15s;
+}
+.ks-spill.is-open .ks-spill-options li {
+  transform: translateY(var(--y)) rotate(var(--tilt));
+  opacity: 1;
+  transition:
+    transform 0.42s var(--spring) var(--open-delay),
+    opacity 0.25s calc(0.1s + var(--open-delay));
+}
+.ks-spill-options li.is-active {
+  text-decoration: underline wavy #b5524590;
+  text-underline-offset: 5px;
+}
+.ks-spill-options li svg {
+  margin-left: auto;
+  width: 18px;
+  flex: none;
+  fill: none;
+  stroke: #9b2e2e;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+/* ---------- Pressed-flower ink picker ---------- */
+.ks-petals {
+  position: relative;
+  width: 280px;
+  text-align: center;
+  color: #3a2e22;
+}
+.ks-petals-bloom {
+  display: block;
+  width: 280px;
+  height: 280px;
+  overflow: visible;
+}
+.ks-petals-core {
+  position: absolute;
+  top: 111px;
+  left: 111px;
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  border: 2px solid #3a2e22;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--ink) 0 58%, transparent 61%),
+    #f3e6c8 url('/textures/paper-warm-cream.webp');
+  background-size:
+    100% 100%,
+    120px;
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.34, 1.5, 0.55, 1);
+}
+.ks-petals-core:hover {
+  transform: scale(1.06);
+}
+.ks-petals-core:focus-visible {
+  outline: 2px dashed #b07933;
+  outline-offset: 3px;
+}
+.ks-petal {
+  cursor: pointer;
+  transform: rotate(var(--a)) scale(0.15);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.5s cubic-bezier(0.34, 1.5, 0.55, 1) calc((7 - var(--i)) * 18ms),
+    opacity 0.2s calc((7 - var(--i)) * 18ms);
+}
+.ks-petals.is-open .ks-petal {
+  transform: rotate(var(--a)) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: calc(var(--i) * 40ms);
+}
+.ks-petals.is-open .ks-petal:hover,
+.ks-petals.is-open .ks-petal:focus-visible {
+  transform: rotate(var(--a)) translateY(-9px) scale(1.12);
+  outline: none;
+}
+.ks-petal-grain {
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+.ks-petal-edge {
+  fill: none;
+  stroke: #3a2e22;
+  stroke-width: 1.6;
+}
+.ks-petal[aria-pressed='true'] .ks-petal-edge {
+  stroke-width: 3;
+}
+.ks-petal-vein {
+  fill: none;
+  stroke: #fff6e2;
+  stroke-opacity: 0.45;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+.ks-petal-heart {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.ks-petals.is-open .ks-petal-heart {
+  opacity: 1;
+}
+.ks-petals-name {
+  margin: 4px 0 0;
+  font:
+    600 28px 'Caveat',
+    cursive;
+}
+
+/* Compact: a small button that blooms the flower above it. */
+.ks-petals.is-compact {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+}
+.ks-petals.is-compact.is-open {
+  z-index: 40;
+}
+.ks-petals.is-compact .ks-petals-core {
+  inset: 0;
+  width: 30px;
+  height: 30px;
+  border-color: #f5ebd6;
+}
+.ks-petals.is-compact .ks-petals-bloom {
+  position: absolute;
+  bottom: calc(100% + 18px);
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  margin-left: -100px;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgb(30 18 8 / 0.35));
+}
+.ks-petals.is-compact .ks-petals-name {
+  position: absolute;
+  bottom: calc(100% + 212px);
+  left: 50%;
+  margin: 0;
+  padding: 0 12px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 24px;
+  background: #f3e6c8 url('/textures/paper-warm-cream.webp');
+  background-size: 160px;
+  border: 1.5px solid #3a2e22;
+  border-radius: 3px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.ks-petals.is-compact.is-open .ks-petals-name {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ks-spill *,
+  .ks-petals * {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+}

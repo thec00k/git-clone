@@ -13,7 +13,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import type {ElementLocation} from '../hooks/useScrapbook';
-import {SHARPIE_COLORS, CAPTION_LOOKS, type CaptionLook} from '../types/scrapbook';
+import {SHARPIE_INKS, CAPTION_LOOKS, type CaptionLook} from '../types/scrapbook';
+import {PetalInkPicker} from './PetalInkPicker';
 
 interface Props {
   selected: ElementLocation;
@@ -152,17 +153,13 @@ export function SelectionToolbar({
         </>
       )}
       {element.type === 'caption' && (
-        <span className="mx-0.5 flex items-center gap-1">
-          {SHARPIE_COLORS.map(c => (
-            <button
-              key={c}
-              aria-label={`Ink colour ${c}`}
-              title="Ink colour"
-              onClick={() => onColor(id, c)}
-              className="h-5 w-5 rounded-full border border-paper/25"
-              style={{background: c}}
-            />
-          ))}
+        <span className="mx-0.5 flex items-center">
+          <PetalInkPicker
+            compact
+            inks={SHARPIE_INKS}
+            value={element.color}
+            onChange={color => onColor(id, color)}
+          />
         </span>
       )}
       {element.type === 'caption' && (

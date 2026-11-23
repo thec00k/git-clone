@@ -69,7 +69,21 @@ try {
     await button('Close the drawer').click();
     await button('Right page').click();
     await p.locator('.ks-book-pages-menu>summary').click();
-    const paper = p.getByLabel('Paper for selected page');
+    const paperNames = {
+      field: 'Woodland margins',
+      tide: 'Coastal margins',
+      ruled: 'Correspondence lines',
+      dots: 'Field notebook dots',
+    };
+    const paper = {
+      selectOption: async style => {
+        await p.getByRole('button', {name: /^Paper for selected page:/}).click();
+        await p
+          .getByRole('listbox', {name: 'Paper for selected page'})
+          .getByRole('option', {name: paperNames[style]})
+          .click();
+      },
+    };
     for (const style of ['field', 'tide', 'ruled', 'dots']) {
       await paper.selectOption(style);
       await p.locator(`.ks-workbench-pages .ks-page[data-paper="${style}"]`).waitFor();

@@ -128,12 +128,15 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 /** Owner decision: 6 photos per page (see src/lib/limits.ts). */
 export const MAX_PHOTOS_PER_PAGE = 6;
 
-export const SHARPIE_COLORS = [
-  '#2c2418', // ink
-  '#9b2e2e', // red
-  '#1e3a5f', // navy
-  '#2f4a3c', // forest
-  '#b55245', // terracotta
+export const SHARPIE_INKS = [
+  {color: '#2c2418', name: 'Fountain ink'},
+  {color: '#9b2e2e', name: 'Cherry red'},
+  {color: '#1e3a5f', name: 'Navy'},
+  {color: '#2f4a3c', name: 'Forest'},
+  {color: '#b55245', name: 'Terracotta'},
+  {color: '#c9973a', name: 'Mustard'},
+  {color: '#8a9a6b', name: 'Sage'},
+  {color: '#c98b84', name: 'Dusty rose'},
 ] as const;
 
 export const STICKER_GLYPHS = [

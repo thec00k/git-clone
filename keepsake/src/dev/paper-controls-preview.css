@@ -49,266 +49,29 @@ body {
     cursive;
   color: #6b5640;
 }
-.ks-pc-today {
+.ks-pc-toolbar {
   margin-top: 36px;
 }
-.ks-pc-today h2 {
+.ks-pc-toolbar h2 {
   font:
     20px 'Fraunces',
     Georgia,
     serif;
 }
-.ks-pc-today div {
-  display: flex;
-  gap: 24px;
+.ks-pc-toolbar div {
+  display: inline-flex;
+  gap: 14px;
   align-items: center;
+  margin-top: 250px;
+  padding: 6px 16px 6px 8px;
+  background: rgb(28 22 16 / 0.92);
+  border-radius: 999px;
 }
-.ks-pc-today select {
-  padding: 8px;
+.ks-pc-toolbar span {
   font:
-    14px Inter,
-    sans-serif;
-}
-.ks-pc-dots {
-  display: flex;
-  gap: 4px;
-  padding: 6px;
-  background: #2c2418;
-  border-radius: 8px;
-}
-.ks-pc-dots i {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid #f5ebd640;
-}
-
-/* ---------- Paper slip dropdown ---------- */
-.ks-spill {
-  --w: 250px;
-  --tag: 60px;
-  --slip: 44px;
-  --gap: 13px;
-  --spring: cubic-bezier(0.34, 1.45, 0.5, 1);
-  position: relative;
-  width: var(--w);
-  height: calc(var(--tag) + 4 * (var(--slip) + var(--gap)) + 14px);
-  font-family: Inter, sans-serif;
-}
-.ks-spill-paper {
-  position: absolute;
-  inset: -12px;
-  padding: 12px;
-  filter: url(#ks-paper-goo);
-  pointer-events: none;
-}
-.ks-spill-blob {
-  position: absolute;
-  left: 12px;
-  width: var(--w);
-  background: #f5ebd6 url('/textures/paper-warm-cream.webp');
-  background-size: 260px;
-}
-.ks-spill-tag {
-  top: 12px;
-  height: var(--tag);
-  border-radius: 12px 12px 14px 10px;
-  background-color: #e9cfa4;
-}
-.ks-spill-slip {
-  --y: calc(var(--tag) + 12px + var(--i) * (var(--slip) + var(--gap)));
-  top: 12px;
-  left: calc(12px + 10px);
-  width: calc(var(--w) - 20px);
-  height: var(--slip);
-  border-radius: 10px;
-  transform: translateY(8px) scale(0.6);
-  opacity: 0;
-  transition:
-    transform 0.42s var(--spring) calc((3 - var(--i)) * 35ms),
-    opacity 0.2s calc((3 - var(--i)) * 35ms);
-}
-.ks-spill.is-open .ks-spill-slip {
-  transform: translateY(var(--y)) rotate(calc((var(--i) - 1.5) * 0.6deg));
-  opacity: 1;
-  transition-delay: calc(var(--i) * 45ms);
-}
-.ks-spill-trigger {
-  position: absolute;
-  inset: 0 auto auto 0;
-  width: var(--w);
-  height: var(--tag);
-  padding: 8px 46px 8px 18px;
-  border: 0;
-  background: none;
-  text-align: left;
-  color: #3a2e22;
-  cursor: pointer;
-}
-.ks-spill-trigger small {
-  display: block;
-  font:
-    600 11px Inter,
-    sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.65;
-}
-.ks-spill-trigger span,
-.ks-spill-options li {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font:
-    600 25px/1 'Caveat',
+    600 26px 'Caveat',
     cursive;
-}
-.ks-spill i {
-  width: 14px;
-  height: 14px;
-  flex: none;
-  border-radius: 50% 45% 55% 50%;
-  border: 1.5px solid #3a2e22;
-}
-.ks-spill-caret {
-  position: absolute;
-  right: 18px;
-  top: 25px;
-  width: 16px;
-  fill: none;
-  stroke: #3a2e22;
-  stroke-width: 2;
-  stroke-linecap: round;
-  transition: transform 0.35s var(--spring);
-}
-.ks-spill.is-open .ks-spill-caret {
-  transform: rotate(180deg);
-}
-.ks-spill-trigger:focus-visible {
-  outline: 2px dashed #9b2e2e;
-  outline-offset: 4px;
-  border-radius: 12px;
-}
-.ks-spill-options {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  pointer-events: none;
-}
-.ks-spill.is-open .ks-spill-options {
-  pointer-events: auto;
-}
-.ks-spill-options li {
-  position: absolute;
-  top: 0;
-  left: 10px;
-  width: calc(var(--w) - 20px);
-  height: var(--slip);
-  box-sizing: border-box;
-  padding: 0 16px;
-  font-size: 23px;
-  color: #3a2e22;
-  cursor: pointer;
-  transform: translateY(8px);
-  opacity: 0;
-  transition:
-    transform 0.42s var(--spring) calc((3 - var(--i)) * 35ms),
-    opacity 0.15s;
-}
-.ks-spill.is-open .ks-spill-options li {
-  transform: translateY(calc(var(--tag) + 12px + var(--i) * (var(--slip) + var(--gap))))
-    rotate(calc((var(--i) - 1.5) * 0.6deg));
-  opacity: 1;
-  transition:
-    transform 0.42s var(--spring) calc(var(--i) * 45ms),
-    opacity 0.25s calc(0.1s + var(--i) * 45ms);
-}
-.ks-spill-options li.is-active {
-  text-decoration: underline wavy #b5524590;
-  text-underline-offset: 6px;
-}
-.ks-spill-options li svg {
-  margin-left: auto;
-  width: 20px;
-  fill: none;
-  stroke: #9b2e2e;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-}
-
-/* ---------- Pressed-flower ink picker ---------- */
-.ks-petals {
-  width: 280px;
-  text-align: center;
-}
-.ks-petals svg {
-  width: 280px;
-  height: 280px;
-  overflow: visible;
-}
-.ks-petal {
-  cursor: pointer;
-  transform: rotate(var(--a)) scale(0.15);
-  opacity: 0;
-  transition:
-    transform 0.5s cubic-bezier(0.34, 1.5, 0.55, 1) calc((7 - var(--i)) * 18ms),
-    opacity 0.2s calc((7 - var(--i)) * 18ms);
-}
-.ks-petals.is-open .ks-petal {
-  transform: rotate(var(--a)) scale(1);
-  opacity: 1;
-  transition-delay: calc(var(--i) * 40ms);
-}
-.ks-petals.is-open .ks-petal:hover,
-.ks-petals.is-open .ks-petal:focus-visible {
-  transform: rotate(var(--a)) translateY(-9px) scale(1.12);
-  outline: none;
-}
-.ks-petal-grain {
-  mix-blend-mode: multiply;
-  opacity: 0.55;
-}
-.ks-petal-edge {
-  fill: none;
-  stroke: #3a2e22;
-  stroke-width: 1.6;
-}
-.ks-petal[aria-pressed='true'] .ks-petal-edge {
-  stroke-width: 3;
-}
-.ks-petal-vein {
-  fill: none;
-  stroke: #fff6e2;
-  stroke-opacity: 0.45;
-  stroke-width: 1.2;
-  stroke-linecap: round;
-}
-.ks-petal-core {
-  cursor: pointer;
-  transition: transform 0.35s cubic-bezier(0.34, 1.5, 0.55, 1);
-}
-.ks-petal-core:hover {
-  transform: scale(1.06);
-}
-.ks-petal-core:focus-visible {
-  outline: none;
-}
-.ks-petal-core:focus-visible .ks-petal-edge {
-  stroke: #9b2e2e;
-  stroke-dasharray: 4 3;
-  stroke-width: 2.5;
-}
-.ks-petals-name {
-  margin: 4px 0 0;
-  font:
-    600 28px 'Caveat',
-    cursive;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ks-spill *,
-  .ks-petals * {
-    transition-duration: 0.01ms !important;
-    transition-delay: 0s !important;
-  }
+  background: #f5ebd6;
+  padding: 0 8px;
+  border-radius: 4px;
 }
