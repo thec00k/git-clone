@@ -6,6 +6,7 @@ import {useReducedMotion} from '../../hooks/useReducedMotion';
 import type {Environment} from '../../types/app';
 import type {Phase} from '../room/RoomFurniture';
 import {OutdoorWeather} from './OutdoorWeather';
+import {PixelParallaxWindow} from './PixelParallaxWindow';
 
 /** A layered coastal view outside the window, independent of the room shell. */
 export function BeachfrontScenery({
@@ -31,6 +32,16 @@ export function BeachfrontScenery({
       boat.current.rotation.z = Math.sin(t * 0.4) * 0.025;
     }
   });
+  // Review switch for the pixel-art window prototype, until Ramenya's art replaces the shader scenery.
+  if (new URLSearchParams(location.search).get('window') === 'pixel')
+    return (
+      <group>
+        <PixelParallaxWindow phase={phase} />
+        {storm && (
+          <OutdoorWeather kind={environment.weather as 'rain' | 'snow'} count={particles} room="beachfront" />
+        )}
+      </group>
+    );
   return (
     <group>
       <CoastalSky phase={phase} storm={storm} season={environment.season} />

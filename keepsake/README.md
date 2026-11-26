@@ -20,6 +20,7 @@ For a clean handoff, start with [start here](docs/start-here.md) and the [curren
 
 - [Batch photo review and scrapbook waiting stack](docs/photo-review-stack.md) — swipeable upload review, archive-backed photo references, saved per-book waiting pile, placement and undo.
 - [Paper material studies](art/paper-studies/README.md) and [interactive comparison page](material-study.html) — source renders, included paper textures, shader settings and page/sticker previews.
+- [Beachfront pixel-art window prototype](docs/beach-pixel-window.md) — layered parallax window view by time of day (`?window=pixel`), measured window and the artist's art contract.
 - [Blender asset workflow](docs/blender-asset-workflow.md), [woodland room notes](docs/woodland-prototype.md), [Beachfront notes](docs/beachfront-prototype.md), and [room performance review](docs/three-room-quality-pass.md).
 - [UI design system](docs/ui-design-system.md), [artifact and card binders](docs/artifacts-and-card-binders.md), [furniture checks](docs/furniture-quality-checks.md), [time-capsule implementation](docs/time-capsule-chest.md), and [remaining polish direction](docs/next-polish-direction.md).
 
