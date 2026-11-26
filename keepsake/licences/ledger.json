@@ -223,6 +223,23 @@
       "notes": "Christmas tree, pumpkin, jack-o'-lantern, stocking, mantel garland, pennant, heart, bat, Easter basket, tulips and flag, built from scratch by the script with plain materials and vertex colours; no textures or downloaded assets."
     },
     {
+      "id": "beach-pixel-window-placeholders",
+      "files": [
+        "art/beachfront/pixel-window/*",
+        "public/room/beachfront/window/*.png"
+      ],
+      "kind": "image",
+      "status": "original",
+      "origin": "original",
+      "author": "Keepsake project (art/beachfront/pixel-window/make-placeholders.py)",
+      "licence": "Original project work",
+      "commercialUse": "yes",
+      "proof": [
+        "art/beachfront/pixel-window/make-placeholders.py"
+      ],
+      "notes": "Stand-in pixel layers for the Beachfront window prototype, drawn by the script from the room's palette. Replace this entry when the commissioned art arrives (docs/beach-pixel-window.md)."
+    },
+    {
       "id": "scrapbook-model",
       "files": [
         "art/workbench/scrapbook.blend",
