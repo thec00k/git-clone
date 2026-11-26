@@ -1,8 +1,10 @@
-"""Placeholder pixel layers for the Beachfront parallax window prototype.
+"""Placeholder animation for the Beachfront parallax window prototype.
 
-Stand-ins only, to prove sizes and motion until Ramenya's art arrives. Every colour
-comes from beach-palette.hex. Writes the runtime PNGs (480x400, native pixels) to
-public/room/beachfront/window/ and a registration template to this folder.
+Stand-ins only, to prove sizes and timing until Ramenya's art arrives. Every colour
+comes from beach-palette.hex. One 15 s loop at 8 fps (120 frames): day, dusk, night,
+40 frames each, the first 16 of each a dissolve from the time before. Writes each
+layer's frames (480x400, native pixels) to public/room/beachfront/window/ and a
+registration template to this folder.
 Run: python3 art/beachfront/pixel-window/make-placeholders.py   (from keepsake/)
 """
 import math, os
@@ -75,14 +77,14 @@ def far_sea(p):
     return img
 
 def near_water(p, frame):
-    """Four-frame loop: wave crests step sideways by a quarter of their spacing each frame."""
+    """Eight-frame loop: wave crests step sideways by an eighth of their spacing each frame."""
     img = Image.new('RGBA', (W, H), CLEAR); d = ImageDraw.Draw(img)
     top = HORIZON + 22
     gradient_img = Image.new('RGBA', (W, H)); gradient(gradient_img, top, H, p['near'])
     img.paste(gradient_img.crop((0, top, W, H)), (0, top))
     sx, sy = p['sun_xy']
     for row, y in enumerate(range(top + 4, H - 20, 7)):
-        gap = 18 + row * 4; off = (frame * gap // 4 + row * 11) % gap
+        gap = 18 + row * 4; off = (frame * gap // 8 + row * 11) % gap
         for x in range(-gap + off, W, gap): d.line((x, y, x + 4 + row, y), fill=rgb(p['foam']))
         for x in range(sx - 14 - row * 3 + (frame + row) % 3 * 2, sx + 14 + row * 3, 5):  # sun or moon path
             d.point((x, y + 2), fill=rgb(p['glint']))
@@ -112,11 +114,34 @@ def template():
     d.rectangle(SAFE, outline=rgb('dc863d'))
     return img
 
+FPS, SECTION, TRANSITION = 8, 40, 16
+ORDER = ['day', 'dusk', 'night']
+LAYERS = {'00_sky': lambda p, n, f: sky(p, n), '01_clouds': lambda p, n, f: clouds(p),
+          '02_far-sea': lambda p, n, f: far_sea(p), '03_near-water': lambda p, n, f: near_water(p, f % 8),
+          '04_foreground': lambda p, n, f: foreground(p)}
+
+def dissolve(a, b, level):
+    """Ordered dissolve, so every pixel stays a palette colour: `level` of 16 Bayer cells show b."""
+    out = a.copy(); pa, pb, po = a.load(), b.load(), out.load()
+    for y in range(H):
+        for x in range(W):
+            if BAYER[y % 4][x % 4] < level: po[x, y] = pb[x, y]
+    return out
+
 os.makedirs(OUT, exist_ok=True)
-for name, p in PHASES.items():
-    layers = {'00_sky': sky(p, name), '01_clouds': clouds(p), '02_far-sea': far_sea(p), '04_foreground': foreground(p)}
-    for key, img in layers.items(): img.save(f'{OUT}/beach_{name}_{key}.png', optimize=True)
-    for f in range(4): near_water(p, f).save(f'{OUT}/beach_{name}_03_near-water_f{f + 1:02d}.png', optimize=True)
+for old in os.listdir(OUT):
+    if old.endswith('.png'): os.remove(os.path.join(OUT, old))
+for key, draw in LAYERS.items():
+    cache = {}
+    def art(name, f):
+        k = (name, f % 8 if key == '03_near-water' else 0)
+        if k not in cache: cache[k] = draw(PHASES[name], name, f)
+        return cache[k]
+    for g in range(SECTION * 3):
+        cur = ORDER[g // SECTION]; prev = ORDER[g // SECTION - 1]; local = g % SECTION
+        img = art(cur, g)
+        if local < TRANSITION: img = dissolve(art(prev, g), img, local + 1)
+        img.save(f'{OUT}/beach_{key}_{g + 1:03d}.png', optimize=True)
 here = os.path.dirname(os.path.abspath(__file__))
 template().save(os.path.join(here, 'window-template-480x400.png'))
-print('placeholders written to', OUT)
+print('placeholder frames written to', OUT)
